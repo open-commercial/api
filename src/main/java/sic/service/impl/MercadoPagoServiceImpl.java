@@ -103,6 +103,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
               messageSource.getMessage(
                   "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
         }
+        monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
         json =
             "{ \""
                 + STRING_ID_USUARIO
@@ -120,9 +121,14 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                 origin + "/checkout/aprobado",
                 origin + "/checkout/pendiente",
                 origin + "/carrito-compra");
-        monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
         break;
       case DEPOSITO:
+        if (nuevaOrdenDeCompra.getMonto() == null) {
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
+        }
+        monto = nuevaOrdenDeCompra.getMonto().floatValue();
         json =
             "{ \""
                 + STRING_ID_USUARIO
@@ -135,7 +141,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                 + "}";
         String urlDeposito = origin + "/perfil";
         backUrls = new BackUrls(urlDeposito, urlDeposito, urlDeposito);
-        monto = nuevaOrdenDeCompra.getMonto().floatValue();
         break;
       default:
         throw new BusinessServiceException(
