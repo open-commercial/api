@@ -909,12 +909,12 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/venta", nuevaFacturaVentaDTO, FacturaVenta[].class);
-//    FacturaVenta facturaAutorizada =
-//        restTemplate.postForObject(
-//            apiPrefix + "/facturas/" + facturas[1].getIdFactura() + "/autorizacion",
-//            null,
-//            FacturaVenta.class);
-//    assertNotEquals(0L, facturaAutorizada.getCae());
+    FacturaVenta facturaAutorizada =
+        restTemplate.postForObject(
+            apiPrefix + "/facturas/" + facturas[1].getIdFactura() + "/autorizacion",
+            null,
+            FacturaVenta.class);
+    assertNotEquals(0L, facturaAutorizada.getCae());
     assertEquals(2, facturas.length);
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
     Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
