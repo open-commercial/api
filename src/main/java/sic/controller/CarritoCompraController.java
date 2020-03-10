@@ -18,7 +18,7 @@ public class CarritoCompraController {
 
   private final ICarritoCompraService carritoCompraService;
   private final IAuthService authService;
-  private static final String STRING_ID_USUARIO = "idUsuario";
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
   public CarritoCompraController(
@@ -31,7 +31,7 @@ public class CarritoCompraController {
   public CarritoCompraDTO getCarritoCompraDelUsuario(
       @PathVariable long idCliente, @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.getCarritoCompra(idUsuarioLoggedIn, idCliente);
   }
 
@@ -40,7 +40,7 @@ public class CarritoCompraController {
       @RequestParam(required = false) Integer pagina,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     if (pagina == null || pagina < 0) pagina = 0;
     return carritoCompraService.getItemsDelCaritoCompra(idUsuarioLoggedIn, pagina, null);
   }
@@ -49,7 +49,7 @@ public class CarritoCompraController {
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
       @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(
         idUsuarioLoggedIn, idProducto);
   }
@@ -58,14 +58,14 @@ public class CarritoCompraController {
   public void eliminarItem(
       @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     carritoCompraService.eliminarItemDelUsuario(idUsuarioLoggedIn, idProducto);
   }
 
   @DeleteMapping("/carrito-compra")
   public void eliminarTodosLosItems(@RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuarioLoggedIn);
   }
 
@@ -75,7 +75,7 @@ public class CarritoCompraController {
       @RequestParam BigDecimal cantidad,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     carritoCompraService.agregarOrModificarItem(idUsuarioLoggedIn, idProducto, cantidad);
   }
 
@@ -84,7 +84,7 @@ public class CarritoCompraController {
       @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(STRING_ID_USUARIO);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.crearPedido(nuevaOrdenDePagoDTO, idUsuarioLoggedIn);
   }
 }
