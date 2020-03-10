@@ -217,7 +217,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             break;
           case pending:
             Pedido pedidoDePayment = pedidoService.getPedidoPorIdPayment(payment.getId());
-            if (pedidoDePayment != null && movimiento == Movimiento.PEDIDO) {
+            if (pedidoDePayment == null && movimiento == Movimiento.PEDIDO) {
               tipoDeEnvio = TipoDeEnvio.valueOf(convertedObject.get("tipoDeEnvio").getAsString());
               this.crearPedidoDelCarrito(
                   Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()),
