@@ -162,7 +162,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     preference.setBackUrls(backUrls);
     preference.setBinaryMode(true);
     PaymentMethods paymentMethods = new PaymentMethods();
-    paymentMethods.setExcludedPaymentMethods("pagofacil", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink");
+    paymentMethods.setExcludedPaymentMethods("rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink");
     preference.setPaymentMethods(paymentMethods);
     try {
       preference = preference.save();
