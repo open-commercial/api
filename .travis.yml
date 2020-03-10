@@ -10,7 +10,7 @@ addons:
   sonarcloud:
     organization: "globo-technology"
     token:
-      secure: "$SONAR_TOKEN"
+    "$SONAR_TOKEN"
 script:  
   - git fetch --unshallow
   - mvn clean verify sonar:sonar -Dsonar.projectKey=sic-api:sic-api
