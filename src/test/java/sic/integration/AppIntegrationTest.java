@@ -643,7 +643,6 @@ class AppIntegrationTest {
     Usuario credencialDadaDeAlta = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, Usuario.class);
     credencialDadaDeAlta.setHabilitado(true);
     assertEquals(credencial, credencialDadaDeAlta);
-    //restTemplate.put(apiPrefix + "/usuarios", credencialDadaDeAlta);asd
     Cliente cliente =
         Cliente.builder()
             .montoCompraMinima(new BigDecimal("500"))

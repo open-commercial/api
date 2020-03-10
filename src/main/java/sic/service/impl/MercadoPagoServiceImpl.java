@@ -197,7 +197,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         switch (payment.getStatus()) {
           case approved:
             if (reciboMP.isPresent()) {
-              logger.warn("El recibo del pago nro {} ya existe.", payment.getId());
+              logger.warn(
+                  messageSource.getMessage(
+                      "mensaje_recibo_de_pago_no_existente",
+                      new Object[] {payment.getId()},
+                      Locale.getDefault()));
             } else {
               switch (movimiento) {
                 case PEDIDO:
@@ -212,7 +216,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                         tipoDeEnvio,
                         payment.getId());
                   } else {
-                    logger.warn("El Pedido ya existe. {}", pedidoDePayment);
+                    logger.warn(
+                        messageSource.getMessage(
+                            "mensaje_pedido_payment_ya_existente",
+                            new Object[] {pedidoDePayment},
+                            Locale.getDefault()));
                   }
                   this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                   break;
@@ -250,14 +258,24 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   reciboMP.get().getSucursal().getIdSucursal(),
                   cliente.getCredencial());
             } else {
-              logger.warn("La nota del pago nro {} ya existe.", payment.getId());
+              logger.warn(
+                  messageSource.getMessage(
+                      "mensaje_nota_pago_existente",
+                      new Object[] {payment.getId()},
+                      Locale.getDefault()));
             }
             break;
           case rejected:
-            logger.error("El pago fue rechazado. Detalles del pago: {}", payment);
+            logger.error(
+                messageSource.getMessage(
+                    "mensaje_pago_rechazado", new Object[] {payment}, Locale.getDefault()));
             break;
           default:
-            logger.warn("El status del pago nro {} no es soportado.", payment.getId());
+            logger.warn(
+                messageSource.getMessage(
+                    "mensaje_pago_status_no_soportado",
+                    new Object[] {payment.getId()},
+                    Locale.getDefault()));
             messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault());
         }
       } else {
@@ -280,9 +298,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         refund.save();
       }
     } catch (MPException ex) {
-      logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
       throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
+          messageSource.getMessage(
+              "mensaje_pago_error", new Object[] {ex.getMessage()}, Locale.getDefault()));
     }
   }
 
@@ -290,7 +308,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case approved:
-        logger.warn("El pago de mercadopago {} se aprobó correctamente.", payment);
+        logger.warn(
+            messageSource.getMessage(
+                "mensaje_pago_aprobado", new Object[] {payment}, Locale.getDefault()));
         Recibo nuevoRecibo = new Recibo();
         nuevoRecibo.setSucursal(sucursal);
         nuevoRecibo.setFormaDePago(
@@ -305,14 +325,20 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         break;
       case pending:
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
-          logger.warn("El pago {} está pendiente", payment.getId());
+          logger.warn(
+              messageSource.getMessage(
+                  "mensaje_pago_pendiente", new Object[] {payment}, Locale.getDefault()));
         } else {
-          logger.warn("El pago {} no fué aprobado", payment.getId());
+          logger.warn(
+              messageSource.getMessage(
+                  "mensaje_pago_no_aprobado", new Object[] {payment}, Locale.getDefault()));
           this.procesarMensajeNoAprobado(payment);
         }
         break;
       default:
-        logger.warn("El pago {} no fué aprobado", payment.getId());
+        logger.warn(
+            messageSource.getMessage(
+                "mensaje_pago_no_aprobado", new Object[] {payment}, Locale.getDefault()));
         this.procesarMensajeNoAprobado(payment);
     }
   }
@@ -361,9 +387,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Override
   public void logExceptionMercadoPago(MPException ex) {
-    logger.warn("Ocurrió un error con MercadoPago: {}", ex.getMessage());
     throw new BusinessServiceException(
-        messageSource.getMessage("mensaje_pago_error", null, Locale.getDefault()));
+        messageSource.getMessage(
+            "mensaje_pago_error", new Object[] {ex.getMessage()}, Locale.getDefault()));
   }
 
   private void procesarMensajeNoAprobado(Payment payment) {
