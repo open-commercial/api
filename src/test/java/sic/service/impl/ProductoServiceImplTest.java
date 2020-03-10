@@ -27,7 +27,7 @@ import sic.service.IRubroService;
 import sic.service.ISucursalService;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfiguration.class)
+@ContextConfiguration(classes = AppTest.class)
 class ProductoServiceImplTest {
 
   @Autowired private MessageSource messageSourceTest;
