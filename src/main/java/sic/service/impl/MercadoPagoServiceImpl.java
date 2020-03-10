@@ -95,6 +95,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     Preference preference = new Preference();
     String json = "";
     BackUrls backUrls = null;
+    String title = "";
     float monto;
     switch (nuevaOrdenDeCompra.getMovimiento()) {
       case PEDIDO:
@@ -104,6 +105,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
         }
         monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
+        title = "Producto";
         json =
             "{ \""
                 + STRING_ID_USUARIO
@@ -129,6 +131,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
         }
         monto = nuevaOrdenDeCompra.getMonto().floatValue();
+        title = "Deposito";
         json =
             "{ \""
                 + STRING_ID_USUARIO
@@ -149,7 +152,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
     preference.setExternalReference(jsonObject.toString());
     Item item = new Item();
-    item.setTitle("Producto").setQuantity(1).setUnitPrice(monto);
+    item.setTitle(title).setQuantity(1).setUnitPrice(monto);
     com.mercadopago.resources.datastructures.preference.Payer payer =
         new com.mercadopago.resources.datastructures.preference.Payer();
     payer.setEmail(clienteDeUsuario.getEmail());
