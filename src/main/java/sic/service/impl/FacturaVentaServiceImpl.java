@@ -130,16 +130,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       renglonesPedido.forEach(
           r -> {
             if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
-              if (r.getCantidad()
-                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()))
-                  > 0) {
+              if (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getIdProductoItem())) > 0) {
                 NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
                     NuevoRenglonFacturaDTO.builder()
                         .cantidad(
                             r.getCantidad()
-                                .subtract(
-                                    renglonesDeFacturas.get(r.getIdProductoItem())))
+                                .subtract(renglonesDeFacturas.get(r.getIdProductoItem())))
                         .idProducto(r.getIdProductoItem())
+                        .renglonMarcado(
+                            facturaService.marcarRenglonParaAplicarBonificacion(
+                                r.getIdProductoItem(), r.getCantidad()))
                         .build();
                 renglonesRestantes.add(
                     facturaService.calcularRenglon(
@@ -150,6 +150,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
                   NuevoRenglonFacturaDTO.builder()
                       .cantidad(r.getCantidad())
                       .idProducto(r.getIdProductoItem())
+                      .renglonMarcado(
+                          facturaService.marcarRenglonParaAplicarBonificacion(
+                              r.getIdProductoItem(), r.getCantidad()))
                       .build();
               renglonesRestantes.add(
                   facturaService.calcularRenglon(
@@ -163,6 +166,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
                 NuevoRenglonFacturaDTO.builder()
                     .cantidad(r.getCantidad())
                     .idProducto(r.getIdProductoItem())
+                    .renglonMarcado(
+                        facturaService.marcarRenglonParaAplicarBonificacion(
+                            r.getIdProductoItem(), r.getCantidad()))
                     .build();
             renglonesRestantes.add(
                 facturaService.calcularRenglon(
