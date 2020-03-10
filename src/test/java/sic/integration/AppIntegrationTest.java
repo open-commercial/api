@@ -1111,6 +1111,7 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
     assertEquals("theRedWolf", cliente.getNombreFiscal());
     assertEquals(0.0, cliente.getMontoCompraMinima().doubleValue());
+    assertFalse(cliente.isPuedeComprarAPlazo());
     sic.model.CuentaCorrienteCliente cuentaCorrienteCliente =
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/" + cliente.getIdCliente(),

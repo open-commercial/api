@@ -10,6 +10,7 @@ import com.mercadopago.resources.Preference;
 import com.mercadopago.resources.Refund;
 import com.mercadopago.resources.datastructures.preference.BackUrls;
 import com.mercadopago.resources.datastructures.preference.Item;
+import com.mercadopago.resources.datastructures.preference.PaymentMethods;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,6 +161,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     preference.appendItem(item);
     preference.setBackUrls(backUrls);
     preference.setBinaryMode(true);
+    PaymentMethods paymentMethods = new PaymentMethods();
+    paymentMethods.setExcludedPaymentMethods("pagofacil", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink");
+    preference.setPaymentMethods(paymentMethods);
     try {
       preference = preference.save();
     } catch (MPException ex) {
