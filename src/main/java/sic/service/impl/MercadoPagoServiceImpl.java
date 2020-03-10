@@ -49,6 +49,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private static final String STRING_ID_USUARIO = "idUsuario";
+  private static final String[] medioDePagoNoPermitidos =
+          new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
@@ -161,9 +163,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     preference.appendItem(item);
     preference.setBackUrls(backUrls);
     preference.setBinaryMode(true);
-    PaymentMethods paymentMethods = new PaymentMethods();
-    paymentMethods.setExcludedPaymentMethods("rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink");
-    preference.setPaymentMethods(paymentMethods);
+    if (!clienteDeUsuario.isPuedeComprarAPlazo()) {
+      PaymentMethods paymentMethods = new PaymentMethods();
+      paymentMethods.setExcludedPaymentMethods(medioDePagoNoPermitidos);
+      preference.setPaymentMethods(paymentMethods);
+    }
     try {
       preference = preference.save();
     } catch (MPException ex) {
