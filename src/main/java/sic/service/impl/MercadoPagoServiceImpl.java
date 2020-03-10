@@ -108,7 +108,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
         }
         monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
-        title = "Producto";
+        title = "Pedido";
         json =
             "{ \""
                 + STRING_ID_USUARIO
