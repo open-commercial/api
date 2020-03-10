@@ -49,7 +49,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private static final String STRING_ID_USUARIO = "idUsuario";
-  private static final String[] medioDePagoNoPermitidos =
+  private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
           new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
@@ -165,7 +165,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     preference.setBinaryMode(true);
     if (!clienteDeUsuario.isPuedeComprarAPlazo()) {
       PaymentMethods paymentMethods = new PaymentMethods();
-      paymentMethods.setExcludedPaymentMethods(medioDePagoNoPermitidos);
+      paymentMethods.setExcludedPaymentMethods(MEDIO_DE_PAGO_NO_PERMITIDOS);
       preference.setPaymentMethods(paymentMethods);
     }
     try {
@@ -206,7 +206,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   Pedido pedidoDePayment = pedidoService.getPedidoPorIdPayment(payment.getId());
                   if (pedidoDePayment == null) {
                     this.crearPedidoDelCarrito(
-                        Long.parseLong(convertedObject.get("idUsuario").getAsString()),
+                        Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()),
                         sucursal,
                         cliente,
                         tipoDeEnvio,
