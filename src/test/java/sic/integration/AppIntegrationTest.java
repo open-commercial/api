@@ -876,6 +876,39 @@ class AppIntegrationTest {
                     + pedidosRecuperados.get(0).getIdPedido()
                     + "?tipoDeComprobante=FACTURA_A",
                 RenglonFactura[].class));
+    assertEquals("Ventilador de pie", renglones.get(0).getDescripcionItem());
+    assertEquals(new BigDecimal("5.000000000000000"), renglones.get(0).getCantidad());
+    assertEquals(new BigDecimal("1000.000000000000000"), renglones.get(0).getPrecioUnitario());
+    assertEquals(new BigDecimal("20.000000000000000"), renglones.get(0).getBonificacionPorcentaje());
+    assertEquals(new BigDecimal("200.000000000000000"), renglones.get(0).getBonificacionNeta());
+    assertEquals(new BigDecimal("21.000000000000000"), renglones.get(0).getIvaPorcentaje());
+    assertEquals(new BigDecimal("168.000000000000000000000000000000000000000000000"), renglones.get(0).getIvaNeto());
+    assertEquals(new BigDecimal("900.000000000000000"), renglones.get(0).getGananciaPorcentaje());
+    assertEquals(new BigDecimal("900.000000000000000"), renglones.get(0).getGananciaNeto());
+    assertEquals(new BigDecimal("6050.000000000000000000000000000000"), renglones.get(0).getImporteAnterior());
+    assertEquals(new BigDecimal("4000.000000000000000000000000000000"), renglones.get(0).getImporte());
+    assertEquals("Reflector led 100w", renglones.get(1).getDescripcionItem());
+    assertEquals(new BigDecimal("3.000000000000000"), renglones.get(1).getCantidad());
+    assertEquals(new BigDecimal("1000.000000000000000"), renglones.get(1).getPrecioUnitario());
+    assertEquals(new BigDecimal("20.000000000000000"), renglones.get(1).getBonificacionPorcentaje());
+    assertEquals(new BigDecimal("200.000000000000000"), renglones.get(1).getBonificacionNeta());
+    assertEquals(new BigDecimal("10.500000000000000"), renglones.get(1).getIvaPorcentaje());
+    assertEquals(new BigDecimal("84.000000000000000000000000000000000000000000000"), renglones.get(1).getIvaNeto());
+    assertEquals(new BigDecimal("900.000000000000000"), renglones.get(1).getGananciaPorcentaje());
+    assertEquals(new BigDecimal("900.000000000000000"), renglones.get(1).getGananciaNeto());
+    assertEquals(new BigDecimal("3315.000000000000000000000000000000"), renglones.get(1).getImporteAnterior());
+    assertEquals(new BigDecimal("2400.000000000000000000000000000000"), renglones.get(1).getImporte());
+    assertEquals("Canilla Monocomando", renglones.get(2).getDescripcionItem());
+    assertEquals(new BigDecimal("10.000000000000000"), renglones.get(2).getCantidad());
+    assertEquals(new BigDecimal("12094.481000000000000"), renglones.get(2).getPrecioUnitario());
+    assertEquals(new BigDecimal("10.000000000000000"), renglones.get(2).getBonificacionPorcentaje());
+    assertEquals(new BigDecimal("1209.448100000000000"), renglones.get(2).getBonificacionNeta());
+    assertEquals(new BigDecimal("10.500000000000000"), renglones.get(2).getIvaPorcentaje());
+    assertEquals(new BigDecimal("1142.928454500000000000000000000000000000000000000"), renglones.get(2).getIvaNeto());
+    assertEquals(new BigDecimal("11.370000000000000"), renglones.get(2).getGananciaPorcentaje());
+    assertEquals(new BigDecimal("1234.751000000000000"), renglones.get(2).getGananciaNeto());
+    assertEquals(new BigDecimal("133644.020000000000000000000000000000"), renglones.get(2).getImporteAnterior());
+    assertEquals(new BigDecimal("108850.329000000000000000000000000000"), renglones.get(2).getImporte());
     List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
     renglones.forEach(
         renglonFactura ->
