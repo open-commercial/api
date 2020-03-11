@@ -1205,38 +1205,8 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Ingresar dinero a la CC de cliente mediante Mercado Pago")
-  @Order(11)
-  void testEscenarioAgregarPagoMercadoPago() {
-    this.iniciarSesionComoAdministrador();
-    Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
-    assertNotNull(usuario);
-    this.token =
-        restTemplate
-            .postForEntity(
-                apiPrefix + "/login",
-                new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
-                String.class)
-            .getBody();
-    assertNotNull(this.token);
-    // No se puede probar con tarjeta de credito por no poder generar el token
-    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
-        NuevaOrdenDePagoDTO.builder()
-            .movimiento(Movimiento.DEPOSITO)
-            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
-            .monto(BigDecimal.TEN)
-            .build();
-    MercadoPagoPreferenceDTO preference =
-        restTemplate.postForObject(
-            apiPrefix + "/pagos/mercado-pago/preference",
-            nuevaOrdenDePagoDTO,
-            MercadoPagoPreferenceDTO.class);
-    assertNotNull(preference);
-  }
-
-  @Test
   @DisplayName("Cerrar caja y verificar movimientos")
-  @Order(12)
+  @Order(11)
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1311,7 +1281,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo y luego cerrar caja")
-  @Order(13)
+  @Order(12)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
