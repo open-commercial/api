@@ -1,13 +1,15 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
+import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.*;
 
 @RestController
@@ -15,54 +17,74 @@ import sic.service.*;
 public class CarritoCompraController {
 
   private final ICarritoCompraService carritoCompraService;
+  private final IAuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
   public CarritoCompraController(
-      ICarritoCompraService carritoCompraService) {
+      ICarritoCompraService carritoCompraService, IAuthService authService) {
     this.carritoCompraService = carritoCompraService;
+    this.authService = authService;
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}")
+  @GetMapping("/carrito-compra/clientes/{idCliente}")
   public CarritoCompraDTO getCarritoCompraDelUsuario(
-      @PathVariable long idUsuario, @PathVariable long idCliente) {
-    return carritoCompraService.getCarritoCompra(idUsuario, idCliente);
+      @PathVariable long idCliente, @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return carritoCompraService.getCarritoCompra(idUsuarioLoggedIn, idCliente);
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/clientes/{idCliente}/items")
+  @GetMapping("/carrito-compra/items")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
-      @PathVariable long idUsuario,
-      @PathVariable long idCliente,
-      @RequestParam(required = false) Integer pagina) {
+      @RequestParam(required = false) Integer pagina,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     if (pagina == null || pagina < 0) pagina = 0;
-    return carritoCompraService.getItemsDelCaritoCompra(idUsuario, idCliente, pagina, null);
+    return carritoCompraService.getItemsDelCaritoCompra(idUsuarioLoggedIn, pagina, null);
   }
 
-  @GetMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(@PathVariable long idUsuario, @PathVariable long idProducto) {
-    return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(idUsuario, idProducto);
+  @GetMapping("/carrito-compra/productos/{idProducto}")
+  public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
+      @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(
+        idUsuarioLoggedIn, idProducto);
   }
 
-  @DeleteMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
-  public void eliminarItem(@PathVariable long idUsuario, @PathVariable long idProducto) {
-    carritoCompraService.eliminarItemDelUsuario(idUsuario, idProducto);
+  @DeleteMapping("/carrito-compra/productos/{idProducto}")
+  public void eliminarItem(
+      @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    carritoCompraService.eliminarItemDelUsuario(idUsuarioLoggedIn, idProducto);
   }
 
-  @DeleteMapping("/carrito-compra/usuarios/{idUsuario}")
-  public void eliminarTodosLosItems(@PathVariable long idUsuario) {
-    carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
+  @DeleteMapping("/carrito-compra")
+  public void eliminarTodosLosItems(@RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuarioLoggedIn);
   }
 
-  @PostMapping("/carrito-compra/usuarios/{idUsuario}/productos/{idProducto}")
+  @PostMapping("/carrito-compra/productos/{idProducto}")
   public void agregarOrModificarItem(
-      @PathVariable long idUsuario,
       @PathVariable long idProducto,
-      @RequestParam BigDecimal cantidad) {
-    carritoCompraService.agregarOrModificarItem(idUsuario, idProducto, cantidad);
+      @RequestParam BigDecimal cantidad,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    carritoCompraService.agregarOrModificarItem(idUsuarioLoggedIn, idProducto, cantidad);
   }
 
   @PostMapping("/carrito-compra")
   public Pedido generarPedidoConItemsDelCarrito(
-      @RequestBody NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO) {
-    return carritoCompraService.crearPedido(nuevaOrdenDeCompraDTO);
+      @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return carritoCompraService.crearPedido(nuevaOrdenDePagoDTO, idUsuarioLoggedIn);
   }
 }

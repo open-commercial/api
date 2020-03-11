@@ -93,6 +93,8 @@ public class Cliente implements Serializable {
 
   private boolean predeterminado;
 
+  private boolean puedeComprarAPlazo;
+
   @JsonGetter("idViajante")
   public Long getIdViajante() {
     if (viajante != null) {

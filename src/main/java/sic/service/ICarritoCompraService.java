@@ -1,20 +1,22 @@
 package sic.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
+import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDeCompraDTO;
+import sic.modelo.dto.NuevaOrdenDePagoDTO;
 
 public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
 
-  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, long idCliente, int pagina, Integer tamanio);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, int pagina, Integer tamanio);
 
-  Pedido crearPedido(NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO);
+  BigDecimal calcularTotal(long idUsuario);
 
   ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto);
 
@@ -25,4 +27,8 @@ public interface ICarritoCompraService {
   void eliminarTodosLosItemsDelUsuario(long idUsuario);
 
   void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad);
+
+  List<ItemCarritoCompra> getItemsDelCarritoPorUsuario(Usuario usuario);
+
+  Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario);
 }

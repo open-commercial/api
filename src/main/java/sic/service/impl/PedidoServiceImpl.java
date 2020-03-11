@@ -650,4 +650,9 @@ public class PedidoServiceImpl implements IPedidoService {
     resultados.setTotal(resultados.getSubTotalBruto());
     return resultados;
   }
+
+  @Override
+  public Pedido getPedidoPorIdPayment(String idPayment) {
+    return pedidoRepository.findByIdPaymentAndEliminado(idPayment, false);
+  }
 }

@@ -49,4 +49,6 @@ public interface IPedidoService {
   List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
 
   Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido);
+
+  Pedido getPedidoPorIdPayment(String idPayment);
 }
