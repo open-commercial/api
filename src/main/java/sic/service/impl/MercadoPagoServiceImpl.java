@@ -108,7 +108,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
         }
         monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
-        title = "Pedido";
+        title = "Pedido de (" + clienteDeUsuario.getNroCliente() + ") " + clienteDeUsuario.getNombreFiscal();
         json =
             "{ \""
                 + STRING_ID_USUARIO
@@ -134,7 +134,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
         }
         monto = nuevaOrdenDeCompra.getMonto().floatValue();
-        title = "Deposito";
+        title = "Deposito de (" + clienteDeUsuario.getNroCliente() + ") " + clienteDeUsuario.getNombreFiscal();
         json =
             "{ \""
                 + STRING_ID_USUARIO
