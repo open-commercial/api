@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
@@ -186,12 +187,22 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
         JsonObject convertedObject =
             new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
+        JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
+        if (idUsuario == null) {
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+        }
+        JsonElement idSucursal = convertedObject.get("idSucursal");
+        if (idSucursal == null) {
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+        }
         Cliente cliente =
-            clienteService.getClientePorIdUsuario(
-                Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()));
+            clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
         Sucursal sucursal =
-            sucursalService.getSucursalPorId(
-                Long.parseLong(convertedObject.get("idSucursal").getAsString()));
+            sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
         Movimiento movimiento = Movimiento.valueOf(convertedObject.get("movimiento").getAsString());
         TipoDeEnvio tipoDeEnvio;
         switch (payment.getStatus()) {
