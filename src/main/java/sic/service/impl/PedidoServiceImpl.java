@@ -131,7 +131,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Pedido actualizarEstadoPedido(Pedido pedido) {
+  public void actualizarEstadoPedido(Pedido pedido) {
     pedido.setEstado(EstadoPedido.ACTIVO);
     if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
       pedido.setEstado(EstadoPedido.ABIERTO);
@@ -139,7 +139,6 @@ public class PedidoServiceImpl implements IPedidoService {
     if (facturaService.pedidoTotalmenteFacturado(pedido)) {
       pedido.setEstado(EstadoPedido.CERRADO);
     }
-    return pedido;
   }
 
   @Override
@@ -470,6 +469,11 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido) {
+    return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
+  }
+
+  @Override
   public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido) {
     return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
   }
@@ -477,7 +481,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido) {
     List<RenglonPedido> renglonPedidos =
-        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
+        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado().equals(EstadoPedido.ABIERTO)) {
       long[] idProductoItem = new long[renglonPedidos.size()];
@@ -559,7 +563,8 @@ public class PedidoServiceImpl implements IPedidoService {
       detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
-    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
+    List<RenglonPedido> renglones =
+        this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(
