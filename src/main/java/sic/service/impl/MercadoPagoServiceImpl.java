@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.calculos.RSAUtils;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
@@ -154,7 +155,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
     }
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-    preference.setExternalReference(jsonObject.toString());
+    preference.setExternalReference(RSAUtils.encrypt(jsonObject.toString()));
     Item item = new Item();
     item.setTitle(title).setQuantity(1).setUnitPrice(monto);
     com.mercadopago.resources.datastructures.preference.Payer payer =
@@ -186,7 +187,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
         JsonObject convertedObject =
-            new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
+            new Gson().fromJson(RSAUtils.decrypt(payment.getExternalReference()), JsonObject.class);
         JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
