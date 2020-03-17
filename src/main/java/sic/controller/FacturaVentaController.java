@@ -19,10 +19,7 @@ import sic.service.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -161,6 +158,12 @@ public class FacturaVentaController {
                   fv.getTotal(),
                   fv.getFecha()));
     }
+    List<TipoDeComprobante> tiposAutorizables =
+        Arrays.asList(
+            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    facturasGuardadas.stream()
+        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+        .forEach(facturaVentaService::autorizarFacturaVenta);
     return facturasGuardadas;
   }
 
