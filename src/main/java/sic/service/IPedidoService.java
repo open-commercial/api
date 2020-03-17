@@ -34,6 +34,8 @@ public interface IPedidoService {
 
   Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long nroPedido);
 
+  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido);
+
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido);
@@ -49,4 +51,6 @@ public interface IPedidoService {
   List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
 
   Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
+
+  Pedido getPedidoPorIdPayment(String idPayment);
 }

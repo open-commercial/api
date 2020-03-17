@@ -29,8 +29,8 @@ public class NuevoProductoDTO {
   private boolean hayStock;
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
   private BigDecimal cantMinima;
-  @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_bulto_invalida}")
-  @NotNull(message = "{mensaje_producto_cantidad_bulto_invalida}")
+  @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_venta_minima_invalida}")
+  @NotNull(message = "{mensaje_producto_cantidad_venta_minima_invalida}")
   private BigDecimal bulto;
   @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")
   private BigDecimal precioCosto;

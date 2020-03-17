@@ -53,7 +53,7 @@ public class App implements WebMvcConfigurer {
         .excludePathPatterns("/api/*/logout")
         .excludePathPatterns("/api/*/password-recovery")
         .excludePathPatterns("/api/*/registracion")
-        .excludePathPatterns("/api/*/pagos/notificacion")
+        .excludePathPatterns("/api/*/pagos/mercado-pago/notificacion")
         .excludePathPatterns("/api/*/productos/*")
         .excludePathPatterns("/api/*/productos/busqueda/criteria");
   }

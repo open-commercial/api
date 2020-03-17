@@ -473,6 +473,11 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido) {
+    return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
+  }
+
+  @Override
   public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido) {
     return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
   }
@@ -480,7 +485,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido) {
     List<RenglonPedido> renglonPedidos =
-        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedido(idPedido);
+        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado().equals(EstadoPedido.ABIERTO)) {
       long[] idProductoItem = new long[renglonPedidos.size()];
@@ -542,7 +547,8 @@ public class PedidoServiceImpl implements IPedidoService {
       detalleEnvio = pedido.getEnvio();
     }
     params.put("detalleEnvio", detalleEnvio);
-    List<RenglonPedido> renglones = this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
+    List<RenglonPedido> renglones =
+        this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     try {
       return JasperExportManager.exportReportToPdf(
@@ -632,5 +638,10 @@ public class PedidoServiceImpl implements IPedidoService {
     resultados.setSubTotalBruto(resultados.getSubTotal().subtract(resultados.getDescuentoNeto()).add(resultados.getRecargoNeto()));
     resultados.setTotal(resultados.getSubTotalBruto());
     return resultados;
+  }
+
+  @Override
+  public Pedido getPedidoPorIdPayment(String idPayment) {
+    return pedidoRepository.findByIdPaymentAndEliminado(idPayment, false);
   }
 }

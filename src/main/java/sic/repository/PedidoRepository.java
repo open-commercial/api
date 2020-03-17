@@ -8,5 +8,8 @@ import sic.modelo.Pedido;
 public interface PedidoRepository
     extends PagingAndSortingRepository<Pedido, Long>, QuerydslPredicateExecutor<Pedido> {
 
-  Pedido findByNroPedidoAndSucursalAndEliminado(long nroPedido, Sucursal sucursal, boolean eliminado);
+  Pedido findByNroPedidoAndSucursalAndEliminado(
+      long nroPedido, Sucursal sucursal, boolean eliminado);
+
+  Pedido findByIdPaymentAndEliminado(String idPayment, boolean eliminado);
 }

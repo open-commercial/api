@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
@@ -64,6 +65,7 @@ class AppIntegrationTest {
   static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired TestRestTemplate restTemplate;
+  @Autowired MessageSource messageSource;
 
   void iniciarSesionComoAdministrador() {
     this.token =
@@ -673,9 +675,10 @@ class AppIntegrationTest {
             .apellido("Canete")
             .email("caniete@yahoo.com.br")
             .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+            .habilitado(true)
             .build();
-    Usuario credencialDadaDeAlta =
-        restTemplate.postForObject(apiPrefix + "/usuarios", credencial, Usuario.class);
+    Usuario credencialDadaDeAlta = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, Usuario.class);
+    credencialDadaDeAlta.setHabilitado(true);
     assertEquals(credencial, credencialDadaDeAlta);
     Cliente cliente =
         Cliente.builder()
@@ -1161,6 +1164,7 @@ class AppIntegrationTest {
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
     assertEquals("theRedWolf", cliente.getNombreFiscal());
     assertEquals(0.0, cliente.getMontoCompraMinima().doubleValue());
+    assertFalse(cliente.isPuedeComprarAPlazo());
     sic.model.CuentaCorrienteCliente cuentaCorrienteCliente =
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/" + cliente.getIdCliente(),
@@ -1179,41 +1183,47 @@ class AppIntegrationTest {
     assertNotNull(this.token);
     restTemplate.postForObject(
         apiPrefix
-            + "/carrito-compra/usuarios/"
-            + usuario.getIdUsuario()
-            + "/productos/1?cantidad=5",
+            + "/carrito-compra/productos/1?cantidad=5",
         null,
         ItemCarritoCompra.class);
     restTemplate.postForObject(
         apiPrefix
-            + "/carrito-compra/usuarios/"
-            + usuario.getIdUsuario()
-            + "/productos/2?cantidad=9",
+            + "/carrito-compra/productos/2?cantidad=9",
         null,
         ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/usuarios/" + usuario.getIdUsuario() + "/productos/1",
+            apiPrefix + "/carrito-compra/productos/1",
             ItemCarritoCompra.class);
     assertNotNull(item1);
     assertEquals(1L, item1.getProducto().getIdProducto().longValue());
     assertEquals(5, item1.getCantidad().doubleValue());
     ItemCarritoCompra item2 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/usuarios/4/productos/2", ItemCarritoCompra.class);
+            apiPrefix + "/carrito-compra/productos/2", ItemCarritoCompra.class);
     assertNotNull(item2);
     assertEquals(2L, item2.getProducto().getIdProducto().longValue());
     assertEquals(9, item2.getCantidad().doubleValue());
-    NuevaOrdenDeCompraDTO nuevaOrdenDeCompraDTO =
-        NuevaOrdenDeCompraDTO.builder()
-            .idCliente(2L)
-            .idUsuario(4L)
-            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
-            .observaciones("Por favor comunicarse conmigo antes de facturar.")
-            .build();
+    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
+        NuevaOrdenDePagoDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
+    RestClientResponseException thrown =
+            assertThrows(
+                    RestClientResponseException.class,
+                    () -> restTemplate.postForObject(
+                            apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+            thrown
+                    .getMessage()
+                    .contains(
+                            messageSource.getMessage(
+                                    "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault())));
+    cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
+    cliente.setPuedeComprarAPlazo(true);
+    restTemplate.put(apiPrefix + "/clientes", cliente);
     Pedido pedido =
         restTemplate.postForObject(
-            apiPrefix + "/carrito-compra", nuevaOrdenDeCompraDTO, Pedido.class);
+            apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
     assertNotNull(pedido);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(
@@ -1261,41 +1271,8 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Ingresar dinero a la CC de cliente mediante Mercado Pago")
-  @Order(11)
-  void testEscenarioAgregarPagoMercadoPago() {
-    this.iniciarSesionComoAdministrador();
-    Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
-    assertNotNull(usuario);
-    this.token =
-        restTemplate
-            .postForEntity(
-                apiPrefix + "/login",
-                new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
-                String.class)
-            .getBody();
-    assertNotNull(this.token);
-    // No se puede probar con tarjeta de credito por no poder generar el token
-    NuevoPagoMercadoPagoDTO nuevoPagoMercadoPagoDTO =
-        NuevoPagoMercadoPagoDTO.builder()
-            .paymentMethodId("pagofacil")
-            .installments(1)
-            .idCliente(1L)
-            .idSucursal(1L)
-            .monto(new Float("2000"))
-            .build();
-    String paymentId =
-        restTemplate.postForObject(
-            apiPrefix + "/pagos/mercado-pago", nuevoPagoMercadoPagoDTO, String.class);
-    // El recibo no se da de alta por ser un pago asincrono.
-    restTemplate.postForObject(
-        apiPrefix + "/pagos/notificacion?data.id=" + paymentId + "&type=payment", null, void.class);
-    assertNotNull(paymentId);
-  }
-
-  @Test
   @DisplayName("Cerrar caja y verificar movimientos")
-  @Order(12)
+  @Order(11)
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1370,7 +1347,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo y luego cerrar caja")
-  @Order(13)
+  @Order(12)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
