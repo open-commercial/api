@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
-import sic.modelo.calculos.RSAUtils;
+import sic.util.EncryptUtils;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
@@ -30,6 +30,7 @@ import sic.service.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -39,6 +40,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
+
+  @Value("${SIC_RSA_PRIVATE_KEY}")
+  private String PRIVATE_KEY;
+
+  @Value("${SIC_RSA_PUBLIC_KEY}")
+  private String PUBLIC_KEY;
 
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
@@ -155,7 +162,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
     }
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-    preference.setExternalReference(RSAUtils.encrypt(jsonObject.toString()));
+    try {
+      preference.setExternalReference(
+          EncryptUtils.encryptWhitRSA(jsonObject.toString(), PUBLIC_KEY));
+    } catch (GeneralSecurityException e) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()));
+    }
     Item item = new Item();
     item.setTitle(title).setQuantity(1).setUnitPrice(monto);
     com.mercadopago.resources.datastructures.preference.Payer payer =
@@ -187,7 +200,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
         JsonObject convertedObject =
-            new Gson().fromJson(RSAUtils.decrypt(payment.getExternalReference()), JsonObject.class);
+            new Gson()
+                .fromJson(
+                    EncryptUtils.decryptWhitRSA(payment.getExternalReference(), PRIVATE_KEY),
+                    JsonObject.class);
         JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
@@ -296,6 +312,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       }
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
+    } catch (GeneralSecurityException e) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()));
     }
   }
 
