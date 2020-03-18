@@ -144,6 +144,30 @@ public abstract class Factura implements Serializable {
 
   private long numFacturaAfip;
 
+  @JsonGetter("subTotalBruto")
+  public BigDecimal getSubTotalBrutoSegunTipoDeComprobante() {
+    return (this.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || this.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO)
+            ? this.subTotalBruto.add(this.iva21Neto).add(this.iva105Neto)
+            : this.subTotalBruto;
+  }
+
+  @JsonGetter("iva21Neto")
+  public BigDecimal getIva21NetoSegunTipoDeComprobante() {
+    return (this.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || this.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO)
+            ? BigDecimal.ZERO
+            : this.iva21Neto;
+  }
+
+  @JsonGetter("iva105Neto")
+  public BigDecimal getIva105NetoSegunTipoDeComprobante() {
+    return (this.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || this.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO)
+            ? BigDecimal.ZERO
+            : this.iva105Neto;
+  }
+
   @JsonGetter("nroPedido")
   public Long getNroPedido() {
     return (this.pedido != null ? this.pedido.getNroPedido() : null);
