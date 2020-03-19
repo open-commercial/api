@@ -30,7 +30,12 @@ public class ExceptionControllerAdvice {
   }
 
   private String log(Exception ex) {
-    logger.error(ex.getMessage());
+    String mensaje =
+        ex.getMessage()
+            + "\n(Transaction ID: "
+            + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            + ")";
+    logger.error(mensaje);
     return ex.getMessage();
   }
 
@@ -41,7 +46,12 @@ public class ExceptionControllerAdvice {
     for (ConstraintViolation<?> violation : ex.getConstraintViolations()) {
       mensaje = mensaje.concat(violation.getMessage() + "\n");
     }
-    logger.error(mensaje, ex);
+    String transactionID =
+        mensaje.concat(
+            "(Transaction ID: "
+                + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                + ")");
+    logger.error(transactionID, ex);
     return mensaje;
   }
 
