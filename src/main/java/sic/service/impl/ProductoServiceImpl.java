@@ -55,7 +55,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final ISucursalService sucursalService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private final MessageSource messageSource;
 
   @Autowired
