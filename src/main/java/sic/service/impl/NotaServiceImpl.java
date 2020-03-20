@@ -46,7 +46,7 @@ import sic.exception.ServiceException;
 @Validated
 public class NotaServiceImpl implements INotaService {
 
-  private final NotaRepository notaRepository;
+  private final NotaRepository<Nota> notaRepository;
   private final NotaCreditoRepository notaCreditoRepository;
   private final NotaDebitoRepository notaDebitoRepository;
   private final IFacturaService facturaService;
@@ -71,7 +71,7 @@ public class NotaServiceImpl implements INotaService {
   @Autowired
   @Lazy
   public NotaServiceImpl(
-      NotaRepository notaRepository,
+      NotaRepository<Nota> notaRepository,
       NotaCreditoRepository notaCreditoRepository,
       NotaDebitoRepository notaDebitoRepository,
       IFacturaService facturaService,
