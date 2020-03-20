@@ -18,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @TestPropertySource(locations="classpath:application.properties")
 public class EncryptUtilsTest {
 
-    @Value("${SIC_RSA_PRIVATE_KEY}")
+    @Value("${SIC_PRIVATE_KEY}")
     private String privateKey;
 
-    @Value("${SIC_RSA_PUBLIC_KEY}")
+    @Value("${SIC_INIT_VECTOR}")
     private String initVector;
 
   @Test
