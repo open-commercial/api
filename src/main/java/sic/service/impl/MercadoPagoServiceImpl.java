@@ -41,11 +41,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
 
-  @Value("${SIC_RSA_PRIVATE_KEY}")
-  private String PRIVATE_KEY;
+  @Value("${SIC_PRIVATE_KEY}")
+  private String privateKey;
 
-  @Value("${SIC_RSA_PUBLIC_KEY}")
-  private String PUBLIC_KEY;
+  @Value("${SIC_INIT_VECTOR}")
+  private String initVector;
 
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
@@ -164,7 +164,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
     try {
       preference.setExternalReference(
-          EncryptUtils.encryptWhitRSA(jsonObject.toString(), PUBLIC_KEY));
+          EncryptUtils.encryptWhitAES(jsonObject.toString(), initVector, privateKey));
     } catch (GeneralSecurityException e) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()));
@@ -202,7 +202,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         JsonObject convertedObject =
             new Gson()
                 .fromJson(
-                    EncryptUtils.decryptWhitRSA(payment.getExternalReference(), PRIVATE_KEY),
+                    EncryptUtils.decryptWhitAES(
+                        payment.getExternalReference(), initVector, privateKey),
                     JsonObject.class);
         JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {

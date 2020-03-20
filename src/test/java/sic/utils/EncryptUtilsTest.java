@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class EncryptUtilsTest {
 
     @Value("${SIC_RSA_PRIVATE_KEY}")
-    private String PRIVATE_KEY;
+    private String privateKey;
 
     @Value("${SIC_RSA_PUBLIC_KEY}")
-    private String PUBLIC_KEY;
+    private String initVector;
 
   @Test
   void shouldEncriptarAndDesencriptarString() throws GeneralSecurityException {
@@ -38,8 +38,11 @@ public class EncryptUtilsTest {
             + " , \"movimiento\": "
             + Movimiento.PEDIDO
             + "}";
-    String jsonParaEncriptar = new JsonParser().parse(stringParaEncriptar).getAsJsonObject().toString();
-    String stringEncriptado = EncryptUtils.encryptWhitRSA(jsonParaEncriptar, PUBLIC_KEY);
-    assertEquals(jsonParaEncriptar, EncryptUtils.decryptWhitRSA(stringEncriptado, PRIVATE_KEY));
+    String jsonParaEncriptar =
+        new JsonParser().parse(stringParaEncriptar).getAsJsonObject().toString();
+    String stringEncriptado =
+        EncryptUtils.encryptWhitAES(jsonParaEncriptar, initVector, privateKey);
+    assertEquals(
+        jsonParaEncriptar, EncryptUtils.decryptWhitAES(stringEncriptado, initVector, privateKey));
   }
 }
