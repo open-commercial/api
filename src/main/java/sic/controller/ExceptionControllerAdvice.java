@@ -35,7 +35,7 @@ public class ExceptionControllerAdvice {
             + "\n(Transaction ID: "
             + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             + ")";
-    logger.error(mensaje);
+    logger.error(mensaje, ex);
     return ex.getMessage();
   }
 
