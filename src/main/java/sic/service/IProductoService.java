@@ -2,6 +2,7 @@ package sic.service;
 
 import java.math.BigDecimal;
 
+import com.querydsl.core.BooleanBuilder;
 import sic.modelo.*;
 
 import java.util.List;
@@ -28,6 +29,8 @@ public interface IProductoService {
       TipoDeComprobante tipoDeComprobante);
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
+
+  BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);
 
   List<Producto> buscarProductosParaReporte(BusquedaProductoCriteria criteria);
 

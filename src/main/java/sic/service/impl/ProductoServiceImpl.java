@@ -242,7 +242,8 @@ public class ProductoServiceImpl implements IProductoService {
     }
   }
 
-  private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
     QProducto qProducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(qProducto.eliminado.eq(false));

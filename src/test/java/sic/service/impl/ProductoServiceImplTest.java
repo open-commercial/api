@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -19,12 +20,15 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ProductoBuilder;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.repository.ProductoRepository;
 import sic.service.IMedidaService;
 import sic.service.IProveedorService;
 import sic.service.IRubroService;
 import sic.service.ISucursalService;
+
+import javax.persistence.EntityNotFoundException;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = AppTest.class)
@@ -42,12 +46,29 @@ class ProductoServiceImplTest {
   @InjectMocks private ProductoServiceImpl productoService;
 
   @Test
-  void shouldCalcularGananciaPorcentaje() {
+  void shouldCalcularGananciaPorcentajeDescendente() {
     BigDecimal precioCosto = new BigDecimal("12.34");
     BigDecimal pvp = new BigDecimal("23.45");
     BigDecimal resultadoEsperado = new BigDecimal("90.032414910859000");
     BigDecimal resultadoObtenido =
         productoService.calcularGananciaPorcentaje(null, null, pvp, null, null, precioCosto, false);
+    assertEquals(resultadoEsperado, resultadoObtenido);
+  }
+
+  @Test
+  void shouldCalcularGananciaPorcentajeAscendente() {
+    BigDecimal precioCosto = new BigDecimal("12.34");
+    BigDecimal pvp = new BigDecimal("23.45");
+    BigDecimal resultadoEsperado = new BigDecimal("95.223662884927066");
+    BigDecimal resultadoObtenido =
+        productoService.calcularGananciaPorcentaje(
+            new BigDecimal("30"),
+            new BigDecimal("25"),
+            pvp,
+            new BigDecimal("21"),
+            BigDecimal.ZERO,
+            precioCosto,
+            true);
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
 
@@ -244,6 +265,64 @@ class ProductoServiceImplTest {
                     "mensaje_producto_duplicado_descripcion",
                     new Object[] {productoParaActualizar.getDescripcion()},
                     Locale.getDefault())));
+  }
+
+  @Test
+  public void shouldTestBusquedaCriteria() {
+    BusquedaProductoCriteria criteria =
+        BusquedaProductoCriteria.builder()
+            .codigo("213")
+            .descripcion("testDescripcion")
+            .idRubro(1L)
+            .idProveedor(2L)
+            .listarSoloEnStock(true)
+            .listarSoloEnStock(true)
+            .publico(true)
+            .oferta(true)
+            .build();
+    String stringBuilder =
+        "producto.eliminado = false && (containsIc(producto.codigo,213) || containsIc(producto.descripcion,testDescripcion)) "
+            + "&& producto.rubro.idRubro = 1 && producto.proveedor.idProveedor = 2 "
+            + "&& any(producto.cantidadEnSucursales).cantidad > 0 && producto.ilimitado = false && producto.publico = true "
+            + "&& producto.oferta = true";
+    assertEquals(stringBuilder, productoService.getBuilder(criteria).toString());
+  }
+
+  @Test
+  public void shouldGetProductoConPrecioBonificadoPorOferta() {
+    Producto producto = new Producto();
+    producto.setPrecioLista(new BigDecimal("100"));
+    producto.setPorcentajeBonificacionOferta(new BigDecimal("10"));
+    producto.setOferta(true);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    Producto productoRecuperado = productoService.getProductoNoEliminadoPorId(1L);
+    assertEquals(new BigDecimal("100"), productoRecuperado.getPrecioLista());
+    assertEquals(new BigDecimal("90.00"), productoRecuperado.getPrecioBonificado());
+  }
+
+  @Test
+  public void shouldThrownEntityNotFoundException() {
+    when(messageSourceTestMock.getMessage(
+            "mensaje_producto_no_existente", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_producto_no_existente", null, Locale.getDefault()));
+    when(productoRepository.findById(1L)).thenReturn(Optional.empty());
+    EntityNotFoundException thrown =
+        assertThrows(
+            EntityNotFoundException.class, () -> productoService.getProductoNoEliminadoPorId(1L));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSourceTest.getMessage(
+                    "mensaje_producto_no_existente", null, Locale.getDefault())));
+  }
+
+  @Test
+  public void shouldDevolverNullSiCodigoVacio() {
+    assertNull(productoService.getProductoPorCodigo("123"));
   }
 
   //  @Test
