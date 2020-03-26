@@ -767,6 +767,10 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
+    if (productosParaVerificarStockDTO.getIdSucursal() == null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
+    }
     List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;

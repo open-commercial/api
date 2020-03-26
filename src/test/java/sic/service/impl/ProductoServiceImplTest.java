@@ -1,14 +1,12 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,6 +20,8 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.NuevoProductoDTO;
+import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.repository.ProductoRepository;
 import sic.service.IMedidaService;
 import sic.service.IProveedorService;
@@ -325,21 +325,73 @@ class ProductoServiceImplTest {
     assertNull(productoService.getProductoPorCodigo("123"));
   }
 
-  //  @Test
-  //  void shouldGetProductosSinStockDisponible() {
-  //    Producto producto = new Producto();
-  //    producto.setIdProducto(1L);
-  //    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
-  //    //producto.setCantidadEnSucursales();
-  //    producto.setIlimitado(false);
-  //    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-  //    long[] idProducto = {1};
-  //    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
-  //    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-  //
-  // ProductosParaVerificarStockDTO.builder().cantidad(cantidad).idProducto(idProducto).build();
-  //    Map<Long, BigDecimal> resultadoObtenido =
-  //        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
-  //    Assertions.assertFalse(resultadoObtenido.isEmpty());
-  //  }
+  @Test
+  void shouldGetProductosSinStockDisponible() {
+    when(messageSourceTestMock.getMessage(
+            "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    producto.setCantidadEnSucursales(cantidadEnSucursales);
+    producto.setIlimitado(false);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    long[] idProducto = {1};
+    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+        ProductosParaVerificarStockDTO.builder()
+            .idSucursal(1L)
+            .cantidad(cantidad)
+            .idProducto(idProducto)
+            .build();
+    List<ProductoFaltanteDTO> resultadoObtenido =
+        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+    Assertions.assertFalse(resultadoObtenido.isEmpty());
+  }
+
+  @Test
+  void shouldThrownBusinessServiceExceptionPorBuscarProductosSinIdSucursal() {
+    when(messageSourceTestMock.getMessage(
+            "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    producto.setCantidadEnSucursales(cantidadEnSucursales);
+    producto.setIlimitado(false);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    long[] idProducto = {1};
+    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+        ProductosParaVerificarStockDTO.builder().cantidad(cantidad).idProducto(idProducto).build();
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSourceTest.getMessage(
+                    "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault())));
+  }
 }
