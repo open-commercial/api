@@ -36,20 +36,4 @@ public class EncryptUtils {
     byte[] original = cipher.doFinal(DatatypeConverter.parseBase64Binary(valorEncriptado));
     return new String(original);
   }
-
-  public static String encryptWhitSHA(String passwordToHash) throws NoSuchAlgorithmException {
-    String generatedPassword = null;
-    MessageDigest md = MessageDigest.getInstance("SHA-256");
-    SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
-    byte[] salt = new byte[16];
-    sr.nextBytes(salt);
-    md.update(salt);
-    byte[] bytes = md.digest(passwordToHash.getBytes());
-    StringBuilder sb = new StringBuilder();
-    for (byte aByte : bytes) {
-      sb.append(Integer.toString((aByte & 0xff) + 0x100, 16).substring(1));
-    }
-    generatedPassword = sb.toString();
-    return generatedPassword;
-  }
 }
