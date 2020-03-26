@@ -209,7 +209,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             criteria.getSentido()));
   }
 
-  private BooleanBuilder getBuilderVenta(
+  @Override
+  public BooleanBuilder getBuilderVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();

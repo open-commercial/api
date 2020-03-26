@@ -92,7 +92,8 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
             criteria.getSentido()));
   }
 
-  private BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria) {
     QFacturaCompra qFacturaCompra = QFacturaCompra.facturaCompra;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() == null) {

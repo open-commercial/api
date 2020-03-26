@@ -1,5 +1,6 @@
 package sic.service;
 
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
@@ -49,4 +50,6 @@ public interface IFacturaVentaService {
 
   void agregarRenglonesAFacturaSinIVA(
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
+
+  BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 }

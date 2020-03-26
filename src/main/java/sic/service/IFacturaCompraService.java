@@ -1,5 +1,6 @@
 package sic.service;
 
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.FacturaCompra;
 import sic.modelo.Proveedor;
@@ -22,4 +23,6 @@ public interface IFacturaCompraService {
     BigDecimal calcularTotalFacturadoCompra(BusquedaFacturaCompraCriteria criteria);
 
     BigDecimal calcularIvaCompra(BusquedaFacturaCompraCriteria criteria);
+
+    BooleanBuilder getBuilderCompra(BusquedaFacturaCompraCriteria criteria);
 }
