@@ -55,6 +55,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final ICarritoCompraService carritoCompraService;
   private final IUsuarioService usuarioService;
   private final IPedidoService pedidoService;
+  private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private static final String STRING_ID_USUARIO = "idUsuario";
@@ -73,6 +74,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       ICarritoCompraService carritoCompraService,
       IUsuarioService usuarioService,
       IPedidoService pedidoService,
+      EncryptUtils encryptUtils,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
@@ -82,6 +84,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     this.carritoCompraService = carritoCompraService;
     this.usuarioService = usuarioService;
     this.pedidoService = pedidoService;
+    this.encryptUtils = encryptUtils;
     this.messageSource = messageSource;
   }
 
@@ -164,7 +167,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
     try {
       preference.setExternalReference(
-          EncryptUtils.encryptWhitAES(jsonObject.toString(), initVector, privateKey));
+          encryptUtils.encryptWhitAES(jsonObject.toString()));
     } catch (GeneralSecurityException e) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()));
@@ -202,9 +205,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         JsonObject convertedObject =
             new Gson()
                 .fromJson(
-                    EncryptUtils.decryptWhitAES(
-                        payment.getExternalReference(), initVector, privateKey),
-                    JsonObject.class);
+                    encryptUtils.decryptWhitAES(payment.getExternalReference()), JsonObject.class);
         JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
