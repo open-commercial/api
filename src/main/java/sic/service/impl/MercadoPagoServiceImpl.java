@@ -41,12 +41,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
 
-  @Value("${SIC_PRIVATE_KEY}")
-  private String privateKey;
-
-  @Value("${SIC_INIT_VECTOR}")
-  private String initVector;
-
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
   private final IClienteService clienteService;
