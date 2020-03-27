@@ -24,7 +24,7 @@ public class MessageSourceImplTest {
         messageSourceTest
             .getMessage(
                 "mensaje_correo_recuperacion",
-                new Object[] {"host", "passwordRecoveryKey", 1000L},
+                new Object[] {"host", "passwordRecoveryKey", 12956L},
                 Locale.ENGLISH)
             .contains("1,000"));
   }
