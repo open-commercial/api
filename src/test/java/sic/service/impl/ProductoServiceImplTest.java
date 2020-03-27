@@ -398,9 +398,9 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldTestActualizarMultiplesProductos() {
-    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
-            .idProducto(new long[]{1L})
-            //.descuentoRecargoPorcentaje(BigDecimal.TEN)
+    ProductosParaActualizarDTO productosParaActualizarDTO =
+        ProductosParaActualizarDTO.builder()
+            .idProducto(new long[] {1L})
             .cantidadVentaMinima(BigDecimal.TEN)
             .idMedida(1L)
             .idRubro(1L)
