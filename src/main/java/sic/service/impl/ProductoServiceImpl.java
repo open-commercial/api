@@ -578,13 +578,10 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
-    boolean actualizaPrecios = productosParaActualizarDTO.getGananciaNeto() != null
-      && productosParaActualizarDTO.getGananciaPorcentaje() != null
-      && productosParaActualizarDTO.getIvaNeto() != null
-      && productosParaActualizarDTO.getIvaPorcentaje() != null
-      && productosParaActualizarDTO.getPrecioCosto() != null
-      && productosParaActualizarDTO.getPrecioLista() != null
-      && productosParaActualizarDTO.getPrecioVentaPublico() != null;
+    boolean actualizaPrecios =
+        productosParaActualizarDTO.getGananciaPorcentaje() != null
+            && productosParaActualizarDTO.getIvaPorcentaje() != null
+            && productosParaActualizarDTO.getPrecioCosto() != null;
     boolean aplicaDescuentoRecargoPorcentaje = productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null;
     if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -637,11 +634,12 @@ public class ProductoServiceImpl implements IProductoService {
       if (actualizaPrecios) {
         p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
         p.setGananciaPorcentaje(productosParaActualizarDTO.getGananciaPorcentaje());
-        p.setGananciaNeto(productosParaActualizarDTO.getGananciaNeto());
-        p.setPrecioVentaPublico(productosParaActualizarDTO.getPrecioVentaPublico());
+        p.setGananciaNeto(this.calcularGananciaNeto(p.getPrecioCosto(), p.getGananciaPorcentaje()));
+        p.setPrecioVentaPublico(this.calcularPVP(p.getPrecioCosto(), p.getGananciaPorcentaje()));
         p.setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
-        p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
-        p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
+        p.setIvaNeto(this.calcularIVANeto(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
+        p.setPrecioLista(
+                this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (aplicaDescuentoRecargoPorcentaje) {

@@ -21,6 +21,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.repository.ProductoRepository;
 import sic.service.IMedidaService;
@@ -393,5 +394,85 @@ class ProductoServiceImplTest {
             .contains(
                 messageSourceTest.getMessage(
                     "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault())));
+  }
+
+  @Test
+  void shouldTestActualizarMultiplesProductos() {
+    ProductosParaActualizarDTO productosParaActualizarDTO = ProductosParaActualizarDTO.builder()
+            .idProducto(new long[]{1L})
+            //.descuentoRecargoPorcentaje(BigDecimal.TEN)
+            .cantidadVentaMinima(BigDecimal.TEN)
+            .idMedida(1L)
+            .idRubro(1L)
+            .idProveedor(2L)
+            .gananciaPorcentaje(BigDecimal.TEN)
+            .ivaPorcentaje(new BigDecimal("21"))
+            .precioCosto(BigDecimal.TEN)
+            .porcentajeBonificacionPrecio(BigDecimal.TEN)
+            .publico(true)
+            .build();
+    Producto producto = new ProductoBuilder().withId_Producto(1L).build();
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    productoService.actualizarMultiples(productosParaActualizarDTO);
+    when(messageSourceTestMock.getMessage(
+            "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () ->
+                productoService.actualizarMultiples(
+                    ProductosParaActualizarDTO.builder()
+                        .idProducto(new long[] {1L})
+                        .descuentoRecargoPorcentaje(BigDecimal.TEN)
+                        .cantidadVentaMinima(BigDecimal.TEN)
+                        .idMedida(1L)
+                        .idRubro(1L)
+                        .idProveedor(2L)
+                        .gananciaPorcentaje(BigDecimal.TEN)
+                        .ivaPorcentaje(new BigDecimal("21"))
+                        .precioCosto(BigDecimal.TEN)
+                        .porcentajeBonificacionPrecio(BigDecimal.TEN)
+                        .publico(true)
+                        .build()));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSourceTest.getMessage(
+                    "mensaje_modificar_producto_no_permitido", null, Locale.getDefault())));
+
+    when(messageSourceTestMock.getMessage(
+            "mensaje_error_ids_duplicados", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_error_ids_duplicados", null, Locale.getDefault()));
+    thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () ->
+                productoService.actualizarMultiples(
+                    ProductosParaActualizarDTO.builder()
+                        .idProducto(new long[] {1L, 1L})
+                        .cantidadVentaMinima(BigDecimal.TEN)
+                        .idMedida(1L)
+                        .idRubro(1L)
+                        .idProveedor(2L)
+                        .gananciaPorcentaje(BigDecimal.TEN)
+                        .ivaPorcentaje(new BigDecimal("21"))
+                        .precioCosto(BigDecimal.TEN)
+                        .porcentajeBonificacionPrecio(BigDecimal.TEN)
+                        .publico(true)
+                        .build()));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSourceTest.getMessage(
+                    "mensaje_error_ids_duplicados", null, Locale.getDefault())));
   }
 }
