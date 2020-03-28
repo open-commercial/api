@@ -29,8 +29,6 @@ import sic.repository.FacturaVentaRepository;
 import sic.service.IFacturaService;
 import sic.util.CalculosComprobante;
 
-import javax.persistence.EntityNotFoundException;
-
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = AppTest.class)
 class FacturaServiceImplTest {
@@ -45,6 +43,8 @@ class FacturaServiceImplTest {
   @Mock private MessageSource messageSourceTestMock;
   @Mock private UsuarioServiceImpl mockUsuarioService;
   @Mock private ClienteServiceImpl mockClienteService;
+  @Mock private PedidoServiceImpl pedidoService;
+  //@Mock private ConfiguracionSucursalServiceImpl mockConfiguracionSucursalService;
   @InjectMocks private FacturaServiceImpl facturaServiceImpl;
   @InjectMocks private FacturaCompraServiceImpl facturaCompraServiceImpl;
   @InjectMocks private FacturaVentaServiceImpl facturaVentaServiceImpl;
@@ -1269,5 +1269,122 @@ class FacturaServiceImplTest {
             .and(qFacturVenta.eliminada.eq(false)));
     when(mockFacturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(null);
     assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularGananciaTotal(criteria, 1L));
+  }
+
+  @Test
+  void shouldTestRenglonesDelPedidoParaFacturar() {
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido1 = new RenglonPedido();
+    renglonPedido1.setIdProductoItem(1L);
+    renglonPedido1.setCantidad(new BigDecimal("10"));
+    RenglonPedido renglonPedido2 = new RenglonPedido();
+    renglonPedido2.setIdProductoItem(2L);
+    renglonPedido2.setCantidad(new BigDecimal("20"));
+    renglonesPedido.add(renglonPedido1);
+    renglonesPedido.add(renglonPedido2);
+    Map<Long, BigDecimal> renglonesDeFacturas = new HashMap<>();
+    renglonesDeFacturas.put(1L, new BigDecimal("5"));
+    renglonesDeFacturas.put(2L, new BigDecimal("15"));
+    RenglonFactura renglonFactura1 = new RenglonFactura();
+    renglonFactura1.setIdProductoItem(1L);
+    renglonFactura1.setCantidad(new BigDecimal("5"));
+    RenglonFactura renglonFactura2 = new RenglonFactura();
+    renglonFactura2.setIdProductoItem(2L);
+    renglonFactura2.setCantidad(new BigDecimal("5"));
+    when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
+    when(pedidoService.getRenglonesFacturadosDelPedido(1L)).thenReturn(renglonesDeFacturas);
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A,
+            Movimiento.VENTA,
+            NuevoRenglonFacturaDTO.builder()
+                .cantidad(new BigDecimal("5"))
+                .idProducto(1L)
+                .renglonMarcado(false)
+                .build()))
+        .thenReturn(renglonFactura1);
+    when(mockFacturaService.calcularRenglon(
+            TipoDeComprobante.FACTURA_A,
+            Movimiento.VENTA,
+            NuevoRenglonFacturaDTO.builder()
+                .cantidad(new BigDecimal("5"))
+                .idProducto(2L)
+                .renglonMarcado(false)
+                .build()))
+        .thenReturn(renglonFactura2);
+    when(mockFacturaService.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")))
+        .thenReturn(false);
+    when(mockFacturaService.marcarRenglonParaAplicarBonificacion(2L, new BigDecimal("5")))
+        .thenReturn(false);
+    assertFalse(
+        facturaVentaServiceImpl
+            .getRenglonesPedidoParaFacturar(1L, TipoDeComprobante.FACTURA_A)
+            .isEmpty());
+    when(pedidoService.getRenglonesFacturadosDelPedido(1L)).thenReturn(null);
+    assertFalse(
+        facturaVentaServiceImpl
+            .getRenglonesPedidoParaFacturar(1L, TipoDeComprobante.FACTURA_A)
+            .isEmpty());
+  }
+
+  @Test
+  void shouldTestEnviarFacturaPorEmail() {
+    FacturaVenta facturaVenta = new FacturaVenta();
+    facturaVenta.setIdFactura(1L);
+    facturaVenta.setNumSerie(2L);
+    facturaVenta.setNumFactura(1L);
+    facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
+    Cliente clienteDeFactura = new Cliente();
+    facturaVenta.setCliente(clienteDeFactura);
+    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(messageSourceTestMock.getMessage(
+            "mensaje_correo_factura_sin_cae", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_correo_factura_sin_cae", null, Locale.getDefault()));
+    BusinessServiceException thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSourceTest.getMessage(
+                    "mensaje_correo_factura_sin_cae", null, Locale.getDefault())));
+
+    facturaVenta.setCae(123L);
+    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(messageSourceTestMock.getMessage(
+            "mensaje_correo_cliente_sin_email", null, Locale.getDefault()))
+        .thenReturn(
+            messageSourceTest.getMessage(
+                "mensaje_correo_cliente_sin_email", null, Locale.getDefault()));
+    thrown =
+        assertThrows(
+            BusinessServiceException.class,
+            () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSourceTest.getMessage(
+                    "mensaje_correo_cliente_sin_email", null, Locale.getDefault())));
+
+    // sin pedido
+    //    clienteDeFactura.setEmail("correo@decliente.com");
+    //    facturaVenta.setCliente(clienteDeFactura);
+    //    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    //    when(mockConfiguracionSucursalService.)
+    //    facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
+
+    //    Sucursal sucursal = new Sucursal();
+    //    sucursal.setNombre("Sucursal de test");
+    //    Pedido pedido = new Pedido();
+    //    pedido.setTipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL);
+    //    pedido.setSucursal(sucursal);
+    //    facturaVenta.setSucursal(sucursal);
+    //    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
   }
 }
