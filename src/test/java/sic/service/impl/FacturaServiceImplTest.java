@@ -24,6 +24,7 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.modelo.dto.UbicacionDTO;
 import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaVentaRepository;
 import sic.service.IFacturaService;
@@ -44,7 +45,8 @@ class FacturaServiceImplTest {
   @Mock private UsuarioServiceImpl mockUsuarioService;
   @Mock private ClienteServiceImpl mockClienteService;
   @Mock private PedidoServiceImpl pedidoService;
-  //@Mock private ConfiguracionSucursalServiceImpl mockConfiguracionSucursalService;
+  @Mock private ConfiguracionSucursalServiceImpl mockConfiguracionSucursalService;
+  @Mock private CorreoElectronicoServiceImpl mockCorreoElectronicoService;
   @InjectMocks private FacturaServiceImpl facturaServiceImpl;
   @InjectMocks private FacturaCompraServiceImpl facturaCompraServiceImpl;
   @InjectMocks private FacturaVentaServiceImpl facturaVentaServiceImpl;
@@ -1371,20 +1373,25 @@ class FacturaServiceImplTest {
             .contains(
                 messageSourceTest.getMessage(
                     "mensaje_correo_cliente_sin_email", null, Locale.getDefault())));
-
-    // sin pedido
-    //    clienteDeFactura.setEmail("correo@decliente.com");
-    //    facturaVenta.setCliente(clienteDeFactura);
-    //    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
-    //    when(mockConfiguracionSucursalService.)
-    //    facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
-
-    //    Sucursal sucursal = new Sucursal();
-    //    sucursal.setNombre("Sucursal de test");
-    //    Pedido pedido = new Pedido();
-    //    pedido.setTipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL);
-    //    pedido.setSucursal(sucursal);
-    //    facturaVenta.setSucursal(sucursal);
-    //    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    clienteDeFactura.setEmail("correo@decliente.com");
+    facturaVenta.setCliente(clienteDeFactura);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setNombre("Sucursal de test");
+    facturaVenta.setSucursal(sucursal);
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    configuracionSucursal.setUsarFacturaVentaPreImpresa(true);
+    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(mockConfiguracionSucursalService.getConfiguracionSucursal(sucursal))
+        .thenReturn(configuracionSucursal);
+    facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
+    Pedido pedido = new Pedido();
+    pedido.setTipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL);
+    pedido.setSucursal(sucursal);
+    UbicacionDTO ubicacionDTO = UbicacionDTO.builder().build();
+    ubicacionDTO.setCalle("Calle 123");
+    pedido.setDetalleEnvio(ubicacionDTO);
+    facturaVenta.setPedido(pedido);
+    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
   }
 }
