@@ -55,4 +55,31 @@ class ReciboServiceImplTest {
     assertEquals(new BigDecimal("100"), recibos.get(0).getMonto());
     assertEquals(new BigDecimal("250"), recibos.get(1).getMonto());
   }
+
+  @Test
+  void shouldCrearUnRecibosConIdsFormasDePagoRepetidos() {
+    Sucursal sucursal = new Sucursal();
+    sucursal.setNombre("Sucursal Test");
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    configuracionSucursal.setNroPuntoDeVentaAfip(2);
+    when(configuracionSucursalServiceInterfaceMock.getConfiguracionSucursal(sucursal))
+            .thenReturn(configuracionSucursal);
+    when(sucursalServiceInterfaceMock.getSucursalPorId(1L)).thenReturn(sucursal);
+    FormaDePago formaDePago = new FormaDePago();
+    formaDePago.setNombre("Efectivo");
+    when(formaDePagoServiceInterfaceMock.getFormasDePagoNoEliminadoPorId(1L)).thenReturn(formaDePago);
+    formaDePago.setNombre("Tarjeta Nativa");
+    when(formaDePagoServiceInterfaceMock.getFormasDePagoNoEliminadoPorId(2L)).thenReturn(formaDePago);
+    when(reciboRepositoryMock.findTopBySucursalAndNumSerieOrderByNumReciboDesc(sucursal, 2)).thenReturn(null);
+    Long[] idsFormasDePago = {2L, 2L};
+    BigDecimal[] montos = {new BigDecimal("100"), new BigDecimal("250")};
+    BigDecimal totalFactura = new BigDecimal("350");
+    Cliente cliente = new Cliente();
+    Usuario usuario = new Usuario();
+    List<Recibo> recibos =
+            reciboServiceImpl.construirRecibos(
+                    idsFormasDePago, sucursal, cliente, usuario, montos, totalFactura, LocalDateTime.now());
+    assertEquals(1, recibos.size());
+    assertEquals(new BigDecimal("350"), recibos.get(0).getMonto());
+  }
 }
