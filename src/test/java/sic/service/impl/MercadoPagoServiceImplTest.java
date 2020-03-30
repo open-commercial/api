@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +52,7 @@ class MercadoPagoServiceImplTest {
   }
 
   @Test
-  void crearNuevaPreference() {
+  void shouldCrearNuevaPreference() {
     NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
         NuevaOrdenDePagoDTO.builder()
             .movimiento(Movimiento.DEPOSITO)
@@ -68,4 +69,9 @@ class MercadoPagoServiceImplTest {
     assertNotEquals("", mercadoPagoPreferenceDTO.getInitPoint());
   }
 
+  @Test
+  @Disabled
+  void shouldCrearComprobantePorNotificacion() {
+    mercadoPagoService.crearComprobantePorNotificacion("24445954");
+  }
 }
