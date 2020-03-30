@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.repository.ReciboRepository;
 import sic.service.IConfiguracionSucursalService;
 import sic.service.IFormaDePagoService;
@@ -81,5 +82,72 @@ class ReciboServiceImplTest {
                     idsFormasDePago, sucursal, cliente, usuario, montos, totalFactura, LocalDateTime.now());
     assertEquals(1, recibos.size());
     assertEquals(new BigDecimal("350"), recibos.get(0).getMonto());
+  }
+
+  @Test
+  void shouldTestBusquedaDeRecibos() {
+    BusquedaReciboCriteria busquedaReciboCriteria =
+        BusquedaReciboCriteria.builder()
+            .fechaDesde(LocalDateTime.MIN)
+            .fechaHasta(LocalDateTime.MIN)
+            .numSerie(2L)
+            .numRecibo(3L)
+            .concepto("Recibo por deposito")
+            .idCliente(4L)
+            .idProveedor(4L)
+            .idUsuario(5L)
+            .idViajante(6L)
+            .movimiento(Movimiento.VENTA)
+            .idSucursal(7L)
+            .build();
+    String builder =
+        "(recibo.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+            + "&& recibo.numSerie = 2 && recibo.numRecibo = 3 || containsIc(recibo.concepto,Recibo) "
+            + "&& containsIc(recibo.concepto,por) && containsIc(recibo.concepto,deposito)) "
+            + "&& recibo.cliente.idCliente = 4 && recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 "
+            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.proveedor is null && recibo.sucursal.idSucursal = 7 "
+            + "&& recibo.eliminado = false";
+    assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
+    builder =
+        "(recibo.fecha > -999999999-01-01T00:00 && recibo.numSerie = 2 && recibo.numRecibo = 3 "
+            + "|| containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) "
+            + "&& containsIc(recibo.concepto,deposito)) && recibo.cliente.idCliente = 4 "
+            + "&& recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 && recibo.cliente.viajante.idUsuario = 6 "
+            + "&& recibo.cliente is null && recibo.sucursal.idSucursal = 7 && recibo.eliminado = false";
+    busquedaReciboCriteria =
+        BusquedaReciboCriteria.builder()
+            .fechaDesde(LocalDateTime.MIN)
+            .numSerie(2L)
+            .numRecibo(3L)
+            .concepto("Recibo por deposito")
+            .idCliente(4L)
+            .idProveedor(4L)
+            .idUsuario(5L)
+            .idViajante(6L)
+            .movimiento(Movimiento.COMPRA)
+            .idSucursal(7L)
+            .build();
+    assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
+    builder =
+        "(recibo.fecha < -999999999-01-01T23:59:59.999999999 && recibo.numSerie = 2 && recibo.numRecibo = 3 "
+            + "|| containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) "
+            + "&& containsIc(recibo.concepto,deposito)) && recibo.cliente.idCliente = 4 "
+            + "&& recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 "
+            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.cliente is null "
+            + "&& recibo.sucursal.idSucursal = 7 && recibo.eliminado = false";
+    busquedaReciboCriteria =
+        BusquedaReciboCriteria.builder()
+            .fechaHasta(LocalDateTime.MIN)
+            .numSerie(2L)
+            .numRecibo(3L)
+            .concepto("Recibo por deposito")
+            .idCliente(4L)
+            .idProveedor(4L)
+            .idUsuario(5L)
+            .idViajante(6L)
+            .movimiento(Movimiento.COMPRA)
+            .idSucursal(7L)
+            .build();
+    assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
   }
 }

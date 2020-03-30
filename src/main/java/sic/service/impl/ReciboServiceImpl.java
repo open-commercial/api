@@ -86,7 +86,8 @@ public class ReciboServiceImpl implements IReciboService {
     return reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado(idPagoMercadoPago, false);
   }
 
-  private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {

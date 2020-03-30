@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
@@ -18,6 +19,8 @@ public interface IReciboService {
   Optional<Recibo> getReciboPorIdMercadoPago(String idPagoMercadoPago);
 
   Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria);
+
+  BooleanBuilder getBuilder(BusquedaReciboCriteria criteria);
 
   BigDecimal getTotalRecibos(BusquedaReciboCriteria criteria);
 
