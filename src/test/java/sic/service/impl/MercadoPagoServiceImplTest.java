@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,15 +9,14 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Cliente;
-import sic.modelo.Movimiento;
-import sic.modelo.TipoDeEnvio;
+import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.*;
 import sic.util.EncryptUtils;
-
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,7 +24,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {MercadoPagoServiceImpl.class})
+@ContextConfiguration(
+    classes = {MercadoPagoServiceImpl.class, EncryptUtils.class, MessageSource.class})
 @TestPropertySource(locations = "classpath:application.properties")
 class MercadoPagoServiceImplTest {
 
@@ -38,8 +37,9 @@ class MercadoPagoServiceImplTest {
   @MockBean ICarritoCompraService carritoCompraService;
   @MockBean IUsuarioService usuarioService;
   @MockBean IPedidoService pedidoService;
-  @MockBean EncryptUtils encryptUtils;
   @MockBean MessageSource messageSource;
+
+  @Autowired EncryptUtils encryptUtils;
   @Autowired MercadoPagoServiceImpl mercadoPagoService;
 
   @BeforeEach
@@ -48,7 +48,24 @@ class MercadoPagoServiceImplTest {
     cliente.setEmail("test@test.com");
     cliente.setNroCliente("1234");
     cliente.setNombreFiscal("Jhon Test");
+    Usuario usuario = new Usuario();
+    usuario.setUsername("test");
+    usuario.setNombre("Jhon Test");
+    cliente.setCredencial(usuario);
     when(clienteService.getClientePorIdUsuario(anyLong())).thenReturn(cliente);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setNombre("9 de Julio");
+    when(sucursalService.getSucursalPorId(anyLong())).thenReturn(sucursal);
+    when(usuarioService.getUsuarioNoEliminadoPorId(2L)).thenReturn(usuario);
+    ItemCarritoCompra itemCarritoCompra = new ItemCarritoCompra();
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    itemCarritoCompra.setProducto(producto);
+    itemCarritoCompra.setCantidad(BigDecimal.ONE);
+    List<ItemCarritoCompra> itemCarritoCompras = Collections.singletonList(itemCarritoCompra);
+    when(carritoCompraService.getItemsDelCarritoPorUsuario(usuario)).thenReturn(itemCarritoCompras);
+    RenglonPedido renglonPedido = new RenglonPedido();
+    when(pedidoService.calcularRenglonPedido(anyLong(), any())).thenReturn(renglonPedido);
   }
 
   @Test
@@ -70,8 +87,7 @@ class MercadoPagoServiceImplTest {
   }
 
   @Test
-  @Disabled
   void shouldCrearComprobantePorNotificacion() {
-    mercadoPagoService.crearComprobantePorNotificacion("24445954");
+    mercadoPagoService.crearComprobantePorNotificacion("24464889");
   }
 }
