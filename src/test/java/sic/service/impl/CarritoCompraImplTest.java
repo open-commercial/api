@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-public class CarritoCompraImplTest {
+class CarritoCompraImplTest {
 
   @Mock private CarritoCompraRepository carritoCompraRepository;
   @Mock private IUsuarioService usuarioService;

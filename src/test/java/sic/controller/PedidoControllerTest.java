@@ -9,14 +9,12 @@ import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.service.impl.PedidoServiceImpl;
-import sic.service.impl.ReciboServiceImpl;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static junit.framework.TestCase.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -32,7 +30,7 @@ public class PedidoControllerTest {
     pedido.setNroPedido(1L);
     when(pedidoService.getPedidoNoEliminadoPorId(2L)).thenReturn(pedido);
     when(pedidoService.calcularTotalActualDePedido(pedido)).thenReturn(pedido);
-    pedidoController.getPedidoPorId(2L);
+    assertEquals(pedido, pedidoController.getPedidoPorId(2L));
   }
 
   @Test
@@ -46,7 +44,7 @@ public class PedidoControllerTest {
     long[] idsProducto = {1L, 2L};
     BigDecimal[] cantidades = {BigDecimal.TEN, BigDecimal.ONE};
     when(pedidoService.calcularRenglonesPedido(idsProducto, cantidades)).thenReturn(renglones);
-    pedidoController.calcularRenglonesPedido(nuevoRenglonPedido);
+    assertEquals(renglones, pedidoController.calcularRenglonesPedido(nuevoRenglonPedido));
   }
 
   @Test
@@ -56,6 +54,7 @@ public class PedidoControllerTest {
     Resultados resultados = new Resultados();
     when(pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO))
         .thenReturn(resultados);
-    pedidoController.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
+    assertEquals(
+        resultados, pedidoController.calcularResultadosPedido(nuevosResultadosComprobanteDTO));
   }
 }
