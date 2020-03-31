@@ -21,6 +21,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -89,5 +90,16 @@ class MercadoPagoServiceImplTest {
   @Test
   void shouldCrearComprobantePorNotificacion() {
     mercadoPagoService.crearComprobantePorNotificacion("24464889");
+    verify(reciboService).getReciboPorIdMercadoPago(anyString());
+    verify(clienteService).getClientePorIdUsuario(anyLong());
+    verify(sucursalService).getSucursalPorId(any());
+    verify(pedidoService).getPedidoPorIdPayment(anyString());
+    verify(messageSource).getMessage(eq("mensaje_pago_aprobado"), any(), any());
+    verify(reciboService).guardar(any());
+    verify(usuarioService).getUsuarioNoEliminadoPorId(anyLong());
+    verify(carritoCompraService).getItemsDelCarritoPorUsuario(any());
+    verify(pedidoService).calcularRenglonPedido(anyLong(), any());
+    verify(pedidoService).guardar(any());
+    verify(carritoCompraService).eliminarTodosLosItemsDelUsuario(anyLong());
   }
 }
