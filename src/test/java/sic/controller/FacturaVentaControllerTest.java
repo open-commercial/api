@@ -325,11 +325,6 @@ class FacturaVentaControllerTest {
 
   @Test
   void shouldCalcularGananciaTotal() {
-    //    @RequestBody BusquedaFacturaVentaCriteria criteria,
-    //    @RequestHeader("Authorization") String authorizationHeader) {
-    //      Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    //      return facturaVentaService.calcularGananciaTotal(criteria, (int)
-    // claims.get(CLAIM_ID_USUARIO));
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
     ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());

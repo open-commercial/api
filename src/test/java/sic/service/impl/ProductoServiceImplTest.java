@@ -349,11 +349,10 @@ class ProductoServiceImplTest {
     long[] idProducto = {1};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder()
-            .idSucursal(1L)
-            .cantidad(cantidad)
-            .idProducto(idProducto)
-            .build();
+        ProductosParaVerificarStockDTO.builder().build();
+    productosParaVerificarStockDTO.setIdSucursal(1L);
+    productosParaVerificarStockDTO.setCantidad(cantidad);
+    productosParaVerificarStockDTO.setIdProducto(idProducto);
     List<ProductoFaltanteDTO> resultadoObtenido =
         productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
     Assertions.assertFalse(resultadoObtenido.isEmpty());
