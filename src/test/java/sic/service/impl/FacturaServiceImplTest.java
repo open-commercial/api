@@ -35,21 +35,21 @@ import sic.util.CalculosComprobante;
 class FacturaServiceImplTest {
 
   @Autowired
-  private MessageSource messageSourceTest;
+  MessageSource messageSourceTest;
 
-  @Mock private FacturaVentaRepository mockFacturaVentaRepository;
-  @Mock private FacturaCompraRepository mockFacturaCompraRepository;
-  @Mock private ProductoServiceImpl mockProductoService;
-  @Mock private IFacturaService mockFacturaService;
-  @Mock private MessageSource messageSourceTestMock;
-  @Mock private UsuarioServiceImpl mockUsuarioService;
-  @Mock private ClienteServiceImpl mockClienteService;
-  @Mock private PedidoServiceImpl pedidoService;
-  @Mock private ConfiguracionSucursalServiceImpl mockConfiguracionSucursalService;
-  @Mock private CorreoElectronicoServiceImpl mockCorreoElectronicoService;
-  @InjectMocks private FacturaServiceImpl facturaServiceImpl;
-  @InjectMocks private FacturaCompraServiceImpl facturaCompraServiceImpl;
-  @InjectMocks private FacturaVentaServiceImpl facturaVentaServiceImpl;
+  @Mock FacturaVentaRepository mockFacturaVentaRepository;
+  @Mock FacturaCompraRepository mockFacturaCompraRepository;
+  @Mock ProductoServiceImpl mockProductoService;
+  @Mock IFacturaService mockFacturaService;
+  @Mock MessageSource messageSourceTestMock;
+  @Mock UsuarioServiceImpl mockUsuarioService;
+  @Mock ClienteServiceImpl mockClienteService;
+  @Mock PedidoServiceImpl pedidoService;
+  @Mock ConfiguracionSucursalServiceImpl mockConfiguracionSucursalService;
+  @Mock CorreoElectronicoServiceImpl mockCorreoElectronicoService;
+  @InjectMocks FacturaServiceImpl facturaServiceImpl;
+  @InjectMocks FacturaCompraServiceImpl facturaCompraServiceImpl;
+  @InjectMocks FacturaVentaServiceImpl facturaVentaServiceImpl;
 
   @Test
   void shouldGetTipoFacturaCompraWhenSucursalYProveedorDiscriminanIVA() {

@@ -35,16 +35,16 @@ import javax.persistence.EntityNotFoundException;
 @ContextConfiguration(classes = AppTest.class)
 class ProductoServiceImplTest {
 
-  @Autowired private MessageSource messageSourceTest;
+  @Autowired MessageSource messageSourceTest;
 
-  @Mock private IMedidaService medidaService;
-  @Mock private IRubroService rubroService;
-  @Mock private IProveedorService proveedorService;
-  @Mock private ISucursalService sucursalService;
-  @Mock private ProductoRepository productoRepository;
-  @Mock private MessageSource messageSourceTestMock;
+  @Mock IMedidaService medidaService;
+  @Mock IRubroService rubroService;
+  @Mock IProveedorService proveedorService;
+  @Mock ISucursalService sucursalService;
+  @Mock ProductoRepository productoRepository;
+  @Mock MessageSource messageSourceTestMock;
 
-  @InjectMocks private ProductoServiceImpl productoService;
+  @InjectMocks ProductoServiceImpl productoService;
 
   @Test
   void shouldCalcularGananciaPorcentajeDescendente() {

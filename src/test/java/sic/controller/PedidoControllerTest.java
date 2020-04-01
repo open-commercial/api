@@ -20,9 +20,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 public class PedidoControllerTest {
 
-  @Mock private PedidoServiceImpl pedidoService;
+  @Mock PedidoServiceImpl pedidoService;
 
-  @InjectMocks private PedidoController pedidoController;
+  @InjectMocks PedidoController pedidoController;
 
   @Test
   void shouldGetPedidoPorId() {

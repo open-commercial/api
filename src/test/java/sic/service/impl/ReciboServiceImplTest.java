@@ -22,12 +22,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class ReciboServiceImplTest {
 
-  @Mock private IConfiguracionSucursalService configuracionSucursalServiceInterfaceMock;
-  @Mock private IFormaDePagoService formaDePagoServiceInterfaceMock;
-  @Mock private ISucursalService sucursalServiceInterfaceMock;
-  @Mock private ReciboRepository reciboRepositoryMock;
+  @Mock IConfiguracionSucursalService configuracionSucursalServiceInterfaceMock;
+  @Mock IFormaDePagoService formaDePagoServiceInterfaceMock;
+  @Mock ISucursalService sucursalServiceInterfaceMock;
+  @Mock ReciboRepository reciboRepositoryMock;
 
-  @InjectMocks private ReciboServiceImpl reciboServiceImpl;
+  @InjectMocks ReciboServiceImpl reciboServiceImpl;
 
   @Test
   void shouldCrearDosRecibos() {

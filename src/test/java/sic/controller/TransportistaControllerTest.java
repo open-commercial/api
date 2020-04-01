@@ -17,9 +17,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class TransportistaControllerTest {
 
-  @Mock private TransportistaServiceImpl transportistaService;
+  @Mock TransportistaServiceImpl transportistaService;
 
-  @InjectMocks private TransportistaController transportistaController;
+  @InjectMocks TransportistaController transportistaController;
 
   @Test
   void shouldGetTransportistaPorId() {

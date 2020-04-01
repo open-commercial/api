@@ -19,9 +19,9 @@ import java.util.Locale;
 @ExtendWith(SpringExtension.class)
 class MedidaServiceImplTest {
 
-  @Mock private MessageSource messageSource;
-  @Mock private MedidaRepository medidaRepository;
-  @InjectMocks private MedidaServiceImpl medidaService;
+  @Mock MessageSource messageSource;
+  @Mock MedidaRepository medidaRepository;
+  @InjectMocks MedidaServiceImpl medidaService;
 
   private String mensaje_medida_duplicada_nombre = "Ya existe una medida con el nombre ingresado.";
 

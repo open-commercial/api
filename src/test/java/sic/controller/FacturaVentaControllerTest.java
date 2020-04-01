@@ -37,19 +37,19 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = AppTest.class)
 class FacturaVentaControllerTest {
 
-  @Autowired private MessageSource messageSourceTest;
+  @Autowired MessageSource messageSourceTest;
 
-  @Mock private MessageSource messageSourceTestMock;
-  @Mock private SucursalServiceImpl sucursalService;
-  @Mock private TransportistaServiceImpl transportistaService;
-  @Mock private ClienteServiceImpl clienteService;
-  @Mock private UsuarioServiceImpl usuarioService;
-  @Mock private FacturaServiceImpl facturaService;
-  @Mock private ReciboServiceImpl reciboService;
-  @Mock private FacturaVentaServiceImpl facturaVentaService;
-  @Mock private AuthServiceImpl authService;
+  @Mock MessageSource messageSourceTestMock;
+  @Mock SucursalServiceImpl sucursalService;
+  @Mock TransportistaServiceImpl transportistaService;
+  @Mock ClienteServiceImpl clienteService;
+  @Mock UsuarioServiceImpl usuarioService;
+  @Mock FacturaServiceImpl facturaService;
+  @Mock ReciboServiceImpl reciboService;
+  @Mock FacturaVentaServiceImpl facturaVentaService;
+  @Mock AuthServiceImpl authService;
 
-  @InjectMocks private FacturaVentaController facturaVentaController;
+  @InjectMocks FacturaVentaController facturaVentaController;
 
   @Test
   void shouldGuardarFacturaVenta() {

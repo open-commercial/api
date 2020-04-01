@@ -27,10 +27,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class CarritoCompraImplTest {
 
-  @Mock private CarritoCompraRepository carritoCompraRepository;
-  @Mock private IUsuarioService usuarioService;
+  @Mock CarritoCompraRepository carritoCompraRepository;
+  @Mock IUsuarioService usuarioService;
 
-  @InjectMocks private CarritoCompraServiceImpl carritoCompraServiceImpl;
+  @InjectMocks CarritoCompraServiceImpl carritoCompraServiceImpl;
 
   @Test
   void shouldGetCarritoDeCompra() {

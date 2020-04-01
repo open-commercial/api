@@ -20,10 +20,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class FacturaControllerTest {
 
-  @Mock private SucursalServiceImpl sucursalService;
-  @Mock private FacturaServiceImpl facturaService;
+  @Mock SucursalServiceImpl sucursalService;
+  @Mock FacturaServiceImpl facturaService;
 
-  @InjectMocks private FacturaController facturaController;
+  @InjectMocks FacturaController facturaController;
 
   @Test
   void shouldGetTiposFacturaSegunSucursal() {

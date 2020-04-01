@@ -33,14 +33,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 class FacturaCompraControllerTest {
 
-  @Mock private FacturaCompraServiceImpl facturaCompraService;
-  @Mock private FacturaServiceImpl facturaService;
-  @Mock private SucursalServiceImpl sucursalService;
-  @Mock private ProveedorServiceImpl proveedorService;
-  @Mock private UsuarioServiceImpl usuarioService;
-  @Mock private AuthServiceImpl authService;
+  @Mock FacturaCompraServiceImpl facturaCompraService;
+  @Mock FacturaServiceImpl facturaService;
+  @Mock SucursalServiceImpl sucursalService;
+  @Mock ProveedorServiceImpl proveedorService;
+  @Mock UsuarioServiceImpl usuarioService;
+  @Mock AuthServiceImpl authService;
 
-  @InjectMocks private FacturaCompraController facturaCompraController;
+  @InjectMocks FacturaCompraController facturaCompraController;
 
   @Test
   void shouldGuardarFacturaCompra() {
