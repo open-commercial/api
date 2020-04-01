@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.util.EncryptUtils;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
@@ -29,6 +30,7 @@ import sic.service.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 import java.math.BigDecimal;
+import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -47,6 +49,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final ICarritoCompraService carritoCompraService;
   private final IUsuarioService usuarioService;
   private final IPedidoService pedidoService;
+  private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private static final String STRING_ID_USUARIO = "idUsuario";
@@ -65,6 +68,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       ICarritoCompraService carritoCompraService,
       IUsuarioService usuarioService,
       IPedidoService pedidoService,
+      EncryptUtils encryptUtils,
       MessageSource messageSource) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
@@ -74,6 +78,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     this.carritoCompraService = carritoCompraService;
     this.usuarioService = usuarioService;
     this.pedidoService = pedidoService;
+    this.encryptUtils = encryptUtils;
     this.messageSource = messageSource;
   }
 
@@ -154,7 +159,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
     }
     JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-    preference.setExternalReference(jsonObject.toString());
+    try {
+      preference.setExternalReference(
+          encryptUtils.encryptWhitAES(jsonObject.toString()));
+    } catch (GeneralSecurityException e) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()));
+    }
     Item item = new Item();
     item.setTitle(title).setQuantity(1).setUnitPrice(monto);
     com.mercadopago.resources.datastructures.preference.Payer payer =
@@ -186,7 +197,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
         JsonObject convertedObject =
-            new Gson().fromJson(payment.getExternalReference(), JsonObject.class);
+            new Gson()
+                .fromJson(
+                    encryptUtils.decryptWhitAES(payment.getExternalReference()), JsonObject.class);
         JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
@@ -295,6 +308,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       }
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
+    } catch (GeneralSecurityException e) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()));
     }
   }
 

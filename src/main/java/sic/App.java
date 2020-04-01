@@ -10,15 +10,12 @@ import org.modelmapper.PropertyMap;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -140,24 +137,6 @@ public class App implements WebMvcConfigurer {
   @Bean
   public Clock clock() {
     return Clock.systemDefaultZone();
-  }
-
-  // https://stackoverflow.com/questions/53968789/not-able-to-access-message-source-in-spring-boot-2-1-1-release
-  @Bean
-  public MessageSource messageSource() {
-    ReloadableResourceBundleMessageSource messageSource =
-        new ReloadableResourceBundleMessageSource();
-    messageSource.setBasename("classpath:messages");
-    messageSource.setDefaultEncoding("UTF-8");
-    return messageSource;
-  }
-
-  @Bean
-  @Override
-  public LocalValidatorFactoryBean getValidator() {
-    LocalValidatorFactoryBean factoryBean = new LocalValidatorFactoryBean();
-    factoryBean.setValidationMessageSource(this.messageSource());
-    return factoryBean;
   }
 
   public static void main(String[] args) {
