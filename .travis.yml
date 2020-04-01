@@ -13,3 +13,5 @@ addons:
 script:  
   - git fetch --unshallow
   - mvn clean verify sonar:sonar -Dsonar.projectKey=sic-api:sic-api
+before_install:
+  - export TZ=America/Argentina/Buenos_Aires
