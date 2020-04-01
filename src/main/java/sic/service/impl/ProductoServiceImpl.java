@@ -787,14 +787,13 @@ public class ProductoServiceImpl implements IProductoService {
                 cantidadEnSucursal -> {
                   if (!producto.isIlimitado()
                       && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                    productosFaltantes.add(
-                        ProductoFaltanteDTO.builder()
-                            .idProducto(producto.getIdProducto())
-                            .codigo(producto.getCodigo())
-                            .descripcion(producto.getDescripcion())
-                            .cantidadSolicitada(cantidadLambda)
-                            .cantidadDisponible(cantidadEnSucursal.getCantidad())
-                            .build());
+                    ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+                    productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+                    productoFaltanteDTO.setCodigo(producto.getCodigo());
+                    productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+                    productoFaltanteDTO.setCantidadSolicitada(cantidadLambda);
+                    productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
+                    productosFaltantes.add(productoFaltanteDTO);
                   }
                 });
       }
