@@ -12,4 +12,5 @@ public class MedidaDTO {
   private long idMedida;
   private String nombre;
   private boolean eliminada;
+  private Integer version;
 }

@@ -38,4 +38,7 @@ public class Medida implements Serializable {
   private String nombre;
 
   private boolean eliminada;
+
+  @Version
+  private Integer version;
 }
