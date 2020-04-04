@@ -45,25 +45,11 @@ public class ClienteController {
   }
 
   @GetMapping("/clientes/{idCliente}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Cliente getCliente(@PathVariable long idCliente) {
     return clienteService.getClienteNoEliminadoPorId(idCliente);
   }
 
   @PostMapping("/clientes/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<Cliente> buscarConCriteria(
       @RequestBody BusquedaClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -84,13 +70,6 @@ public class ClienteController {
   }
 
   @PostMapping("/clientes")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Cliente guardar(
       @RequestBody ClienteDTO nuevoCliente,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -137,13 +116,6 @@ public class ClienteController {
   }
 
   @PutMapping("/clientes")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Cliente actualizar(
       @RequestBody ClienteDTO clienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -214,13 +186,6 @@ public class ClienteController {
   }
 
   @GetMapping("/clientes/usuarios/{idUsuario}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Cliente getClientePorIdUsuario(@PathVariable long idUsuario) {
     return clienteService.getClientePorIdUsuario(idUsuario);
   }

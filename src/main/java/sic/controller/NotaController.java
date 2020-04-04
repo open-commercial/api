@@ -60,13 +60,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/{idNota}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Nota getNota(@PathVariable long idNota) {
     return notaService.getNotaNoEliminadaPorId(idNota);
   }
@@ -91,102 +84,46 @@ public class NotaController {
   }
 
   @GetMapping("/notas/{idNota}/facturas")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Factura getFacturaNotaCredito(@PathVariable long idNota) {
     return notaService.getFacturaDeLaNotaCredito(idNota);
   }
 
   @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public boolean existeNotaDebitoRecibo(@PathVariable long idRecibo) {
     return notaService.existsNotaDebitoPorRecibo(reciboService.getReciboNoEliminadoPorId(idRecibo));
   }
 
   @GetMapping("/notas/clientes/tipos/credito")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<TipoDeComprobante> getTipoNotaCreditoCliente(
       @RequestParam long idCliente, @RequestParam long idSucursal) {
     return notaService.getTipoNotaCreditoCliente(idCliente, idSucursal);
   }
 
   @GetMapping("/notas/clientes/tipos/debito")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<TipoDeComprobante> getTipoNotaDebitoCliente(
       @RequestParam long idCliente, @RequestParam long idSucursal) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idSucursal);
   }
 
   @GetMapping("/notas/proveedores/tipos/credito")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<TipoDeComprobante> getTipoNotaCreditoProveedor(
     @RequestParam long idProveedor, @RequestParam long idSucursal) {
     return notaService.getTipoNotaCreditoProveedor(idProveedor, idSucursal);
   }
 
   @GetMapping("/notas/proveedores/tipos/debito")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<TipoDeComprobante> getTipoNotaDebitoProveedor(
     @RequestParam long idProveedor, @RequestParam long idSucursal) {
     return notaService.getTipoNotaDebitoProveedor(idProveedor, idSucursal);
   }
 
   @GetMapping("/notas/renglones/credito/{idNotaCredito}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(
       @PathVariable long idNotaCredito) {
     return notaService.getRenglonesDeNotaCredito(idNotaCredito);
   }
 
   @GetMapping("/notas/renglones/debito/{idNotaDebito}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(@PathVariable long idNotaDebito) {
     return notaService.getRenglonesDeNotaDebito(idNotaDebito);
   }
@@ -296,13 +233,6 @@ public class NotaController {
   }
 
   @GetMapping("/notas/{idNota}/reporte")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public ResponseEntity<byte[]> getReporteNota(@PathVariable long idNota) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -328,13 +258,6 @@ public class NotaController {
   }
 
   @PostMapping("/notas/credito/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<NotaCredito> buscarNotasCredito(
     @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
     @RequestHeader("Authorization") String authorizationHeader) {
@@ -343,13 +266,6 @@ public class NotaController {
   }
 
   @PostMapping("/notas/debito/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<NotaDebito> buscarNotasDebito(
     @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
     @RequestHeader("Authorization") String authorizationHeader) {

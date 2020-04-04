@@ -1,7 +1,10 @@
 package sic.util;
 
+import sic.modelo.dto.NuevoRenglonFacturaDTO;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 
 public class CalculosComprobante {
 
@@ -37,7 +40,7 @@ public class CalculosComprobante {
     BigDecimal descuentoNeto,
     BigDecimal iva105Neto,
     BigDecimal iva21Neto) {
-    BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
+    BigDecimal resultado = subTotal.add(recargoNeto != null ? recargoNeto : BigDecimal.ZERO).subtract(descuentoNeto != null ? descuentoNeto : BigDecimal.ZERO);
     if (quitarIVA) {
       resultado = resultado.subtract(iva105Neto.add(iva21Neto));
     }
@@ -47,5 +50,29 @@ public class CalculosComprobante {
   public static BigDecimal calcularTotal(
     BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto) {
     return subTotalBruto.add(iva105Neto).add(iva21Neto);
+  }
+
+  public static long[] getArrayDeIdProductoParaFactura(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
+    long[] idProductoItem = new long[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      idProductoItem[i] = nuevosRenglones.get(i).getIdProducto();
+    }
+    return idProductoItem;
+  }
+
+  public static BigDecimal[] getArrayDeCantidadesProductoParaFactura(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
+    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      cantidades[i] = nuevosRenglones.get(i).getCantidad();
+    }
+    return cantidades;
+  }
+
+  public static BigDecimal[] getArrayDeBonificacionesParaFactura(List<NuevoRenglonFacturaDTO> nuevosRenglones) {
+    BigDecimal[] bonificaciones = new BigDecimal[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      bonificaciones[i] = nuevosRenglones.get(i).getBonificacion();
+    }
+    return bonificaciones;
   }
 }

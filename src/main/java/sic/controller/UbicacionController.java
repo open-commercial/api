@@ -34,13 +34,6 @@ public class UbicacionController {
   }
 
   @GetMapping("/ubicaciones/{idUbicacion}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Ubicacion getUbicacionPorId(@PathVariable Long idUbicacion) {
     return ubicacionService.getUbicacionPorId(idUbicacion);
   }
@@ -52,13 +45,6 @@ public class UbicacionController {
   }
 
   @GetMapping("/ubicaciones/localidades/provincias/{idProvincia}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<Localidad> getLocalidadesDeLaProvincia(@PathVariable long idProvincia) {
     return ubicacionService.getLocalidadesDeLaProvincia(
       ubicacionService.getProvinciaPorId(idProvincia));

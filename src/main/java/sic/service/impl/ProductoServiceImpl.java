@@ -33,8 +33,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
@@ -240,7 +242,8 @@ public class ProductoServiceImpl implements IProductoService {
     }
   }
 
-  private BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
     QProducto qProducto = QProducto.producto;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(qProducto.eliminado.eq(false));
@@ -574,14 +577,11 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
-    boolean actualizaPrecios = productosParaActualizarDTO.getGananciaNeto() != null
-      && productosParaActualizarDTO.getGananciaPorcentaje() != null
-      && productosParaActualizarDTO.getIvaNeto() != null
-      && productosParaActualizarDTO.getIvaPorcentaje() != null
-      && productosParaActualizarDTO.getPrecioCosto() != null
-      && productosParaActualizarDTO.getPrecioLista() != null
-      && productosParaActualizarDTO.getPrecioVentaPublico() != null;
+  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
+    boolean actualizaPrecios =
+        productosParaActualizarDTO.getGananciaPorcentaje() != null
+            && productosParaActualizarDTO.getIvaPorcentaje() != null
+            && productosParaActualizarDTO.getPrecioCosto() != null;
     boolean aplicaDescuentoRecargoPorcentaje = productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null;
     if (aplicaDescuentoRecargoPorcentaje && actualizaPrecios) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -634,11 +634,12 @@ public class ProductoServiceImpl implements IProductoService {
       if (actualizaPrecios) {
         p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
         p.setGananciaPorcentaje(productosParaActualizarDTO.getGananciaPorcentaje());
-        p.setGananciaNeto(productosParaActualizarDTO.getGananciaNeto());
-        p.setPrecioVentaPublico(productosParaActualizarDTO.getPrecioVentaPublico());
+        p.setGananciaNeto(this.calcularGananciaNeto(p.getPrecioCosto(), p.getGananciaPorcentaje()));
+        p.setPrecioVentaPublico(this.calcularPVP(p.getPrecioCosto(), p.getGananciaPorcentaje()));
         p.setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
-        p.setIvaNeto(productosParaActualizarDTO.getIvaNeto());
-        p.setPrecioLista(productosParaActualizarDTO.getPrecioLista());
+        p.setIvaNeto(this.calcularIVANeto(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
+        p.setPrecioLista(
+                this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (aplicaDescuentoRecargoPorcentaje) {
@@ -673,7 +674,6 @@ public class ProductoServiceImpl implements IProductoService {
     }
     productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
-    return productos;
   }
 
   @Override
@@ -763,9 +763,13 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Map<Long, BigDecimal> getProductosSinStockDisponible(
+  public List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
-    Map<Long, BigDecimal> productos = new HashMap<>();
+    if (productosParaVerificarStockDTO.getIdSucursal() == null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
+    }
+    List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     if (longitudIds == longitudCantidades) {
@@ -783,7 +787,13 @@ public class ProductoServiceImpl implements IProductoService {
                 cantidadEnSucursal -> {
                   if (!producto.isIlimitado()
                       && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                    productos.put(producto.getIdProducto(), cantidadLambda);
+                    ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+                    productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+                    productoFaltanteDTO.setCodigo(producto.getCodigo());
+                    productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+                    productoFaltanteDTO.setCantidadSolicitada(cantidadLambda);
+                    productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
+                    productosFaltantes.add(productoFaltanteDTO);
                   }
                 });
       }
@@ -791,7 +801,7 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
     }
-    return productos;
+    return productosFaltantes;
   }
 
   @Override

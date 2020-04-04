@@ -86,7 +86,8 @@ public class ReciboServiceImpl implements IReciboService {
     return reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado(idPagoMercadoPago, false);
   }
 
-  private BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
@@ -220,34 +221,34 @@ public class ReciboServiceImpl implements IReciboService {
       LocalDateTime fecha) {
     List<Recibo> recibos = new ArrayList<>();
     if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
-      BigDecimal totalMontos = BigDecimal.ZERO;
-      for (BigDecimal monto : montos) {
-        totalMontos = totalMontos.add(monto);
+      HashMap<Long, BigDecimal> mapIdsFormaDePago = new HashMap<>();
+      for (int i = 0; i < idsFormaDePago.length; i++) {
+        if (mapIdsFormaDePago.containsKey(idsFormaDePago[i])) {
+          mapIdsFormaDePago.put(
+              idsFormaDePago[i], mapIdsFormaDePago.get(idsFormaDePago[i]).add(montos[i]));
+        } else {
+          mapIdsFormaDePago.put(idsFormaDePago[i], montos[i]);
+        }
       }
-//      if (totalMontos.compareTo(totalFactura) > 0 || totalMontos.compareTo(BigDecimal.ZERO) < 0) {
-//        throw new BusinessServiceException(messageSource.getMessage(
-//          "mensaje_recibo_superan_total_factura", null, Locale.getDefault()));
-//      }
-      int i = 0;
-      for (long idFormaDePago : idsFormaDePago) {
-        Recibo recibo = new Recibo();
-        recibo.setCliente(cliente);
-        recibo.setUsuario(usuario);
-        recibo.setSucursal(sucursal);
-        recibo.setFecha(fecha);
-        FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago);
-        recibo.setFormaDePago(fdp);
-        recibo.setMonto(montos[i]);
-        recibo.setNumSerie(
-            configuracionSucursalService
-                .getConfiguracionSucursal(recibo.getSucursal())
-                .getNroPuntoDeVentaAfip());
-        recibo.setNumRecibo(
-            this.getSiguienteNumeroRecibo(sucursal.getIdSucursal(), recibo.getNumSerie()));
-        recibo.setConcepto("SALDO.");
-        recibos.add(recibo);
-        i++;
-      }
+      mapIdsFormaDePago.forEach(
+          (k, v) -> {
+            Recibo recibo = new Recibo();
+            recibo.setCliente(cliente);
+            recibo.setUsuario(usuario);
+            recibo.setSucursal(sucursal);
+            recibo.setFecha(fecha);
+            FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
+            recibo.setFormaDePago(fdp);
+            recibo.setMonto(v);
+            recibo.setNumSerie(
+                configuracionSucursalService
+                    .getConfiguracionSucursal(recibo.getSucursal())
+                    .getNroPuntoDeVentaAfip());
+            recibo.setNumRecibo(
+                this.getSiguienteNumeroRecibo(sucursal.getIdSucursal(), recibo.getNumSerie()));
+            recibo.setConcepto("SALDO.");
+            recibos.add(recibo);
+          });
     }
     return recibos;
   }
@@ -307,7 +308,6 @@ public class ReciboServiceImpl implements IReciboService {
         params.put(
             "logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
-        logger.error(ex.getMessage());
         throw new ServiceException(messageSource.getMessage(
           "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
@@ -316,7 +316,6 @@ public class ReciboServiceImpl implements IReciboService {
       return JasperExportManager.exportReportToPdf(
           JasperFillManager.fillReport(isFileReport, params));
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
     }

@@ -14,7 +14,7 @@ import static junit.framework.TestCase.assertFalse;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = AppTest.class)
-public class MessageSourceImplTest {
+class MessageSourceImplTest {
 
   @Autowired private MessageSource messageSourceTest;
 

@@ -29,25 +29,11 @@ public class SucursalController {
   }
 
   @GetMapping("/sucursales")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<Sucursal> getSucursales(@RequestParam(required = false) boolean puntoDeRetiro) {
     return sucursalService.getSucusales(puntoDeRetiro);
   }
 
   @GetMapping("/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Sucursal getSucursalPorId(@PathVariable long idSucursal) {
     return sucursalService.getSucursalPorId(idSucursal);
   }

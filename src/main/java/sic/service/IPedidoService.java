@@ -7,8 +7,8 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
-import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 
 import javax.validation.Valid;
 
@@ -32,7 +32,7 @@ public interface IPedidoService {
 
   List<Factura> getFacturasDelPedido(long id);
 
-  Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long nroPedido);
+  Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long nroPedido);
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido);
 
@@ -50,7 +50,7 @@ public interface IPedidoService {
 
   List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
 
-  Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido);
+  Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
 
   Pedido getPedidoPorIdPayment(String idPayment);
 }

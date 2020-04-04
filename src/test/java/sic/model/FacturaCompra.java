@@ -16,6 +16,7 @@ import java.util.List;
 @EqualsAndHashCode(
     callSuper = true,
     exclude = {"razonSocialProveedor", "idProveedor"})
+@Builder
 public class FacturaCompra extends Factura implements Serializable {
 
   private Long idProveedor;

@@ -69,64 +69,29 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
     return cuentaCorrienteService.getCuentaCorrientePorCliente(
         clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
   @GetMapping("/cuentas-corriente/clientes/predeterminado")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public CuentaCorrienteCliente getCuentaCorrienteClientePredeterminado() {
     return cuentaCorrienteService.getCuentaCorrientePorCliente(
         clienteService.getClientePredeterminado());
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
     return cuentaCorrienteService.getCuentaCorrientePorProveedor(
         proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
 
   @GetMapping("/cuentas-corriente/clientes/{idCliente}/saldo")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {
     return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
   }
 
   @GetMapping("/cuentas-corriente/proveedores/{idProveedor}/saldo")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {
     return cuentaCorrienteService
         .getCuentaCorrientePorProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor))
@@ -134,13 +99,6 @@ public class CuentaCorrienteController {
   }
 
   @GetMapping("/cuentas-corriente/{idCuentaCorriente}/renglones")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
       @PathVariable long idCuentaCorriente,
       @RequestParam(required = false) Integer pagina) {
@@ -149,13 +107,6 @@ public class CuentaCorrienteController {
   }
 
   @PostMapping("/cuentas-corriente/clientes/reporte/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public ResponseEntity<byte[]> getReporteCuentaCorriente(
     @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestParam(required = false) String formato) {

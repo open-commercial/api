@@ -2,20 +2,24 @@ package sic.service;
 
 import java.math.BigDecimal;
 
+import com.querydsl.core.BooleanBuilder;
 import sic.modelo.*;
 
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 
 import javax.validation.Valid;
 
 public interface IProductoService {
 
-  void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
+  void actualizar(
+      @Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
   void actualizarStock(
       Map<Long, BigDecimal> idsYCantidades,
@@ -26,11 +30,13 @@ public interface IProductoService {
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
+  BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);
+
   List<Producto> buscarProductosParaReporte(BusquedaProductoCriteria criteria);
 
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  Map<Long, BigDecimal> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
+  List<ProductoFaltanteDTO> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
@@ -45,8 +51,7 @@ public interface IProductoService {
 
   BigDecimal calcularPVP(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  BigDecimal calcularPrecioLista(
-      BigDecimal pvp, BigDecimal ivaPorcentaje);
+  BigDecimal calcularPrecioLista(BigDecimal pvp, BigDecimal ivaPorcentaje);
 
   void eliminarMultiplesProductos(long[] idProducto);
 
@@ -64,12 +69,11 @@ public interface IProductoService {
 
   Producto guardar(@Valid NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
-  List<Producto> actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
+  void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
   String subirImagenProducto(long idProducto, byte[] imagen);
 
   List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
-
 }

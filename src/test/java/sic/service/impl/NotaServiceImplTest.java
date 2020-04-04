@@ -19,10 +19,10 @@ import sic.modelo.*;
 @ExtendWith(SpringExtension.class)
 class NotaServiceImplTest {
 
-  @Mock private SucursalServiceImpl sucursalServiceImpl;
-  @Mock private ClienteServiceImpl clienteService;
-  @Mock private ProveedorServiceImpl proveedorService;
-  @InjectMocks private NotaServiceImpl notaServiceImpl;
+  @Mock SucursalServiceImpl sucursalServiceImpl;
+  @Mock ClienteServiceImpl clienteService;
+  @Mock ProveedorServiceImpl proveedorService;
+  @InjectMocks NotaServiceImpl notaServiceImpl;
 
   @Test
   void shouldGetTipoNotaCreditoWhenSucursalYClienteDiscriminanIVA() {

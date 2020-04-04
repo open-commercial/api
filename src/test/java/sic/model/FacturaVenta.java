@@ -5,6 +5,7 @@ import sic.modelo.CategoriaIVA;
 import sic.modelo.RenglonFactura;
 import sic.modelo.TipoDeComprobante;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,12 +25,14 @@ import java.util.List;
       "nombreViajanteCliente",
       "ubicacionCliente"
     })
-public class FacturaVenta extends Factura {
+@Builder
+public class FacturaVenta extends Factura implements Serializable {
+
   private Long idCliente;
   private String nombreFiscalCliente;
   private String nroDeCliente;
   private CategoriaIVA categoriaIVACliente;
-  private Long idViajanteCliente ;
+  private Long idViajanteCliente;
   private String nombreViajanteCliente;
   private String ubicacionCliente;
 

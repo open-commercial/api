@@ -22,37 +22,16 @@ public class FormaDePagoController {
   }
 
   @GetMapping("/formas-de-pago/{idFormaDePago}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public FormaDePago getFormaDePagoPorId(@PathVariable long idFormaDePago) {
     return formaDePagoService.getFormasDePagoPorId(idFormaDePago);
   }
 
   @GetMapping("/formas-de-pago/predeterminada")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public FormaDePago getFormaDePagoPredeterminada() {
     return formaDePagoService.getFormaDePagoPredeterminada();
   }
 
   @GetMapping("/formas-de-pago")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public List<FormaDePago> getFormasDePago() {
     return formaDePagoService.getFormasDePagoNoEliminadas();
   }

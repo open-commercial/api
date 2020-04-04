@@ -17,8 +17,8 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
-import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.service.*;
@@ -52,13 +52,11 @@ public class PedidoController {
   }
 
     @GetMapping("/pedidos/{idPedido}")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public Pedido getPedidoPorId(@PathVariable long idPedido) {
         return pedidoService.calcularTotalActualDePedido(pedidoService.getPedidoNoEliminadoPorId(idPedido));
     }
     
     @GetMapping("/pedidos/{idPedido}/renglones")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido) {
         return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(idPedido);
     }
@@ -73,7 +71,6 @@ public class PedidoController {
   }
 
   @PutMapping("/pedidos")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
   public void actualizar(@RequestBody PedidoDTO pedidoDTO,
                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -98,13 +95,6 @@ public class PedidoController {
   }
 
   @PostMapping("/pedidos")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Pedido guardar(@RequestBody PedidoDTO pedidoDTO,
                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -135,13 +125,6 @@ public class PedidoController {
   }
 
   @PostMapping("/pedidos/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Page<Pedido> buscarConCriteria(
       @RequestBody BusquedaPedidoCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -156,7 +139,6 @@ public class PedidoController {
     }       
         
     @GetMapping("/pedidos/{idPedido}/reporte")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE, Rol.COMPRADOR})
     public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);        
@@ -167,15 +149,8 @@ public class PedidoController {
     }
 
   @PostMapping("/pedidos/calculo-pedido")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosPedidoDTO nuevosResultadosPedidoDTO) {
-    return pedidoService.calcularResultadosPedido(nuevosResultadosPedidoDTO);
+  public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
+    return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
   }
 
   private long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {

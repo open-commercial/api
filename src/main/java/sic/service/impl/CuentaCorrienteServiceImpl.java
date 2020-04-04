@@ -44,7 +44,7 @@ import sic.exception.ServiceException;
 @Validated
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
-  private final CuentaCorrienteRepository cuentaCorrienteRepository;
+  private final CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
   private final CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
   private final CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository;
   private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
@@ -57,7 +57,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Autowired
   @Lazy
   public CuentaCorrienteServiceImpl(
-      CuentaCorrienteRepository cuentaCorrienteRepository,
+      CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
       CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
       RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,

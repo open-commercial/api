@@ -31,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.calculos.NuevosResultadosPedidoDTO;
-import sic.modelo.calculos.Resultados;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.Resultados;
 import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
@@ -47,7 +47,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
   private final RenglonPedidoRepository renglonPedidoRepository;
-  private final IFacturaService facturaService;
+  private final IFacturaVentaService facturaVentaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProductoService productoService;
@@ -64,7 +64,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public PedidoServiceImpl(
       PedidoRepository pedidoRepository,
       RenglonPedidoRepository renglonPedidoRepository,
-      IFacturaService facturaService,
+      IFacturaVentaService facturaVentaService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
       IProductoService productoService,
@@ -73,7 +73,7 @@ public class PedidoServiceImpl implements IPedidoService {
       ICuentaCorrienteService cuentaCorrienteService,
       ModelMapper modelMapper,
       MessageSource messageSource) {
-    this.facturaService = facturaService;
+    this.facturaVentaService = facturaVentaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
     this.usuarioService = usuarioService;
@@ -136,7 +136,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
       pedido.setEstado(EstadoPedido.ABIERTO);
     }
-    if (facturaService.pedidoTotalmenteFacturado(pedido)) {
+    if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
       pedido.setEstado(EstadoPedido.CERRADO);
     }
   }
@@ -192,7 +192,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<Factura> getFacturasDelPedido(long idPedido) {
-    return facturaService.getFacturasDelPedido(idPedido);
+    return facturaVentaService.getFacturasDelPedido(idPedido);
   }
 
   @Override
@@ -421,12 +421,16 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void actualizar(Pedido pedido) {
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
-    List<BigDecimal> importesDeRenglones= new ArrayList<>();
-    pedido.getRenglones().forEach(renglonPedido -> importesDeRenglones.add(renglonPedido.getImporte()));
+    BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
+    int i = 0;
+    for (RenglonPedido renglon : pedido.getRenglones()) {
+      importesDeRenglones[i] = renglon.getImporte();
+      i++;
+    }
     Resultados resultados =
         this.calcularResultadosPedido(
-            NuevosResultadosPedidoDTO.builder()
-                .importes(importesDeRenglones)
+            NuevosResultadosComprobanteDTO.builder()
+                .importe(importesDeRenglones)
                 .descuentoPorcentaje(
                         pedido.getDescuentoPorcentaje() != null
                         ? pedido.getDescuentoPorcentaje()
@@ -501,39 +505,19 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Map<Long, RenglonFactura> getRenglonesFacturadosDelPedido(long idPedido) {
+  public Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long idPedido) {
     List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-    this.getFacturasDelPedido(idPedido)
-        .forEach(
-            f ->
-                f.getRenglones()
-                    .forEach(
-                        r ->
-                            renglonesDeFacturas.add(
-                                facturaService.calcularRenglon(
-                                    f.getTipoComprobante(),
-                                    Movimiento.VENTA,
-                                    NuevoRenglonFacturaDTO.builder()
-                                        .cantidad(r.getCantidad())
-                                        .idProducto(r.getIdProductoItem())
-                                        .renglonMarcado(
-                                            facturaService.marcarRenglonParaAplicarBonificacion(
-                                                r.getIdProductoItem(), r.getCantidad()))
-                                        .build()))));
-    HashMap<Long, RenglonFactura> listaRenglonesUnificados = new HashMap<>();
+    this.getFacturasDelPedido(idPedido).forEach(f -> renglonesDeFacturas.addAll(f.getRenglones()));
+    HashMap<Long, BigDecimal> listaRenglonesUnificados = new HashMap<>();
     if (!renglonesDeFacturas.isEmpty()) {
       renglonesDeFacturas.forEach(
           r -> {
             if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
-              listaRenglonesUnificados
-                  .get(r.getIdProductoItem())
-                  .setCantidad(
-                      listaRenglonesUnificados
-                          .get(r.getIdProductoItem())
-                          .getCantidad()
-                          .add(r.getCantidad()));
+              listaRenglonesUnificados.put(
+                  r.getIdProductoItem(),
+                  listaRenglonesUnificados.get(r.getIdProductoItem()).add(r.getCantidad()));
             } else {
-              listaRenglonesUnificados.put(r.getIdProductoItem(), r);
+              listaRenglonesUnificados.put(r.getIdProductoItem(), r.getCantidad());
             }
           });
     }
@@ -634,7 +618,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Resultados calcularResultadosPedido(NuevosResultadosPedidoDTO calculoPedido) {
+  public Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido) {
     Resultados resultados = Resultados.builder().build();
     resultados.setDescuentoPorcentaje(
         calculoPedido.getDescuentoPorcentaje() != null
@@ -645,7 +629,7 @@ public class PedidoServiceImpl implements IPedidoService {
             ? calculoPedido.getRecargoPorcentaje()
             : BigDecimal.ZERO);
     BigDecimal subTotal = BigDecimal.ZERO;
-    for (BigDecimal importe: calculoPedido.getImportes()) {
+    for (BigDecimal importe: calculoPedido.getImporte()) {
       subTotal = subTotal.add(importe);
     }
     resultados.setSubTotal(subTotal);

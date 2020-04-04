@@ -69,13 +69,6 @@ public class UsuarioController {
   }
 
   @PutMapping("/usuarios")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VIAJANTE,
-    Rol.VENDEDOR,
-    Rol.COMPRADOR
-  })
   public void actualizar(
       @RequestBody UsuarioDTO usuarioDTO,
       @RequestHeader("Authorization") String authorizationHeader) {

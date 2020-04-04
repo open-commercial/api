@@ -22,11 +22,11 @@ import java.util.Locale;
 @ExtendWith(SpringExtension.class)
 class ClienteServiceImplTest {
 
-  @Mock private MessageSource messageSource;
-  @Mock private ClienteRepository clienteRepository;
-  @InjectMocks private ClienteServiceImpl clienteServiceImpl;
+  @Mock MessageSource messageSource;
+  @Mock ClienteRepository clienteRepository;
+  @InjectMocks ClienteServiceImpl clienteServiceImpl;
 
-  private String mensaje_cliente_duplicado_idFiscal = "Ya existe el ID fiscal ingresado.";
+  String mensaje_cliente_duplicado_idFiscal = "Ya existe el ID fiscal ingresado.";
 
   @BeforeEach
   void setup() {

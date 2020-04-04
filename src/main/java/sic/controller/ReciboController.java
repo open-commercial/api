@@ -52,13 +52,6 @@ public class ReciboController {
   }
 
   @GetMapping("/recibos/{idRecibo}")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public Recibo getReciboPorId(@PathVariable long idRecibo) {
     return reciboService.getReciboNoEliminadoPorId(idRecibo);
   }
@@ -114,13 +107,6 @@ public class ReciboController {
   }
 
   @GetMapping("/recibos/{idRecibo}/reporte")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);

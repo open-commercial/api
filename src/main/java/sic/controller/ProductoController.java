@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.NuevoProductoDTO;
-import sic.modelo.dto.ProductoDTO;
-import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.*;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -77,13 +75,6 @@ public class ProductoController {
   }
 
   @GetMapping("/productos/busqueda")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
     public Producto getProductoPorCodigo(@RequestParam String codigo) {
       return productoService.getProductoPorCodigo(codigo);
     }
@@ -108,13 +99,6 @@ public class ProductoController {
   }
 
   @PostMapping("/productos/reporte/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
   public ResponseEntity<byte[]> getListaDePrecios(
     @RequestBody BusquedaProductoCriteria criteria,
     @RequestParam(required = false) String formato) {
@@ -218,14 +202,7 @@ public class ProductoController {
   }
 
   @PostMapping("/productos/disponibilidad-stock")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE,
-    Rol.COMPRADOR
-  })
-  public Map<Long, BigDecimal> verificarDisponibilidadStock(
+  public List<ProductoFaltanteDTO> verificarDisponibilidadStock(
       @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }

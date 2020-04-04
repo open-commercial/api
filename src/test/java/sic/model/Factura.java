@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import lombok.*;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.RenglonFactura;
-
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import sic.modelo.RenglonFactura;
+import sic.modelo.TipoDeComprobante;
 
 @Data
 @AllArgsConstructor
@@ -38,8 +42,7 @@ import java.util.List;
   @JsonSubTypes.Type(value = FacturaCompra.class, name = "FacturaCompra"),
   @JsonSubTypes.Type(value = FacturaVenta.class, name = "FacturaVenta"),
 })
-@Builder
-public class Factura {
+public abstract class Factura implements Serializable {
 
   private long idFactura;
   private LocalDateTime fecha;
@@ -67,7 +70,7 @@ public class Factura {
   private String nombreSucursal;
   private Long idUsuario;
   private String nombreUsuario;
-  private boolean eliminada = false;
+  private boolean eliminada;
   private long cae;
   private LocalDate vencimientoCae;
 }
