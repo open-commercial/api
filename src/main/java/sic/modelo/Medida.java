@@ -4,7 +4,6 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import javax.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -38,7 +37,4 @@ public class Medida implements Serializable {
   private String nombre;
 
   private boolean eliminada;
-
-  @Version
-  private Integer version;
 }

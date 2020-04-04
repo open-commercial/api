@@ -47,7 +47,7 @@ public class Producto implements Serializable {
   @JoinColumn(name = "idProducto")
   @JsonProperty(access = JsonProperty.Access.READ_WRITE)
   @JsonView(Views.Viajante.class)
-  @NotEmpty(message = "{mensaje_producto_cantidad_en_sucursales_vacia}")
+  //@NotEmpty(message = "{mensaje_producto_cantidad_en_sucursales_vacia}")
   private Set<CantidadEnSucursal> cantidadEnSucursales;
 
   @Column(precision = 25, scale = 15)
@@ -151,7 +151,7 @@ public class Producto implements Serializable {
   private String urlImagen;
 
   @Version
-  private long version;
+  private Long version;
 
   @JsonGetter("nombreMedida")
   @JsonView(Views.Comprador.class)
