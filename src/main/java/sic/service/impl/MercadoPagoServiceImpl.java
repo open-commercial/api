@@ -20,6 +20,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.util.EncryptUtils;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
@@ -163,8 +164,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       preference.setExternalReference(
           encryptUtils.encryptWhitAES(jsonObject.toString()));
     } catch (GeneralSecurityException e) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()));
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
     }
     Item item = new Item();
     item.setTitle(title).setQuantity(1).setUnitPrice(monto);
