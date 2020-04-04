@@ -310,8 +310,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
     } catch (GeneralSecurityException e) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()));
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
     }
   }
 
