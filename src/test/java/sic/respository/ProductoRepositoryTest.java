@@ -1,10 +1,12 @@
 package sic.respository;
 
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import sic.modelo.*;
 import sic.repository.*;
@@ -21,15 +23,15 @@ import static org.junit.Assert.*;
 @RunWith(SpringRunner.class)
 public class ProductoRepositoryTest {
 
-  @Autowired private MedidaRepository medidaRepository;
+  @Autowired MedidaRepository medidaRepository;
 
-  @Autowired private ProveedorRepository proveedorRepository;
+  @Autowired ProveedorRepository proveedorRepository;
 
-  @Autowired private RubroRepository rubroRepository;
+  @Autowired RubroRepository rubroRepository;
 
-  @Autowired private SucursalRepository sucursalRepository;
+  @Autowired SucursalRepository sucursalRepository;
 
-  @Autowired private ProductoRepository productoRepository;
+  @Autowired ProductoRepository productoRepository;
 
   @Test(expected = ObjectOptimisticLockingFailureException.class)
   public void shouldTestConcurrenciaEnActualizacionDeProducto() {
@@ -72,14 +74,14 @@ public class ProductoRepositoryTest {
 
     Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
     CantidadEnSucursal cantidad = new CantidadEnSucursal();
-    cantidad.setCantidad(BigDecimal.ZERO);
+    cantidad.setCantidad(BigDecimal.ONE);
     cantidad.setSucursal(sucursal);
     altaCantidadesEnSucursales.add(cantidad);
     producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
     producto.setCantidadTotalEnSucursales(
-            producto.getCantidadEnSucursales().stream()
-                    .map(CantidadEnSucursal::getCantidad)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add));
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
 
     producto.setVersion(1L);
     productoRepository.save(producto);
