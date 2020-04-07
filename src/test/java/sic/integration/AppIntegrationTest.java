@@ -17,7 +17,6 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
@@ -1144,7 +1143,7 @@ class AppIntegrationTest {
     RegistracionClienteAndUsuarioDTO registro =
         RegistracionClienteAndUsuarioDTO.builder()
             .apellido("Stark")
-            .nombre("Sansa")
+            .nombre("Sansa María")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .email("sansa@got.com")
             .telefono("4157899667")
@@ -1155,7 +1154,7 @@ class AppIntegrationTest {
     restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
-    assertEquals("Sansa", usuario.getNombre());
+    assertEquals("Sansa María", usuario.getNombre());
     assertEquals("Stark", usuario.getApellido());
     assertTrue(usuario.isHabilitado());
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
