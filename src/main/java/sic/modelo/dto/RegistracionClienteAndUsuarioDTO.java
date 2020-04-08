@@ -17,7 +17,7 @@ import java.io.Serializable;
 @Builder
 public class RegistracionClienteAndUsuarioDTO implements Serializable {
 
-  @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚ ]*$", message = "{mensaje_registracion_nombre}")//"^[a-zA-ZáéíóúÁÉÍÓÚ ]*$"
+  @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚ ]*$", message = "{mensaje_registracion_nombre}")
   private String nombre;
 
   @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚ ]*$", message = "{mensaje_registracion_apellido}")
