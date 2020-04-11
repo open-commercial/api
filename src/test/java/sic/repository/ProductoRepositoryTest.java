@@ -1,10 +1,12 @@
 package sic.repository;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
@@ -23,9 +25,9 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-// @DataJpaTest
+@DataJpaTest
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+// @SpringBootTest
 // @ContextConfiguration(classes = {App.class})
 public class ProductoRepositoryTest {
 
@@ -37,7 +39,10 @@ public class ProductoRepositoryTest {
 
   @MockBean JwtInterceptor jwtInterceptor;
 
+  @Autowired TestEntityManager testEntityManager;
+
   @Test
+  @Disabled
   public void shouldTestConcurrenciaEnActualizacionDeProducto() {
     Assertions.assertThrows(
         ObjectOptimisticLockingFailureException.class,
