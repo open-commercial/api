@@ -17,4 +17,5 @@ public class CantidadEnSucursal {
   private String estante;
   private Long idSucursal;
   private String nombreSucursal;
+  private Long version;
 }
