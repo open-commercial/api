@@ -10,7 +10,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.interceptor.JwtInterceptor;
 import sic.modelo.*;
-
 import javax.persistence.OptimisticLockException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,16 +18,16 @@ import java.util.Set;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
-public class ProductoRepositoryTest {
+class ProductoRepositoryTest {
 
   @MockBean JwtInterceptor jwtInterceptor;
 
   @Autowired TestEntityManager testEntityManager;
 
   @Test
-  public void shouldThrowOptimisticLockExceptionWhenIntentaActualizarProductoDetached() {
+  void shouldThrowOptimisticLockExceptionWhenIntentaActualizarProductoDetached() {
     Assertions.assertThrows(
-      OptimisticLockException.class,
+        OptimisticLockException.class,
         () -> {
           Proveedor proveedor = new Proveedor();
           proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
@@ -66,10 +65,11 @@ public class ProductoRepositoryTest {
                   .map(CantidadEnSucursal::getCantidad)
                   .reduce(BigDecimal.ZERO, BigDecimal::add));
 
-          Producto productoEnPrimeraInstancia = testEntityManager.persist(producto);
+          Producto productoEnPrimeraInstancia = testEntityManager.persistFlushFind(producto);
           testEntityManager.detach(productoEnPrimeraInstancia);
-          Producto productoEnSegundaInstancia = testEntityManager.find(Producto.class, productoEnPrimeraInstancia.getIdProducto());
-          productoEnSegundaInstancia.setDescripcion("Cambiado");
+          Producto productoEnSegundaInstancia =
+              testEntityManager.find(Producto.class, productoEnPrimeraInstancia.getIdProducto());
+          productoEnSegundaInstancia.setDescripcion("Nueva descripcion");
           testEntityManager.merge(productoEnSegundaInstancia);
           testEntityManager.flush();
           productoEnPrimeraInstancia.setCodigo("123");
