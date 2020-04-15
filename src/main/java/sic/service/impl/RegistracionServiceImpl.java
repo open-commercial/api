@@ -48,7 +48,6 @@ public class RegistracionServiceImpl implements IRegistracionService {
   }
 
   @Override
-  @Validated
   public void crearCuenta(@Valid RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
     Usuario nuevoUsuario = new Usuario();
     nuevoUsuario.setHabilitado(true);
