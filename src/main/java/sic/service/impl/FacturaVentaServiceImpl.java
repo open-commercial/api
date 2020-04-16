@@ -303,6 +303,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+      pedidoService.actualizarEstadoPedido(pedido, EstadoPedido.CERRADO);
+      productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
       facturas.forEach(f -> f.setPedido(pedido));
       for (FacturaVenta f : facturas) {
         FacturaVenta facturaGuardada =
@@ -316,7 +318,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
       pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
       facturasProcesadas.forEach(f -> logger.warn("La Factura {} se guardó correctamente.", f));
-      pedidoService.actualizarEstadoPedido(pedido);
+      //pedidoService.actualizarEstadoPedido(pedido);
     } else {
       facturasProcesadas = new ArrayList<>();
       for (FacturaVenta f : facturas) {
@@ -352,12 +354,11 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     facturas.forEach(
         facturaVenta -> {
           facturaService.calcularValoresFactura(facturaVenta);
-          productoService.actualizarStock(
+          productoService.actualizarStockFactura(
               facturaService.getIdsProductosYCantidades(facturaVenta),
               facturaVenta.getIdSucursal(),
               TipoDeOperacion.ALTA,
-              Movimiento.VENTA,
-              facturaVenta.getTipoComprobante());
+              Movimiento.VENTA);
         });
   }
 

@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -71,19 +72,22 @@ public class PedidoController {
   }
 
   @PutMapping("/pedidos")
-  public void actualizar(@RequestBody PedidoDTO pedidoDTO,
-                         @RequestHeader("Authorization") String authorizationHeader) {
+  public void actualizar(
+      @RequestBody PedidoDTO pedidoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     long idUsuario = (int) claims.get("idUsuario");
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     if (pedidoDTO.getIdSucursal() != null)
       pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
-    if (pedidoDTO.getObservaciones() != null)
-      pedido.setObservaciones(pedidoDTO.getObservaciones());
+    if (pedidoDTO.getObservaciones() != null) pedido.setObservaciones(pedidoDTO.getObservaciones());
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
-    if (pedidoDTO.getRecargoPorcentaje() != null) pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
-    if (pedidoDTO.getDescuentoPorcentaje() != null) pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
+    if (pedidoDTO.getRecargoPorcentaje() != null)
+      pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
+    if (pedidoDTO.getDescuentoPorcentaje() != null)
+      pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
+    List<RenglonPedido> renglonesAnteriores = new ArrayList<>(pedido.getRenglones());
     pedido.getRenglones().clear();
     pedido
         .getRenglones()
@@ -91,7 +95,7 @@ public class PedidoController {
             pedidoService.calcularRenglonesPedido(
                 this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
                 this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
-    pedidoService.actualizar(pedido);
+    pedidoService.actualizar(pedido, renglonesAnteriores);
   }
 
   @PostMapping("/pedidos")

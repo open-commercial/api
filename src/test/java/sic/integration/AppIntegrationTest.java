@@ -262,7 +262,7 @@ class AppIntegrationTest {
             .cantidadEnSucursal(
                 new HashMap<Long, BigDecimal>() {
                   {
-                    put(1L, new BigDecimal("6"));
+                    put(1L, new BigDecimal("9"));
                   }
                 })
             .bulto(BigDecimal.ONE)
@@ -374,7 +374,7 @@ class AppIntegrationTest {
     productosRecuperados = resultadoBusqueda.getContent();
     assertEquals("Reflector led 100w", productosRecuperados.get(0).getDescripcion());
     assertEquals(
-        new BigDecimal("6.000000000000000"),
+        new BigDecimal("9.000000000000000"),
         productosRecuperados.get(0).getCantidadTotalEnSucursales());
     assertEquals("Metro", productosRecuperados.get(0).getNombreMedida());
     assertEquals(

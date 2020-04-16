@@ -88,15 +88,16 @@ public class FacturaServiceImpl implements IFacturaService {
       }
       this.cuentaCorrienteService.asentarEnCuentaCorriente(
           (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-      productoService.actualizarStock(
+      productoService.actualizarStockFactura(
           this.getIdsProductosYCantidades(factura),
           factura.getIdSucursal(),
           TipoDeOperacion.ELIMINACION,
-          Movimiento.VENTA,
-          factura.getTipoComprobante());
+          Movimiento.VENTA);
       factura.setEliminada(true);
       if (factura.getPedido() != null) {
-        pedidoService.actualizarEstadoPedido(factura.getPedido());
+        pedidoService.actualizarEstadoPedido(factura.getPedido(), EstadoPedido.ABIERTO);
+        productoService.actualizarStockPedido(
+            factura.getPedido(), TipoDeOperacion.ACTUALIZACION);
       }
       facturaRepository.save(factura);
     } else {

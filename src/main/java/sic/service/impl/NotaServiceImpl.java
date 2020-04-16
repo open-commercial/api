@@ -134,11 +134,7 @@ public class NotaServiceImpl implements INotaService {
         NotaCredito nc = (NotaCredito) nota;
         if (nc.isModificaStock()) {
           this.actualizarStock(
-              nc.getRenglonesNotaCredito(),
-              nota.getIdSucursal(),
-              TipoDeOperacion.ELIMINACION,
-              nota.getMovimiento(),
-              nota.getTipoComprobante());
+              nc.getRenglonesNotaCredito(), nota.getIdSucursal(), TipoDeOperacion.ELIMINACION);
         }
       }
     }
@@ -809,11 +805,7 @@ public class NotaServiceImpl implements INotaService {
     }
     if (notaCredito.isModificaStock()) {
       this.actualizarStock(
-          notaCredito.getRenglonesNotaCredito(),
-          notaCredito.getIdSucursal(),
-          TipoDeOperacion.ALTA,
-          notaCredito.getMovimiento(),
-          notaCredito.getTipoComprobante());
+          notaCredito.getRenglonesNotaCredito(), notaCredito.getIdSucursal(), TipoDeOperacion.ALTA);
     }
     this.validarCalculosCredito(notaCredito);
     notaCredito = notaCreditoRepository.save(notaCredito);
@@ -1225,13 +1217,10 @@ public class NotaServiceImpl implements INotaService {
   private void actualizarStock(
       List<RenglonNotaCredito> renglonesNotaCredito,
       Long idSucursal,
-      TipoDeOperacion tipoOperacion,
-      Movimiento movimiento,
-      TipoDeComprobante tipoDeComprobante) {
+      TipoDeOperacion tipoOperacion) {
     HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
     renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
-    productoService.actualizarStock(
-        idsYCantidades, idSucursal, tipoOperacion, movimiento, tipoDeComprobante);
+    productoService.actualizarStockNotaCredito(idsYCantidades, idSucursal, tipoOperacion);
   }
 
   @Override

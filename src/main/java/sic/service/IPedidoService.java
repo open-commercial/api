@@ -16,7 +16,7 @@ public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
-  void actualizar(Pedido pedido);
+  void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
 
   void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
 
@@ -24,7 +24,7 @@ public interface IPedidoService {
 
   long generarNumeroPedido(Sucursal sucursal);
 
-  void actualizarEstadoPedido(Pedido pedido);
+  void actualizarEstadoPedido(Pedido pedido, EstadoPedido estadoPedido);
 
   Pedido calcularTotalActualDePedido(Pedido pedido);
 
@@ -33,8 +33,6 @@ public interface IPedidoService {
   List<Factura> getFacturasDelPedido(long id);
 
   Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long nroPedido);
-
-  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido);
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
 

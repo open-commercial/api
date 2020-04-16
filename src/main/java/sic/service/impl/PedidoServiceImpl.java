@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -131,14 +132,14 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public void actualizarEstadoPedido(Pedido pedido) {
-    pedido.setEstado(EstadoPedido.ACTIVO);
-    if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
-      pedido.setEstado(EstadoPedido.ABIERTO);
-    }
-    if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
-      pedido.setEstado(EstadoPedido.CERRADO);
-    }
+  public void actualizarEstadoPedido(Pedido pedido, EstadoPedido estadoPedido) {
+    pedido.setEstado(estadoPedido);
+//    if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
+//      pedido.setEstado(EstadoPedido.ABIERTO);
+//    }
+//    if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
+//      pedido.setEstado(EstadoPedido.CERRADO);
+//    }
   }
 
   @Override
@@ -235,6 +236,9 @@ public class PedidoServiceImpl implements IPedidoService {
                         .getProductoNoEliminadoPorId(renglonPedido.getIdProductoItem())
                         .getUrlImagen()));
     this.validarOperacion(TipoDeOperacion.ALTA, pedido);
+    Map<Long, BigDecimal> idsYCantidades = new HashMap<>();
+    pedido.getRenglones().forEach(p -> idsYCantidades.put(p.getIdProductoItem(), p.getCantidad()));
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
@@ -419,7 +423,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido) {
+  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores) {
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
@@ -450,6 +454,8 @@ public class PedidoServiceImpl implements IPedidoService {
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
+    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
   }
 
@@ -467,14 +473,11 @@ public class PedidoServiceImpl implements IPedidoService {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       pedido.setEliminado(true);
+      productoService.actualizarStockPedido(
+          pedido, TipoDeOperacion.ELIMINACION);
       pedidoRepository.save(pedido);
     }
     return pedido.isEliminado();
-  }
-
-  @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido) {
-    return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
   }
 
   @Override
@@ -643,5 +646,22 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Pedido getPedidoPorIdPayment(String idPayment) {
     return pedidoRepository.findByIdPaymentAndEliminado(idPayment, false);
+  }
+
+  @Scheduled(cron = "30 0 0 * * *")
+  public void cerrarPedidosAbiertos() {
+    QPedido qPedido = QPedido.pedido;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(qPedido.estado.eq(EstadoPedido.ABIERTO)).and(qPedido.eliminado.eq(false));
+    Iterable<Pedido> pedidosAbiertos = pedidoRepository.findAll(builder);
+    pedidosAbiertos.forEach(
+        pedido -> {
+          if (pedido.getFecha().isBefore(LocalDateTime.now().minusDays(2L))) {
+            pedido.setEstado(EstadoPedido.CERRADO);
+            pedidoRepository.save(pedido);
+            productoService.actualizarStockPedido(
+                pedido, TipoDeOperacion.ACTUALIZACION);
+          }
+        });
   }
 }

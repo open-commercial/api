@@ -21,12 +21,19 @@ public interface IProductoService {
   void actualizar(
       @Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
-  void actualizarStock(
+  void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
+
+  void devolverStockPedido(
+      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores);
+
+  void actualizarStockFactura(
       Map<Long, BigDecimal> idsYCantidades,
       Long idSucursal,
       TipoDeOperacion operacion,
-      Movimiento movimiento,
-      TipoDeComprobante tipoDeComprobante);
+      Movimiento movimiento);
+
+  void actualizarStockNotaCredito(
+      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion);
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 

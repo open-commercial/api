@@ -1,47 +1,47 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
-import java.io.*;
-
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.*;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.NuevoProductoDTO;
+import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.repository.ProductoRepository;
+import sic.service.*;
+import sic.util.CalculosComprobante;
 
+import javax.persistence.EntityNotFoundException;
+import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.ProductoFaltanteDTO;
-import sic.modelo.dto.NuevoProductoDTO;
-import sic.modelo.dto.ProductosParaActualizarDTO;
-import sic.modelo.dto.ProductosParaVerificarStockDTO;
-import sic.service.*;
-import sic.exception.BusinessServiceException;
-import sic.exception.ServiceException;
-import sic.repository.ProductoRepository;
-import sic.util.CalculosComprobante;
 
 @Service
 @Validated
@@ -427,128 +427,135 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public void actualizarStock(
+  public void devolverStockPedido(
+      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores) {
+    if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
+        && pedido.getEstado() == EstadoPedido.ABIERTO
+        && renglonesAnteriores != null
+        && !renglonesAnteriores.isEmpty()) {
+      renglonesAnteriores.forEach(
+          renglonAnterior -> {
+            Optional<Producto> productoAnterior =
+                productoRepository.findById(renglonAnterior.getIdProductoItem());
+            if (productoAnterior.isPresent() && !productoAnterior.get().isIlimitado()) {
+              this.agregarStock(
+                  productoAnterior.get(),
+                  pedido.getSucursal().getIdSucursal(),
+                  renglonAnterior.getCantidad());
+            } else {
+              logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+            }
+          });
+      //zasd
+    }
+  }
+
+  @Override
+  public void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
+    pedido
+        .getRenglones()
+        .forEach(
+            renglones -> {
+              Optional<Producto> producto =
+                  productoRepository.findById(renglones.getIdProductoItem());
+              if (producto.isPresent() && !producto.get().isIlimitado()) {
+                if (tipoDeOperacion == TipoDeOperacion.ALTA
+                    || (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
+                        && pedido.getEstado() == EstadoPedido.ABIERTO)) {
+                  this.quitarStock(
+                      producto.get(),
+                      pedido.getSucursal().getIdSucursal(),
+                      renglones.getCantidad());
+                }
+                if (tipoDeOperacion == TipoDeOperacion.ELIMINACION
+                    || (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
+                        && pedido.getEstado() == EstadoPedido.CERRADO)) {
+                  this.agregarStock(
+                      producto.get(),
+                      pedido.getSucursal().getIdSucursal(),
+                      renglones.getCantidad());
+                }
+              } else {
+                logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+              }
+            });
+  }
+
+  @Override
+  public void actualizarStockFactura(
       Map<Long, BigDecimal> idsYCantidades,
       Long idSucursal,
       TipoDeOperacion operacion,
-      Movimiento movimiento,
-      TipoDeComprobante tipoDeComprobante) {
+      Movimiento movimiento) {
     idsYCantidades.forEach(
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
           if (producto.isPresent() && !producto.get().isIlimitado()) {
-            List<TipoDeComprobante> tiposDeFactura =
-                Arrays.asList(
-                    TipoDeComprobante.FACTURA_A,
-                    TipoDeComprobante.FACTURA_B,
-                    TipoDeComprobante.FACTURA_C,
-                    TipoDeComprobante.FACTURA_X,
-                    TipoDeComprobante.FACTURA_Y,
-                    TipoDeComprobante.PRESUPUESTO);
-            List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
-                Arrays.asList(
-                    TipoDeComprobante.NOTA_CREDITO_A,
-                    TipoDeComprobante.NOTA_CREDITO_B,
-                    TipoDeComprobante.NOTA_CREDITO_C,
-                    TipoDeComprobante.NOTA_CREDITO_X,
-                    TipoDeComprobante.NOTA_CREDITO_X,
-                    TipoDeComprobante.NOTA_CREDITO_Y,
-                    TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-            switch (movimiento) {
-              case VENTA:
-                if (tiposDeFactura.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                break;
-              case COMPRA:
-                if (tiposDeFactura.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                break;
-              default:
-                throw new BusinessServiceException(
-                    messageSource.getMessage(
-                        "mensaje_movimiento_no_valido", null, Locale.getDefault()));
+            if ((movimiento == Movimiento.VENTA && operacion == TipoDeOperacion.ALTA)
+                || (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ELIMINACION)) {
+              this.quitarStock(producto.get(), idSucursal, cantidad);
             }
-            productoRepository.save(producto.get());
+            if ((movimiento == Movimiento.VENTA && operacion == TipoDeOperacion.ELIMINACION)
+                || (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ALTA)) {
+              this.agregarStock(producto.get(), idSucursal, cantidad);
+            }
           } else {
             logger.warn("Se intenta actualizar el stock de un producto eliminado.");
           }
         });
   }
 
-  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(
-      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
-    if (operacion == TipoDeOperacion.ALTA) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(
-                      cantidadEnSucursal.getCantidad().subtract(cantidad));
-                }
-              });
-    }
-    if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
-                }
-              });
-    }
-    producto.setCantidadTotalEnSucursales(
-        producto
-            .getCantidadEnSucursales()
-            .stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+  @Override
+  public void actualizarStockNotaCredito(
+      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion) {
+    idsYCantidades.forEach(
+        (idProducto, cantidad) -> {
+          Optional<Producto> producto = productoRepository.findById(idProducto);
+          if (producto.isPresent() && !producto.get().isIlimitado()) {
+            if (operacion == TipoDeOperacion.ALTA) {
+              this.agregarStock(producto.get(), idSucursal, cantidad);
+            }
+            if (operacion == TipoDeOperacion.ELIMINACION) {
+              this.quitarStock(producto.get(), idSucursal, cantidad);
+            }
+          } else {
+            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+          }
+        });
   }
 
-  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(
-      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
-    if (operacion == TipoDeOperacion.ALTA) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
-                }
-              });
-    }
-    if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(
-                      cantidadEnSucursal.getCantidad().subtract(cantidad));
-                }
-              });
-    }
+  private Producto agregarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
+    producto
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal -> {
+              if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
+              }
+            });
     producto.setCantidadTotalEnSucursales(
-        producto
-            .getCantidadEnSucursales()
-            .stream()
+        producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    return productoRepository.save(producto);
+  }
+
+  private Producto quitarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
+    producto
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal -> {
+              if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
+              }
+            });
+    producto.setCantidadTotalEnSucursales(
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    return productoRepository.save(producto);
   }
 
   @Override
