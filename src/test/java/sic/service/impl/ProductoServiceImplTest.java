@@ -474,30 +474,4 @@ class ProductoServiceImplTest {
                 messageSourceTest.getMessage(
                     "mensaje_error_ids_duplicados", null, Locale.getDefault())));
   }
-
-  @Test
-  void shouldActualizarStockSegunPedido() {
-    Producto producto = new Producto();
-    producto.setIdProducto(1L);
-    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
-    cantidadEnSucursal.setSucursal(sucursal);
-    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
-    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
-    cantidadEnSucursales.add(cantidadEnSucursal);
-    producto.setCantidadEnSucursales(cantidadEnSucursales);
-    producto.setIlimitado(false);
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-
-    Pedido pedido = new Pedido();
-    pedido.setEstado(EstadoPedido.ABIERTO);
-    List<RenglonPedido> renglonesPedido =  new ArrayList<>();
-    RenglonPedido renglonPedido = new RenglonPedido();
-    renglonPedido.setIdProductoItem(1L);
-    renglonPedido.setCantidad(BigDecimal.TEN);
-    renglonesPedido.add(renglonPedido);
-    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
-  }
 }
