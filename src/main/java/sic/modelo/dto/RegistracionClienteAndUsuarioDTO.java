@@ -9,6 +9,7 @@ import sic.modelo.CategoriaIVA;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Pattern;
+
 import java.io.Serializable;
 
 @Data
@@ -17,10 +18,10 @@ import java.io.Serializable;
 @Builder
 public class RegistracionClienteAndUsuarioDTO implements Serializable {
 
-  @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚ ]*$", message = "{mensaje_registracion_nombre}")
+  @Pattern(regexp = "^[a-zA-ZáéíóúñÁÉÍÓÚÑ ]*$", message = "{mensaje_registracion_nombre}")
   private String nombre;
 
-  @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚ ]*$", message = "{mensaje_registracion_apellido}")
+  @Pattern(regexp = "^[a-zA-ZáéíóúñÁÉÍÓÚÑ ]*$", message = "{mensaje_registracion_apellido}")
   private String apellido;
 
   @Pattern(regexp = "[0-9]{10}", message = "{mensaje_registracion_telefono}")
@@ -30,6 +31,7 @@ public class RegistracionClienteAndUsuarioDTO implements Serializable {
   private String email;
 
   private CategoriaIVA categoriaIVA;
+
   private String nombreFiscal;
 
   @Length(min = 6, message = "{mensaje_registracion_contraseña}")

@@ -42,6 +42,7 @@ public class ProductoBuilder {
     private LocalDate fechaVencimiento = LocalDate.of(2020, Month.OCTOBER, 20);; // 20-08-2020
     private boolean eliminado = false;
     private String urlImagen;
+    private Long version;
 
     public Producto build() {
     return new Producto(
@@ -74,7 +75,8 @@ public class ProductoBuilder {
         fechaAlta,
         fechaVencimiento,
         eliminado,
-        urlImagen);
+        urlImagen,
+        version);
     }
 
     public ProductoBuilder withId_Producto(Long idProducto) {

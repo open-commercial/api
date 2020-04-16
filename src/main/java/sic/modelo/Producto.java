@@ -150,6 +150,9 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private String urlImagen;
 
+  @Version
+  private Long version;
+
   @JsonGetter("nombreMedida")
   @JsonView(Views.Comprador.class)
   public String getNombreMedida() {

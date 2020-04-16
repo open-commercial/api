@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +25,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -101,7 +100,7 @@ class FacturaCompraControllerTest {
         BusquedaFacturaCompraCriteria.builder().build();
     when(facturaCompraService.calcularTotalFacturadoCompra(busquedaFacturaCompraCriteria))
         .thenReturn(BigDecimal.TEN);
-    Assertions.assertEquals(
+    assertEquals(
         BigDecimal.TEN,
         facturaCompraController.calcularTotalFacturadoCompra(busquedaFacturaCompraCriteria));
   }
@@ -112,7 +111,7 @@ class FacturaCompraControllerTest {
         BusquedaFacturaCompraCriteria.builder().build();
     when(facturaCompraService.calcularIvaCompra(busquedaFacturaCompraCriteria))
         .thenReturn(BigDecimal.TEN);
-    Assertions.assertEquals(
+    assertEquals(
         BigDecimal.TEN,
         facturaCompraController.calcularTotalIvaCompra(busquedaFacturaCompraCriteria));
   }
