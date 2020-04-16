@@ -662,7 +662,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un cliente y levantar un pedido")
+  @DisplayName("Dar de alta un cliente y levantar un pedido con reserva, verificar stock")
   @Order(6)
   void testEscenarioAltaClienteYPedido() {
     this.iniciarSesionComoAdministrador();
@@ -693,6 +693,10 @@ class AppIntegrationTest {
     Cliente clienteRecuperado =
         restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
     assertEquals(cliente, clienteRecuperado);
+    Producto productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", Producto.class);
+    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", Producto.class);
+    assertEquals(new BigDecimal("14.000000000000000"), productoUno.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("12.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
         NuevoRenglonPedidoDTO.builder()
@@ -715,6 +719,10 @@ class AppIntegrationTest {
             .build();
     Pedido pedidoRecuperado =
         restTemplate.postForObject(apiPrefix + "/pedidos", pedidoDTO, Pedido.class);
+    productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", Producto.class);
+    productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", Producto.class);
+    assertEquals(new BigDecimal("9.000000000000000"), productoUno.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("10.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =
@@ -759,7 +767,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName(
-          "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente")
+          "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando y verificando stock")
   @Order(7)
   void testEscenarioModificacionPedido() {
     this.iniciarSesionComoAdministrador();
@@ -805,6 +813,8 @@ class AppIntegrationTest {
             .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
             .build();
     restTemplate.put(apiPrefix + "/pedidos", pedidoDTO);
+    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", Producto.class);
+    assertEquals(new BigDecimal("9.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
     requestEntity = new HttpEntity<>(criteria);
     resultadoBusquedaPedido =
@@ -853,7 +863,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName(
-      "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo")
+      "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo y verificar stock")
   @Order(8)
   void testEscenarioVenta1() {
     this.iniciarSesionComoAdministrador();
@@ -936,6 +946,12 @@ class AppIntegrationTest {
     FacturaVenta[] facturas =
         restTemplate.postForObject(
             apiPrefix + "/facturas/ventas", nuevaFacturaVentaDTO, FacturaVenta[].class);
+    Producto productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", Producto.class);
+    assertEquals(new BigDecimal("9.000000000000000"), productoUno.getCantidadTotalEnSucursales());
+    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", Producto.class);
+    assertEquals(new BigDecimal("9.000000000000000"), productoDos.getCantidadTotalEnSucursales());
+    Producto productoTres = restTemplate.getForObject(apiPrefix + "/productos/3", Producto.class);
+    assertEquals(new BigDecimal("0E-15"), productoTres.getCantidadTotalEnSucursales());
     assertEquals(2, facturas.length);
     assertEquals(TipoDeComprobante.FACTURA_A, facturas[1].getTipoComprobante());
     assertEquals(TipoDeComprobante.FACTURA_X, facturas[0].getTipoComprobante());
