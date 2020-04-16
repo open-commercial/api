@@ -318,7 +318,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
       pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
       facturasProcesadas.forEach(f -> logger.warn("La Factura {} se guardó correctamente.", f));
-      //pedidoService.actualizarEstadoPedido(pedido);
     } else {
       facturasProcesadas = new ArrayList<>();
       for (FacturaVenta f : facturas) {

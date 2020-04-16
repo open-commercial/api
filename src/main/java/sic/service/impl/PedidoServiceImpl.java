@@ -133,13 +133,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public void actualizarEstadoPedido(Pedido pedido, EstadoPedido estadoPedido) {
-    pedido.setEstado(estadoPedido);
-//    if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
-//      pedido.setEstado(EstadoPedido.ABIERTO);
-//    }
-//    if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
-//      pedido.setEstado(EstadoPedido.CERRADO);
-//    }
+    pedido.setEstado(estadoPedido);// nota: es necesario un método simplemente para esto?
   }
 
   @Override
