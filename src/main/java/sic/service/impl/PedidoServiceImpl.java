@@ -92,7 +92,6 @@ public class PedidoServiceImpl implements IPedidoService {
     // Validar Estado
     EstadoPedido estado = pedido.getEstado();
     if ((estado != EstadoPedido.ABIERTO)
-        && (estado != EstadoPedido.ACTIVO)
         && (estado != EstadoPedido.CERRADO)) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaja_estado_no_valido", null, Locale.getDefault()));
