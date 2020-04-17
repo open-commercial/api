@@ -363,7 +363,9 @@ public class ProductoServiceImpl implements IProductoService {
     this.validarOperacion(TipoDeOperacion.ALTA, producto);
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
-    logger.warn("El Producto {} se guardó correctamente.", producto);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_guardado", new Object[] {producto}, Locale.getDefault()));
     if (nuevoProductoDTO.getImagen() != null)
       producto.setUrlImagen(
           this.subirImagenProducto(producto.getIdProducto(), nuevoProductoDTO.getImagen()));
@@ -399,7 +401,11 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.setIlimitado(false);
     productoPorActualizar = productoRepository.save(productoPorActualizar);
-    logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_actualizado",
+            new Object[] {productoPorActualizar},
+            Locale.getDefault()));
     if (imagen != null) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
   }
 
@@ -443,10 +449,13 @@ public class ProductoServiceImpl implements IProductoService {
                   pedido.getSucursal().getIdSucursal(),
                   renglonAnterior.getCantidad());
             } else {
-              logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+              logger.warn(
+                  messageSource.getMessage(
+                      "mensaje_error_actualizar_stock_producto_eliminado",
+                      null,
+                      Locale.getDefault()));
             }
           });
-      //zasd
     }
   }
 
@@ -476,7 +485,11 @@ public class ProductoServiceImpl implements IProductoService {
                       renglones.getCantidad());
                 }
               } else {
-                logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+                logger.warn(
+                    messageSource.getMessage(
+                        "mensaje_error_actualizar_stock_producto_eliminado",
+                        null,
+                        Locale.getDefault()));
               }
             });
   }
@@ -500,7 +513,11 @@ public class ProductoServiceImpl implements IProductoService {
               this.agregarStock(producto.get(), idSucursal, cantidad);
             }
           } else {
-            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+            logger.warn(
+                messageSource.getMessage(
+                    "mensaje_error_actualizar_stock_producto_eliminado",
+                    null,
+                    Locale.getDefault()));
           }
         });
   }
@@ -519,7 +536,11 @@ public class ProductoServiceImpl implements IProductoService {
               this.quitarStock(producto.get(), idSucursal, cantidad);
             }
           } else {
-            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+            logger.warn(
+                messageSource.getMessage(
+                    "mensaje_error_actualizar_stock_producto_eliminado",
+                    null,
+                    Locale.getDefault()));
           }
         });
   }
@@ -884,7 +905,6 @@ public class ProductoServiceImpl implements IProductoService {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          logger.error(ex.getMessage());
           throw new ServiceException(messageSource.getMessage(
             "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
@@ -893,7 +913,6 @@ public class ProductoServiceImpl implements IProductoService {
           return JasperExportManager.exportReportToPdf(
               JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          logger.error(ex.getMessage());
           throw new ServiceException(messageSource.getMessage(
             "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
@@ -916,7 +935,6 @@ public class ProductoServiceImpl implements IProductoService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
