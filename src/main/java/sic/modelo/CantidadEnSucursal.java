@@ -41,7 +41,7 @@ public class CantidadEnSucursal implements Serializable {
 
   private String estante;
 
-  @Version
+  //@Version
   private Long version;
 
   @JsonGetter("idSucursal")
