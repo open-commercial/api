@@ -7,14 +7,18 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.App;
 import sic.builder.ProductoBuilder;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
@@ -31,20 +35,19 @@ import sic.service.ISucursalService;
 
 import javax.persistence.EntityNotFoundException;
 
+@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = AppTest.class)
+@ContextConfiguration(classes = {ProductoServiceImpl.class})
 class ProductoServiceImplTest {
 
-  @Autowired MessageSource messageSourceTest;
+  @MockBean IMedidaService medidaService;
+  @MockBean IRubroService rubroService;
+  @MockBean IProveedorService proveedorService;
+  @MockBean ISucursalService sucursalService;
+  @MockBean ProductoRepository productoRepository;
 
-  @Mock IMedidaService medidaService;
-  @Mock IRubroService rubroService;
-  @Mock IProveedorService proveedorService;
-  @Mock ISucursalService sucursalService;
-  @Mock ProductoRepository productoRepository;
-  @Mock MessageSource messageSourceTestMock;
-
-  @InjectMocks ProductoServiceImpl productoService;
+  @Autowired MessageSource messageSource;
+  @Autowired ProductoServiceImpl productoService;
 
   @Test
   void shouldCalcularGananciaPorcentajeDescendente() {
@@ -145,10 +148,10 @@ class ProductoServiceImplTest {
     Producto productoDuplicado = new Producto();
     productoDuplicado.setDescripcion("12345");
     when(productoRepository.findByCodigoAndEliminado("12345", false)).thenReturn(productoDuplicado);
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_producto_duplicado_codigo", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
@@ -159,7 +162,7 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_producto_duplicado_codigo", null, Locale.getDefault())));
   }
 
@@ -197,10 +200,10 @@ class ProductoServiceImplTest {
     productoDuplicado.setDescripcion("Ventilador de pie");
     when(productoRepository.findByDescripcionAndEliminado("Ventilador de pie", false))
         .thenReturn(productoDuplicado);
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
@@ -211,19 +214,19 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_producto_duplicado_descripcion", null, Locale.getDefault())));
   }
 
   @Test
   public void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
     Producto productoParaActualizar = new ProductoBuilder().withOferta(true).build();
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_producto_oferta_sin_imagen",
             new Object[] {productoParaActualizar.getDescripcion()},
             Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_producto_oferta_sin_imagen",
                 new Object[] {productoParaActualizar.getDescripcion()},
                 Locale.getDefault()));
@@ -236,7 +239,7 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_producto_oferta_sin_imagen",
                     new Object[] {productoParaActualizar.getDescripcion()},
                     Locale.getDefault())));
@@ -248,10 +251,10 @@ class ProductoServiceImplTest {
     Producto productoPersistido = new ProductoBuilder().withId_Producto(2L).build();
     when(productoRepository.findByDescripcionAndEliminado("Cinta adhesiva doble faz 3M", false))
         .thenReturn(productoPersistido);
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
@@ -262,7 +265,7 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_producto_duplicado_descripcion",
                     new Object[] {productoParaActualizar.getDescripcion()},
                     Locale.getDefault())));
@@ -303,10 +306,10 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownEntityNotFoundException() {
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_producto_no_existente", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_producto_no_existente", null, Locale.getDefault()));
     when(productoRepository.findById(1L)).thenReturn(Optional.empty());
     EntityNotFoundException thrown =
@@ -317,7 +320,7 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_producto_no_existente", null, Locale.getDefault())));
   }
 
@@ -328,10 +331,10 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldGetProductosSinStockDisponible() {
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
     Producto producto = new Producto();
     producto.setIdProducto(1L);
@@ -360,10 +363,10 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldThrownBusinessServiceExceptionPorBuscarProductosSinIdSucursal() {
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
     Producto producto = new Producto();
     producto.setIdProducto(1L);
@@ -391,7 +394,7 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault())));
   }
 
@@ -413,10 +416,10 @@ class ProductoServiceImplTest {
     Producto producto = new ProductoBuilder().withId_Producto(1L).build();
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     productoService.actualizarMultiples(productosParaActualizarDTO);
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
@@ -441,13 +444,13 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_modificar_producto_no_permitido", null, Locale.getDefault())));
 
-    when(messageSourceTestMock.getMessage(
+    when(messageSource.getMessage(
             "mensaje_error_ids_duplicados", null, Locale.getDefault()))
         .thenReturn(
-            messageSourceTest.getMessage(
+            messageSource.getMessage(
                 "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     thrown =
         assertThrows(
@@ -471,7 +474,7 @@ class ProductoServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_error_ids_duplicados", null, Locale.getDefault())));
   }
 }
