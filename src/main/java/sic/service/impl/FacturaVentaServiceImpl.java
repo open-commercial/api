@@ -728,31 +728,31 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         BigDecimal cantidad = renglon.getCantidad();
         if (cantidad.compareTo(BigDecimal.ONE) >= 0) {
           if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0)
-                  || cantidad.remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) == 0) {
+              || cantidad.remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO) == 0) {
             cantidadProductosRenglonFacturaSinIVA =
-                    cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
+                cantidad.divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
           } else if (cantidad.remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO) != 0) {
             cantidadProductosRenglonFacturaSinIVA =
-                    cantidad.subtract(
-                            cantidad
-                                    .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP)
-                                    .setScale(0, RoundingMode.CEILING));
+                cantidad.subtract(
+                    cantidad
+                        .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP)
+                        .setScale(0, RoundingMode.CEILING));
           }
         } else {
           cantidadProductosRenglonFacturaSinIVA = BigDecimal.ZERO;
         }
-        RenglonFactura nuevoRenglonSinIVA =
-                facturaService.calcularRenglon(
-                        TipoDeComprobante.FACTURA_X,
-                        Movimiento.VENTA,
-                        NuevoRenglonFacturaDTO.builder()
-                                .cantidad(cantidadProductosRenglonFacturaSinIVA)
-                                .idProducto(renglon.getIdProductoItem())
-                                .renglonMarcado(
-                                        facturaService.marcarRenglonParaAplicarBonificacion(
-                                                renglon.getIdProductoItem(), cantidad))
-                                .build());
-        if (nuevoRenglonSinIVA.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
+        if (cantidadProductosRenglonFacturaSinIVA.compareTo(BigDecimal.ZERO) > 0) {
+          RenglonFactura nuevoRenglonSinIVA =
+              facturaService.calcularRenglon(
+                  TipoDeComprobante.FACTURA_X,
+                  Movimiento.VENTA,
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(cantidadProductosRenglonFacturaSinIVA)
+                      .idProducto(renglon.getIdProductoItem())
+                      .renglonMarcado(
+                          facturaService.marcarRenglonParaAplicarBonificacion(
+                              renglon.getIdProductoItem(), cantidad))
+                      .build());
           renglonesSinIVA.add(nuevoRenglonSinIVA);
         }
         numeroDeRenglon++;
