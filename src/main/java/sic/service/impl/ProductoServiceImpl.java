@@ -398,6 +398,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     //se setea siempre en false momentaniamente
     productoPorActualizar.setIlimitado(false);
+    productoPorActualizar.setVersion(productoPersistido.getVersion());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
     if (imagen != null) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);

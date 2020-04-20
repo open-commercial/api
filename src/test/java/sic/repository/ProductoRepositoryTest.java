@@ -26,7 +26,6 @@ class ProductoRepositoryTest {
   @Autowired TestEntityManager testEntityManager;
 
   @Test
-  @Disabled
   void shouldThrowOptimisticLockExceptionWhenIntentaActualizarProductoDetached() {
     Assertions.assertThrows(
         OptimisticLockException.class,
