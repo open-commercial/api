@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -17,6 +18,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.App;
 import sic.builder.ProductoBuilder;
@@ -38,6 +40,7 @@ import javax.persistence.EntityNotFoundException;
 @WebMvcTest
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ProductoServiceImpl.class})
+@TestPropertySource(locations = "classpath:application.properties")
 class ProductoServiceImplTest {
 
   @MockBean IMedidaService medidaService;
@@ -48,6 +51,36 @@ class ProductoServiceImplTest {
 
   @Autowired MessageSource messageSource;
   @Autowired ProductoServiceImpl productoService;
+
+  private Producto crearProducto() {
+    Producto producto = new Producto();
+    producto.setDescripcion("Disco de corte");
+    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
+    CantidadEnSucursal cantidad = new CantidadEnSucursal();
+    cantidad.setCantidad(BigDecimal.ZERO);
+    cantidad.setSucursal(new Sucursal());
+    altaCantidadesEnSucursales.add(cantidad);
+    producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
+    producto.setCantidadTotalEnSucursales(BigDecimal.ZERO);
+    producto.setCantMinima(BigDecimal.ONE);
+    producto.setBulto(BigDecimal.ONE);
+    producto.setMedida(new Medida());
+    producto.setPrecioCosto(BigDecimal.ZERO);
+    producto.setGananciaPorcentaje(BigDecimal.ZERO);
+    producto.setGananciaNeto(BigDecimal.ZERO);
+    producto.setPrecioVentaPublico(BigDecimal.ZERO);
+    producto.setIvaPorcentaje(BigDecimal.ZERO);
+    producto.setIvaNeto(BigDecimal.ZERO);
+    producto.setPrecioLista(BigDecimal.ZERO);
+    producto.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+    producto.setPorcentajeBonificacionPrecio(BigDecimal.ZERO);
+    producto.setPrecioBonificado(BigDecimal.ZERO);
+    producto.setRubro(new Rubro());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
+    producto.setProveedor(new Proveedor());
+    producto.setFechaAlta(LocalDateTime.now());
+    return producto;
+  }
 
   @Test
   void shouldCalcularGananciaPorcentajeDescendente() {
@@ -148,11 +181,6 @@ class ProductoServiceImplTest {
     Producto productoDuplicado = new Producto();
     productoDuplicado.setDescripcion("12345");
     when(productoRepository.findByCodigoAndEliminado("12345", false)).thenReturn(productoDuplicado);
-    when(messageSource.getMessage(
-            "mensaje_producto_duplicado_codigo", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -200,11 +228,6 @@ class ProductoServiceImplTest {
     productoDuplicado.setDescripcion("Ventilador de pie");
     when(productoRepository.findByDescripcionAndEliminado("Ventilador de pie", false))
         .thenReturn(productoDuplicado);
-    when(messageSource.getMessage(
-            "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -220,20 +243,12 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
-    Producto productoParaActualizar = new ProductoBuilder().withOferta(true).build();
-    when(messageSource.getMessage(
-            "mensaje_producto_oferta_sin_imagen",
-            new Object[] {productoParaActualizar.getDescripcion()},
-            Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_producto_oferta_sin_imagen",
-                new Object[] {productoParaActualizar.getDescripcion()},
-                Locale.getDefault()));
+    Producto producto = this.crearProducto();
+    producto.setOferta(true);
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
-            () -> productoService.actualizar(productoParaActualizar, productoParaActualizar, null));
+            () -> productoService.actualizar(producto, producto, null));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -241,21 +256,20 @@ class ProductoServiceImplTest {
             .contains(
                 messageSource.getMessage(
                     "mensaje_producto_oferta_sin_imagen",
-                    new Object[] {productoParaActualizar.getDescripcion()},
+                    new Object[] {producto.getDescripcion()},
                     Locale.getDefault())));
   }
 
   @Test
   public void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
-    Producto productoParaActualizar = new ProductoBuilder().withId_Producto(1L).build();
-    Producto productoPersistido = new ProductoBuilder().withId_Producto(2L).build();
-    when(productoRepository.findByDescripcionAndEliminado("Cinta adhesiva doble faz 3M", false))
+    Producto productoParaActualizar = this.crearProducto();
+    productoParaActualizar.setIdProducto(1L);
+    productoParaActualizar.setCodigo("X3M.12");
+    Producto productoPersistido = this.crearProducto();
+    productoPersistido.setIdProducto(2L);
+    productoPersistido.setCodigo("X3M.12");
+    when(productoRepository.findByCodigoAndEliminado("X3M.12", false))
         .thenReturn(productoPersistido);
-    when(messageSource.getMessage(
-            "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_producto_duplicado_descripcion", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -266,7 +280,7 @@ class ProductoServiceImplTest {
             .getMessage()
             .contains(
                 messageSource.getMessage(
-                    "mensaje_producto_duplicado_descripcion",
+                    "mensaje_producto_duplicado_codigo",
                     new Object[] {productoParaActualizar.getDescripcion()},
                     Locale.getDefault())));
   }
@@ -306,11 +320,6 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownEntityNotFoundException() {
-    when(messageSource.getMessage(
-            "mensaje_producto_no_existente", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_producto_no_existente", null, Locale.getDefault()));
     when(productoRepository.findById(1L)).thenReturn(Optional.empty());
     EntityNotFoundException thrown =
         assertThrows(
@@ -331,11 +340,6 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldGetProductosSinStockDisponible() {
-    when(messageSource.getMessage(
-            "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
     Producto producto = new Producto();
     producto.setIdProducto(1L);
     producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
@@ -363,11 +367,6 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldThrownBusinessServiceExceptionPorBuscarProductosSinIdSucursal() {
-    when(messageSource.getMessage(
-            "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
     Producto producto = new Producto();
     producto.setIdProducto(1L);
     producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
@@ -416,11 +415,6 @@ class ProductoServiceImplTest {
     Producto producto = new ProductoBuilder().withId_Producto(1L).build();
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     productoService.actualizarMultiples(productosParaActualizarDTO);
-    when(messageSource.getMessage(
-            "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -446,12 +440,6 @@ class ProductoServiceImplTest {
             .contains(
                 messageSource.getMessage(
                     "mensaje_modificar_producto_no_permitido", null, Locale.getDefault())));
-
-    when(messageSource.getMessage(
-            "mensaje_error_ids_duplicados", null, Locale.getDefault()))
-        .thenReturn(
-            messageSource.getMessage(
-                "mensaje_error_ids_duplicados", null, Locale.getDefault()));
     thrown =
         assertThrows(
             BusinessServiceException.class,
