@@ -26,7 +26,7 @@ import sic.controller.Views;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"idProducto", "descripcion"})
 @ToString
-@JsonIgnoreProperties({"medida", "rubro", "proveedor"})
+@JsonIgnoreProperties({"medida", "rubro", "proveedor", "version"})
 @JsonView(Views.Vendedor.class)
 public class Producto implements Serializable {
 

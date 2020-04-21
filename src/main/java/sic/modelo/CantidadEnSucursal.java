@@ -41,8 +41,6 @@ public class CantidadEnSucursal implements Serializable {
 
   private String estante;
 
-  private Long version;
-
   @JsonGetter("idSucursal")
   public Long getIdSucursal() {
     return sucursal.getIdSucursal();
