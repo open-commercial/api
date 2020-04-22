@@ -1,27 +1,24 @@
 package sic.service.impl;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.MessageSource;
-import org.springframework.context.support.ReloadableResourceBundleMessageSource;
-import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.App;
-import sic.builder.ProductoBuilder;
+import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
@@ -29,57 +26,98 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
-import sic.repository.ProductoRepository;
-import sic.service.IMedidaService;
-import sic.service.IProveedorService;
-import sic.service.IRubroService;
-import sic.service.ISucursalService;
 
+import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 
-@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {ProductoServiceImpl.class})
+@SpringBootTest
 @TestPropertySource(locations = "classpath:application.properties")
+@Sql(scripts = {"classpath:data.sql"})
 class ProductoServiceImplTest {
-
-  @MockBean IMedidaService medidaService;
-  @MockBean IRubroService rubroService;
-  @MockBean IProveedorService proveedorService;
-  @MockBean ISucursalService sucursalService;
-  @MockBean ProductoRepository productoRepository;
 
   @Autowired MessageSource messageSource;
   @Autowired ProductoServiceImpl productoService;
+  @Autowired ProveedorServiceImpl proveedorService;
+  @Autowired MedidaServiceImpl medidaService;
+  @Autowired RubroServiceImpl rubroService;
+  @Autowired SucursalServiceImpl sucursalService;
 
-  private Producto crearProducto() {
-    Producto producto = new Producto();
-    producto.setDescripcion("Disco de corte");
-    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
-    CantidadEnSucursal cantidad = new CantidadEnSucursal();
-    cantidad.setCantidad(BigDecimal.ZERO);
-    cantidad.setSucursal(new Sucursal());
-    altaCantidadesEnSucursales.add(cantidad);
-    producto.setCantidadEnSucursales(altaCantidadesEnSucursales);
-    producto.setCantidadTotalEnSucursales(BigDecimal.ZERO);
-    producto.setCantMinima(BigDecimal.ONE);
-    producto.setBulto(BigDecimal.ONE);
-    producto.setMedida(new Medida());
-    producto.setPrecioCosto(BigDecimal.ZERO);
-    producto.setGananciaPorcentaje(BigDecimal.ZERO);
-    producto.setGananciaNeto(BigDecimal.ZERO);
-    producto.setPrecioVentaPublico(BigDecimal.ZERO);
-    producto.setIvaPorcentaje(BigDecimal.ZERO);
-    producto.setIvaNeto(BigDecimal.ZERO);
-    producto.setPrecioLista(BigDecimal.ZERO);
-    producto.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
-    producto.setPorcentajeBonificacionPrecio(BigDecimal.ZERO);
-    producto.setPrecioBonificado(BigDecimal.ZERO);
-    producto.setRubro(new Rubro());
-    producto.setFechaUltimaModificacion(LocalDateTime.now());
-    producto.setProveedor(new Proveedor());
-    producto.setFechaAlta(LocalDateTime.now());
-    return producto;
+  private NuevoProductoDTO crearNuevoProductoDTO(Sucursal sucursal) {
+    return NuevoProductoDTO.builder()
+        .descripcion("Corta Papas - Vegetales")
+        .codigo("XD3.M2")
+        .cantidadEnSucursal(
+            new HashMap<Long, BigDecimal>() {
+              {
+                put(sucursal.getIdSucursal(), BigDecimal.TEN);
+              }
+            })
+        .bulto(BigDecimal.ONE)
+        .precioCosto(new BigDecimal("100"))
+        .gananciaPorcentaje(new BigDecimal("900"))
+        .gananciaNeto(new BigDecimal("900"))
+        .precioVentaPublico(new BigDecimal("1000"))
+        .ivaPorcentaje(new BigDecimal("10.5"))
+        .ivaNeto(new BigDecimal("105"))
+        .precioLista(new BigDecimal("1105"))
+        .porcentajeBonificacionPrecio(new BigDecimal("20"))
+        .publico(true)
+        .build();
+  }
+
+  private Proveedor crearProveedor() {
+    Proveedor proveedor = new Proveedor();
+    proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    byte[] array = new byte[7];
+    new Random().nextBytes(array);
+    String generatedString = new String(array, StandardCharsets.UTF_8);
+    proveedor.setNroProveedor(generatedString);
+    proveedor.setRazonSocial(generatedString);
+    return proveedor;
+  }
+
+  private Medida crearMedida() {
+    Medida medida = new Medida();
+    byte[] array = new byte[7];
+    new Random().nextBytes(array);
+    String generatedString = new String(array, StandardCharsets.UTF_8);
+    medida.setNombre(generatedString);
+    return medida;
+  }
+
+  private Rubro crearRubro() {
+    Rubro rubro = new Rubro();
+    byte[] array = new byte[7];
+    new Random().nextBytes(array);
+    String generatedString = new String(array, StandardCharsets.UTF_8);
+    rubro.setNombre(generatedString);
+    return rubro;
+  }
+
+  private Sucursal crearSucursal() {
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    byte[] array = new byte[7];
+    new Random().nextBytes(array);
+    String generatedString = new String(array, StandardCharsets.UTF_8);
+    sucursal.setNombre(generatedString);
+    int leftLimit = 97; // letter 'a'
+    int rightLimit = 122; // letter 'z'
+    int targetStringLength = 10;
+    Random random = new Random();
+    generatedString =
+        random
+            .ints(leftLimit, rightLimit + 1)
+            .limit(targetStringLength)
+            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+            .toString();
+    sucursal.setEmail(generatedString + "@" + generatedString + ".com");
+    long leftLimitLong = 1L;
+    long rightLimitLong = 1000000L;
+    long generatedLong = leftLimitLong + (long) (Math.random() * (rightLimitLong - leftLimitLong));
+    sucursal.setIdFiscal(generatedLong);
+    return sucursal;
   }
 
   @Test
@@ -148,43 +186,28 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownBusinessExceptionAltaProductoCodigoDuplicado() {
-    NuevoProductoDTO nuevoProductoUno =
-        NuevoProductoDTO.builder()
-            .descripcion("Ventilador de pie")
-            .cantidadEnSucursal(
-                new HashMap<Long, BigDecimal>() {
-                  {
-                    put(1L, BigDecimal.TEN);
-                  }
-                })
-            .bulto(BigDecimal.ONE)
-            .precioCosto(new BigDecimal("100"))
-            .gananciaPorcentaje(new BigDecimal("900"))
-            .gananciaNeto(new BigDecimal("900"))
-            .precioVentaPublico(new BigDecimal("1000"))
-            .ivaPorcentaje(new BigDecimal("21.0"))
-            .ivaNeto(new BigDecimal("210"))
-            .precioLista(new BigDecimal("1210"))
-            .porcentajeBonificacionPrecio(new BigDecimal("20"))
-            .porcentajeBonificacionOferta(new BigDecimal("-1"))
-            .oferta(true)
-            .imagen((new String("imagen")).getBytes())
-            .codigo("12345")
-            .build();
-    when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(new Proveedor());
-    when(rubroService.getRubroNoEliminadoPorId(1L)).thenReturn(new Rubro());
-    when(medidaService.getMedidaNoEliminadaPorId(1L)).thenReturn(new Medida());
-    Sucursal[] sucursales = new Sucursal[] {new Sucursal()};
-    when(sucursalService.getSucusales(false)).thenReturn(Arrays.asList(sucursales));
-    when(productoRepository.findByDescripcionAndEliminado("Ventilador de pie", false))
-        .thenReturn(null);
-    Producto productoDuplicado = new Producto();
-    productoDuplicado.setDescripcion("12345");
-    when(productoRepository.findByCodigoAndEliminado("12345", false)).thenReturn(productoDuplicado);
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
+    nuevoProductoDTO.setCodigo("RES.8");
+    nuevoProductoDTO.setDescripcion("RES.8");
+    assertNotNull(
+        productoService.guardar(
+            nuevoProductoDTO,
+            medida.getIdMedida(),
+            rubro.getIdRubro(),
+            proveedor.getIdProveedor()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
-            () -> productoService.guardar(nuevoProductoUno, 1L, 1L, 1L));
+            () ->
+                productoService.guardar(
+                    nuevoProductoDTO,
+                    medida.getIdMedida(),
+                    rubro.getIdRubro(),
+                    proveedor.getIdProveedor()));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -196,42 +219,25 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownBusinessExceptionAltaProductoDescripcionDuplicado() {
-    NuevoProductoDTO nuevoProductoUno =
-        NuevoProductoDTO.builder()
-            .descripcion("Ventilador de pie")
-            .cantidadEnSucursal(
-                new HashMap<Long, BigDecimal>() {
-                  {
-                    put(1L, BigDecimal.TEN);
-                  }
-                })
-            .bulto(BigDecimal.ONE)
-            .precioCosto(new BigDecimal("100"))
-            .gananciaPorcentaje(new BigDecimal("900"))
-            .gananciaNeto(new BigDecimal("900"))
-            .precioVentaPublico(new BigDecimal("1000"))
-            .ivaPorcentaje(new BigDecimal("21.0"))
-            .ivaNeto(new BigDecimal("210"))
-            .precioLista(new BigDecimal("1210"))
-            .porcentajeBonificacionPrecio(new BigDecimal("20"))
-            .porcentajeBonificacionOferta(new BigDecimal("-1"))
-            .oferta(true)
-            .imagen((new String("imagen")).getBytes())
-            .codigo("12345")
-            .build();
-    when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(new Proveedor());
-    when(rubroService.getRubroNoEliminadoPorId(1L)).thenReturn(new Rubro());
-    when(medidaService.getMedidaNoEliminadaPorId(1L)).thenReturn(new Medida());
-    Sucursal[] sucursales = new Sucursal[] {new Sucursal()};
-    when(sucursalService.getSucusales(false)).thenReturn(Arrays.asList(sucursales));
-    Producto productoDuplicado = new Producto();
-    productoDuplicado.setDescripcion("Ventilador de pie");
-    when(productoRepository.findByDescripcionAndEliminado("Ventilador de pie", false))
-        .thenReturn(productoDuplicado);
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProducto = this.crearNuevoProductoDTO(sucursal);
+    nuevoProducto.setCodigo(null);
+    nuevoProducto.setDescripcion("Ventilador de pared");
+    assertNotNull(
+        productoService.guardar(
+            nuevoProducto, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
-            () -> productoService.guardar(nuevoProductoUno, 1L, 1L, 1L));
+            () ->
+                productoService.guardar(
+                    nuevoProducto,
+                    medida.getIdMedida(),
+                    rubro.getIdRubro(),
+                    proveedor.getIdProveedor()));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -243,7 +249,16 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
-    Producto producto = this.crearProducto();
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    Producto producto =
+        productoService.guardar(
+            this.crearNuevoProductoDTO(sucursal),
+            medida.getIdMedida(),
+            rubro.getIdRubro(),
+            proveedor.getIdProveedor());
     producto.setOferta(true);
     BusinessServiceException thrown =
         assertThrows(
@@ -262,18 +277,25 @@ class ProductoServiceImplTest {
 
   @Test
   public void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
-    Producto productoParaActualizar = this.crearProducto();
-    productoParaActualizar.setIdProducto(1L);
-    productoParaActualizar.setCodigo("X3M.12");
-    Producto productoPersistido = this.crearProducto();
-    productoPersistido.setIdProducto(2L);
-    productoPersistido.setCodigo("X3M.12");
-    when(productoRepository.findByCodigoAndEliminado("X3M.12", false))
-        .thenReturn(productoPersistido);
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
+    nuevoProductoDTO.setCodigo("X9M.19");
+    nuevoProductoDTO.setDescripcion("X9M.19");
+    productoService.guardar(
+        nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
+    nuevoProductoDTO.setCodigo("TLC.16");
+    nuevoProductoDTO.setDescripcion("TLC.16");
+    Producto productoParaActualizar =
+        productoService.guardar(
+            nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
+    productoParaActualizar.setCodigo("X9M.19");
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
-            () -> productoService.actualizar(productoParaActualizar, productoPersistido, null));
+            () -> productoService.actualizar(productoParaActualizar, productoParaActualizar, null));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -299,31 +321,42 @@ class ProductoServiceImplTest {
             .oferta(true)
             .build();
     String stringBuilder =
-        "producto.eliminado = false && (containsIc(producto.codigo,213) || containsIc(producto.descripcion,testDescripcion)) "
+        "producto.eliminado = false && (containsIc(producto.codigo,213) || "
+            + "containsIc(producto.descripcion,testDescripcion)) "
             + "&& producto.rubro.idRubro = 1 && producto.proveedor.idProveedor = 2 "
-            + "&& any(producto.cantidadEnSucursales).cantidad > 0 && producto.ilimitado = false && producto.publico = true "
+            + "&& any(producto.cantidadEnSucursales).cantidad > 0 && producto.ilimitado = false "
+            + "&& producto.publico = true "
             + "&& producto.oferta = true";
     assertEquals(stringBuilder, productoService.getBuilder(criteria).toString());
   }
 
   @Test
-  public void shouldGetProductoConPrecioBonificadoPorOferta() {
-    Producto producto = new Producto();
-    producto.setPrecioLista(new BigDecimal("100"));
-    producto.setPorcentajeBonificacionOferta(new BigDecimal("10"));
-    producto.setOferta(true);
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    Producto productoRecuperado = productoService.getProductoNoEliminadoPorId(1L);
-    assertEquals(new BigDecimal("100"), productoRecuperado.getPrecioLista());
-    assertEquals(new BigDecimal("90.00"), productoRecuperado.getPrecioBonificado());
+  public void shouldGetProductoConPrecioBonificadoPorOferta() throws IOException {
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
+    nuevoProductoDTO.setCodigo("T900M.19");
+    nuevoProductoDTO.setDescripcion("Taladro 900w");
+    nuevoProductoDTO.setPorcentajeBonificacionOferta(new BigDecimal("10"));
+    nuevoProductoDTO.setOferta(true);
+    BufferedImage bImage = ImageIO.read(getClass().getResource("/imagenProductoTest.jpeg"));
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ImageIO.write(bImage, "jpeg", bos);
+    nuevoProductoDTO.setImagen(bos.toByteArray());
+    Producto producto =
+        productoService.guardar(
+            nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
+    assertEquals(new BigDecimal("1105"), producto.getPrecioLista());
+    assertEquals(new BigDecimal("994.500000000000000"), producto.getPrecioBonificado());
   }
 
   @Test
   public void shouldThrownEntityNotFoundException() {
-    when(productoRepository.findById(1L)).thenReturn(Optional.empty());
     EntityNotFoundException thrown =
         assertThrows(
-            EntityNotFoundException.class, () -> productoService.getProductoNoEliminadoPorId(1L));
+            EntityNotFoundException.class, () -> productoService.getProductoNoEliminadoPorId(999L));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -339,25 +372,23 @@ class ProductoServiceImplTest {
   }
 
   @Test
+  @Transactional
   void shouldGetProductosSinStockDisponible() {
-    Producto producto = new Producto();
-    producto.setIdProducto(1L);
-    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
-    cantidadEnSucursal.setSucursal(sucursal);
-    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
-    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
-    cantidadEnSucursales.add(cantidadEnSucursal);
-    producto.setCantidadEnSucursales(cantidadEnSucursales);
-    producto.setIlimitado(false);
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    long[] idProducto = {1};
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
+    nuevoProductoDTO.setCodigo("TIM.38");
+    nuevoProductoDTO.setDescripcion("TIM.38");
+    Producto producto =
+        productoService.guardar(
+            nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
+    long[] idProducto = {producto.getIdProducto()};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
         ProductosParaVerificarStockDTO.builder().build();
-    productosParaVerificarStockDTO.setIdSucursal(1L);
+    productosParaVerificarStockDTO.setIdSucursal(sucursal.getIdSucursal());
     productosParaVerificarStockDTO.setCantidad(cantidad);
     productosParaVerificarStockDTO.setIdProducto(idProducto);
     List<ProductoFaltanteDTO> resultadoObtenido =
@@ -367,19 +398,6 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldThrownBusinessServiceExceptionPorBuscarProductosSinIdSucursal() {
-    Producto producto = new Producto();
-    producto.setIdProducto(1L);
-    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
-    cantidadEnSucursal.setSucursal(sucursal);
-    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
-    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
-    cantidadEnSucursales.add(cantidadEnSucursal);
-    producto.setCantidadEnSucursales(cantidadEnSucursales);
-    producto.setIlimitado(false);
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     long[] idProducto = {1};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
@@ -399,21 +417,29 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldTestActualizarMultiplesProductos() {
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
+    nuevoProductoDTO.setCodigo("POM.98");
+    nuevoProductoDTO.setDescripcion("POM.98");
+    Producto producto =
+        productoService.guardar(
+            nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
     ProductosParaActualizarDTO productosParaActualizarDTO =
         ProductosParaActualizarDTO.builder()
-            .idProducto(new long[] {1L})
+            .idProducto(new long[] {producto.getIdProducto()})
             .cantidadVentaMinima(BigDecimal.TEN)
-            .idMedida(1L)
-            .idRubro(1L)
-            .idProveedor(2L)
+            .idMedida(medida.getIdMedida())
+            .idRubro(rubro.getIdRubro())
+            .idProveedor(proveedor.getIdProveedor())
             .gananciaPorcentaje(BigDecimal.TEN)
             .ivaPorcentaje(new BigDecimal("21"))
             .precioCosto(BigDecimal.TEN)
             .porcentajeBonificacionPrecio(BigDecimal.TEN)
             .publico(true)
             .build();
-    Producto producto = new ProductoBuilder().withId_Producto(1L).build();
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     productoService.actualizarMultiples(productosParaActualizarDTO);
     BusinessServiceException thrown =
         assertThrows(
@@ -421,12 +447,12 @@ class ProductoServiceImplTest {
             () ->
                 productoService.actualizarMultiples(
                     ProductosParaActualizarDTO.builder()
-                        .idProducto(new long[] {1L})
+                        .idProducto(new long[] {producto.getIdProducto()})
                         .descuentoRecargoPorcentaje(BigDecimal.TEN)
                         .cantidadVentaMinima(BigDecimal.TEN)
-                        .idMedida(1L)
-                        .idRubro(1L)
-                        .idProveedor(2L)
+                        .idMedida(medida.getIdMedida())
+                        .idRubro(rubro.getIdRubro())
+                        .idProveedor(proveedor.getIdProveedor())
                         .gananciaPorcentaje(BigDecimal.TEN)
                         .ivaPorcentaje(new BigDecimal("21"))
                         .precioCosto(BigDecimal.TEN)
@@ -446,11 +472,11 @@ class ProductoServiceImplTest {
             () ->
                 productoService.actualizarMultiples(
                     ProductosParaActualizarDTO.builder()
-                        .idProducto(new long[] {1L, 1L})
+                        .idProducto(new long[] {producto.getIdProducto(), producto.getIdProducto()})
                         .cantidadVentaMinima(BigDecimal.TEN)
-                        .idMedida(1L)
-                        .idRubro(1L)
-                        .idProveedor(2L)
+                        .idMedida(medida.getIdMedida())
+                        .idRubro(rubro.getIdRubro())
+                        .idProveedor(proveedor.getIdProveedor())
                         .gananciaPorcentaje(BigDecimal.TEN)
                         .ivaPorcentaje(new BigDecimal("21"))
                         .precioCosto(BigDecimal.TEN)
@@ -464,5 +490,65 @@ class ProductoServiceImplTest {
             .contains(
                 messageSource.getMessage(
                     "mensaje_error_ids_duplicados", null, Locale.getDefault())));
+  }
+
+  @Test
+  @Transactional
+  void shouldTestActualizarStockPedido() {
+    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
+    Medida medida = medidaService.guardar(this.crearMedida());
+    Rubro rubro = rubroService.guardar(this.crearRubro());
+    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
+    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
+    nuevoProductoDTO.setCodigo(null);
+    nuevoProductoDTO.setDescripcion("Corta Papas - Vegetales");
+
+//    NuevoProductoDTO nuevoProducto =
+//            NuevoProductoDTO.builder()
+//                    .descripcion("Corta Papas - Vegetales")
+//                    .cantidadEnSucursal(
+//                            new HashMap<Long, BigDecimal>() {
+//                              {
+//                                put(1L, BigDecimal.TEN);
+//                              }
+//                            })
+//                    .bulto(BigDecimal.ONE)
+//                    .precioCosto(new BigDecimal("100"))
+//                    .gananciaPorcentaje(new BigDecimal("900"))
+//                    .gananciaNeto(new BigDecimal("900"))
+//                    .precioVentaPublico(new BigDecimal("1000"))
+//                    .ivaPorcentaje(new BigDecimal("10.5"))
+//                    .ivaNeto(new BigDecimal("105"))
+//                    .precioLista(new BigDecimal("1105"))
+//                    .porcentajeBonificacionPrecio(new BigDecimal("20"))
+//                    .publico(true)
+//                    .build();
+    Producto producto =
+            productoService.guardar(
+                    nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
+    assertEquals(BigDecimal.TEN, producto.getCantidadTotalEnSucursales());
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(new BigDecimal("2"));
+    renglonesPedido.add(renglonPedido);
+    Pedido pedido = new Pedido();
+    pedido.setSucursal(sucursal);
+    pedido.setRenglones(renglonesPedido);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
+    producto = productoService.getProductoNoEliminadoPorId(1L);
+    assertEquals(new BigDecimal("8"), producto.getCantidadTotalEnSucursales());
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+    assertEquals(new BigDecimal("6"), producto.getCantidadTotalEnSucursales());
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
+    assertEquals(new BigDecimal("8"), producto.getCantidadTotalEnSucursales());
+    pedido.setEstado(EstadoPedido.CERRADO);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+    assertEquals(new BigDecimal("10"), producto.getCantidadTotalEnSucursales());
+    producto.setEliminado(true);
+    productoService.actualizar(producto, producto, null);
+    assertTrue(producto.isEliminado());
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
   }
 }
