@@ -33,7 +33,6 @@ import javax.persistence.EntityNotFoundException;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.properties")
-@Sql(scripts = {"classpath:data.sql"})
 class ProductoServiceImplTest {
 
   @Autowired MessageSource messageSource;
