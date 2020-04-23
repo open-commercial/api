@@ -501,27 +501,6 @@ class ProductoServiceImplTest {
     NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
     nuevoProductoDTO.setCodigo(null);
     nuevoProductoDTO.setDescripcion("Corta Papas - Vegetales");
-
-//    NuevoProductoDTO nuevoProducto =
-//            NuevoProductoDTO.builder()
-//                    .descripcion("Corta Papas - Vegetales")
-//                    .cantidadEnSucursal(
-//                            new HashMap<Long, BigDecimal>() {
-//                              {
-//                                put(1L, BigDecimal.TEN);
-//                              }
-//                            })
-//                    .bulto(BigDecimal.ONE)
-//                    .precioCosto(new BigDecimal("100"))
-//                    .gananciaPorcentaje(new BigDecimal("900"))
-//                    .gananciaNeto(new BigDecimal("900"))
-//                    .precioVentaPublico(new BigDecimal("1000"))
-//                    .ivaPorcentaje(new BigDecimal("10.5"))
-//                    .ivaNeto(new BigDecimal("105"))
-//                    .precioLista(new BigDecimal("1105"))
-//                    .porcentajeBonificacionPrecio(new BigDecimal("20"))
-//                    .publico(true)
-//                    .build();
     Producto producto =
             productoService.guardar(
                     nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
