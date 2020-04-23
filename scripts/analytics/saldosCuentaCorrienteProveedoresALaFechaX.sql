@@ -6,8 +6,8 @@ select proveedor.idFiscal, proveedor.razonSocial, sum(rengloncuentacorriente.mon
 from cuentacorriente inner join cuentacorrienteproveedor on cuentacorriente.id_cuenta_corriente = cuentacorrienteproveedor.id_cuenta_corriente
 	inner join rengloncuentacorriente on cuentacorriente.id_cuenta_corriente = rengloncuentacorriente.id_cuenta_corriente
 	inner join proveedor on cuentacorrienteproveedor.id_Proveedor = proveedor.id_Proveedor
-where cuentacorriente.id_Empresa = 1 and rengloncuentacorriente.eliminado = false
-	and rengloncuentacorriente.fecha <= '2018-12-31 23:59:59'
+where rengloncuentacorriente.eliminado = false
+	and rengloncuentacorriente.fecha <= '2019-12-31 23:59:59'
     and (rengloncuentacorriente.tipo_comprobante = 'FACTURA_A'
 		or rengloncuentacorriente.tipo_comprobante = 'FACTURA_B'
 		or rengloncuentacorriente.tipo_comprobante = 'FACTURA_C'
