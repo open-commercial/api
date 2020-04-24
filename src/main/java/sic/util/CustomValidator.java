@@ -1,7 +1,6 @@
 package sic.util;
 
 import org.hibernate.validator.messageinterpolation.ResourceBundleMessageInterpolator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
@@ -15,7 +14,6 @@ public class CustomValidator {
 
   private Validator validator;
 
-  @Autowired
   public CustomValidator() {
     this.build();
   }
