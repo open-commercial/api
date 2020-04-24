@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -20,7 +19,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -42,9 +40,9 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.repository.ProductoRepository;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
@@ -59,6 +57,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ISucursalService sucursalService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
@@ -70,7 +69,8 @@ public class ProductoServiceImpl implements IProductoService {
     ICarritoCompraService carritoCompraService,
     IPhotoVideoUploader photoVideoUploader,
     ISucursalService sucursalService,
-    MessageSource messageSource) {
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.productoRepository = productoRepository;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
@@ -79,6 +79,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.photoVideoUploader = photoVideoUploader;
     this.sucursalService = sucursalService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -292,7 +293,8 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public Producto guardar(
-      @Valid NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+      NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+    customValidator.validar(nuevoProductoDTO);
     if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
       throw new BusinessServiceException(
           messageSource.getMessage(
@@ -372,7 +374,8 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+  public void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+    customValidator.validar(productoPorActualizar);
     if (productoPorActualizar.isOferta()
         && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())

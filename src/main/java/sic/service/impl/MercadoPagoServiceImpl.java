@@ -18,10 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
+import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
@@ -29,14 +29,12 @@ import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@Validated
 public class MercadoPagoServiceImpl implements IMercadoPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
@@ -58,19 +56,21 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
           new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public MercadoPagoServiceImpl(
-      IReciboService reciboService,
-      IFormaDePagoService formaDePagoService,
-      IClienteService clienteService,
-      INotaService notaService,
-      ISucursalService sucursalService,
-      ICarritoCompraService carritoCompraService,
-      IUsuarioService usuarioService,
-      IPedidoService pedidoService,
-      EncryptUtils encryptUtils,
-      MessageSource messageSource) {
+    IReciboService reciboService,
+    IFormaDePagoService formaDePagoService,
+    IClienteService clienteService,
+    INotaService notaService,
+    ISucursalService sucursalService,
+    ICarritoCompraService carritoCompraService,
+    IUsuarioService usuarioService,
+    IPedidoService pedidoService,
+    EncryptUtils encryptUtils,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.reciboService = reciboService;
     this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
@@ -81,11 +81,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     this.pedidoService = pedidoService;
     this.encryptUtils = encryptUtils;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
   public MercadoPagoPreferenceDTO crearNuevaPreference(
-      long idUsuario, @Valid NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+      long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+    customValidator.validar(nuevaOrdenDeCompra);
     if (nuevaOrdenDeCompra.getIdSucursal() == null) {
       if (nuevaOrdenDeCompra.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
         throw new BusinessServiceException(

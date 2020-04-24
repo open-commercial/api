@@ -60,7 +60,7 @@ class ClienteServiceImplTest {
             () -> {
               when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
                   .thenReturn(listaClienteNuevo);
-              clienteServiceImpl.validarOperacion(TipoDeOperacion.ALTA, clienteDuplicado);
+              clienteServiceImpl.validarReglasDeNegocio(TipoDeOperacion.ALTA, clienteDuplicado);
             });
     assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));
   }
@@ -83,7 +83,7 @@ class ClienteServiceImplTest {
             () -> {
               when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
                   .thenReturn(listaClienteNuevo);
-              clienteServiceImpl.validarOperacion(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
+              clienteServiceImpl.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
             });
     assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));
   }

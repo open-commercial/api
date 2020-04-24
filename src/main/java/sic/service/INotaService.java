@@ -10,13 +10,11 @@ import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
 import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
 import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
 
-import javax.validation.Valid;
-
 public interface INotaService {
 
-  NotaCredito guardarNotaCredito(@Valid NotaCredito nota);
+  NotaCredito guardarNotaCredito(NotaCredito nota);
 
-  NotaDebito guardarNotaDebito(@Valid NotaDebito nota);
+  NotaDebito guardarNotaDebito(NotaDebito nota);
 
   NotaCredito calcularNotaCreditoConFactura(NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario);
 

@@ -2,25 +2,21 @@ package sic.service;
 
 import sic.modelo.TipoDeOperacion;
 import java.util.List;
-
 import sic.modelo.Medida;
 
-import javax.validation.Valid;
-
 public interface IMedidaService {
-    
-    Medida getMedidaNoEliminadaPorId(Long id_Medida);
 
-    void actualizar(@Valid Medida medida);
+  Medida getMedidaNoEliminadaPorId(Long idMedida);
 
-    void eliminar(long idMedida);
+  void actualizar(Medida medida);
 
-    Medida getMedidaPorNombre(String nombre);
+  void eliminar(long idMedida);
 
-    List<Medida> getUnidadMedidas();
+  Medida getMedidaPorNombre(String nombre);
 
-    Medida guardar(@Valid Medida medida);
+  List<Medida> getUnidadMedidas();
 
-    void validarOperacion(TipoDeOperacion operacion, Medida medida);
+  Medida guardar(Medida medida);
 
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Medida medida);
 }

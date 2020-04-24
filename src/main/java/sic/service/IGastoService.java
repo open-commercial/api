@@ -10,30 +10,30 @@ import sic.modelo.Sucursal;
 import sic.modelo.FormaDePago;
 import sic.modelo.Gasto;
 
-import javax.validation.Valid;
-
 public interface IGastoService {
-    
-    Gasto getGastoNoEliminadoPorId(Long id);
-    
-    void eliminar(long idGasto);
 
-    List<Gasto> getGastosEntreFechasYFormaDePago(Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
+  Gasto getGastoNoEliminadoPorId(Long id);
 
-    Gasto guardar(@Valid Gasto gasto);
+  void eliminar(long idGasto);
 
-    void validarOperacion(Gasto gasto);
+  List<Gasto> getGastosEntreFechasYFormaDePago(
+      Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
 
-    Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria);
+  Gasto guardar(Gasto gasto);
 
-    long getUltimoNumeroDeGasto(long idSucursal);
+  void validarReglasDeNegocio(Gasto gasto);
 
-    BigDecimal getTotalGastosEntreFechasYFormaDePago(long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
+  Page<Gasto> buscarGastos(BusquedaGastoCriteria criteria);
 
-    BigDecimal getTotalGastosQueAfectanCajaEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
+  long getUltimoNumeroDeGasto(long idSucursal);
 
-    BigDecimal getTotalGastosEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
+  BigDecimal getTotalGastosEntreFechasYFormaDePago(
+      long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
-    BigDecimal getTotalGastos(BusquedaGastoCriteria criteria);
+  BigDecimal getTotalGastosQueAfectanCajaEntreFechas(
+      long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
+  BigDecimal getTotalGastosEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
+
+  BigDecimal getTotalGastos(BusquedaGastoCriteria criteria);
 }

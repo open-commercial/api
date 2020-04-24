@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
@@ -24,10 +23,10 @@ import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaVentaRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.validation.Valid;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -37,7 +36,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-@Validated
 public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   private final FacturaVentaRepository facturaVentaRepository;
@@ -57,22 +55,24 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final String NRO_SERIE = "nroSerie";
   private static final String NRO_FACTURA = "nroFactura";
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public FacturaVentaServiceImpl(
-      FacturaVentaRepository facturaVentaRepository,
-      IAfipService afipService,
-      IReciboService reciboService,
-      ICorreoElectronicoService correoElectronicoService,
-      IPedidoService pedidoService,
-      IUsuarioService usuarioService,
-      IClienteService clienteService,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IConfiguracionSucursalService configuracionSucursalService,
-      IFacturaService facturaService,
-      IProductoService productoService,
-      MessageSource messageSource) {
+    FacturaVentaRepository facturaVentaRepository,
+    IAfipService afipService,
+    IReciboService reciboService,
+    ICorreoElectronicoService correoElectronicoService,
+    IPedidoService pedidoService,
+    IUsuarioService usuarioService,
+    IClienteService clienteService,
+    ICuentaCorrienteService cuentaCorrienteService,
+    IConfiguracionSucursalService configuracionSucursalService,
+    IFacturaService facturaService,
+    IProductoService productoService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.afipService = afipService;
@@ -85,6 +85,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.facturaService = facturaService;
     this.productoService = productoService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -298,7 +299,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   @Transactional
   public List<FacturaVenta> guardar(
-      @Valid List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
+      List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
+    facturas.forEach(customValidator::validar);
     this.calcularValoresFacturasVentaAndActualizarStock(facturas);
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     if (idPedido != null) {

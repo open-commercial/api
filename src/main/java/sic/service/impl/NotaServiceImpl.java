@@ -10,7 +10,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaNotaCriteria;
 import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
@@ -41,9 +39,9 @@ import sic.service.*;
 import sic.repository.NotaRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class NotaServiceImpl implements INotaService {
 
   private final NotaRepository<Nota> notaRepository;
@@ -67,26 +65,28 @@ public class NotaServiceImpl implements INotaService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public NotaServiceImpl(
-      NotaRepository<Nota> notaRepository,
-      NotaCreditoRepository notaCreditoRepository,
-      NotaDebitoRepository notaDebitoRepository,
-      IFacturaService facturaService,
-      INotaService notaService,
-      IReciboService reciboService,
-      IClienteService clienteService,
-      IProveedorService proveedorService,
-      IUsuarioService usuarioService,
-      IProductoService productoService,
-      ISucursalService sucursalService,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IMercadoPagoService mercadoPagoService,
-      IConfiguracionSucursalService configuracionSucursalService,
-      IAfipService afipService,
-      MessageSource messageSource) {
+    NotaRepository<Nota> notaRepository,
+    NotaCreditoRepository notaCreditoRepository,
+    NotaDebitoRepository notaDebitoRepository,
+    IFacturaService facturaService,
+    INotaService notaService,
+    IReciboService reciboService,
+    IClienteService clienteService,
+    IProveedorService proveedorService,
+    IUsuarioService usuarioService,
+    IProductoService productoService,
+    ISucursalService sucursalService,
+    ICuentaCorrienteService cuentaCorrienteService,
+    IMercadoPagoService mercadoPagoService,
+    IConfiguracionSucursalService configuracionSucursalService,
+    IAfipService afipService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.notaRepository = notaRepository;
     this.notaCreditoRepository = notaCreditoRepository;
     this.notaDebitoRepository = notaDebitoRepository;
@@ -103,6 +103,7 @@ public class NotaServiceImpl implements INotaService {
     this.configuracionSucursalService = configuracionSucursalService;
     this.afipService = afipService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -768,7 +769,8 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public NotaCredito guardarNotaCredito(@Valid NotaCredito notaCredito) {
+  public NotaCredito guardarNotaCredito(NotaCredito notaCredito) {
+    customValidator.validar(notaCredito);
     if (notaCredito.getFecha() == null) {
       notaCredito.setFecha(LocalDateTime.now());
     }
@@ -1116,7 +1118,8 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public NotaDebito guardarNotaDebito(@Valid NotaDebito notaDebito) {
+  public NotaDebito guardarNotaDebito(NotaDebito notaDebito) {
+    customValidator.validar(notaDebito);
     if (notaDebito.getFecha() == null) {
       notaDebito.setFecha(LocalDateTime.now());
     }

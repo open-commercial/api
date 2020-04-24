@@ -3,7 +3,6 @@ package sic.service.impl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -12,14 +11,14 @@ import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.IClienteService;
 import sic.service.ICorreoElectronicoService;
 import sic.service.IUsuarioService;
+import sic.util.CustomValidator;
 
 import javax.validation.ConstraintViolationException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RegistracionServiceImpl.class})
+@ContextConfiguration(classes = {RegistracionServiceImpl.class, CustomValidator.class})
 class RegistracionServiceImplTest {
 
   @MockBean IUsuarioService usuarioService;

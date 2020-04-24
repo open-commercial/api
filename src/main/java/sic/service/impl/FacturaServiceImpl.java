@@ -5,14 +5,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,9 +23,9 @@ import sic.exception.BusinessServiceException;
 import sic.repository.FacturaRepository;
 import sic.repository.RenglonFacturaRepository;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class FacturaServiceImpl implements IFacturaService {
 
   private final FacturaRepository<Factura> facturaRepository;
@@ -41,17 +39,19 @@ public class FacturaServiceImpl implements IFacturaService {
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public FacturaServiceImpl(
-      FacturaRepository<Factura> facturaRepository,
-      RenglonFacturaRepository renglonFacturaRepository,
-      IProductoService productoService,
-      IPedidoService pedidoService,
-      INotaService notaService,
-      ICuentaCorrienteService cuentaCorrienteService,
-      MessageSource messageSource) {
+    FacturaRepository<Factura> facturaRepository,
+    RenglonFacturaRepository renglonFacturaRepository,
+    IProductoService productoService,
+    IPedidoService pedidoService,
+    INotaService notaService,
+    ICuentaCorrienteService cuentaCorrienteService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.facturaRepository = facturaRepository;
     this.renglonFacturaRepository = renglonFacturaRepository;
     this.productoService = productoService;
@@ -59,6 +59,7 @@ public class FacturaServiceImpl implements IFacturaService {
     this.notaService = notaService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -354,7 +355,8 @@ public class FacturaServiceImpl implements IFacturaService {
   public List<RenglonFactura> calcularRenglones(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      @Valid List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO) {
+      List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO) {
+    nuevosRenglonesFacturaDTO.forEach(customValidator::validar);
     List<RenglonFactura> renglones = new ArrayList<>();
     nuevosRenglonesFacturaDTO.forEach(
         nuevoRenglonFacturaDTO -> {
@@ -373,7 +375,8 @@ public class FacturaServiceImpl implements IFacturaService {
   public RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO) {
+      NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO) {
+    customValidator.validar(nuevoRenglonFacturaDTO);
     Producto producto = productoService.getProductoNoEliminadoPorId(nuevoRenglonFacturaDTO.getIdProducto());
     RenglonFactura nuevoRenglon = new RenglonFactura();
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());

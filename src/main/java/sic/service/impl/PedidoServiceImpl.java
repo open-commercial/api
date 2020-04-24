@@ -11,7 +11,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
@@ -40,9 +38,9 @@ import sic.repository.PedidoRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
@@ -59,20 +57,22 @@ public class PedidoServiceImpl implements IPedidoService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public PedidoServiceImpl(
-      PedidoRepository pedidoRepository,
-      RenglonPedidoRepository renglonPedidoRepository,
-      IFacturaVentaService facturaVentaService,
-      IUsuarioService usuarioService,
-      IClienteService clienteService,
-      IProductoService productoService,
-      ICorreoElectronicoService correoElectronicoService,
-      IConfiguracionSucursalService configuracionSucursal,
-      ICuentaCorrienteService cuentaCorrienteService,
-      ModelMapper modelMapper,
-      MessageSource messageSource) {
+    PedidoRepository pedidoRepository,
+    RenglonPedidoRepository renglonPedidoRepository,
+    IFacturaVentaService facturaVentaService,
+    IUsuarioService usuarioService,
+    IClienteService clienteService,
+    IProductoService productoService,
+    ICorreoElectronicoService correoElectronicoService,
+    IConfiguracionSucursalService configuracionSucursal,
+    ICuentaCorrienteService cuentaCorrienteService,
+    ModelMapper modelMapper,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.facturaVentaService = facturaVentaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
@@ -84,6 +84,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Pedido pedido) {
@@ -455,7 +456,8 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas) {
+  public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
+    customValidator.validar(pedido);
     pedido.setFacturas(facturas);
     this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);

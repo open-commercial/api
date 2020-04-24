@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaLocalidadCriteria;
 import sic.repository.LocalidadRepository;
@@ -19,14 +18,13 @@ import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
+import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Locale;
 
 @Service
-@Validated
 public class UbicacionServiceImpl implements IUbicacionService {
 
   private final UbicacionRepository ubicacionRepository;
@@ -35,17 +33,20 @@ public class UbicacionServiceImpl implements IUbicacionService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private final CustomValidator customValidator;
 
   @Autowired
   public UbicacionServiceImpl(
-      UbicacionRepository ubicacionRepository,
-      LocalidadRepository localidadRepository,
-      ProvinciaRepository provinciaRepository,
-      MessageSource messageSource) {
+    UbicacionRepository ubicacionRepository,
+    LocalidadRepository localidadRepository,
+    ProvinciaRepository provinciaRepository,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.ubicacionRepository = ubicacionRepository;
     this.localidadRepository = localidadRepository;
     this.provinciaRepository = provinciaRepository;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -56,7 +57,8 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public Ubicacion guardar(@Valid Ubicacion ubicacion) {
+  public Ubicacion guardar(Ubicacion ubicacion) {
+    customValidator.validar(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
     logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
@@ -99,13 +101,14 @@ public class UbicacionServiceImpl implements IUbicacionService {
 
   @Override
   @Transactional
-  public void actualizarLocalidad(@Valid Localidad localidad) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, localidad);
+  public void actualizarLocalidad(Localidad localidad) {
+    customValidator.validar(localidad);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, localidad);
     localidadRepository.save(localidad);
   }
 
   @Override
-  public void validarOperacion(TipoDeOperacion operacion, Localidad localidad) {
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Localidad localidad) {
     // Requeridos
     if (localidad.getNombre() == null || localidad.getNombre().equals("")) {
       throw new BusinessServiceException(

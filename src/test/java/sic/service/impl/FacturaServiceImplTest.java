@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -29,13 +30,16 @@ import sic.repository.FacturaCompraRepository;
 import sic.repository.FacturaVentaRepository;
 import sic.service.IFacturaService;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = AppTest.class)
+@ContextConfiguration(classes = {CustomValidator.class})
 class FacturaServiceImplTest {
 
   @Autowired
   MessageSource messageSourceTest;
+
+  @Autowired CustomValidator customValidator;
 
   @Mock FacturaVentaRepository mockFacturaVentaRepository;
   @Mock FacturaCompraRepository mockFacturaCompraRepository;

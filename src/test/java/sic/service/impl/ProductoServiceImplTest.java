@@ -13,7 +13,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.builder.ProductoBuilder;
 import sic.exception.BusinessServiceException;
@@ -32,7 +31,6 @@ import sic.service.ISucursalService;
 import javax.persistence.EntityNotFoundException;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = AppTest.class)
 class ProductoServiceImplTest {
 
   @Autowired MessageSource messageSourceTest;
