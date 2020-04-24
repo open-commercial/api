@@ -1,4 +1,4 @@
-package sic;
+package sic.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +12,7 @@ public class AppWebMvc implements WebMvcConfigurer {
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
     registry
-        .addInterceptor(this.jwtInterceptor())
+        .addInterceptor(this.getJwtInterceptor())
         .addPathPatterns("/api/**")
         .excludePathPatterns("/api/*/login")
         .excludePathPatterns("/api/*/logout")
@@ -24,7 +24,7 @@ public class AppWebMvc implements WebMvcConfigurer {
   }
 
   @Bean
-  public JwtInterceptor jwtInterceptor() {
+  public JwtInterceptor getJwtInterceptor() {
     return new JwtInterceptor();
   }
 }
