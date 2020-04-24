@@ -1,8 +1,5 @@
 package sic.service.impl;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -10,112 +7,49 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
-import sic.repository.SucursalRepository;
+import sic.repository.FacturaRepository;
 import sic.util.CalculosComprobante;
+import sic.util.EncryptUtils;
 
-import javax.imageio.ImageIO;
-
+@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@SpringBootTest
+@ContextConfiguration(
+    classes = {FacturaServiceImpl.class, SucursalServiceImpl.class, ProductoServiceImpl.class})
 @TestPropertySource(locations = "classpath:application.properties")
 class FacturaServiceImplTest {
 
-  @Autowired SucursalRepository sucursalRepository;
+  @MockBean SucursalServiceImpl sucursalService;
+  @MockBean ProductoServiceImpl productoService;
+  @MockBean PedidoServiceImpl pedidoService;
+  @MockBean FacturaRepository facturaRepository;
+  @MockBean NotaServiceImpl notaService;
+  @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
+  @Autowired MessageSource messageSource;
   @Autowired FacturaServiceImpl facturaServiceImpl;
-  @Autowired SucursalServiceImpl sucursalServiceImpl;
-  @Autowired ProductoServiceImpl productoService;
-  @Autowired ProveedorServiceImpl proveedorService;
-  @Autowired MedidaServiceImpl medidaService;
-  @Autowired RubroServiceImpl rubroService;
-  @Autowired SucursalServiceImpl sucursalService;
-
-  private Sucursal crearSucursal() {
-    Sucursal sucursal = new Sucursal();
-    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    byte[] array = new byte[7];
-    new Random().nextBytes(array);
-    String generatedString = new String(array, StandardCharsets.UTF_8);
-    sucursal.setNombre(generatedString);
-    int leftLimit = 97; // letra 'a'
-    int rightLimit = 122; // letra 'z'
-    int targetStringLength = 10;
-    Random random = new Random();
-    generatedString =
-        random
-            .ints(leftLimit, rightLimit + 1)
-            .limit(targetStringLength)
-            .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-            .toString();
-    sucursal.setEmail(generatedString + "@" + generatedString + ".com");
-    long leftLimitLong = 1L;
-    long rightLimitLong = 1000000L;
-    long generatedLong = leftLimitLong + (long) (Math.random() * (rightLimitLong - leftLimitLong));
-    sucursal.setIdFiscal(generatedLong);
-    return sucursal;
-  }
-
-  private NuevoProductoDTO crearNuevoProductoDTO(Sucursal sucursal) {
-    return NuevoProductoDTO.builder()
-        .descripcion("Corta Papas - Vegetales")
-        .codigo("XD3.M2")
-        .cantidadEnSucursal(
-            new HashMap<Long, BigDecimal>() {
-              {
-                put(sucursal.getIdSucursal(), BigDecimal.TEN);
-              }
-            })
-        .bulto(BigDecimal.ONE)
-        .precioCosto(new BigDecimal("100"))
-        .gananciaPorcentaje(new BigDecimal("900"))
-        .gananciaNeto(new BigDecimal("900"))
-        .precioVentaPublico(new BigDecimal("1000"))
-        .ivaPorcentaje(new BigDecimal("10.5"))
-        .ivaNeto(new BigDecimal("105"))
-        .precioLista(new BigDecimal("1105"))
-        .porcentajeBonificacionPrecio(new BigDecimal("20"))
-        .publico(true)
-        .build();
-  }
-
-  private Proveedor crearProveedor() {
-    Proveedor proveedor = new Proveedor();
-    proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    byte[] array = new byte[7];
-    new Random().nextBytes(array);
-    String generatedString = new String(array, StandardCharsets.UTF_8);
-    proveedor.setNroProveedor(generatedString);
-    proveedor.setRazonSocial(generatedString);
-    return proveedor;
-  }
-
-  private Medida crearMedida() {
-    Medida medida = new Medida();
-    byte[] array = new byte[7];
-    new Random().nextBytes(array);
-    String generatedString = new String(array, StandardCharsets.UTF_8);
-    medida.setNombre(generatedString);
-    return medida;
-  }
-
-  private Rubro crearRubro() {
-    Rubro rubro = new Rubro();
-    byte[] array = new byte[7];
-    new Random().nextBytes(array);
-    String generatedString = new String(array, StandardCharsets.UTF_8);
-    rubro.setNombre(generatedString);
-    return rubro;
-  }
 
   @Test
   void shouldGetTiposFacturaWhenSucursalDiscriminaIVA() {
-    Sucursal sucursal = sucursalServiceImpl.guardar(this.crearSucursal());
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_A,
       TipoDeComprobante.FACTURA_B,
@@ -129,9 +63,9 @@ class FacturaServiceImplTest {
 
   @Test
   void shouldGetTiposFacturaWhenSucursalNoDiscriminaIVA() {
-    Sucursal sucursal = this.crearSucursal();
+    Sucursal sucursal = new Sucursal();
     sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
-    sucursal = sucursalServiceImpl.guardar(sucursal);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C,
       TipoDeComprobante.FACTURA_X,
@@ -144,87 +78,59 @@ class FacturaServiceImplTest {
 
   @Test
   void shouldMarcarRenglonParaAplicarBonificacion() {
-    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
-    Medida medida = medidaService.guardar(this.crearMedida());
-    Rubro rubro = rubroService.guardar(this.crearRubro());
-    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
-    NuevoProductoDTO nuevoProductoDTO = this.crearNuevoProductoDTO(sucursal);
-    nuevoProductoDTO.setCodigo(null);
-    nuevoProductoDTO.setDescripcion("Licuadora");
-    nuevoProductoDTO.setBulto(new BigDecimal("5"));
-    Producto producto =
-        productoService.guardar(
-            nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
-    assertTrue(
-        facturaServiceImpl.marcarRenglonParaAplicarBonificacion(
-            producto.getIdProducto(), new BigDecimal("5")));
-    assertFalse(
-        facturaServiceImpl.marcarRenglonParaAplicarBonificacion(
-            producto.getIdProducto(), new BigDecimal("3")));
+    Producto productoParaRetorno = new Producto();
+    productoParaRetorno.setBulto(new BigDecimal("5"));
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
+    assertTrue(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")));
+    assertFalse(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("3")));
   }
 
   @Test
-  void shouldCalcularRenglon() throws IOException {
-    Proveedor proveedor = proveedorService.guardar(this.crearProveedor());
-    Medida medida = medidaService.guardar(this.crearMedida());
-    Rubro rubro = rubroService.guardar(this.crearRubro());
-    Sucursal sucursal = sucursalService.guardar(this.crearSucursal());
-    NuevoProductoDTO nuevoProductoDTO =
-        NuevoProductoDTO.builder()
-            .descripcion("Corta Papas - Vegetales")
-            .codigo("XD3.M2")
-            .cantidadEnSucursal(
-                new HashMap<Long, BigDecimal>() {
-                  {
-                    put(sucursal.getIdSucursal(), BigDecimal.TEN);
-                  }
-                })
-            .bulto(BigDecimal.ONE)
-            .precioCosto(new BigDecimal("100"))
-            .gananciaPorcentaje(new BigDecimal("900"))
-            .gananciaNeto(new BigDecimal("900"))
-            .precioVentaPublico(new BigDecimal("1000"))
-            .ivaPorcentaje(new BigDecimal("10.5"))
-            .ivaNeto(new BigDecimal("105"))
-            .precioLista(new BigDecimal("1105"))
-            .porcentajeBonificacionPrecio(new BigDecimal("20"))
-            .publico(true)
-            .bulto(new BigDecimal("2"))
-            .build();
-    Producto producto =
-        productoService.guardar(
-            nuevoProductoDTO, medida.getIdMedida(), rubro.getIdRubro(), proveedor.getIdProveedor());
+  void shouldCalcularRenglon() {
+    Producto productoParaRetorno = new Producto();
+    productoParaRetorno.setIdProducto(1L);
+    productoParaRetorno.setCodigo("1");
+    productoParaRetorno.setDescripcion("Producto para test");
+    productoParaRetorno.setMedida(new Medida());
+    productoParaRetorno.setPrecioCosto(new BigDecimal("89.35"));
+    productoParaRetorno.setGananciaPorcentaje(new BigDecimal("38.74"));
+    productoParaRetorno.setGananciaNeto(new BigDecimal("34.62"));
+    productoParaRetorno.setPrecioVentaPublico(new BigDecimal("123.97"));
+    productoParaRetorno.setIvaPorcentaje(new BigDecimal("21"));
+    productoParaRetorno.setIvaNeto(new BigDecimal("26.03"));
+    productoParaRetorno.setPrecioLista(new BigDecimal("150"));
+    productoParaRetorno.setPorcentajeBonificacionPrecio(new BigDecimal("10"));
+    productoParaRetorno.setPrecioBonificado(new BigDecimal("135"));
+    productoParaRetorno.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+    productoParaRetorno.setBulto(new BigDecimal("5"));
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
     NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
         NuevoRenglonFacturaDTO.builder()
             .renglonMarcado(true)
-            .idProducto(producto.getIdProducto())
+            .idProducto(1L)
             .cantidad(new BigDecimal("2"))
             .build();
     RenglonFactura renglonFacturaResultante =
         facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("1600.000000000000000"), renglonFacturaResultante.getImporte());
+    assertEquals(new BigDecimal("223.146000000000000"), renglonFacturaResultante.getImporte());
     nuevoRenglonFacturaDTO.setRenglonMarcado(false);
     renglonFacturaResultante =
         facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("2000.000000000000000"), renglonFacturaResultante.getImporte());
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
     nuevoRenglonFacturaDTO.setRenglonMarcado(true);
-    producto.setOferta(true);
-    producto.setPorcentajeBonificacionOferta(new BigDecimal("30"));
-    BufferedImage bImage = ImageIO.read(getClass().getResource("/imagenProductoTest.jpeg"));
-    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-    ImageIO.write(bImage, "jpeg", bos);
-    productoService.actualizar(producto, producto, bos.toByteArray());
+    productoParaRetorno.setOferta(true);
+    productoParaRetorno.setPorcentajeBonificacionOferta(new BigDecimal("20"));
     renglonFacturaResultante =
         facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("1400.000000000000000"), renglonFacturaResultante.getImporte());
+    assertEquals(new BigDecimal("198.352000000000000"), renglonFacturaResultante.getImporte());
     nuevoRenglonFacturaDTO.setRenglonMarcado(false);
     renglonFacturaResultante =
         facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("2000.000000000000000"), renglonFacturaResultante.getImporte());
+    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
   }
 
   // Calculos
@@ -563,5 +469,49 @@ class FacturaServiceImplTest {
     assertArrayEquals(
         arrayEsperado,
         CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevosRenglonsFactura));
+  }
+
+  @Test
+  void shouldEliminarFactura() {
+    Factura factura = new FacturaVenta();
+    List<RenglonFactura> renglonFacturas = new ArrayList<>();
+    factura.setRenglones(renglonFacturas);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    factura.setSucursal(sucursal);
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
+    facturaServiceImpl.eliminarFactura(1L);
+    verify(facturaRepository, times(1)).save(factura);
+    factura.setCae(23232L);
+    factura.setEliminada(false);
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
+    BusinessServiceException thrown =
+        assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_eliminar_factura_aprobada", null, Locale.getDefault())));
+    factura.setCae(0L);
+    factura.setEliminada(false);
+    when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(true);
+    thrown =
+        assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_no_se_puede_eliminar", null, Locale.getDefault())));
+    when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(false);
+    factura.setEliminada(false);
+    Pedido pedido = new Pedido();
+    factura.setPedido(pedido);
+    facturaServiceImpl.eliminarFactura(1L);
+    verify(pedidoService, times(1)).actualizarEstadoPedido(pedido, EstadoPedido.ABIERTO);
+    verify(productoService, times(1)).actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
   }
 }
