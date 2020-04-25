@@ -6,14 +6,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.context.MessageSource;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCajaCriteria;
 import sic.service.*;
-
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.repository.CajaRepository;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class CajaServiceImpl implements ICajaService {
 
   private final CajaRepository cajaRepository;
@@ -41,17 +37,19 @@ public class CajaServiceImpl implements ICajaService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public CajaServiceImpl(
-      CajaRepository cajaRepository,
-      IFormaDePagoService formaDePagoService,
-      IGastoService gastoService,
-      ISucursalService sucursalService,
-      IUsuarioService usuarioService,
-      IReciboService reciboService,
-      IClockService clockService,
-      MessageSource messageSource) {
+    CajaRepository cajaRepository,
+    IFormaDePagoService formaDePagoService,
+    IGastoService gastoService,
+    ISucursalService sucursalService,
+    IUsuarioService usuarioService,
+    IReciboService reciboService,
+    IClockService clockService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.cajaRepository = cajaRepository;
     this.formaDePagoService = formaDePagoService;
     this.gastoService = gastoService;
@@ -60,10 +58,11 @@ public class CajaServiceImpl implements ICajaService {
     this.reciboService = reciboService;
     this.clockService = clockService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
-  public void validarOperacion(@Valid Caja caja) {
+  public void validarReglasDeNegocio(Caja caja) {
     // Una Caja por dia
     Caja ultimaCaja = this.getUltimaCaja(caja.getSucursal().getIdSucursal());
     if (ultimaCaja != null) {
@@ -111,12 +110,14 @@ public class CajaServiceImpl implements ICajaService {
     caja.setSaldoApertura(saldoApertura);
     caja.setUsuarioAbreCaja(usuarioApertura);
     caja.setFechaApertura(this.clockService.getFechaActual());
-    this.validarOperacion(caja);
+    customValidator.validar(caja);
+    this.validarReglasDeNegocio(caja);
     return cajaRepository.save(caja);
   }
 
   @Override
-  public void actualizar(@Valid Caja caja) {
+  public void actualizar(Caja caja) {
+    customValidator.validar(caja);
     cajaRepository.save(caja);
   }
 
@@ -395,7 +396,8 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   @Transactional
-  public int actualizarSaldoSistema(Caja caja, BigDecimal monto) {
-    return cajaRepository.actualizarSaldoSistema(caja.getIdCaja(), monto);
+  public void actualizarSaldoSistema(Caja caja, BigDecimal monto) {
+    cajaRepository.actualizarSaldoSistema(caja.getIdCaja(), monto);
   }
+
 }

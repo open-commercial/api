@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,16 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.SucursalRepository;
 import sic.exception.BusinessServiceException;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;
@@ -31,21 +29,24 @@ public class SucursalServiceImpl implements ISucursalService {
   private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public SucursalServiceImpl(
-      SucursalRepository sucursalRepository,
-      IConfiguracionSucursalService configuracionSucursalService,
-      IUbicacionService ubicacionService,
-      IPhotoVideoUploader photoVideoUploader,
-      IProductoService productoService,
-      MessageSource messageSource) {
+    SucursalRepository sucursalRepository,
+    IConfiguracionSucursalService configuracionSucursalService,
+    IUbicacionService ubicacionService,
+    IPhotoVideoUploader photoVideoUploader,
+    IProductoService productoService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.sucursalRepository = sucursalRepository;
     this.configuracionSucursalService = configuracionSucursalService;
     this.ubicacionService = ubicacionService;
     this.photoVideoUploader = photoVideoUploader;
     this.productoService = productoService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -130,7 +131,8 @@ public class SucursalServiceImpl implements ISucursalService {
 
   @Override
   @Transactional
-  public Sucursal guardar(@Valid Sucursal sucursal) {
+  public Sucursal guardar(Sucursal sucursal) {
+    customValidator.validar(sucursal);
     if (sucursal.getUbicacion() != null && sucursal.getUbicacion().getIdLocalidad() != null) {
       sucursal
           .getUbicacion()
@@ -147,7 +149,8 @@ public class SucursalServiceImpl implements ISucursalService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Sucursal sucursalParaActualizar, Sucursal sucursalPersistida) {
+  public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida) {
+    customValidator.validar(sucursalParaActualizar);
     if (sucursalPersistida.getLogo() != null
         && !sucursalPersistida.getLogo().isEmpty()
         && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {

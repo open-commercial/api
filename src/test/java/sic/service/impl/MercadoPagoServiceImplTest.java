@@ -13,6 +13,7 @@ import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.*;
+import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {MercadoPagoServiceImpl.class, EncryptUtils.class, MessageSource.class})
+    classes = {MercadoPagoServiceImpl.class, EncryptUtils.class, MessageSource.class, CustomValidator.class})
 @TestPropertySource(locations = "classpath:application.properties")
 class MercadoPagoServiceImplTest {
 

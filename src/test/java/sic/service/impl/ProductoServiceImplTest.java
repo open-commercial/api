@@ -30,7 +30,6 @@ import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 
-@ExtendWith(SpringExtension.class)
 @SpringBootTest
 @TestPropertySource(locations = "classpath:application.properties")
 class ProductoServiceImplTest {

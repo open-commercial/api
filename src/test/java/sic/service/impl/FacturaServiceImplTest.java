@@ -1,21 +1,17 @@
 package sic.service.impl;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
@@ -23,16 +19,14 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
-import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaRepository;
 import sic.util.CalculosComprobante;
-import sic.util.EncryptUtils;
+import sic.util.CustomValidator;
 
 @WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(
-    classes = {FacturaServiceImpl.class, SucursalServiceImpl.class, ProductoServiceImpl.class})
+@ContextConfiguration(classes = {CustomValidator.class, FacturaServiceImpl.class})
 @TestPropertySource(locations = "classpath:application.properties")
 class FacturaServiceImplTest {
 
@@ -428,6 +422,32 @@ class FacturaServiceImplTest {
         facturaServiceImpl
             .calcularPrecioUnitario(Movimiento.VENTA, TipoDeComprobante.FACTURA_C, producto)
             .compareTo(new BigDecimal("242")));
+  }
+
+  @Test
+  void shouldCalcularIVANetoWhenVentaConFacturaA() {
+    Producto producto = new Producto();
+    producto.setPrecioVentaPublico(new BigDecimal("121"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertEquals(
+        25.41,
+        facturaServiceImpl
+            .calcularIVANetoRenglon(
+                Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto, BigDecimal.ZERO)
+            .doubleValue());
+  }
+
+  @Test
+  void shouldCalcularIVANetoWhenVentaConFacturaB() {
+    Producto producto = new Producto();
+    producto.setPrecioVentaPublico(new BigDecimal("1000"));
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    assertEquals(
+        0,
+        facturaServiceImpl
+            .calcularIVANetoRenglon(
+                Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto, BigDecimal.ZERO)
+            .compareTo(new BigDecimal("210")));
   }
 
   @Test

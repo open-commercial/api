@@ -5,13 +5,11 @@ import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import org.springframework.data.domain.Page;
 import sic.modelo.Transportista;
 
-import javax.validation.Valid;
-
 public interface ITransportistaService {
 
   Transportista getTransportistaNoEliminadoPorId(long idTransportista);
 
-  void actualizar(@Valid Transportista transportista);
+  void actualizar(Transportista transportista);
 
   Page<Transportista> buscarTransportistas(BusquedaTransportistaCriteria criteria);
 
@@ -21,5 +19,5 @@ public interface ITransportistaService {
 
   List<Transportista> getTransportistas();
 
-  Transportista guardar(@Valid Transportista transportista);
+  Transportista guardar(Transportista transportista);
 }

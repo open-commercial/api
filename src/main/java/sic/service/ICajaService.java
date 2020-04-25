@@ -9,46 +9,45 @@ import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCajaCriteria;
 
-import javax.validation.Valid;
-
 public interface ICajaService {
 
-    void actualizar(@Valid Caja caja);
+  void actualizar(Caja caja);
 
-    void validarMovimiento(LocalDateTime fechaMovimiento, long idSucursal);
-    
-    void eliminar(Long idCaja);
-    
-    Caja getCajaPorId(Long id);
+  void validarMovimiento(LocalDateTime fechaMovimiento, long idSucursal);
 
-    Page<Caja> buscarCajas(BusquedaCajaCriteria criteria);
+  void eliminar(Long idCaja);
 
-    Map<Long, BigDecimal> getIdsFormasDePagoAndMontos(long idCaja);
+  Caja getCajaPorId(Long id);
 
-    Caja getUltimaCaja(long idSucursal);
+  Page<Caja> buscarCajas(BusquedaCajaCriteria criteria);
 
-    Caja abrirCaja(Sucursal sucursal, Usuario usuarioApertura, BigDecimal saldoApertura);
+  Map<Long, BigDecimal> getIdsFormasDePagoAndMontos(long idCaja);
 
-    void validarOperacion(@Valid Caja caja);
-    
-    Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
-    
-    BigDecimal getSaldoQueAfectaCaja(Caja caja);
+  Caja getUltimaCaja(long idSucursal);
 
-    BigDecimal getSaldoSistema(Caja caja);
+  Caja abrirCaja(Sucursal sucursal, Usuario usuarioApertura, BigDecimal saldoApertura);
 
-    boolean isUltimaCajaAbierta(long idSucursal);
-    
-    BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria);
-    
-    BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
+  void validarReglasDeNegocio(Caja caja);
 
-    List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
+  Caja cerrarCaja(long idCaja, BigDecimal monto, Long idUsuario, boolean scheduling);
 
-    void reabrirCaja(long idCaja, BigDecimal saldoInicial);
+  BigDecimal getSaldoQueAfectaCaja(Caja caja);
 
-    Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(long idSucursal, LocalDateTime fecha);
+  BigDecimal getSaldoSistema(Caja caja);
 
-    int actualizarSaldoSistema(Caja caja, BigDecimal monto);
+  boolean isUltimaCajaAbierta(long idSucursal);
 
+  BigDecimal getSaldoSistemaCajas(BusquedaCajaCriteria criteria);
+
+  BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
+
+  List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(
+      Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
+
+  void reabrirCaja(long idCaja, BigDecimal saldoInicial);
+
+  Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
+      long idSucursal, LocalDateTime fecha);
+
+  void actualizarSaldoSistema(Caja caja, BigDecimal monto);
 }

@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaLocalidadCriteria;
 
-import javax.validation.Valid;
 import java.util.List;
 
 public interface IUbicacionService {
@@ -13,7 +12,7 @@ public interface IUbicacionService {
 
   Page<Localidad> buscarLocalidades(BusquedaLocalidadCriteria criteria);
 
-  Ubicacion guardar(@Valid Ubicacion ubicacion);
+  Ubicacion guardar(Ubicacion ubicacion);
 
   Localidad getLocalidadPorId(Long idLocalidad);
 
@@ -25,7 +24,7 @@ public interface IUbicacionService {
 
   List<Provincia> getProvincias();
 
-  void actualizarLocalidad(@Valid Localidad localidad);
+  void actualizarLocalidad(Localidad localidad);
 
-  void validarOperacion(TipoDeOperacion operacion, Localidad localidad);
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Localidad localidad);
 }

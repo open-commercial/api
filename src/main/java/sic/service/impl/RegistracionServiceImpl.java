@@ -7,15 +7,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.CategoriaIVA;
 import sic.modelo.Cliente;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.*;
+import sic.util.CustomValidator;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -23,7 +22,6 @@ import java.util.Locale;
 
 @Service
 @Transactional
-@Validated
 public class RegistracionServiceImpl implements IRegistracionService {
 
   @Value("${SIC_MAIL_USERNAME}")
@@ -34,21 +32,25 @@ public class RegistracionServiceImpl implements IRegistracionService {
   private final ICorreoElectronicoService correoElectronicoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public RegistracionServiceImpl(
       IUsuarioService usuarioService,
       IClienteService clienteService,
       ICorreoElectronicoService correoElectronicoService,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      CustomValidator customValidator) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
-  public void crearCuenta(@Valid RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+  public void crearCuenta(RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+    customValidator.validar(registracionClienteAndUsuarioDTO);
     Usuario nuevoUsuario = new Usuario();
     nuevoUsuario.setHabilitado(true);
     nuevoUsuario.setNombre(registracionClienteAndUsuarioDTO.getNombre());

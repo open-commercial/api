@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -22,17 +21,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.service.*;
 import sic.repository.UsuarioRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.util.CustomValidator;
 
 @Service
 @Transactional
-@Validated
 public class UsuarioServiceImpl implements IUsuarioService {
 
   private final UsuarioRepository usuarioRepository;
@@ -42,20 +40,23 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public UsuarioServiceImpl(
-      UsuarioRepository usuarioRepository,
-      ISucursalService sucursalService,
-      IClienteService clienteService,
-      ICorreoElectronicoService correoElectronicoService,
-      MessageSource messageSource) {
+    UsuarioRepository usuarioRepository,
+    ISucursalService sucursalService,
+    IClienteService clienteService,
+    ICorreoElectronicoService correoElectronicoService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.usuarioRepository = usuarioRepository;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   public String encriptarConMD5(String password) {
@@ -205,7 +206,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void validarOperacion(TipoDeOperacion operacion, Usuario usuario) {
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Usuario usuario) {
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -261,17 +262,18 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Usuario usuarioPorActualizar) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, usuarioPorActualizar);
-    if (!usuarioPorActualizar.getRoles().contains(Rol.VIAJANTE)) {
-      this.clienteService.desvincularClienteDeViajante(usuarioPorActualizar.getIdUsuario());
+  public void actualizar(Usuario usuario) {
+    customValidator.validar(usuario);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, usuario);
+    if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
+      this.clienteService.desvincularClienteDeViajante(usuario.getIdUsuario());
     }
-    if (!usuarioPorActualizar.getRoles().contains(Rol.COMPRADOR)) {
-      this.clienteService.desvincularClienteDeCredencial(usuarioPorActualizar.getIdUsuario());
+    if (!usuario.getRoles().contains(Rol.COMPRADOR)) {
+      this.clienteService.desvincularClienteDeCredencial(usuario.getIdUsuario());
     }
-    usuarioPorActualizar.setUsername(usuarioPorActualizar.getUsername().toLowerCase());
-    usuarioRepository.save(usuarioPorActualizar);
-    logger.warn("El Usuario {} se actualizó correctamente.", usuarioPorActualizar);
+    usuario.setUsername(usuario.getUsername().toLowerCase());
+    usuarioRepository.save(usuario);
+    logger.warn("El Usuario {} se actualizó correctamente.", usuario);
   }
 
   @Override
@@ -281,12 +283,12 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public int actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada) {
+  public void actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada) {
     if (sucursalService.getSucursalPorId(idSucursalPredeterminada) == null) {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_sucursal_no_existente", null, Locale.getDefault()));
     }
-    return usuarioRepository.updateIdSucursal(idUsuario, idSucursalPredeterminada);
+    usuarioRepository.updateIdSucursal(idUsuario, idSucursalPredeterminada);
   }
 
   @Override
@@ -313,8 +315,9 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public Usuario guardar(@Valid Usuario usuario) {
-    this.validarOperacion(TipoDeOperacion.ALTA, usuario);
+  public Usuario guardar(Usuario usuario) {
+    customValidator.validar(usuario);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, usuario);
     usuario.setUsername(usuario.getUsername().toLowerCase());
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
@@ -325,7 +328,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public void eliminar(long idUsuario) {
     Usuario usuario = this.getUsuarioNoEliminadoPorId(idUsuario);
-    this.validarOperacion(TipoDeOperacion.ELIMINACION, usuario);
+    this.validarReglasDeNegocio(TipoDeOperacion.ELIMINACION, usuario);
     Cliente clienteVinculado = clienteService.getClientePorCredencial(usuario);
     if (clienteVinculado != null)
       throw new BusinessServiceException(

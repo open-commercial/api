@@ -9,8 +9,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
-
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -26,16 +24,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class ReciboServiceImpl implements IReciboService {
 
   private final ReciboRepository reciboRepository;
@@ -48,18 +45,20 @@ public class ReciboServiceImpl implements IReciboService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public ReciboServiceImpl(
-      ReciboRepository reciboRepository,
-      ICuentaCorrienteService cuentaCorrienteService,
-      ISucursalService sucursalService,
-      IConfiguracionSucursalService configuracionSucursalService,
-      INotaService notaService,
-      IFormaDePagoService formaDePagoService,
-      ICajaService cajaService,
-      MessageSource messageSource) {
+    ReciboRepository reciboRepository,
+    ICuentaCorrienteService cuentaCorrienteService,
+    ISucursalService sucursalService,
+    IConfiguracionSucursalService configuracionSucursalService,
+    INotaService notaService,
+    IFormaDePagoService formaDePagoService,
+    ICajaService cajaService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.sucursalService = sucursalService;
@@ -68,6 +67,7 @@ public class ReciboServiceImpl implements IReciboService {
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -166,7 +166,8 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   @Transactional
-  public Recibo guardar(@Valid Recibo recibo) {
+  public Recibo guardar(Recibo recibo) {
+    customValidator.validar(recibo);
     recibo.setNumSerie(
         configuracionSucursalService
             .getConfiguracionSucursal(recibo.getSucursal())
@@ -177,7 +178,7 @@ public class ReciboServiceImpl implements IReciboService {
             configuracionSucursalService
                 .getConfiguracionSucursal(recibo.getSucursal())
                 .getNroPuntoDeVentaAfip()));
-    this.validarOperacion(recibo);
+    this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
     logger.warn("El Recibo {} se guardó correctamente.", recibo);
@@ -185,7 +186,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public void validarOperacion(Recibo recibo) {
+  public void validarReglasDeNegocio(Recibo recibo) {
     // Muteado momentaneamente por el problema del alta de recibo generado por sic-com cuando la caja esta cerrada
     // this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getSucursal().getIdSucursal());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {

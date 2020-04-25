@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
@@ -39,9 +37,9 @@ import sic.repository.RenglonCuentaCorrienteRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   private final CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
@@ -53,16 +51,18 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public CuentaCorrienteServiceImpl(
-      CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
-      CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
-      CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
-      IUsuarioService usuarioService, IClienteService clienteService,
-      MessageSource messageSource) {
+    CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
+    CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
+    CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
+    RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
+    IUsuarioService usuarioService, IClienteService clienteService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
@@ -70,13 +70,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
   @Transactional
   public CuentaCorrienteCliente guardarCuentaCorrienteCliente(
-      @Valid CuentaCorrienteCliente cuentaCorrienteCliente) {
-    this.validarOperacion(cuentaCorrienteCliente);
+      CuentaCorrienteCliente cuentaCorrienteCliente) {
+    customValidator.validar(cuentaCorrienteCliente);
+    this.validarReglasDeNegocio(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
     logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
@@ -85,8 +87,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   @Transactional
   public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
-      @Valid CuentaCorrienteProveedor cuentaCorrienteProveedor) {
-    this.validarOperacion(cuentaCorrienteProveedor);
+      CuentaCorrienteProveedor cuentaCorrienteProveedor) {
+    customValidator.validar(cuentaCorrienteProveedor);
+    this.validarReglasDeNegocio(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
     logger.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
@@ -99,7 +102,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public void validarOperacion(CuentaCorriente cuentaCorriente) {
+  public void validarReglasDeNegocio(CuentaCorriente cuentaCorriente) {
     // Duplicados
     if (cuentaCorriente.getIdCuentaCorriente() != null
         && cuentaCorrienteRepository.findById(cuentaCorriente.getIdCuentaCorriente()).isPresent()) {

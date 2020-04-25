@@ -3,17 +3,19 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.repository.FacturaCompraRepository;
+import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,16 +24,18 @@ import java.util.Locale;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = AppTest.class)
+@ContextConfiguration(
+    classes = {CustomValidator.class, FacturaServiceImpl.class, FacturaCompraServiceImpl.class})
+@TestPropertySource(locations = "classpath:application.properties")
 class FacturaCompraServiceImplTest {
 
-  @Autowired MessageSource messageSourceTest;
+  @MockBean FacturaCompraRepository facturaCompraRepository;
+  @Autowired FacturaServiceImpl facturaServiceImpl;
+  @Autowired FacturaCompraServiceImpl facturaCompraServiceImpl;
 
-  @Mock FacturaCompraRepository mockFacturaCompraRepository;
-  @Mock MessageSource messageSourceTestMock;
-  @InjectMocks FacturaServiceImpl facturaServiceImpl;
-  @InjectMocks FacturaCompraServiceImpl facturaCompraServiceImpl;
+  @Autowired MessageSource messageSource;
 
   @Test
   void shouldGetTipoFacturaCompraWhenSucursalYProveedorDiscriminanIVA() {
@@ -181,11 +185,6 @@ class FacturaCompraServiceImplTest {
   @Test
   void shouldThrownBusinessServiceExceptionPorBusquedaCompraSinIdSucursal() {
     BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder().build();
-    when(messageSourceTestMock.getMessage(
-            "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -195,7 +194,7 @@ class FacturaCompraServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_busqueda_sin_sucursal", null, Locale.getDefault())));
   }
 
@@ -211,8 +210,7 @@ class FacturaCompraServiceImplTest {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
-    when(mockFacturaCompraRepository.calcularTotalFacturadoCompra(builder))
-        .thenReturn(BigDecimal.TEN);
+    when(facturaCompraRepository.calcularTotalFacturadoCompra(builder)).thenReturn(BigDecimal.TEN);
     assertEquals(BigDecimal.TEN, facturaCompraServiceImpl.calcularTotalFacturadoCompra(criteria));
   }
 
@@ -228,7 +226,7 @@ class FacturaCompraServiceImplTest {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
-    when(mockFacturaCompraRepository.calcularTotalFacturadoCompra(builder)).thenReturn(null);
+    when(facturaCompraRepository.calcularTotalFacturadoCompra(builder)).thenReturn(null);
     assertEquals(BigDecimal.ZERO, facturaCompraServiceImpl.calcularTotalFacturadoCompra(criteria));
   }
 
@@ -245,7 +243,7 @@ class FacturaCompraServiceImplTest {
             .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
-    when(mockFacturaCompraRepository.calcularIVACompra(builder, tipoFactura))
+    when(facturaCompraRepository.calcularIVACompra(builder, tipoFactura))
         .thenReturn(BigDecimal.TEN);
     assertEquals(BigDecimal.TEN, facturaCompraServiceImpl.calcularIvaCompra(criteria));
   }
@@ -263,7 +261,7 @@ class FacturaCompraServiceImplTest {
             .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A};
-    when(mockFacturaCompraRepository.calcularIVACompra(builder, tipoFactura)).thenReturn(null);
+    when(facturaCompraRepository.calcularIVACompra(builder, tipoFactura)).thenReturn(null);
     assertEquals(BigDecimal.ZERO, facturaCompraServiceImpl.calcularIvaCompra(criteria));
   }
 }

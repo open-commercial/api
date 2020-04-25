@@ -3,13 +3,11 @@ package sic.service;
 import java.util.List;
 import sic.modelo.Sucursal;
 
-import javax.validation.Valid;
-
 public interface ISucursalService {
 
   Sucursal getSucursalPorId(Long idSucursal);
 
-  void actualizar(@Valid Sucursal sucursalParaActualizar, Sucursal sucursalPersistida);
+  void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida);
 
   void eliminar(Long idSucursal);
 
@@ -19,7 +17,7 @@ public interface ISucursalService {
 
   List<Sucursal> getSucusales(boolean puntoDeRetiro);
 
-  Sucursal guardar(@Valid Sucursal sucursal);
+  Sucursal guardar(Sucursal sucursal);
 
   String guardarLogo(long idSucursal, byte[] imagen);
 }

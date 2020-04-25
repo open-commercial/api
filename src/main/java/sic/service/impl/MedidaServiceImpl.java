@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,26 +11,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.Medida;
 import sic.service.IMedidaService;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.MedidaRepository;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class MedidaServiceImpl implements IMedidaService {
 
   private final MedidaRepository medidaRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
-  public MedidaServiceImpl(MedidaRepository medidaRepository,
-                           MessageSource messageSource) {
+  public MedidaServiceImpl(
+    MedidaRepository medidaRepository,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.medidaRepository = medidaRepository;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -57,7 +59,7 @@ public class MedidaServiceImpl implements IMedidaService {
   }
 
   @Override
-  public void validarOperacion(TipoDeOperacion operacion, Medida medida) {
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Medida medida) {
     // Duplicados
     // Nombre
     Medida medidaDuplicada = this.getMedidaPorNombre(medida.getNombre());
@@ -75,15 +77,17 @@ public class MedidaServiceImpl implements IMedidaService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Medida medida) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, medida);
+  public void actualizar(Medida medida) {
+    customValidator.validar(medida);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, medida);
     medidaRepository.save(medida);
   }
 
   @Override
   @Transactional
-  public Medida guardar(@Valid Medida medida) {
-    this.validarOperacion(TipoDeOperacion.ALTA, medida);
+  public Medida guardar(Medida medida) {
+    customValidator.validar(medida);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, medida);
     medida = medidaRepository.save(medida);
     logger.warn("La Medida {} se guardó correctamente.", medida);
     return medida;

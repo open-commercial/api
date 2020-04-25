@@ -4,12 +4,10 @@ import com.mercadopago.exceptions.MPException;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
 
-import javax.validation.Valid;
-
 public interface IMercadoPagoService {
 
   MercadoPagoPreferenceDTO crearNuevaPreference(
-          long idUsuario, @Valid NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin);
+      long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin);
 
   void crearComprobantePorNotificacion(String idPayment);
 

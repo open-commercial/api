@@ -44,7 +44,7 @@ class MedidaServiceImplTest {
               when(medidaRepository.findByNombreAndEliminada("Unidad", false))
                   .thenReturn(medidaMock);
               medidaNueva.setNombre("Unidad");
-              medidaService.validarOperacion(TipoDeOperacion.ALTA, medidaNueva);
+              medidaService.validarReglasDeNegocio(TipoDeOperacion.ALTA, medidaNueva);
             });
     assertTrue(thrown.getMessage().contains(mensaje_medida_duplicada_nombre));
   }
@@ -62,7 +62,7 @@ class MedidaServiceImplTest {
               Medida medidaDuplicada = new Medida();
               medidaDuplicada.setIdMedida(2L);
               medidaDuplicada.setNombre("Metro");
-              medidaService.validarOperacion(TipoDeOperacion.ACTUALIZACION, medidaDuplicada);
+              medidaService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, medidaDuplicada);
             });
     assertTrue(thrown.getMessage().contains(mensaje_medida_duplicada_nombre));
   }

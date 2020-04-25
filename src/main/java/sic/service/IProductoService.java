@@ -14,12 +14,9 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
 
-import javax.validation.Valid;
-
 public interface IProductoService {
 
-  void actualizar(
-      @Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
+  void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
   void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 
@@ -43,7 +40,8 @@ public interface IProductoService {
 
   BigDecimal calcularGananciaNeto(BigDecimal precioCosto, BigDecimal gananciaPorcentaje);
 
-  List<ProductoFaltanteDTO> getProductosSinStockDisponible(ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
+  List<ProductoFaltanteDTO> getProductosSinStockDisponible(
+      ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
@@ -74,7 +72,7 @@ public interface IProductoService {
 
   byte[] getListaDePrecios(List<Producto> productos, String formato);
 
-  Producto guardar(@Valid NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
+  Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
   void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
 

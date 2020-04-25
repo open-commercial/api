@@ -1,29 +1,36 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import sic.modelo.*;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.*;
+import javax.persistence.EntityNotFoundException;
+
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
@@ -32,19 +39,13 @@ import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.repository.ProductoRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
-import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.*;
 
 @Service
-@Validated
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
@@ -59,6 +60,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ISucursalService sucursalService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
@@ -70,7 +72,8 @@ public class ProductoServiceImpl implements IProductoService {
     ICarritoCompraService carritoCompraService,
     IPhotoVideoUploader photoVideoUploader,
     ISucursalService sucursalService,
-    MessageSource messageSource) {
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.productoRepository = productoRepository;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
@@ -79,6 +82,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.photoVideoUploader = photoVideoUploader;
     this.sucursalService = sucursalService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
@@ -292,7 +296,8 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public Producto guardar(
-      @Valid NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+      NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+    customValidator.validar(nuevoProductoDTO);
     if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
       throw new BusinessServiceException(
           messageSource.getMessage(
@@ -374,7 +379,8 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+  public void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+    customValidator.validar(productoPorActualizar);
     if (productoPorActualizar.isOferta()
         && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())

@@ -1,36 +1,37 @@
 package sic.service.impl;
 
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
 import sic.service.IConfiguracionSucursalService;
 import sic.repository.ConfiguracionSucursalRepository;
 import sic.exception.BusinessServiceException;
+import sic.util.CustomValidator;
 
 import java.util.Locale;
 
 @Service
-@Validated
 public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalService {
 
   private final ConfiguracionSucursalRepository configuracionRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public ConfiguracionSucursalServiceImpl(
-    ConfiguracionSucursalRepository configuracionRepository, MessageSource messageSource) {
+    ConfiguracionSucursalRepository configuracionRepository,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.configuracionRepository = configuracionRepository;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -49,8 +50,9 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public ConfiguracionSucursal guardar(@Valid ConfiguracionSucursal configuracionSucursal) {
-    this.validarOperacion(configuracionSucursal);
+  public ConfiguracionSucursal guardar(ConfiguracionSucursal configuracionSucursal) {
+    customValidator.validar(configuracionSucursal);
+    this.validarReglasDeNegocio(configuracionSucursal);
     configuracionSucursal = configuracionRepository.save(configuracionSucursal);
     logger.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
     return configuracionSucursal;
@@ -58,8 +60,9 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public void actualizar(@Valid ConfiguracionSucursal configuracionSucursal) {
-    this.validarOperacion(configuracionSucursal);
+  public void actualizar(ConfiguracionSucursal configuracionSucursal) {
+    customValidator.validar(configuracionSucursal);
+    this.validarReglasDeNegocio(configuracionSucursal);
     if (configuracionSucursal.getPasswordCertificadoAfip() != null) {
       configuracionSucursal.setPasswordCertificadoAfip(configuracionSucursal.getPasswordCertificadoAfip());
     }
@@ -73,7 +76,7 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   }
 
   @Override
-  public void validarOperacion(ConfiguracionSucursal configuracionSucursal) {
+  public void validarReglasDeNegocio(ConfiguracionSucursal configuracionSucursal) {
     if (configuracionSucursal.isFacturaElectronicaHabilitada()) {
       if (configuracionSucursal.getCertificadoAfip() == null) {
         throw new BusinessServiceException(messageSource.getMessage(

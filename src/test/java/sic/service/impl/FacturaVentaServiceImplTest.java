@@ -3,12 +3,13 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
@@ -17,6 +18,7 @@ import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.FacturaVentaRepository;
 import sic.service.IFacturaService;
+import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,24 +28,21 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = AppTest.class)
+@ContextConfiguration(classes = {CustomValidator.class, FacturaVentaServiceImpl.class})
+@TestPropertySource(locations = "classpath:application.properties")
 class FacturaVentaServiceImplTest {
 
-  @Autowired MessageSource messageSourceTest;
-
-  @Mock FacturaVentaRepository mockFacturaVentaRepository;
-  @Mock ProductoServiceImpl mockProductoService;
-  @Mock IFacturaService mockFacturaService;
-  @Mock MessageSource messageSourceTestMock;
-  @Mock UsuarioServiceImpl mockUsuarioService;
-  @Mock ClienteServiceImpl mockClienteService;
-  @Mock PedidoServiceImpl pedidoService;
-  @Mock ConfiguracionSucursalServiceImpl mockConfiguracionSucursalService;
-  @Mock CorreoElectronicoServiceImpl mockCorreoElectronicoService;
-  @InjectMocks FacturaServiceImpl facturaServiceImpl;
-  //@InjectMocks FacturaCompraServiceImpl facturaCompraServiceImpl;
-  @InjectMocks FacturaVentaServiceImpl facturaVentaServiceImpl;
+  @MockBean FacturaVentaRepository facturaVentaRepository;
+  @MockBean ProductoServiceImpl productoService;
+  @MockBean UsuarioServiceImpl usuarioService;
+  @MockBean ClienteServiceImpl clienteService;
+  @MockBean PedidoServiceImpl pedidoService;
+  @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
+  @MockBean FacturaServiceImpl facturaServiceImpl;
+  @Autowired FacturaVentaServiceImpl facturaVentaServiceImpl;
+  @Autowired MessageSource messageSource;
 
   @Test
   void shouldGetTipoFacturaVentaWhenSucursalDiscriminaYClienteTambien() {
@@ -103,11 +102,9 @@ class FacturaVentaServiceImplTest {
 
   @Test
   void shouldDividirFactura() {
-    when(mockFacturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-            TipoDeComprobante.FACTURA_X, 1L, 1L))
+    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(TipoDeComprobante.FACTURA_X, 1L, 1L))
         .thenReturn(1L);
-    when(mockFacturaVentaRepository.buscarMayorNumFacturaSegunTipo(
-            TipoDeComprobante.FACTURA_A, 1L, 1L))
+    when(facturaVentaRepository.buscarMayorNumFacturaSegunTipo(TipoDeComprobante.FACTURA_A, 1L, 1L))
         .thenReturn(1L);
     RenglonFactura renglon1 = Mockito.mock(RenglonFactura.class);
     RenglonFactura renglon2 = Mockito.mock(RenglonFactura.class);
@@ -130,7 +127,7 @@ class FacturaVentaServiceImplTest {
     when(producto1.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto1.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto1.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(mockProductoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto1);
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto1);
     when(producto2.getIdProducto()).thenReturn(2L);
     when(producto2.getCodigo()).thenReturn("2");
     when(producto2.getDescripcion()).thenReturn("producto dos test");
@@ -139,7 +136,7 @@ class FacturaVentaServiceImplTest {
     when(producto2.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto2.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto2.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(mockProductoService.getProductoNoEliminadoPorId(2L)).thenReturn(producto2);
+    when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(producto2);
     when(producto3.getIdProducto()).thenReturn(3L);
     when(producto3.getCodigo()).thenReturn("3");
     when(producto3.getDescripcion()).thenReturn("producto tres test");
@@ -148,7 +145,7 @@ class FacturaVentaServiceImplTest {
     when(producto3.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto3.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto3.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(mockProductoService.getProductoNoEliminadoPorId(3L)).thenReturn(producto3);
+    when(productoService.getProductoNoEliminadoPorId(3L)).thenReturn(producto3);
     when(producto4.getIdProducto()).thenReturn(4L);
     when(producto4.getCodigo()).thenReturn("4");
     when(producto4.getDescripcion()).thenReturn("producto cuatro test");
@@ -157,7 +154,7 @@ class FacturaVentaServiceImplTest {
     when(producto4.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto4.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto4.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(mockProductoService.getProductoNoEliminadoPorId(4L)).thenReturn(producto4);
+    when(productoService.getProductoNoEliminadoPorId(4L)).thenReturn(producto4);
     when(producto5.getIdProducto()).thenReturn(5L);
     when(producto5.getCodigo()).thenReturn("5");
     when(producto5.getDescripcion()).thenReturn("producto cinco test");
@@ -166,7 +163,7 @@ class FacturaVentaServiceImplTest {
     when(producto5.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto5.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto5.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(mockProductoService.getProductoNoEliminadoPorId(5L)).thenReturn(producto5);
+    when(productoService.getProductoNoEliminadoPorId(5L)).thenReturn(producto5);
     when(producto6.getIdProducto()).thenReturn(6L);
     when(producto6.getCodigo()).thenReturn("6");
     when(producto6.getDescripcion()).thenReturn("producto seis test");
@@ -175,7 +172,7 @@ class FacturaVentaServiceImplTest {
     when(producto6.getPrecioVentaPublico()).thenReturn(BigDecimal.ONE);
     when(producto6.getIvaPorcentaje()).thenReturn(new BigDecimal("21.00"));
     when(producto6.getPrecioLista()).thenReturn(BigDecimal.ONE);
-    when(mockProductoService.getProductoNoEliminadoPorId(6L)).thenReturn(producto6);
+    when(productoService.getProductoNoEliminadoPorId(6L)).thenReturn(producto6);
     when(renglon1.getIdProductoItem()).thenReturn(1L);
     when(renglon1.getIvaNeto()).thenReturn(new BigDecimal("21"));
     when(renglon1.getBonificacionPorcentaje()).thenReturn(BigDecimal.ZERO);
@@ -230,6 +227,7 @@ class FacturaVentaServiceImplTest {
             .idProducto(1L)
             .cantidad(new BigDecimal("2.000000000000000"))
             .build();
+
     RenglonFactura renglonCalculadoX1 =
         facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX1);
@@ -293,37 +291,37 @@ class FacturaVentaServiceImplTest {
     RenglonFactura renglonCalculadoA6 =
         facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA6);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX1))
         .thenReturn(renglonCalculadoX1);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX2))
         .thenReturn(renglonCalculadoX2);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX3))
         .thenReturn(renglonCalculadoX3);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_X, Movimiento.VENTA, nuevoRenglonFacturaX4))
         .thenReturn(renglonCalculadoX4);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA1))
         .thenReturn(renglonCalculadoA1);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA2))
         .thenReturn(renglonCalculadoA2);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA3))
         .thenReturn(renglonCalculadoA3);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA4))
         .thenReturn(renglonCalculadoA4);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA5))
         .thenReturn(renglonCalculadoA5);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaA6))
         .thenReturn(renglonCalculadoA6);
-    when(mockFacturaService.calcularIvaNetoFactura(any(), any(), any(), any(), any(), any(), any()))
+    when(facturaServiceImpl.calcularIvaNetoFactura(any(), any(), any(), any(), any(), any(), any()))
         .thenReturn(BigDecimal.ZERO);
     List<FacturaVenta> result = facturaVentaServiceImpl.dividirFactura(factura, indices);
     assertEquals(cantidadDeFacturasEsperadas, result.size());
@@ -352,39 +350,8 @@ class FacturaVentaServiceImplTest {
   }
 
   @Test
-  void shouldCalcularIVANetoWhenVentaConFacturaA() {
-    Producto producto = new Producto();
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
-    assertEquals(
-        25.41,
-        facturaServiceImpl
-            .calcularIVANetoRenglon(
-                Movimiento.VENTA, TipoDeComprobante.FACTURA_A, producto, BigDecimal.ZERO)
-            .doubleValue());
-  }
-
-  @Test
-  void shouldCalcularIVANetoWhenVentaConFacturaB() {
-    Producto producto = new Producto();
-    producto.setPrecioVentaPublico(new BigDecimal("1000"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
-    assertEquals(
-        0,
-        facturaServiceImpl
-            .calcularIVANetoRenglon(
-                Movimiento.VENTA, TipoDeComprobante.FACTURA_B, producto, BigDecimal.ZERO)
-            .compareTo(new BigDecimal("210")));
-  }
-
-  @Test
   void shouldThrownBusinessServiceExceptionPorBusquedaVentaSinIdSucursal() {
     BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder().build();
-    when(messageSourceTestMock.getMessage(
-            "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -394,7 +361,7 @@ class FacturaVentaServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_busqueda_sin_sucursal", null, Locale.getDefault())));
   }
 
@@ -403,7 +370,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idSucursal(1L)
@@ -473,10 +440,10 @@ class FacturaVentaServiceImplTest {
         resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
     roles = Collections.singletonList(Rol.COMPRADOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     Cliente clienteRelacionadoConUsuarioLogueado = new Cliente();
     clienteRelacionadoConUsuarioLogueado.setIdCliente(6L);
-    when(mockClienteService.getClientePorIdUsuario(1L))
+    when(clienteService.getClientePorIdUsuario(1L))
         .thenReturn(clienteRelacionadoConUsuarioLogueado);
     criteria =
         BusquedaFacturaVentaCriteria.builder()
@@ -500,7 +467,7 @@ class FacturaVentaServiceImplTest {
             + "&& any(facturaVenta.renglones).idProductoItem = 3 && facturaVenta.cliente.idCliente = 6";
     assertEquals(
         resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
-    when(mockClienteService.getClientePorIdUsuario(1L)).thenReturn(null);
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(null);
     criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idSucursal(1L)
@@ -530,7 +497,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
@@ -541,8 +508,7 @@ class FacturaVentaServiceImplTest {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturVenta.eliminada.eq(false)));
-    when(mockFacturaVentaRepository.calcularTotalFacturadoVenta(builder))
-        .thenReturn(BigDecimal.TEN);
+    when(facturaVentaRepository.calcularTotalFacturadoVenta(builder)).thenReturn(BigDecimal.TEN);
     assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularTotalFacturadoVenta(criteria, 1L));
   }
 
@@ -551,7 +517,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
@@ -562,7 +528,7 @@ class FacturaVentaServiceImplTest {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturVenta.eliminada.eq(false)));
-    when(mockFacturaVentaRepository.calcularTotalFacturadoVenta(builder)).thenReturn(null);
+    when(facturaVentaRepository.calcularTotalFacturadoVenta(builder)).thenReturn(null);
     assertEquals(
         BigDecimal.ZERO, facturaVentaServiceImpl.calcularTotalFacturadoVenta(criteria, 1L));
   }
@@ -572,7 +538,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
@@ -584,8 +550,7 @@ class FacturaVentaServiceImplTest {
             .eq(criteria.getIdSucursal())
             .and(qFacturVenta.eliminada.eq(false)));
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
-    when(mockFacturaVentaRepository.calcularIVAVenta(builder, tipoFactura))
-        .thenReturn(BigDecimal.TEN);
+    when(facturaVentaRepository.calcularIVAVenta(builder, tipoFactura)).thenReturn(BigDecimal.TEN);
     assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularIvaVenta(criteria, 1L));
   }
 
@@ -594,7 +559,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
@@ -606,7 +571,7 @@ class FacturaVentaServiceImplTest {
             .eq(criteria.getIdSucursal())
             .and(qFacturVenta.eliminada.eq(false)));
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
-    when(mockFacturaVentaRepository.calcularIVAVenta(builder, tipoFactura)).thenReturn(null);
+    when(facturaVentaRepository.calcularIVAVenta(builder, tipoFactura)).thenReturn(null);
     assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularIvaVenta(criteria, 1L));
   }
 
@@ -615,7 +580,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
@@ -626,7 +591,7 @@ class FacturaVentaServiceImplTest {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturVenta.eliminada.eq(false)));
-    when(mockFacturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(BigDecimal.TEN);
+    when(facturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(BigDecimal.TEN);
     assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularGananciaTotal(criteria, 1L));
   }
 
@@ -635,7 +600,7 @@ class FacturaVentaServiceImplTest {
     Usuario usuarioLogueado = new Usuario();
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
         BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
@@ -646,7 +611,7 @@ class FacturaVentaServiceImplTest {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturVenta.eliminada.eq(false)));
-    when(mockFacturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(null);
+    when(facturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(null);
     assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularGananciaTotal(criteria, 1L));
   }
 
@@ -672,7 +637,7 @@ class FacturaVentaServiceImplTest {
     renglonFactura2.setCantidad(new BigDecimal("5"));
     when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
     when(pedidoService.getRenglonesFacturadosDelPedido(1L)).thenReturn(renglonesDeFacturas);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A,
             Movimiento.VENTA,
             NuevoRenglonFacturaDTO.builder()
@@ -681,7 +646,7 @@ class FacturaVentaServiceImplTest {
                 .renglonMarcado(false)
                 .build()))
         .thenReturn(renglonFactura1);
-    when(mockFacturaService.calcularRenglon(
+    when(facturaServiceImpl.calcularRenglon(
             TipoDeComprobante.FACTURA_A,
             Movimiento.VENTA,
             NuevoRenglonFacturaDTO.builder()
@@ -690,9 +655,9 @@ class FacturaVentaServiceImplTest {
                 .renglonMarcado(false)
                 .build()))
         .thenReturn(renglonFactura2);
-    when(mockFacturaService.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")))
+    when(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")))
         .thenReturn(false);
-    when(mockFacturaService.marcarRenglonParaAplicarBonificacion(2L, new BigDecimal("5")))
+    when(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(2L, new BigDecimal("5")))
         .thenReturn(false);
     assertFalse(
         facturaVentaServiceImpl
@@ -714,12 +679,7 @@ class FacturaVentaServiceImplTest {
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     Cliente clienteDeFactura = new Cliente();
     facturaVenta.setCliente(clienteDeFactura);
-    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
-    when(messageSourceTestMock.getMessage(
-            "mensaje_correo_factura_sin_cae", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_correo_factura_sin_cae", null, Locale.getDefault()));
+    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -729,16 +689,11 @@ class FacturaVentaServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_correo_factura_sin_cae", null, Locale.getDefault())));
 
     facturaVenta.setCae(123L);
-    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
-    when(messageSourceTestMock.getMessage(
-            "mensaje_correo_cliente_sin_email", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_correo_cliente_sin_email", null, Locale.getDefault()));
+    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
     thrown =
         assertThrows(
             BusinessServiceException.class,
@@ -748,7 +703,7 @@ class FacturaVentaServiceImplTest {
         thrown
             .getMessage()
             .contains(
-                messageSourceTest.getMessage(
+                messageSource.getMessage(
                     "mensaje_correo_cliente_sin_email", null, Locale.getDefault())));
     clienteDeFactura.setEmail("correo@decliente.com");
     facturaVenta.setCliente(clienteDeFactura);
@@ -757,8 +712,8 @@ class FacturaVentaServiceImplTest {
     facturaVenta.setSucursal(sucursal);
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setUsarFacturaVentaPreImpresa(true);
-    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
-    when(mockConfiguracionSucursalService.getConfiguracionSucursal(sucursal))
+    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
         .thenReturn(configuracionSucursal);
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
     Pedido pedido = new Pedido();
@@ -768,7 +723,7 @@ class FacturaVentaServiceImplTest {
     ubicacionDTO.setCalle("Calle 123");
     pedido.setDetalleEnvio(ubicacionDTO);
     facturaVenta.setPedido(pedido);
-    when(mockFacturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
   }
 }

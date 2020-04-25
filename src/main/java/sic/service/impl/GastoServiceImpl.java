@@ -8,14 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +24,9 @@ import sic.exception.BusinessServiceException;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.ISucursalService;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class GastoServiceImpl implements IGastoService {
 
   private final GastoRepository gastoRepository;
@@ -37,18 +35,21 @@ public class GastoServiceImpl implements IGastoService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public GastoServiceImpl(
-      GastoRepository gastoRepository,
-      ISucursalService sucursalService,
-      ICajaService cajaService,
-      MessageSource messageSource) {
+    GastoRepository gastoRepository,
+    ISucursalService sucursalService,
+    ICajaService cajaService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.gastoRepository = gastoRepository;
     this.sucursalService = sucursalService;
     this.cajaService = cajaService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -64,7 +65,7 @@ public class GastoServiceImpl implements IGastoService {
   }
 
   @Override
-  public void validarOperacion(Gasto gasto) {
+  public void validarReglasDeNegocio(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getSucursal().getIdSucursal());
     if (gastoRepository.findById(gasto.getIdGasto()).isPresent()) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -134,9 +135,10 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   @Transactional
-  public Gasto guardar(@Valid Gasto gasto) {
+  public Gasto guardar(Gasto gasto) {
+    customValidator.validar(gasto);
     gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getSucursal().getIdSucursal()) + 1);
-    this.validarOperacion(gasto);
+    this.validarReglasDeNegocio(gasto);
     gasto = gastoRepository.save(gasto);
     logger.warn("El Gasto {} se guardó correctamente.", gasto);
     return gasto;

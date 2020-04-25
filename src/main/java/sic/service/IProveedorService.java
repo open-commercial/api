@@ -3,16 +3,15 @@ package sic.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import sic.modelo.TipoDeOperacion;
 import sic.modelo.criteria.BusquedaProveedorCriteria;
 import sic.modelo.Proveedor;
-
-import javax.validation.Valid;
 
 public interface IProveedorService {
 
   Proveedor getProveedorNoEliminadoPorId(long idProveedor);
 
-  void actualizar(@Valid Proveedor proveedor);
+  void actualizar(Proveedor proveedor);
 
   Page<Proveedor> buscarProveedores(BusquedaProveedorCriteria criteria);
 
@@ -20,9 +19,11 @@ public interface IProveedorService {
 
   Proveedor getProveedorPorRazonSocial(String razonSocial);
 
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Proveedor proveedor);
+
   List<Proveedor> getProveedores();
 
-  Proveedor guardar(@Valid Proveedor proveedor);
+  Proveedor guardar(Proveedor proveedor);
 
   String generarNroDeProveedor();
 }

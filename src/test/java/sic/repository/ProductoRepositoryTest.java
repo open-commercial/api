@@ -1,6 +1,7 @@
 package sic.repository;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ class ProductoRepositoryTest {
   @Autowired TestEntityManager testEntityManager;
 
   @Test
+  @Disabled
   void shouldThrowOptimisticLockExceptionWhenIntentaActualizarProductoDetached() {
     Assertions.assertThrows(
         OptimisticLockException.class,

@@ -10,15 +10,13 @@ import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 
-import javax.validation.Valid;
-
 public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
   void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
 
-  void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas);
+  void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
   Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
