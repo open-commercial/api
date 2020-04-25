@@ -1,1 +1,0 @@
-ALTER TABLE cantidadensucursal DROP version;
