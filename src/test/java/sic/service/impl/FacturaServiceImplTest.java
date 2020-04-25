@@ -482,6 +482,7 @@ class FacturaServiceImplTest {
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
     facturaServiceImpl.eliminarFactura(1L);
     verify(facturaRepository, times(1)).save(factura);
+    assertTrue(factura.isEliminada());
     factura.setCae(23232L);
     factura.setEliminada(false);
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
@@ -495,7 +496,6 @@ class FacturaServiceImplTest {
                 messageSource.getMessage(
                     "mensaje_eliminar_factura_aprobada", null, Locale.getDefault())));
     factura.setCae(0L);
-    factura.setEliminada(false);
     when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(true);
     thrown =
         assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
@@ -507,11 +507,9 @@ class FacturaServiceImplTest {
                 messageSource.getMessage(
                     "mensaje_no_se_puede_eliminar", null, Locale.getDefault())));
     when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(false);
-    factura.setEliminada(false);
     Pedido pedido = new Pedido();
     factura.setPedido(pedido);
     facturaServiceImpl.eliminarFactura(1L);
-    verify(pedidoService, times(1)).actualizarEstadoPedido(pedido, EstadoPedido.ABIERTO);
     verify(productoService, times(1)).actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
   }
 }

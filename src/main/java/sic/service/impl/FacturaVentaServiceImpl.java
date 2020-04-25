@@ -303,7 +303,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
-      pedidoService.actualizarEstadoPedido(pedido, EstadoPedido.CERRADO);
+      pedido.setEstado(EstadoPedido.CERRADO);
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
       facturas.forEach(f -> f.setPedido(pedido));
       for (FacturaVenta f : facturas) {

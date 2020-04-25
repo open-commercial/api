@@ -95,7 +95,7 @@ public class FacturaServiceImpl implements IFacturaService {
           Movimiento.VENTA);
       factura.setEliminada(true);
       if (factura.getPedido() != null) {
-        pedidoService.actualizarEstadoPedido(factura.getPedido(), EstadoPedido.ABIERTO);
+        factura.getPedido().setEstado(EstadoPedido.ABIERTO);
         productoService.actualizarStockPedido(
             factura.getPedido(), TipoDeOperacion.ACTUALIZACION);
       }

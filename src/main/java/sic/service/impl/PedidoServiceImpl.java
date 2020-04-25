@@ -131,11 +131,6 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public void actualizarEstadoPedido(Pedido pedido, EstadoPedido estadoPedido) {
-    pedido.setEstado(estadoPedido);// nota: es necesario un método simplemente para esto?
-  }
-
-  @Override
   public Pedido calcularTotalActualDePedido(Pedido pedido) {
     BigDecimal totalActual = BigDecimal.ZERO;
     List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
