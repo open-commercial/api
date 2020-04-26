@@ -5,37 +5,34 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.repository.FacturaCompraRepository;
-import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@WebMvcTest
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {CustomValidator.class, FacturaServiceImpl.class, FacturaCompraServiceImpl.class})
-@TestPropertySource(locations = "classpath:application.properties")
+    classes = {FacturaServiceImpl.class, FacturaCompraServiceImpl.class, MessageSource.class})
 class FacturaCompraServiceImplTest {
 
   @MockBean FacturaCompraRepository facturaCompraRepository;
+  @MockBean MessageSource messageSource;
+
   @Autowired FacturaServiceImpl facturaServiceImpl;
   @Autowired FacturaCompraServiceImpl facturaCompraServiceImpl;
-
-  @Autowired MessageSource messageSource;
 
   @Test
   void shouldGetTipoFacturaCompraWhenSucursalYProveedorDiscriminanIVA() {
@@ -185,17 +182,9 @@ class FacturaCompraServiceImplTest {
   @Test
   void shouldThrownBusinessServiceExceptionPorBusquedaCompraSinIdSucursal() {
     BusquedaFacturaCompraCriteria criteria = BusquedaFacturaCompraCriteria.builder().build();
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaCompraServiceImpl.getBuilderCompra(criteria));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_busqueda_sin_sucursal", null, Locale.getDefault())));
+    assertThrows(
+        BusinessServiceException.class, () -> facturaCompraServiceImpl.getBuilderCompra(criteria));
+    verify(messageSource).getMessage(eq("mensaje_busqueda_sin_sucursal"), any(), any());
   }
 
   @Test
