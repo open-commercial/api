@@ -11,6 +11,7 @@ import sic.modelo.EstadoPedido;
 import sic.modelo.Pedido;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
+import sic.util.CustomValidator;
 
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = PedidoServiceImpl.class)
+@ContextConfiguration(classes = {PedidoServiceImpl.class, CustomValidator.class})
 class PedidoServiceImplTest {
 
   @MockBean PedidoRepository pedidoRepository;

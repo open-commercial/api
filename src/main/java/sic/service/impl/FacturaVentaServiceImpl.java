@@ -60,19 +60,19 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Autowired
   @Lazy
   public FacturaVentaServiceImpl(
-    FacturaVentaRepository facturaVentaRepository,
-    IAfipService afipService,
-    IReciboService reciboService,
-    ICorreoElectronicoService correoElectronicoService,
-    IPedidoService pedidoService,
-    IUsuarioService usuarioService,
-    IClienteService clienteService,
-    ICuentaCorrienteService cuentaCorrienteService,
-    IConfiguracionSucursalService configuracionSucursalService,
-    IFacturaService facturaService,
-    IProductoService productoService,
-    MessageSource messageSource,
-    CustomValidator customValidator) {
+      FacturaVentaRepository facturaVentaRepository,
+      IAfipService afipService,
+      IReciboService reciboService,
+      ICorreoElectronicoService correoElectronicoService,
+      IPedidoService pedidoService,
+      IUsuarioService usuarioService,
+      IClienteService clienteService,
+      ICuentaCorrienteService cuentaCorrienteService,
+      IConfiguracionSucursalService configuracionSucursalService,
+      IFacturaService facturaService,
+      IProductoService productoService,
+      MessageSource messageSource,
+      CustomValidator customValidator) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.afipService = afipService;
@@ -188,9 +188,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       for (RenglonPedido r : pedido.getRenglones()) {
         if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
           facturado =
-              (r.getCantidad()
-                      .compareTo(renglonesDeFacturas.get(r.getIdProductoItem()))
-                  < 1);
+              (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getIdProductoItem())) < 1);
         } else {
           return false;
         }
@@ -588,8 +586,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     return facturas;
   }
 
-  private void procesarFacturaSinIVA(
-          FacturaVenta facturaADividir, FacturaVenta facturaSinIVA) {
+  private void procesarFacturaSinIVA(FacturaVenta facturaADividir, FacturaVenta facturaSinIVA) {
     int size = facturaSinIVA.getRenglones().size();
     BigDecimal[] importes = new BigDecimal[size];
     BigDecimal[] cantidades = new BigDecimal[size];
@@ -611,50 +608,49 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     facturaSinIVA.setSubTotal(CalculosComprobante.calcularSubTotal(importes));
     facturaSinIVA.setDescuentoNeto(
-            CalculosComprobante.calcularProporcion(
-                    facturaSinIVA.getSubTotal(), facturaSinIVA.getDescuentoPorcentaje()));
+        CalculosComprobante.calcularProporcion(
+            facturaSinIVA.getSubTotal(), facturaSinIVA.getDescuentoPorcentaje()));
     facturaSinIVA.setRecargoNeto(
-            CalculosComprobante.calcularProporcion(
-                    facturaSinIVA.getSubTotal(), facturaSinIVA.getRecargoPorcentaje()));
+        CalculosComprobante.calcularProporcion(
+            facturaSinIVA.getSubTotal(), facturaSinIVA.getRecargoPorcentaje()));
     facturaSinIVA.setIva105Neto(
-            facturaService.calcularIvaNetoFactura(
-                    facturaSinIVA.getTipoComprobante(),
-                    cantidades,
-                    ivaPorcentajeRenglones,
-                    ivaNetoRenglones,
-                    IVA_105,
-                    facturaADividir.getDescuentoPorcentaje(),
-                    facturaADividir.getRecargoPorcentaje()));
+        facturaService.calcularIvaNetoFactura(
+            facturaSinIVA.getTipoComprobante(),
+            cantidades,
+            ivaPorcentajeRenglones,
+            ivaNetoRenglones,
+            IVA_105,
+            facturaADividir.getDescuentoPorcentaje(),
+            facturaADividir.getRecargoPorcentaje()));
     facturaSinIVA.setIva21Neto(
-            facturaService.calcularIvaNetoFactura(
-                    facturaSinIVA.getTipoComprobante(),
-                    cantidades,
-                    ivaPorcentajeRenglones,
-                    ivaNetoRenglones,
-                    IVA_21,
-                    facturaADividir.getDescuentoPorcentaje(),
-                    facturaADividir.getRecargoPorcentaje()));
+        facturaService.calcularIvaNetoFactura(
+            facturaSinIVA.getTipoComprobante(),
+            cantidades,
+            ivaPorcentajeRenglones,
+            ivaNetoRenglones,
+            IVA_21,
+            facturaADividir.getDescuentoPorcentaje(),
+            facturaADividir.getRecargoPorcentaje()));
     facturaSinIVA.setSubTotalBruto(
-            CalculosComprobante.calcularSubTotalBruto(
-                    (facturaSinIVA.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-                            || facturaSinIVA.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO),
-                    facturaSinIVA.getSubTotal(),
-                    facturaSinIVA.getRecargoNeto(),
-                    facturaSinIVA.getDescuentoNeto(),
-                    facturaSinIVA.getIva105Neto(),
-                    facturaSinIVA.getIva21Neto()));
+        CalculosComprobante.calcularSubTotalBruto(
+            (facturaSinIVA.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+                || facturaSinIVA.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO),
+            facturaSinIVA.getSubTotal(),
+            facturaSinIVA.getRecargoNeto(),
+            facturaSinIVA.getDescuentoNeto(),
+            facturaSinIVA.getIva105Neto(),
+            facturaSinIVA.getIva21Neto()));
     facturaSinIVA.setTotal(
-            CalculosComprobante.calcularTotal(
-                    facturaSinIVA.getSubTotalBruto(),
-                    facturaSinIVA.getIva105Neto(),
-                    facturaSinIVA.getIva21Neto()));
+        CalculosComprobante.calcularTotal(
+            facturaSinIVA.getSubTotalBruto(),
+            facturaSinIVA.getIva105Neto(),
+            facturaSinIVA.getIva21Neto()));
     facturaSinIVA.setObservaciones(facturaADividir.getObservaciones());
     facturaSinIVA.setSucursal(facturaADividir.getSucursal());
     facturaSinIVA.setEliminada(facturaADividir.isEliminada());
   }
 
-  private void procesarFacturaConIVA(
-          FacturaVenta facturaADividir, FacturaVenta facturaConIVA) {
+  private void procesarFacturaConIVA(FacturaVenta facturaADividir, FacturaVenta facturaConIVA) {
     int size = facturaConIVA.getRenglones().size();
     BigDecimal[] importes = new BigDecimal[size];
     BigDecimal[] cantidades = new BigDecimal[size];
@@ -676,43 +672,43 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     facturaConIVA.setSubTotal(CalculosComprobante.calcularSubTotal(importes));
     facturaConIVA.setDescuentoNeto(
-            CalculosComprobante.calcularProporcion(
-                    facturaConIVA.getSubTotal(), facturaConIVA.getDescuentoPorcentaje()));
+        CalculosComprobante.calcularProporcion(
+            facturaConIVA.getSubTotal(), facturaConIVA.getDescuentoPorcentaje()));
     facturaConIVA.setRecargoNeto(
-            CalculosComprobante.calcularProporcion(
-                    facturaConIVA.getSubTotal(), facturaConIVA.getRecargoPorcentaje()));
+        CalculosComprobante.calcularProporcion(
+            facturaConIVA.getSubTotal(), facturaConIVA.getRecargoPorcentaje()));
     facturaConIVA.setIva105Neto(
-            facturaService.calcularIvaNetoFactura(
-                    facturaConIVA.getTipoComprobante(),
-                    cantidades,
-                    ivaPorcentajeRenglones,
-                    ivaNetoRenglones,
-                    IVA_105,
-                    facturaADividir.getDescuentoPorcentaje(),
-                    facturaADividir.getRecargoPorcentaje()));
+        facturaService.calcularIvaNetoFactura(
+            facturaConIVA.getTipoComprobante(),
+            cantidades,
+            ivaPorcentajeRenglones,
+            ivaNetoRenglones,
+            IVA_105,
+            facturaADividir.getDescuentoPorcentaje(),
+            facturaADividir.getRecargoPorcentaje()));
     facturaConIVA.setIva21Neto(
-            facturaService.calcularIvaNetoFactura(
-                    facturaConIVA.getTipoComprobante(),
-                    cantidades,
-                    ivaPorcentajeRenglones,
-                    ivaNetoRenglones,
-                    IVA_21,
-                    facturaADividir.getDescuentoPorcentaje(),
-                    facturaADividir.getRecargoPorcentaje()));
+        facturaService.calcularIvaNetoFactura(
+            facturaConIVA.getTipoComprobante(),
+            cantidades,
+            ivaPorcentajeRenglones,
+            ivaNetoRenglones,
+            IVA_21,
+            facturaADividir.getDescuentoPorcentaje(),
+            facturaADividir.getRecargoPorcentaje()));
     facturaConIVA.setSubTotalBruto(
-            CalculosComprobante.calcularSubTotalBruto(
-                    (facturaConIVA.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-                            || facturaConIVA.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO),
-                    facturaConIVA.getSubTotal(),
-                    facturaConIVA.getRecargoNeto(),
-                    facturaConIVA.getDescuentoNeto(),
-                    facturaConIVA.getIva105Neto(),
-                    facturaConIVA.getIva21Neto()));
+        CalculosComprobante.calcularSubTotalBruto(
+            (facturaConIVA.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+                || facturaConIVA.getTipoComprobante() == TipoDeComprobante.PRESUPUESTO),
+            facturaConIVA.getSubTotal(),
+            facturaConIVA.getRecargoNeto(),
+            facturaConIVA.getDescuentoNeto(),
+            facturaConIVA.getIva105Neto(),
+            facturaConIVA.getIva21Neto()));
     facturaConIVA.setTotal(
-            CalculosComprobante.calcularTotal(
-                    facturaConIVA.getSubTotalBruto(),
-                    facturaConIVA.getIva105Neto(),
-                    facturaConIVA.getIva21Neto()));
+        CalculosComprobante.calcularTotal(
+            facturaConIVA.getSubTotalBruto(),
+            facturaConIVA.getIva105Neto(),
+            facturaConIVA.getIva21Neto()));
     facturaConIVA.setObservaciones(facturaADividir.getObservaciones());
     facturaConIVA.setSucursal(facturaADividir.getSucursal());
     facturaConIVA.setEliminada(facturaADividir.isEliminada());
@@ -783,58 +779,58 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
           if (cantidad.compareTo(BigDecimal.ONE) < 0 || cantidad.compareTo(BigDecimal.ONE) == 0) {
             cantidadProductosRenglonFacturaConIVA = cantidad;
           } else if ((cantidad.remainder(BigDecimal.ONE).compareTo(BigDecimal.ZERO) != 0)
-                  || renglon.getCantidad().remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO)
+              || renglon.getCantidad().remainder(new BigDecimal(2)).compareTo(BigDecimal.ZERO)
                   == 0) {
             cantidadProductosRenglonFacturaConIVA =
-                    renglon.getCantidad().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
+                renglon.getCantidad().divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP);
           } else if (renglon.getCantidad().remainder(new BigDecimal("2")).compareTo(BigDecimal.ZERO)
-                  != 0) {
+              != 0) {
             cantidadProductosRenglonFacturaConIVA =
-                    renglon
-                            .getCantidad()
-                            .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP)
-                            .setScale(0, RoundingMode.CEILING);
+                renglon
+                    .getCantidad()
+                    .divide(new BigDecimal("2"), 15, RoundingMode.HALF_UP)
+                    .setScale(0, RoundingMode.CEILING);
           }
           renglonesConIVA.add(
-                  facturaService.calcularRenglon(
-                          facturaConIVA.getTipoComprobante(),
-                          Movimiento.VENTA,
-                          NuevoRenglonFacturaDTO.builder()
-                                  .cantidad(cantidadProductosRenglonFacturaConIVA)
-                                  .idProducto(renglon.getIdProductoItem())
-                                  .renglonMarcado(
-                                          facturaService.marcarRenglonParaAplicarBonificacion(
-                                                  renglon.getIdProductoItem(), cantidad))
-                                  .build()));
+              facturaService.calcularRenglon(
+                  facturaConIVA.getTipoComprobante(),
+                  Movimiento.VENTA,
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(cantidadProductosRenglonFacturaConIVA)
+                      .idProducto(renglon.getIdProductoItem())
+                      .renglonMarcado(
+                          facturaService.marcarRenglonParaAplicarBonificacion(
+                              renglon.getIdProductoItem(), cantidad))
+                      .build()));
           renglonMarcado++;
           numeroDeRenglon++;
         } else {
           numeroDeRenglon++;
           renglonesConIVA.add(
-                  facturaService.calcularRenglon(
-                          facturaConIVA.getTipoComprobante(),
-                          Movimiento.VENTA,
-                          NuevoRenglonFacturaDTO.builder()
-                                  .cantidad(renglon.getCantidad())
-                                  .idProducto(renglon.getIdProductoItem())
-                                  .renglonMarcado(
-                                          facturaService.marcarRenglonParaAplicarBonificacion(
-                                                  renglon.getIdProductoItem(), renglon.getCantidad()))
-                                  .build()));
+              facturaService.calcularRenglon(
+                  facturaConIVA.getTipoComprobante(),
+                  Movimiento.VENTA,
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(renglon.getCantidad())
+                      .idProducto(renglon.getIdProductoItem())
+                      .renglonMarcado(
+                          facturaService.marcarRenglonParaAplicarBonificacion(
+                              renglon.getIdProductoItem(), renglon.getCantidad()))
+                      .build()));
         }
       } else {
         numeroDeRenglon++;
         renglonesConIVA.add(
-                facturaService.calcularRenglon(
-                        facturaConIVA.getTipoComprobante(),
-                        Movimiento.VENTA,
-                        NuevoRenglonFacturaDTO.builder()
-                                .cantidad(renglon.getCantidad())
-                                .idProducto(renglon.getIdProductoItem())
-                                .renglonMarcado(
-                                        facturaService.marcarRenglonParaAplicarBonificacion(
-                                                renglon.getIdProductoItem(), renglon.getCantidad()))
-                                .build()));
+            facturaService.calcularRenglon(
+                facturaConIVA.getTipoComprobante(),
+                Movimiento.VENTA,
+                NuevoRenglonFacturaDTO.builder()
+                    .cantidad(renglon.getCantidad())
+                    .idProducto(renglon.getIdProductoItem())
+                    .renglonMarcado(
+                        facturaService.marcarRenglonParaAplicarBonificacion(
+                            renglon.getIdProductoItem(), renglon.getCantidad()))
+                    .build()));
       }
     }
     facturaConIVA.setRenglones(renglonesConIVA);

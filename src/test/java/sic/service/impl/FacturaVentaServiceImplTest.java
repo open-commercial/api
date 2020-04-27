@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
@@ -14,11 +13,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
-import sic.service.IFacturaService;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
@@ -27,24 +24,32 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
-@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CustomValidator.class, FacturaVentaServiceImpl.class, FacturaServiceImpl.class})
+@ContextConfiguration(
+    classes = {
+      CustomValidator.class,
+      FacturaVentaServiceImpl.class,
+      FacturaServiceImpl.class,
+      MessageSource.class
+    })
 @TestPropertySource(locations = "classpath:application.properties")
 class FacturaVentaServiceImplTest {
 
+  @MockBean FacturaRepository facturaRepository;
   @MockBean FacturaVentaRepository facturaVentaRepository;
   @MockBean ProductoServiceImpl productoService;
   @MockBean UsuarioServiceImpl usuarioService;
   @MockBean ClienteServiceImpl clienteService;
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
+  @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
+  @MockBean MessageSource messageSource;
 
   @Autowired FacturaServiceImpl facturaServiceImpl;
   @Autowired FacturaVentaServiceImpl facturaVentaServiceImpl;
-  @Autowired MessageSource messageSource;
 
   @Test
   void shouldGetTipoFacturaVentaWhenSucursalDiscriminaYClienteTambien() {
@@ -257,13 +262,7 @@ class FacturaVentaServiceImplTest {
         assertThrows(
             BusinessServiceException.class,
             () -> facturaVentaServiceImpl.getBuilderVenta(criteria, 1L));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_busqueda_sin_sucursal", null, Locale.getDefault())));
+    verify(messageSource).getMessage(eq("mensaje_busqueda_sin_sucursal"), any(), any());
   }
 
   @Test
@@ -575,32 +574,17 @@ class FacturaVentaServiceImplTest {
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
     Cliente clienteDeFactura = new Cliente();
     facturaVenta.setCliente(clienteDeFactura);
-    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_correo_factura_sin_cae", null, Locale.getDefault())));
-
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
+    verify(messageSource).getMessage(eq("mensaje_correo_factura_sin_cae"), any(), any());
     facturaVenta.setCae(123L);
-    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
-    thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_correo_cliente_sin_email", null, Locale.getDefault())));
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
+    verify(messageSource).getMessage(eq("mensaje_correo_cliente_sin_email"), any(), any());
     clienteDeFactura.setEmail("correo@decliente.com");
     facturaVenta.setCliente(clienteDeFactura);
     Sucursal sucursal = new Sucursal();
@@ -608,7 +592,7 @@ class FacturaVentaServiceImplTest {
     facturaVenta.setSucursal(sucursal);
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setUsarFacturaVentaPreImpresa(true);
-    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
     when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
         .thenReturn(configuracionSucursal);
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
@@ -619,7 +603,19 @@ class FacturaVentaServiceImplTest {
     ubicacionDTO.setCalle("Calle 123");
     pedido.setDetalleEnvio(ubicacionDTO);
     facturaVenta.setPedido(pedido);
-    when(facturaServiceImpl.getFacturaNoEliminadaPorId(1L)).thenReturn(facturaVenta);
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
+    pedido.setTipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO);
+    facturaVenta.setPedido(pedido);
+    when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
+    facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
+    verify(correoElectronicoService, times(3))
+        .enviarEmail(
+            eq(facturaVenta.getCliente().getEmail()),
+            eq(""),
+            eq("Su Factura de Compra"),
+            any(),
+            any(),
+            eq("Reporte"));
   }
 }

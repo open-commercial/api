@@ -6,12 +6,13 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,9 +25,9 @@ import sic.repository.FacturaRepository;
 import sic.util.CalculosComprobante;
 import sic.util.CustomValidator;
 
-@WebMvcTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CustomValidator.class, FacturaServiceImpl.class})
+@ContextConfiguration(
+    classes = {CustomValidator.class, FacturaServiceImpl.class, MessageSource.class})
 @TestPropertySource(locations = "classpath:application.properties")
 class FacturaServiceImplTest {
 
@@ -36,7 +37,8 @@ class FacturaServiceImplTest {
   @MockBean FacturaRepository facturaRepository;
   @MockBean NotaServiceImpl notaService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
-  @Autowired MessageSource messageSource;
+  @MockBean MessageSource messageSource;
+
   @Autowired FacturaServiceImpl facturaServiceImpl;
 
   @Test
@@ -506,26 +508,12 @@ class FacturaServiceImplTest {
     factura.setCae(23232L);
     factura.setEliminada(false);
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
-    BusinessServiceException thrown =
-        assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_eliminar_factura_aprobada", null, Locale.getDefault())));
+    assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
+    verify(messageSource).getMessage(eq("mensaje_eliminar_factura_aprobada"), any(), any());
     factura.setCae(0L);
     when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(true);
-    thrown =
-        assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_no_se_puede_eliminar", null, Locale.getDefault())));
+    assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
+    verify(messageSource).getMessage(eq("mensaje_no_se_puede_eliminar"), any(), any());
     when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(false);
     Pedido pedido = new Pedido();
     factura.setPedido(pedido);

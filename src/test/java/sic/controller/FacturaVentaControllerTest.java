@@ -9,9 +9,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
@@ -30,45 +32,35 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {FacturaVentaController.class, MessageSource.class})
 class FacturaVentaControllerTest {
 
-  @Autowired MessageSource messageSourceTest;
+  @MockBean SucursalServiceImpl sucursalService;
+  @MockBean TransportistaServiceImpl transportistaService;
+  @MockBean ClienteServiceImpl clienteService;
+  @MockBean UsuarioServiceImpl usuarioService;
+  @MockBean FacturaServiceImpl facturaService;
+  @MockBean ReciboServiceImpl reciboService;
+  @MockBean FacturaVentaServiceImpl facturaVentaService;
+  @MockBean AuthServiceImpl authService;
+  @MockBean PedidoServiceImpl pedidoService;
+  @MockBean MessageSource messageSource;
 
-  @Mock MessageSource messageSourceTestMock;
-  @Mock SucursalServiceImpl sucursalService;
-  @Mock TransportistaServiceImpl transportistaService;
-  @Mock ClienteServiceImpl clienteService;
-  @Mock UsuarioServiceImpl usuarioService;
-  @Mock FacturaServiceImpl facturaService;
-  @Mock ReciboServiceImpl reciboService;
-  @Mock FacturaVentaServiceImpl facturaVentaService;
-  @Mock AuthServiceImpl authService;
-
-  @InjectMocks FacturaVentaController facturaVentaController;
+  @Autowired FacturaVentaController facturaVentaController;
 
   @Test
   void shouldGuardarFacturaVenta() {
     NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
         NuevaFacturaVentaDTO.builder().tipoDeComprobante(TipoDeComprobante.PEDIDO).build();
-    when(messageSourceTestMock.getMessage(
-            "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, "headers"));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSourceTest.getMessage(
-                    "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault())));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, "headers"));
+    verify(messageSource).getMessage(eq("mensaje_tipo_de_comprobante_no_valido"), any(), any());
     Sucursal sucursal = new Sucursal();
     sucursal.setNombre("Sucursal prueba");
     when(sucursalService.getSucursalPorId(2L)).thenReturn(sucursal);
@@ -81,22 +73,10 @@ class FacturaVentaControllerTest {
             .idSucursal(2L)
             .idCliente(1L)
             .build();
-    when(messageSourceTestMock.getMessage(
-            "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
-    thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, "headers"));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSourceTest.getMessage(
-                    "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault())));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, "headers"));
+    verify(messageSource).getMessage(eq("mensaje_ubicacion_facturacion_vacia"), any(), any());
     Transportista transportista = new Transportista();
     transportista.setNombre("OCA");
     when(transportistaService.getTransportistaNoEliminadoPorId(4L)).thenReturn(transportista);
