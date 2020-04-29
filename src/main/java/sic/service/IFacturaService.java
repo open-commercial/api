@@ -63,6 +63,8 @@ public interface IFacturaService {
 
   Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura);
 
+  void validarReglasDeNegocio(Factura factura);
+
   void aplicarBonificacion(
           RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion);
 

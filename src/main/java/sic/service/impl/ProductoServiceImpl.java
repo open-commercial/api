@@ -82,7 +82,8 @@ public class ProductoServiceImpl implements IProductoService {
     this.customValidator = customValidator;
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Producto producto) {
     if (producto.isOferta()
         && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessServiceException(
@@ -123,7 +124,8 @@ public class ProductoServiceImpl implements IProductoService {
     this.validarCalculos(producto);
   }
 
-  private void validarCalculos(Producto producto) {
+  @Override
+  public void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
       throw new BusinessServiceException(
@@ -362,7 +364,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setFechaAlta(LocalDateTime.now());
     producto.setFechaUltimaModificacion(LocalDateTime.now());
     this.calcularPrecioBonificado(producto);
-    this.validarOperacion(TipoDeOperacion.ALTA, producto);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, producto);
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
     logger.warn("El Producto {} se guardó correctamente.", producto);
@@ -394,7 +396,7 @@ public class ProductoServiceImpl implements IProductoService {
       photoVideoUploader.borrarImagen(
           Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
@@ -673,7 +675,7 @@ public class ProductoServiceImpl implements IProductoService {
             productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
       }
       this.calcularPrecioBonificado(p);
-      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
+      this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);

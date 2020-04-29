@@ -167,7 +167,7 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public Factura procesarFactura(Factura factura) {
     this.calcularCantidadDeArticulos(factura);
-    this.validarOperacion(factura);
+    this.validarReglasDeNegocio(factura);
     return factura;
   }
 
@@ -230,7 +230,8 @@ public class FacturaServiceImpl implements IFacturaService {
     return idsYCantidades;
   }
 
-  private void validarOperacion(Factura factura) {
+  @Override
+  public void validarReglasDeNegocio(Factura factura) {
     // Requeridos
     if (factura instanceof FacturaCompra && factura.getFecha().isAfter(LocalDateTime.now())) {
       throw new BusinessServiceException(

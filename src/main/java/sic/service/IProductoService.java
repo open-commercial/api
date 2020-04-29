@@ -25,6 +25,10 @@ public interface IProductoService {
       Movimiento movimiento,
       TipoDeComprobante tipoDeComprobante);
 
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Producto producto);
+
+  void validarCalculos(Producto producto);
+
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);

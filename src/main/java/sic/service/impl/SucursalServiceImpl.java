@@ -84,7 +84,8 @@ public class SucursalServiceImpl implements ISucursalService {
     return sucursalRepository.findByIdFiscalAndEliminada(idFiscal, false);
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Sucursal sucursal) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Sucursal sucursal) {
     // Duplicados
     // Nombre
     Sucursal sucursalDuplicada = this.getSucursalPorNombre(sucursal.getNombre());
@@ -139,7 +140,7 @@ public class SucursalServiceImpl implements ISucursalService {
           .setLocalidad(
               ubicacionService.getLocalidadPorId(sucursal.getUbicacion().getIdLocalidad()));
     }
-    validarOperacion(TipoDeOperacion.ALTA, sucursal);
+    validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursal);
     sucursal = sucursalRepository.save(sucursal);
     this.productoService.guardarCantidadesDeSucursalNueva(sucursal);
     crearConfiguracionSucursal(sucursal);
@@ -157,7 +158,7 @@ public class SucursalServiceImpl implements ISucursalService {
       photoVideoUploader.borrarImagen(
           Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
     }
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
     sucursalRepository.save(sucursalParaActualizar);
   }
 
