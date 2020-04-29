@@ -124,7 +124,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
     return transportistaRepository.findByNombreAndEliminado(nombre, false);
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Transportista transportista) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Transportista transportista) {
     // Duplicados
     // Nombre
     Transportista transportistaDuplicado = this.getTransportistaPorNombre(transportista.getNombre());
@@ -157,7 +158,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
           .setLocalidad(
               ubicacionService.getLocalidadPorId(transportista.getUbicacion().getIdLocalidad()));
     }
-    this.validarOperacion(TipoDeOperacion.ALTA, transportista);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, transportista);
     transportista = transportistaRepository.save(transportista);
     logger.warn("El Transportista {} se guardó correctamente.", transportista);
     return transportista;
@@ -167,7 +168,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
   @Transactional
   public void actualizar(Transportista transportista) {
     customValidator.validar(transportista);
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, transportista);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, transportista);
     transportistaRepository.save(transportista);
   }
 

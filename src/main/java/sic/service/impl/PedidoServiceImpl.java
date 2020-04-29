@@ -88,7 +88,8 @@ public class PedidoServiceImpl implements IPedidoService {
     this.customValidator = customValidator;
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Pedido pedido) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Pedido pedido) {
     // Entrada de Datos
     // Validar Estado
     EstadoPedido estado = pedido.getEstado();
@@ -224,9 +225,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     productoService
                         .getProductoNoEliminadoPorId(renglonPedido.getIdProductoItem())
                         .getUrlImagen()));
-    this.validarOperacion(TipoDeOperacion.ALTA, pedido);
-    Map<Long, BigDecimal> idsYCantidades = new HashMap<>();
-    pedido.getRenglones().forEach(p -> idsYCantidades.put(p.getIdProductoItem(), p.getCantidad()));
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
@@ -442,7 +441,7 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setTotalActual(resultados.getTotal());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
@@ -453,7 +452,7 @@ public class PedidoServiceImpl implements IPedidoService {
   public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
     customValidator.validar(pedido);
     pedido.setFacturas(facturas);
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 

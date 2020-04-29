@@ -12,6 +12,8 @@ import sic.modelo.Resultados;
 
 public interface IPedidoService {
 
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Pedido pedido);
+
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
   void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores);

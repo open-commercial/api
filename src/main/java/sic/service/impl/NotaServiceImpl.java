@@ -559,7 +559,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private void validarOperacion(Nota nota) {
+  @Override
+  public void validarReglasDeNegocio(Nota nota) {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
       if (nota.getFacturaVenta() != null
           && nota.getFecha().isBefore(nota.getFacturaVenta().getFecha())) {
@@ -596,7 +597,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private void validarCalculosCredito(NotaCredito notaCredito) {
+  @Override
+  public void validarCalculosCredito(NotaCredito notaCredito) {
     List<RenglonNotaCredito> renglonesNotaCredito = notaCredito.getRenglonesNotaCredito();
     BigDecimal subTotal = BigDecimal.ZERO;
     BigDecimal[] importes = new BigDecimal[renglonesNotaCredito.size()];
@@ -705,7 +707,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private void validarCalculosDebito(NotaDebito notaDebito) {
+  @Override
+  public void validarCalculosDebito(NotaDebito notaDebito) {
     // monto no gravado
     if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
             || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
@@ -770,7 +773,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaCredito.getFecha() == null) {
       notaCredito.setFecha(LocalDateTime.now());
     }
-    this.validarOperacion(notaCredito);
+    this.validarReglasDeNegocio(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       if (notaCredito.getFacturaVenta() != null) {
         notaCredito.setTipoComprobante(
@@ -1115,7 +1118,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaDebito.getFecha() == null) {
       notaDebito.setFecha(LocalDateTime.now());
     }
-    this.validarOperacion(notaDebito);
+    this.validarReglasDeNegocio(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       if (!this.getTipoNotaDebitoCliente(
               notaDebito.getCliente().getIdCliente(), notaDebito.getSucursal().getIdSucursal())

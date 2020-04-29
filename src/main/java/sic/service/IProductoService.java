@@ -32,6 +32,10 @@ public interface IProductoService {
   void actualizarStockNotaCredito(
       Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion);
 
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Producto producto);
+
+  void validarCalculos(Producto producto);
+
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);

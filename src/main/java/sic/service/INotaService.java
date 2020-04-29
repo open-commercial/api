@@ -16,13 +16,17 @@ public interface INotaService {
 
   NotaDebito guardarNotaDebito(NotaDebito nota);
 
-  NotaCredito calcularNotaCreditoConFactura(NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario);
+  NotaCredito calcularNotaCreditoConFactura(
+      NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario);
 
-  NotaCredito calcularNotaCreditoSinFactura(NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO, Usuario usuario);
+  NotaCredito calcularNotaCreditoSinFactura(
+      NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO, Usuario usuario);
 
-  NotaDebito calcularNotaDebitoConRecibo(NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario);
+  NotaDebito calcularNotaDebitoConRecibo(
+      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario);
 
-  NotaDebito calcularNotaDebitoSinRecibo(NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario);
+  NotaDebito calcularNotaDebitoSinRecibo(
+      NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario);
 
   boolean existsByFacturaVentaAndEliminada(FacturaVenta facturaVenta);
 
@@ -34,9 +38,11 @@ public interface INotaService {
 
   void eliminarNota(long idNota);
 
-  Page<NotaCredito> buscarNotasCredito(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
+  Page<NotaCredito> buscarNotasCredito(
+      BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
-  Page<NotaDebito> buscarNotasDebito(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
+  Page<NotaDebito> buscarNotasDebito(
+      BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn);
 
   Factura getFacturaDeLaNotaCredito(Long idNota);
 
@@ -73,12 +79,12 @@ public interface INotaService {
   List<RenglonNotaCredito> calcularRenglonesCreditoProducto(
       TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 
-  RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String detalle, BigDecimal monto);
+  RenglonNotaCredito calcularRenglonCredito(
+      TipoDeComprobante tipo, String detalle, BigDecimal monto);
 
-  RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) ;
+  RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo);
 
-  RenglonNotaDebito calcularRenglonDebito(
-    BigDecimal monto, TipoDeComprobante tipoDeComprobante);
+  RenglonNotaDebito calcularRenglonDebito(BigDecimal monto, TipoDeComprobante tipoDeComprobante);
 
   BigDecimal calcularSubTotalCredito(BigDecimal[] importesBrutos);
 
@@ -102,6 +108,12 @@ public interface INotaService {
       BigDecimal ivaPorcentaje,
       BigDecimal descuentoPorcentaje,
       BigDecimal recargoPorcentaje);
+
+  void validarReglasDeNegocio(Nota nota);
+
+  void validarCalculosCredito(NotaCredito notaCredito);
+
+  void validarCalculosDebito(NotaDebito notaDebito);
 
   BigDecimal calcularTotalCredito(
       BigDecimal subTotalBruto, BigDecimal iva105Neto, BigDecimal iva21Neto);

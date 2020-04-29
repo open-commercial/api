@@ -1487,7 +1487,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName(
-      "Facturar un pedido del carrito, intentar eliminar el Pedido sin éxito, eliminar la factura relacionada, para luego eliminar pedido.")
+      "Facturar un pedido del carrito, intentar eliminar el Pedido sin éxito, eliminar la factura relacionada, para luego eliminar pedido")
   @Order(13)
   void testEscenarioEliminarPedidoFacturado() {
     this.iniciarSesionComoAdministrador();
@@ -1668,7 +1668,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("verificar stock y cerrar caja.")
+  @DisplayName("Verificar stock y cerrar caja")
   @Order(14)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
