@@ -258,10 +258,9 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldThrownBusinessServiceExceptionPorBusquedaVentaSinIdSucursal() {
     BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder().build();
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaServiceImpl.getBuilderVenta(criteria, 1L));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaServiceImpl.getBuilderVenta(criteria, 1L));
     verify(messageSource).getMessage(eq("mensaje_busqueda_sin_sucursal"), any(), any());
   }
 

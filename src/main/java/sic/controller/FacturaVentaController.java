@@ -129,7 +129,11 @@ public class FacturaVentaController {
             ? nuevaFacturaVentaDTO.getObservaciones()
             : "");
     List<FacturaVenta> facturasGuardadas;
-    if (nuevaFacturaVentaDTO.getIndices() != null && nuevaFacturaVentaDTO.getIndices().length > 0) {
+    if (nuevaFacturaVentaDTO.getIndices() != null
+        && nuevaFacturaVentaDTO.getIndices().length > 0
+        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
       facturasGuardadas =
           facturaVentaService.guardar(
               facturaVentaService.dividirFactura(fv, nuevaFacturaVentaDTO.getIndices()),
