@@ -35,10 +35,9 @@ import static org.mockito.Mockito.*;
       FacturaServiceImpl.class,
       MessageSource.class
     })
-@TestPropertySource(locations = "classpath:application.properties")
 class FacturaVentaServiceImplTest {
 
-  @MockBean FacturaRepository facturaRepository;
+  @MockBean FacturaRepository<Factura> facturaRepository;
   @MockBean FacturaVentaRepository facturaVentaRepository;
   @MockBean ProductoServiceImpl productoService;
   @MockBean UsuarioServiceImpl usuarioService;

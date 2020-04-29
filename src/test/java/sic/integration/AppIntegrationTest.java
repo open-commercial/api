@@ -1486,10 +1486,9 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName(
-      "Facturar un pedido del carrito, intentar eliminar el Pedido sin éxito, eliminar la factura relacionada, para luego eliminar pedido")
+  @DisplayName("Facturar un pedido, luego intentar eliminarlo sin éxito")
   @Order(13)
-  void testEscenarioEliminarPedidoFacturado() {
+  void testEscenarioFacturarPedidoAndIntentarEliminarlo() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
     HttpEntity<BusquedaProductoCriteria> requestEntityProductos =
@@ -1583,9 +1582,8 @@ class AppIntegrationTest {
             .descuentoPorcentaje(new BigDecimal("25"))
             .indices(indices)
             .build();
-    FacturaVenta[] facturas =
-        restTemplate.postForObject(
-            apiPrefix + "/facturas/ventas", nuevaFacturaVentaDTO, FacturaVenta[].class);
+    restTemplate.postForObject(
+        apiPrefix + "/facturas/ventas", nuevaFacturaVentaDTO, FacturaVenta[].class);
     pedidoCriteria =
         BusquedaPedidoCriteria.builder().idSucursal(1L).estadoPedido(EstadoPedido.CERRADO).build();
     requestEntity = new HttpEntity<>(pedidoCriteria);
@@ -1616,13 +1614,48 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("5.000000000000000"),
         productosRecuperados.get(3).getCantidadTotalEnSucursales());
-    restTemplate.delete(apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido());
-    Pedido pedidoNoEliminado =
-        restTemplate.getForObject(
-            apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido(), Pedido.class);
-    assertFalse(pedidoNoEliminado.isEliminado());
-    restTemplate.delete(apiPrefix + "/facturas/" + facturas[0].getIdFactura());
-    resultadoBusqueda =
+    RestClientResponseException thrown =
+        assertThrows(
+            RestClientResponseException.class, () -> restTemplate.delete(apiPrefix + "/pedidos/2"));
+    assertNotNull(thrown.getMessage());
+    assertTrue(
+        thrown
+            .getMessage()
+            .contains(
+                messageSource.getMessage(
+                    "mensaje_no_se_puede_eliminar_pedido",
+                    new Object[] {EstadoPedido.CERRADO},
+                    Locale.getDefault())));
+  }
+
+  @Test
+  @DisplayName("Eliminar el ultimo pedido, quitando primero su factura relacionada")
+  @Order(14)
+  void testEscenarioEliminarPedidoFacturado() {
+    this.iniciarSesionComoAdministrador();
+    BusquedaFacturaVentaCriteria criteria =
+        BusquedaFacturaVentaCriteria.builder()
+            .idSucursal(1L)
+            .numSerie(2L)
+            .numFactura(2L)
+            .tipoComprobante(TipoDeComprobante.FACTURA_X)
+            .build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<FacturaVenta> resultadoBusqueda =
+        restTemplate
+            .exchange(
+                apiPrefix + "/facturas/ventas/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntity,
+                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<FacturaVenta> facturasRecuperadas = resultadoBusqueda.getContent();
+    restTemplate.delete(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura());
+    BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
+    HttpEntity<BusquedaProductoCriteria> requestEntityProductos =
+        new HttpEntity<>(productosCriteria);
+    PaginaRespuestaRest<Producto> resultadoBusquedaProducto =
         restTemplate
             .exchange(
                 apiPrefix + "/productos/busqueda/criteria",
@@ -1631,12 +1664,36 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
             .getBody();
     assertNotNull(resultadoBusqueda);
-    productosRecuperados = resultadoBusqueda.getContent();
+    List<Producto> productosRecuperados = resultadoBusquedaProducto.getContent();
+    resultadoBusquedaProducto =
+        restTemplate
+            .exchange(
+                apiPrefix + "/productos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntityProductos,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+            .getBody();
+    assertNotNull(resultadoBusqueda);
+    productosRecuperados = resultadoBusquedaProducto.getContent();
     assertEquals(
         new BigDecimal("0E-15"), productosRecuperados.get(2).getCantidadTotalEnSucursales());
     assertEquals(
         new BigDecimal("5.000000000000000"),
         productosRecuperados.get(3).getCantidadTotalEnSucursales());
+    BusquedaPedidoCriteria pedidoCriteria =
+        BusquedaPedidoCriteria.builder().idSucursal(1L).estadoPedido(EstadoPedido.ABIERTO).build();
+    HttpEntity<BusquedaPedidoCriteria> requestEntityPedido = new HttpEntity<>(pedidoCriteria);
+    PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
+        restTemplate
+            .exchange(
+                apiPrefix + "/pedidos/busqueda/criteria",
+                HttpMethod.POST,
+                requestEntityPedido,
+                new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
+            .getBody();
+    assertNotNull(resultadoBusquedaPedido);
+    List<Pedido> pedidosRecuperados = resultadoBusquedaPedido.getContent();
+    assertEquals(1, pedidosRecuperados.size());
     restTemplate.delete(apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido());
     RestClientResponseException thrown =
         assertThrows(
@@ -1649,7 +1706,7 @@ class AppIntegrationTest {
             .contains(
                 messageSource.getMessage(
                     "mensaje_pedido_no_existente", null, Locale.getDefault())));
-    resultadoBusqueda =
+    resultadoBusquedaProducto =
         restTemplate
             .exchange(
                 apiPrefix + "/productos/busqueda/criteria",
@@ -1658,7 +1715,7 @@ class AppIntegrationTest {
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
             .getBody();
     assertNotNull(resultadoBusqueda);
-    productosRecuperados = resultadoBusqueda.getContent();
+    productosRecuperados = resultadoBusquedaProducto.getContent();
     assertEquals(
         new BigDecimal("9.000000000000000"),
         productosRecuperados.get(2).getCantidadTotalEnSucursales());
@@ -1669,7 +1726,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Verificar stock y cerrar caja")
-  @Order(14)
+  @Order(15)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();

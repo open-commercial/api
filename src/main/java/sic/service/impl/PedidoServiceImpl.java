@@ -458,15 +458,19 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public boolean eliminar(long idPedido) {
+  public void eliminar(long idPedido) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       pedido.setEliminado(true);
-      productoService.actualizarStockPedido(
-          pedido, TipoDeOperacion.ELIMINACION);
+      productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
       pedidoRepository.save(pedido);
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_no_se_puede_eliminar_pedido",
+              new Object[] {pedido.getEstado()},
+              Locale.getDefault()));
     }
-    return pedido.isEliminado();
   }
 
   @Override

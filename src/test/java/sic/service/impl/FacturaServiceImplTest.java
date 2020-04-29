@@ -28,13 +28,12 @@ import sic.util.CustomValidator;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {CustomValidator.class, FacturaServiceImpl.class, MessageSource.class})
-@TestPropertySource(locations = "classpath:application.properties")
 class FacturaServiceImplTest {
 
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean ProductoServiceImpl productoService;
   @MockBean PedidoServiceImpl pedidoService;
-  @MockBean FacturaRepository facturaRepository;
+  @MockBean FacturaRepository<Factura> facturaRepository;
   @MockBean NotaServiceImpl notaService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
   @MockBean MessageSource messageSource;
@@ -129,7 +128,6 @@ class FacturaServiceImplTest {
     assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
   }
 
-  // Calculos
   @Test
   void shouldCalcularSubTotal() {
     RenglonFactura renglon1 = new RenglonFactura();
@@ -494,8 +492,8 @@ class FacturaServiceImplTest {
   }
 
   @Test
-  void shouldEliminarFactura() {
-    Factura factura = new FacturaVenta();
+  void shouldEliminarFacturaVenta() {
+    FacturaVenta factura = new FacturaVenta();
     List<RenglonFactura> renglonFacturas = new ArrayList<>();
     factura.setRenglones(renglonFacturas);
     Sucursal sucursal = new Sucursal();
@@ -511,10 +509,10 @@ class FacturaServiceImplTest {
     assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
     verify(messageSource).getMessage(eq("mensaje_eliminar_factura_aprobada"), any(), any());
     factura.setCae(0L);
-    when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(true);
+    when(notaService.existsByFacturaVentaAndEliminada(factura)).thenReturn(true);
     assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
     verify(messageSource).getMessage(eq("mensaje_no_se_puede_eliminar"), any(), any());
-    when(notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)).thenReturn(false);
+    when(notaService.existsByFacturaVentaAndEliminada(factura)).thenReturn(false);
     Pedido pedido = new Pedido();
     factura.setPedido(pedido);
     facturaServiceImpl.eliminarFactura(1L);

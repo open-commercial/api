@@ -26,7 +26,7 @@ public interface IPedidoService {
 
   Pedido calcularTotalActualDePedido(Pedido pedido);
 
-  boolean eliminar(long idPedido);
+  void eliminar(long idPedido);
 
   List<Factura> getFacturasDelPedido(long id);
 
