@@ -250,7 +250,7 @@ public class PedidoServiceImpl implements IPedidoService {
               },
               Locale.getDefault()),
           this.getReportePedido(pedido.getIdPedido()),
-          "Reporte");
+          "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     this.calcularTotalActualDePedido(pedido);
