@@ -420,6 +420,14 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public void actualizar(Pedido pedido) {
+    if (pedido.getEstado() == EstadoPedido.CERRADO) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_pedido_facturado", null, Locale.getDefault()));
+    }
+    if (pedido.getEstado() == EstadoPedido.ACTIVO) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_pedido_procesado", null, Locale.getDefault()));
+    }
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
