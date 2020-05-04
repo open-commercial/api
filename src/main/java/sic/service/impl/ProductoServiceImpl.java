@@ -801,37 +801,46 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
-    if (productosParaVerificarStockDTO.getIdSucursal() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
-    }
     List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     if (longitudIds == longitudCantidades) {
       for (int i = 0; i < longitudIds; i++) {
-        BigDecimal cantidadLambda = productosParaVerificarStockDTO.getCantidad()[i];
         Producto producto =
             this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        producto.getCantidadEnSucursales().stream()
-            .filter(
-                cantidadEnSucursal ->
-                    cantidadEnSucursal
-                        .getIdSucursal()
-                        .equals(productosParaVerificarStockDTO.getIdSucursal()))
-            .forEach(
-                cantidadEnSucursal -> {
-                  if (!producto.isIlimitado()
-                      && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                    ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
-                    productoFaltanteDTO.setIdProducto(producto.getIdProducto());
-                    productoFaltanteDTO.setCodigo(producto.getCodigo());
-                    productoFaltanteDTO.setDescripcion(producto.getDescripcion());
-                    productoFaltanteDTO.setCantidadSolicitada(cantidadLambda);
-                    productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
-                    productosFaltantes.add(productoFaltanteDTO);
-                  }
-                });
+        BigDecimal cantidadSolicitada = productosParaVerificarStockDTO.getCantidad()[i];
+        if (productosParaVerificarStockDTO.getIdSucursal() != null) {
+          producto.getCantidadEnSucursales().stream()
+              .filter(
+                  cantidadEnSucursal ->
+                      cantidadEnSucursal
+                          .getIdSucursal()
+                          .equals(productosParaVerificarStockDTO.getIdSucursal()))
+              .forEach(
+                  cantidadEnSucursal -> {
+                    if (!producto.isIlimitado()
+                        && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0) {
+                      ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+                      productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+                      productoFaltanteDTO.setCodigo(producto.getCodigo());
+                      productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+                      productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
+                      productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
+                      productosFaltantes.add(productoFaltanteDTO);
+                    }
+                  });
+        } else if (producto
+                .getCantidadTotalEnSucursales()
+                .compareTo(productosParaVerificarStockDTO.getCantidad()[i])
+            < 0) {
+          ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+          productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+          productoFaltanteDTO.setCodigo(producto.getCodigo());
+          productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+          productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
+          productoFaltanteDTO.setCantidadDisponible(producto.getCantidadTotalEnSucursales());
+          productosFaltantes.add(productoFaltanteDTO);
+        }
       }
     } else {
       throw new BusinessServiceException(

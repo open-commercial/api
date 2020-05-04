@@ -318,31 +318,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldThrownBusinessServiceExceptionPorBuscarProductosSinIdSucursal() {
-    Producto producto = new Producto();
-    producto.setIdProducto(1L);
-    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
-    cantidadEnSucursal.setSucursal(sucursal);
-    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
-    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
-    cantidadEnSucursales.add(cantidadEnSucursal);
-    producto.setCantidadEnSucursales(cantidadEnSucursales);
-    producto.setIlimitado(false);
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    long[] idProducto = {1};
-    BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
-    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().cantidad(cantidad).idProducto(idProducto).build();
-    assertThrows(
-        BusinessServiceException.class,
-        () -> productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO));
-    verify(messageSource).getMessage(eq("mensaje_consulta_stock_sin_sucursal"), any(), any());
-  }
-
-  @Test
   void shouldTestActualizarMultiplesProductos() {
     ProductosParaActualizarDTO productosParaActualizarDTO =
         ProductosParaActualizarDTO.builder()
