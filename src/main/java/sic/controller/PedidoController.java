@@ -66,8 +66,8 @@ public class PedidoController {
   public List<RenglonPedido> calcularRenglonesPedido(
       @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
     return pedidoService.calcularRenglonesPedido(
-        this.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
-        this.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
+        pedidoService.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
+        pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
   }
 
   @PutMapping("/pedidos")
@@ -89,8 +89,8 @@ public class PedidoController {
         .getRenglones()
         .addAll(
             pedidoService.calcularRenglonesPedido(
-                this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
-                this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
+                pedidoService.getArrayDeIdProducto(pedidoDTO.getRenglones()),
+                pedidoService.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
     pedidoService.actualizar(pedido);
   }
 
@@ -119,8 +119,8 @@ public class PedidoController {
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
     pedido.setRenglones(
         pedidoService.calcularRenglonesPedido(
-            this.getArrayDeIdProducto(pedidoDTO.getRenglones()),
-            this.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
+            pedidoService.getArrayDeIdProducto(pedidoDTO.getRenglones()),
+            pedidoService.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
     return pedidoService.guardar(pedido);
   }
 
@@ -151,21 +151,5 @@ public class PedidoController {
   @PostMapping("/pedidos/calculo-pedido")
   public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
     return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
-  }
-
-  private long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
-    long[] idProductoItem = new long[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      idProductoItem[i] = nuevosRenglones.get(i).getIdProductoItem();
-    }
-    return idProductoItem;
-  }
-
-  private BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
-    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
-    for (int i = 0; i < nuevosRenglones.size(); ++i) {
-      cantidades[i] = nuevosRenglones.get(i).getCantidad();
-    }
-    return cantidades;
   }
 }
