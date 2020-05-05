@@ -1,6 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Pedido;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
+import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.service.*;
 
 @RestController
@@ -86,5 +88,13 @@ public class CarritoCompraController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.crearPedido(nuevaOrdenDePagoDTO, idUsuarioLoggedIn);
+  }
+
+  @GetMapping("/carrito-compra/disponibilidad-stock")
+  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return carritoCompraService.getProductosDelCarritoSinStockDisponible(idUsuarioLoggedIn);
   }
 }

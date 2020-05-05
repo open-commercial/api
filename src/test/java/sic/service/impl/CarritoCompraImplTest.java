@@ -4,17 +4,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Producto;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.repository.CarritoCompraRepository;
-import sic.service.IUsuarioService;
+import sic.service.*;
+import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -22,15 +28,20 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {CustomValidator.class, CarritoCompraServiceImpl.class})
 class CarritoCompraImplTest {
 
-  @Mock CarritoCompraRepository carritoCompraRepository;
-  @Mock IUsuarioService usuarioService;
+  @MockBean CarritoCompraRepository carritoCompraRepository;
+  @MockBean IUsuarioService usuarioService;
+  @MockBean IProductoService productoService;
+  @MockBean ISucursalService sucursalService;
+  @MockBean IClienteService clienteService;
+  @MockBean IPedidoService pedidoService;
 
-  @InjectMocks CarritoCompraServiceImpl carritoCompraServiceImpl;
+  @Autowired CarritoCompraServiceImpl carritoCompraServiceImpl;
 
   @Test
   void shouldGetCarritoDeCompra() {
@@ -77,5 +88,55 @@ class CarritoCompraImplTest {
     assertEquals(3, carritoCompraServiceImpl.getCarritoCompra(1L, 1L).getCantRenglones());
     assertEquals(
         new BigDecimal("1450.00"), carritoCompraServiceImpl.getCarritoCompra(1L, 1L).getTotal());
+  }
+
+  @Test
+  void shouldGetProductosDelCarritoSinStockDisponible() {
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    producto1.setBulto(BigDecimal.TEN);
+    producto1.setPrecioLista(new BigDecimal("200"));
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    producto2.setBulto(BigDecimal.TEN);
+    producto2.setPrecioLista(new BigDecimal("350"));
+    Producto producto3 = new Producto();
+    producto3.setIdProducto(3L);
+    producto3.setBulto(BigDecimal.TEN);
+    producto3.setPrecioLista(new BigDecimal("900"));
+    List<ItemCarritoCompra> itemsCarritoCompra = new ArrayList<>();
+    ItemCarritoCompra itemCarritoCompra1 = new ItemCarritoCompra();
+    itemCarritoCompra1.setImporte(new BigDecimal("200"));
+    itemCarritoCompra1.setCantidad(BigDecimal.ONE);
+    itemCarritoCompra1.setProducto(producto1);
+    ItemCarritoCompra itemCarritoCompra2 = new ItemCarritoCompra();
+    itemCarritoCompra2.setImporte(new BigDecimal("350"));
+    itemCarritoCompra2.setCantidad(BigDecimal.ONE);
+    itemCarritoCompra2.setProducto(producto2);
+    ItemCarritoCompra itemCarritoCompra3 = new ItemCarritoCompra();
+    itemCarritoCompra3.setCantidad(BigDecimal.ONE);
+    itemCarritoCompra3.setImporte(new BigDecimal("900"));
+    itemCarritoCompra3.setProducto(producto3);
+    itemsCarritoCompra.add(itemCarritoCompra1);
+    itemsCarritoCompra.add(itemCarritoCompra2);
+    itemsCarritoCompra.add(itemCarritoCompra3);
+    Usuario usuario = new Usuario();
+    usuario.setIdUsuario(1L);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
+    when(carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario))
+        .thenReturn(itemsCarritoCompra);
+    long[] idProducto = new long[itemsCarritoCompra.size()];
+    BigDecimal[] cantidad = new BigDecimal[itemsCarritoCompra.size()];
+    int indice = 0;
+    for (ItemCarritoCompra item : itemsCarritoCompra) {
+      idProducto[indice] = item.getProducto().getIdProducto();
+      cantidad[indice] = item.getCantidad();
+      indice++;
+    }
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    carritoCompraServiceImpl.getProductosDelCarritoSinStockDisponible(1L);
+    verify(productoService, times(1))
+        .getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 }

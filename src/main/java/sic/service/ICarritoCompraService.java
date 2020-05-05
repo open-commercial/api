@@ -9,6 +9,7 @@ import sic.modelo.Pedido;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
+import sic.modelo.dto.ProductoFaltanteDTO;
 
 public interface ICarritoCompraService {
 
@@ -31,4 +32,6 @@ public interface ICarritoCompraService {
   List<ItemCarritoCompra> getItemsDelCarritoPorUsuario(Usuario usuario);
 
   Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario);
+
+  List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario);
 }

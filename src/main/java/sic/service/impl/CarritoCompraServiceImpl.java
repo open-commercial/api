@@ -209,4 +209,21 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     this.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }
+
+  @Override
+  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario) {
+    List<ItemCarritoCompra> items =
+        this.getItemsDelCarritoPorUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    long[] idProducto = new long[items.size()];
+    BigDecimal[] cantidad = new BigDecimal[items.size()];
+    int indice = 0;
+    for (ItemCarritoCompra item : items) {
+      idProducto[indice] = item.getProducto().getIdProducto();
+      cantidad[indice] = item.getCantidad();
+      indice++;
+    }
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+  }
 }
