@@ -151,16 +151,17 @@ public class PedidoServiceImpl implements IPedidoService {
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
     for (int i = 0; i < renglonesDelPedido.size(); ++i) {
-      if (productos.get(i).isOferta()
-          && renglonesDelPedido.get(i).getCantidad().compareTo(productos.get(i).getBulto()) >= 0
-          && productos.get(i).getPorcentajeBonificacionOferta() != null) {
+      boolean cumpleCondicionDeOferta =
+          productos.get(i).isOferta() && productos.get(i).getPorcentajeBonificacionOferta() != null;
+      boolean cumpleCondicionDeCantidad =
+          renglonesDelPedido.get(i).getCantidad().compareTo(productos.get(i).getBulto()) >= 0;
+      if (cumpleCondicionDeOferta && cumpleCondicionDeCantidad) {
         bonificacionNeta =
             bonificacionNeta.add(
                 CalculosComprobante.calcularProporcion(
                     productos.get(i).getPrecioLista(),
                     productos.get(i).getPorcentajeBonificacionOferta()));
-      } else if (renglonesDelPedido.get(i).getCantidad().compareTo(productos.get(i).getBulto())
-          >= 0) {
+      } else if (cumpleCondicionDeCantidad) {
         bonificacionNeta =
             bonificacionNeta.add(
                 CalculosComprobante.calcularProporcion(
