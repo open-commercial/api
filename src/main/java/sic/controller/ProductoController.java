@@ -181,6 +181,12 @@ public class ProductoController {
     if (productoPorActualizar.getPorcentajeBonificacionPrecio() == null)
       productoPorActualizar.setPorcentajeBonificacionPrecio(
           productoPersistido.getPorcentajeBonificacionPrecio());
+    if (productoPorActualizar.getBulto() == null)
+      productoPorActualizar.setBulto(productoPersistido.getBulto());
+    if (productoPorActualizar.getDescripcion() == null)
+      productoPorActualizar.setDescripcion(productoPersistido.getDescripcion());
+    if (productoPorActualizar.getCodigo() == null)
+      productoPorActualizar.setCodigo(productoPersistido.getCodigo());
     productoService.actualizar(productoPorActualizar, productoPersistido, productoDTO.getImagen());
   }
 

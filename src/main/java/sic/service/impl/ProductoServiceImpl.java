@@ -382,6 +382,8 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+    productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
+    productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     customValidator.validar(productoPorActualizar);
     if (productoPorActualizar.isOferta()
         && (productoPorActualizar.getUrlImagen() == null
@@ -393,8 +395,6 @@ public class ProductoServiceImpl implements IProductoService {
               new Object[] {productoPorActualizar.getDescripcion()},
               Locale.getDefault()));
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
-    productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
         && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())) {
@@ -571,20 +571,42 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private Producto quitarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
-    producto
-        .getCantidadEnSucursales()
-        .forEach(
-            cantidadEnSucursal -> {
-              if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
-              }
-            });
+    for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadEnSucursales()) {
+      if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+        cantidad = this.quitarStockSegunCantidadEnSucursal(cantidadEnSucursal, cantidad);
+      }
+    }
+    if (cantidad.compareTo(BigDecimal.ZERO) > 0) {
+      List<CantidadEnSucursal> listaOrdenadaPorCantidad =
+          new ArrayList<>(producto.getCantidadEnSucursales());
+      listaOrdenadaPorCantidad.sort(
+          (cantidad1, cantidad2) -> cantidad2.getCantidad().compareTo(cantidad1.getCantidad()));
+      for (CantidadEnSucursal cantidadEnSucursal : listaOrdenadaPorCantidad) {
+        if (cantidadEnSucursal.getSucursal().getIdSucursal() != idSucursal) {
+          cantidad = this.quitarStockSegunCantidadEnSucursal(cantidadEnSucursal, cantidad);
+        }
+      }
+      listaOrdenadaPorCantidad.forEach(
+          cantidadEnSucursal -> producto.getCantidadEnSucursales().add(cantidadEnSucursal));
+    }
     producto.setCantidadTotalEnSucursales(
         producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     return productoRepository.save(producto);
+  }
+
+  private BigDecimal quitarStockSegunCantidadEnSucursal(
+      CantidadEnSucursal cantidadEnSucursal, BigDecimal cantidad) {
+    if (cantidadEnSucursal.getCantidad().compareTo(cantidad) > 0) {
+      cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
+      return BigDecimal.ZERO;
+    } else {
+      cantidad = cantidad.subtract(cantidadEnSucursal.getCantidad());
+      cantidadEnSucursal.setCantidad(BigDecimal.ZERO);
+      return cantidad;
+    }
   }
 
   @Override

@@ -299,12 +299,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public List<FacturaVenta> guardar(
       List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
     facturas.forEach(customValidator::validar);
-    this.calcularValoresFacturasVentaAndActualizarStock(facturas);
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
       pedido.setEstado(EstadoPedido.CERRADO);
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+      this.calcularValoresFacturasVentaAndActualizarStock(facturas);
       facturas.forEach(f -> f.setPedido(pedido));
       for (FacturaVenta f : facturas) {
         FacturaVenta facturaGuardada =
@@ -319,6 +319,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
       facturasProcesadas.forEach(f -> logger.warn("La Factura {} se guardó correctamente.", f));
     } else {
+      this.calcularValoresFacturasVentaAndActualizarStock(facturas);
       facturasProcesadas = new ArrayList<>();
       for (FacturaVenta f : facturas) {
         FacturaVenta facturaGuardada;
