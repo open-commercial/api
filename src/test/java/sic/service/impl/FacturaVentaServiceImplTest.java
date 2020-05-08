@@ -614,6 +614,6 @@ class FacturaVentaServiceImplTest {
             eq("Su Factura de Compra"),
             any(),
             any(),
-            eq("Reporte"));
+            eq("Reporte.pdf"));
   }
 }

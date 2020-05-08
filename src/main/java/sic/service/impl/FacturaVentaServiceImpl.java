@@ -550,7 +550,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
           "Su Factura de Compra",
           bodyEmail,
           this.getReporteFacturaVenta(factura),
-          "Reporte");
+          "Reporte.pdf");
       logger.warn(
           "El mail de la factura serie {} nro {} se envió.",
           factura.getNumSerie(),

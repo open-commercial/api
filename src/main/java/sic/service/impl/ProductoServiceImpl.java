@@ -408,6 +408,7 @@ public class ProductoServiceImpl implements IProductoService {
     }
     //se setea siempre en false momentaniamente
     productoPorActualizar.setIlimitado(false);
+    productoPorActualizar.setVersion(productoPersistido.getVersion());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
         messageSource.getMessage(

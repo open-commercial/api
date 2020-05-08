@@ -1301,7 +1301,7 @@ class AppIntegrationTest {
     assertNotNull(pedido);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(
-        new BigDecimal("12796.00000000000000000000000000000000000000000000000"),
+        new BigDecimal("12796.00000000000000000000000000000000"),
         pedido.getTotalActual());
     assertEquals(EstadoPedido.ABIERTO, pedido.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =

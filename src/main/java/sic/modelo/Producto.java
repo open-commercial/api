@@ -26,7 +26,7 @@ import sic.controller.Views;
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"idProducto", "descripcion"})
 @ToString
-@JsonIgnoreProperties({"medida", "rubro", "proveedor"})
+@JsonIgnoreProperties({"medida", "rubro", "proveedor", "version"})
 @JsonView(Views.Vendedor.class)
 public class Producto implements Serializable {
 
@@ -52,6 +52,7 @@ public class Producto implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
+  @JsonView(Views.Comprador.class)
   private BigDecimal cantidadTotalEnSucursales;
 
   @Column(precision = 25, scale = 15)
@@ -150,7 +151,7 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private String urlImagen;
 
-  //@Version
+  @Version
   private Long version;
 
   @JsonGetter("nombreMedida")

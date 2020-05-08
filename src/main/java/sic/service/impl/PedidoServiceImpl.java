@@ -135,23 +135,37 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   public Pedido calcularTotalActualDePedido(Pedido pedido) {
     BigDecimal totalActual = BigDecimal.ZERO;
-    List<RenglonPedido> renglonesDelPedido = this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
+    BigDecimal bonificacionNeta = BigDecimal.ZERO;
+    List<RenglonPedido> renglonesDelPedido =
+        this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
     List<Long> idsProductos = new ArrayList<>();
     renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
     List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
-    int i = 0;
-    for (RenglonPedido renglonPedido : renglonesDelPedido) {
-      BigDecimal precioUnitario = productos.get(i).getPrecioLista();
-      renglonPedido.setImporte(
-          precioUnitario
-              .multiply(renglonPedido.getCantidad())
-              .multiply(
-                  BigDecimal.ONE.subtract(
-                      renglonPedido
-                          .getBonificacionPorcentaje()
-                          .divide(CIEN, 15, RoundingMode.HALF_UP))));
-      totalActual = totalActual.add(renglonPedido.getImporte());
-      i++;
+    for (int i = 0; i < renglonesDelPedido.size(); ++i) {
+      boolean cumpleCondicionDeOferta =
+          productos.get(i).isOferta() && productos.get(i).getPorcentajeBonificacionOferta() != null;
+      boolean cumpleCondicionDeCantidad =
+          renglonesDelPedido.get(i).getCantidad().compareTo(productos.get(i).getBulto()) >= 0;
+      if (cumpleCondicionDeOferta && cumpleCondicionDeCantidad) {
+        bonificacionNeta =
+            bonificacionNeta.add(
+                CalculosComprobante.calcularProporcion(
+                    productos.get(i).getPrecioLista(),
+                    productos.get(i).getPorcentajeBonificacionOferta()));
+      } else if (cumpleCondicionDeCantidad) {
+        bonificacionNeta =
+            bonificacionNeta.add(
+                CalculosComprobante.calcularProporcion(
+                    productos.get(i).getPrecioLista(),
+                    productos.get(i).getPorcentajeBonificacionPrecio()));
+      }
+      totalActual =
+          totalActual.add(
+              CalculosComprobante.calcularImporte(
+                  renglonesDelPedido.get(i).getCantidad(),
+                  productos.get(i).getPrecioLista(),
+                  bonificacionNeta));
+      bonificacionNeta = BigDecimal.ZERO;
     }
     BigDecimal porcentajeDescuento =
         pedido.getDescuentoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP);
@@ -163,7 +177,8 @@ public class PedidoServiceImpl implements IPedidoService {
             .add(totalActual.multiply(porcentajeRecargo)));
     pedido
         .getCliente()
-        .setSaldoCuentaCorriente(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
+        .setSaldoCuentaCorriente(
+            cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
     return pedido;
   }
 
@@ -242,7 +257,7 @@ public class PedidoServiceImpl implements IPedidoService {
               },
               Locale.getDefault()),
           this.getReportePedido(pedido.getIdPedido()),
-          "Reporte");
+          "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     this.calcularTotalActualDePedido(pedido);
@@ -412,6 +427,10 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores) {
+    if (pedido.getEstado() == EstadoPedido.CERRADO) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_pedido_facturado", null, Locale.getDefault()));
+    }
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
@@ -652,9 +671,26 @@ public class PedidoServiceImpl implements IPedidoService {
           if (pedido.getFecha().isBefore(LocalDateTime.now().minusDays(2L))) {
             pedido.setEstado(EstadoPedido.CERRADO);
             pedidoRepository.save(pedido);
-            productoService.actualizarStockPedido(
-                pedido, TipoDeOperacion.ACTUALIZACION);
+            productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
           }
         });
+  }
+
+  @Override
+  public long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+    long[] idProductoItem = new long[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      idProductoItem[i] = nuevosRenglones.get(i).getIdProductoItem();
+    }
+    return idProductoItem;
+  }
+
+  @Override
+  public BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+    BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
+    for (int i = 0; i < nuevosRenglones.size(); ++i) {
+      cantidades[i] = nuevosRenglones.get(i).getCantidad();
+    }
+    return cantidades;
   }
 }

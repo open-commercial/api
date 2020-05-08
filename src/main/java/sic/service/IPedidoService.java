@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
+import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 
@@ -49,4 +50,8 @@ public interface IPedidoService {
   Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
 
   Pedido getPedidoPorIdPayment(String idPayment);
+
+  long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
+
+  BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
 }
