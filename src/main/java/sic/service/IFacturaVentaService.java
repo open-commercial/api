@@ -17,8 +17,6 @@ public interface IFacturaVentaService {
   List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante);
 
-  boolean pedidoTotalmenteFacturado(Pedido pedido);
-
   Page<FacturaVenta> buscarFacturaVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 

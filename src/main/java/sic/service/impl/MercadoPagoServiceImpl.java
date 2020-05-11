@@ -21,11 +21,9 @@ import org.springframework.stereotype.Service;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
+import sic.modelo.dto.*;
 import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
-import sic.modelo.dto.MercadoPagoPreferenceDTO;
-import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
-import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.*;
 
 import javax.persistence.EntityNotFoundException;
@@ -40,6 +38,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
 
+  @Value("${SIC_MAIL_USERNAME}")
+  private String emailUsername;
+
   private final IReciboService reciboService;
   private final IFormaDePagoService formaDePagoService;
   private final IClienteService clienteService;
@@ -48,6 +49,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final ICarritoCompraService carritoCompraService;
   private final IUsuarioService usuarioService;
   private final IPedidoService pedidoService;
+  private final IProductoService productoService;
+  private final ICorreoElectronicoService correoElectronicoService;
+  private final IFacturaVentaService facturaVentaService;
+  private final IFacturaService facturaService;
   private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
@@ -68,6 +73,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     ICarritoCompraService carritoCompraService,
     IUsuarioService usuarioService,
     IPedidoService pedidoService,
+    IProductoService productoService,
+    ICorreoElectronicoService correoElectronicoService,
+    IFacturaVentaService facturaVentaService,
+    IFacturaService facturaService,
     EncryptUtils encryptUtils,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -79,6 +88,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     this.carritoCompraService = carritoCompraService;
     this.usuarioService = usuarioService;
     this.pedidoService = pedidoService;
+    this.productoService = productoService;
+    this.correoElectronicoService = correoElectronicoService;
+    this.facturaVentaService = facturaVentaService;
+    this.facturaService = facturaService;
     this.encryptUtils = encryptUtils;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -98,97 +111,113 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         nuevaOrdenDeCompra.setIdSucursal(ID_SUCURSAL_DEFAULT);
       }
     }
-    Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
-    if (clienteDeUsuario.getEmail() == null || clienteDeUsuario.getEmail().isEmpty()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_preference_cliente_sin_email", null, Locale.getDefault()));
-    }
-    MercadoPago.SDK.configure(mercadoPagoAccesToken);
-    Preference preference = new Preference();
-    String json = "";
-    BackUrls backUrls = null;
-    String title = "";
-    float monto;
-    switch (nuevaOrdenDeCompra.getMovimiento()) {
-      case PEDIDO:
-        if (nuevaOrdenDeCompra.getTipoDeEnvio() == null) {
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
-        }
-        monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
-        title = "Pedido de (" + clienteDeUsuario.getNroCliente() + ") " + clienteDeUsuario.getNombreFiscal();
-        json =
-            "{ \""
-                + STRING_ID_USUARIO
-                + "\": "
-                + idUsuario
-                + " , \"idSucursal\": "
-                + nuevaOrdenDeCompra.getIdSucursal()
-                + " , \"tipoDeEnvio\": "
-                + nuevaOrdenDeCompra.getTipoDeEnvio()
-                + " , \"movimiento\": "
-                + Movimiento.PEDIDO
-                + "}";
-        backUrls =
-            new BackUrls(
-                origin + "/checkout/aprobado",
-                origin + "/checkout/pendiente",
-                origin + "/carrito-compra");
-        break;
-      case DEPOSITO:
-        if (nuevaOrdenDeCompra.getMonto() == null) {
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
-        }
-        monto = nuevaOrdenDeCompra.getMonto().floatValue();
-        title = "Deposito de (" + clienteDeUsuario.getNroCliente() + ") " + clienteDeUsuario.getNombreFiscal();
-        json =
-            "{ \""
-                + STRING_ID_USUARIO
-                + "\": "
-                + idUsuario
-                + " , \"idSucursal\": "
-                + nuevaOrdenDeCompra.getIdSucursal()
-                + " , \"movimiento\": "
-                + Movimiento.DEPOSITO
-                + "}";
-        String urlDeposito = origin + "/perfil";
-        backUrls = new BackUrls(urlDeposito, urlDeposito, urlDeposito);
-        break;
-      default:
+    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    List<ItemCarritoCompra> items = carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
+    if (this.virificarStockItemsDelCarrito(items)) {
+      Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
+      if (clienteDeUsuario.getEmail() == null || clienteDeUsuario.getEmail().isEmpty()) {
         throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+            messageSource.getMessage(
+                "mensaje_preference_cliente_sin_email", null, Locale.getDefault()));
+      }
+      MercadoPago.SDK.configure(mercadoPagoAccesToken);
+      Preference preference = new Preference();
+      String json = "";
+      BackUrls backUrls = null;
+      String title = "";
+      float monto;
+      switch (nuevaOrdenDeCompra.getMovimiento()) {
+        case PEDIDO:
+          if (nuevaOrdenDeCompra.getTipoDeEnvio() == null) {
+            throw new BusinessServiceException(
+                messageSource.getMessage(
+                    "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
+          }
+          monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
+          title =
+              "Pedido de ("
+                  + clienteDeUsuario.getNroCliente()
+                  + ") "
+                  + clienteDeUsuario.getNombreFiscal();
+          json =
+              "{ \""
+                  + STRING_ID_USUARIO
+                  + "\": "
+                  + idUsuario
+                  + " , \"idSucursal\": "
+                  + nuevaOrdenDeCompra.getIdSucursal()
+                  + " , \"tipoDeEnvio\": "
+                  + nuevaOrdenDeCompra.getTipoDeEnvio()
+                  + " , \"movimiento\": "
+                  + Movimiento.PEDIDO
+                  + "}";
+          backUrls =
+              new BackUrls(
+                  origin + "/checkout/aprobado",
+                  origin + "/checkout/pendiente",
+                  origin + "/carrito-compra");
+          break;
+        case DEPOSITO:
+          if (nuevaOrdenDeCompra.getMonto() == null) {
+            throw new BusinessServiceException(
+                messageSource.getMessage(
+                    "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
+          }
+          monto = nuevaOrdenDeCompra.getMonto().floatValue();
+          title =
+              "Deposito de ("
+                  + clienteDeUsuario.getNroCliente()
+                  + ") "
+                  + clienteDeUsuario.getNombreFiscal();
+          json =
+              "{ \""
+                  + STRING_ID_USUARIO
+                  + "\": "
+                  + idUsuario
+                  + " , \"idSucursal\": "
+                  + nuevaOrdenDeCompra.getIdSucursal()
+                  + " , \"movimiento\": "
+                  + Movimiento.DEPOSITO
+                  + "}";
+          String urlDeposito = origin + "/perfil";
+          backUrls = new BackUrls(urlDeposito, urlDeposito, urlDeposito);
+          break;
+        default:
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+      }
+      JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
+      try {
+        preference.setExternalReference(encryptUtils.encryptWhitAES(jsonObject.toString()));
+      } catch (GeneralSecurityException e) {
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
+      }
+      Item item = new Item();
+      item.setTitle(title).setQuantity(1).setUnitPrice(monto);
+      com.mercadopago.resources.datastructures.preference.Payer payer =
+          new com.mercadopago.resources.datastructures.preference.Payer();
+      payer.setEmail(clienteDeUsuario.getEmail());
+      preference.setPayer(payer);
+      preference.appendItem(item);
+      preference.setBackUrls(backUrls);
+      preference.setBinaryMode(true);
+      if (!clienteDeUsuario.isPuedeComprarAPlazo()) {
+        PaymentMethods paymentMethods = new PaymentMethods();
+        paymentMethods.setExcludedPaymentMethods(MEDIO_DE_PAGO_NO_PERMITIDOS);
+        preference.setPaymentMethods(paymentMethods);
+      }
+      try {
+        preference = preference.save();
+      } catch (MPException ex) {
+        this.logExceptionMercadoPago(ex);
+      }
+      return new MercadoPagoPreferenceDTO(preference.getId(), preference.getInitPoint());
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_preference_sin_stock", null, Locale.getDefault()));
     }
-    JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-    try {
-      preference.setExternalReference(
-          encryptUtils.encryptWhitAES(jsonObject.toString()));
-    } catch (GeneralSecurityException e) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
-    }
-    Item item = new Item();
-    item.setTitle(title).setQuantity(1).setUnitPrice(monto);
-    com.mercadopago.resources.datastructures.preference.Payer payer =
-        new com.mercadopago.resources.datastructures.preference.Payer();
-    payer.setEmail(clienteDeUsuario.getEmail());
-    preference.setPayer(payer);
-    preference.appendItem(item);
-    preference.setBackUrls(backUrls);
-    preference.setBinaryMode(true);
-    if (!clienteDeUsuario.isPuedeComprarAPlazo()) {
-      PaymentMethods paymentMethods = new PaymentMethods();
-      paymentMethods.setExcludedPaymentMethods(MEDIO_DE_PAGO_NO_PERMITIDOS);
-      preference.setPaymentMethods(paymentMethods);
-    }
-    try {
-      preference = preference.save();
-    } catch (MPException ex) {
-      this.logExceptionMercadoPago(ex);
-    }
-    return new MercadoPagoPreferenceDTO(preference.getId(), preference.getInitPoint());
   }
 
   @Override
@@ -235,21 +264,30 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   tipoDeEnvio =
                       TipoDeEnvio.valueOf(convertedObject.get("tipoDeEnvio").getAsString());
                   Pedido pedidoDePayment = pedidoService.getPedidoPorIdPayment(payment.getId());
+                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                   if (pedidoDePayment == null) {
-                    this.crearPedidoDelCarrito(
+                    this.crearPedidoDelCarritoAndFacturarlo(
                         Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()),
                         sucursal,
                         cliente,
                         tipoDeEnvio,
                         payment.getId());
                   } else {
-                    logger.warn(
-                        messageSource.getMessage(
-                            "mensaje_pedido_payment_ya_existente",
-                            new Object[] {pedidoDePayment},
-                            Locale.getDefault()));
+                    List<Factura> facturasGuardadas =
+                        facturaVentaService.getFacturasDelPedido(pedidoDePayment.getIdPedido());
+                    if (facturasGuardadas.isEmpty()) {
+                      List<FacturaVenta> facturasVentas = new ArrayList<>();
+                      facturasVentas.add(this.construirFacturaDelPedido(pedidoDePayment));
+                      facturaVentaService.guardar(
+                          facturasVentas, pedidoDePayment.getIdPedido(), null);
+                    } else {
+                      logger.warn(
+                          messageSource.getMessage(
+                              "mensaje_factura_payment_ya_existente",
+                              new Object[] {facturasGuardadas.get(0)},
+                              Locale.getDefault()));
+                    }
                   }
-                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                   break;
                 case DEPOSITO:
                   this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
@@ -265,12 +303,26 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             Pedido pedidoDePayment = pedidoService.getPedidoPorIdPayment(payment.getId());
             if (pedidoDePayment == null && movimiento == Movimiento.PEDIDO) {
               tipoDeEnvio = TipoDeEnvio.valueOf(convertedObject.get("tipoDeEnvio").getAsString());
-              this.crearPedidoDelCarrito(
-                  Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()),
-                  sucursal,
-                  cliente,
-                  tipoDeEnvio,
-                  payment.getId());
+              Usuario usuario =
+                  usuarioService.getUsuarioNoEliminadoPorId(
+                      Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()));
+              List<ItemCarritoCompra> items =
+                  carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
+              if (this.virificarStockItemsDelCarrito(items)) {
+                this.crearPedidoPorNotificacion(
+                    sucursal, usuario, cliente, items, tipoDeEnvio, idPayment);
+              } else {
+                correoElectronicoService.enviarEmail(
+                    cliente.getEmail(),
+                    this.emailUsername,
+                    "Su pedido no pudo realizarse.",
+                    messageSource.getMessage(
+                        "mensaje_correo_pedido_sin_stock",
+                        new Object[] {cliente.getNombreFiscal()},
+                        Locale.getDefault()),
+                    null,
+                    null);
+              }
             }
             break;
           case refunded:
@@ -388,7 +440,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     notaService.autorizarNota(notaGuardada);
   }
 
-  private void crearPedidoDelCarrito(
+  private void crearPedidoDelCarritoAndFacturarlo(
       Long idUsuario,
       Sucursal sucursal,
       Cliente cliente,
@@ -396,6 +448,36 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       String idPayment) {
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     List<ItemCarritoCompra> items = carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
+    if (this.virificarStockItemsDelCarrito(items)) {
+      List<FacturaVenta> facturasVenta = new ArrayList<>();
+      Pedido pedido =
+          this.crearPedidoPorNotificacion(
+              sucursal, usuario, cliente, items, tipoDeEnvio, idPayment);
+      FacturaVenta facturaVentaDelPedido = this.construirFacturaDelPedido(pedido);
+      facturasVenta.add(facturaVentaDelPedido);
+      facturaVentaService.guardar(facturasVenta, pedido.getIdPedido(), null);
+      carritoCompraService.eliminarTodosLosItemsDelUsuario(usuario.getIdUsuario());
+    } else {
+      correoElectronicoService.enviarEmail(
+          cliente.getEmail(),
+          this.emailUsername,
+          "Su pedido no pudo realizarse.",
+          messageSource.getMessage(
+              "mensaje_correo_pedido_sin_stock",
+              new Object[] {cliente.getNombreFiscal()},
+              Locale.getDefault()),
+          null,
+          null);
+    }
+  }
+
+  private Pedido crearPedidoPorNotificacion(
+      Sucursal sucursal,
+      Usuario usuario,
+      Cliente cliente,
+      List<ItemCarritoCompra> items,
+      TipoDeEnvio tipoDeEnvio,
+      String idPayment) {
     Pedido pedido = new Pedido();
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
@@ -411,8 +493,66 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(tipoDeEnvio);
     pedido.setIdPayment(idPayment);
-    pedidoService.guardar(pedido);
-    carritoCompraService.eliminarTodosLosItemsDelUsuario(usuario.getIdUsuario());
+    return pedidoService.guardar(pedido);
+  }
+
+  private FacturaVenta construirFacturaDelPedido(Pedido pedido) {
+    FacturaVenta fv = new FacturaVenta();
+    fv.setPedido(pedido);
+    fv.setSucursal(pedido.getSucursal());
+    fv.setTipoComprobante(
+        facturaVentaService
+            .getTiposDeComprobanteVenta(pedido.getSucursal(), pedido.getCliente())[0]);
+    fv.setDescuentoPorcentaje(
+        pedido.getDescuentoPorcentaje() != null
+            ? pedido.getDescuentoPorcentaje()
+            : BigDecimal.ZERO);
+    fv.setRecargoPorcentaje(
+        pedido.getRecargoPorcentaje() != null ? pedido.getRecargoPorcentaje() : BigDecimal.ZERO);
+    if (pedido.getCliente().getUbicacionFacturacion() == null
+        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
+    }
+    fv.setCliente(pedido.getCliente());
+    fv.setClienteEmbedded(clienteService.crearClienteEmbedded(pedido.getCliente()));
+    fv.setFecha(LocalDateTime.now());
+    fv.setUsuario(pedido.getUsuario());
+    List<NuevoRenglonFacturaDTO> nuevoRenglonesFactura = new ArrayList<>();
+    pedido
+        .getRenglones()
+        .forEach(
+            renglonPedido -> {
+              NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(renglonPedido.getCantidad())
+                      .idProducto(renglonPedido.getIdProductoItem())
+                      .build();
+              nuevoRenglonesFactura.add(nuevoRenglonFacturaDTO);
+            });
+
+    fv.setRenglones(
+        facturaService.calcularRenglones(
+            fv.getTipoComprobante(), Movimiento.VENTA, nuevoRenglonesFactura));
+    fv.setObservaciones(pedido.getObservaciones() != null ? pedido.getObservaciones() : "");
+    return fv;
+  }
+
+  private boolean virificarStockItemsDelCarrito(List<ItemCarritoCompra> items) {
+    long[] idProducto = new long[items.size()];
+    BigDecimal[] cantidad = new BigDecimal[items.size()];
+    int indice = 0;
+    items.forEach(
+        item -> {
+          idProducto[indice] = item.getProducto().getIdProducto();
+          cantidad[indice] = item.getCantidad();
+        });
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty();
   }
 
   @Override

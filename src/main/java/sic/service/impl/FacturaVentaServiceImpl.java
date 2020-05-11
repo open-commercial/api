@@ -180,24 +180,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public boolean pedidoTotalmenteFacturado(Pedido pedido) {
-    boolean facturado = false;
-    Map<Long, BigDecimal> renglonesDeFacturas =
-        pedidoService.getRenglonesFacturadosDelPedido(pedido.getIdPedido());
-    if (!renglonesDeFacturas.isEmpty()) {
-      for (RenglonPedido r : pedido.getRenglones()) {
-        if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
-          facturado =
-              (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getIdProductoItem())) < 1);
-        } else {
-          return false;
-        }
-      }
-    }
-    return facturado;
-  }
-
-  @Override
   public Page<FacturaVenta> buscarFacturaVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     return facturaVentaRepository.findAll(
