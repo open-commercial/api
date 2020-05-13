@@ -38,6 +38,7 @@ class PedidoServiceImplTest {
   @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
+  @MockBean ReciboServiceImpl reciboService;
   @MockBean MessageSource messageSource;
   @MockBean ModelMapper modelMapper;
 

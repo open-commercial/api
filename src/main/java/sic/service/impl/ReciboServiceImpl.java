@@ -9,6 +9,8 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+
+import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -218,7 +220,6 @@ public class ReciboServiceImpl implements IReciboService {
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] montos,
-      BigDecimal totalFactura,
       LocalDateTime fecha) {
     List<Recibo> recibos = new ArrayList<>();
     if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
@@ -252,6 +253,22 @@ public class ReciboServiceImpl implements IReciboService {
           });
     }
     return recibos;
+  }
+
+  @Override
+  public Recibo construirReciboPorPayment(
+      Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment) {
+    Recibo nuevoRecibo = new Recibo();
+    nuevoRecibo.setSucursal(sucursal);
+    nuevoRecibo.setFormaDePago(
+        formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
+    nuevoRecibo.setUsuario(usuario);
+    nuevoRecibo.setCliente(cliente);
+    nuevoRecibo.setFecha(LocalDateTime.now());
+    nuevoRecibo.setConcepto("Pago en MercadoPago (" + payment.getPaymentMethodId() + ")");
+    nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
+    nuevoRecibo.setIdPagoMercadoPago(payment.getId());
+    return nuevoRecibo;
   }
 
   @Override

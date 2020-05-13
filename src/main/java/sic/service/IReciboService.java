@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
@@ -32,8 +33,10 @@ public interface IReciboService {
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] monto,
-      BigDecimal totalFactura,
       LocalDateTime fecha);
+
+  Recibo construirReciboPorPayment(
+      Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment);
 
   long getSiguienteNumeroRecibo(long idSucursal, long serie);
 

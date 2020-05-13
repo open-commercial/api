@@ -144,7 +144,6 @@ public class FacturaVentaController {
                   fv.getCliente(),
                   fv.getUsuario(),
                   nuevaFacturaVentaDTO.getMontos(),
-                  fv.getTotal(),
                   fv.getFecha()));
     } else {
       List<FacturaVenta> facturas = new ArrayList<>();
@@ -159,7 +158,6 @@ public class FacturaVentaController {
                   fv.getCliente(),
                   fv.getUsuario(),
                   nuevaFacturaVentaDTO.getMontos(),
-                  fv.getTotal(),
                   fv.getFecha()));
     }
     List<TipoDeComprobante> tiposAutorizables =

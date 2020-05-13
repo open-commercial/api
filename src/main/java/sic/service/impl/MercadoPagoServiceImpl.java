@@ -29,7 +29,6 @@ import sic.service.*;
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -42,7 +41,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private String emailUsername;
 
   private final IReciboService reciboService;
-  private final IFormaDePagoService formaDePagoService;
   private final IClienteService clienteService;
   private final INotaService notaService;
   private final ISucursalService sucursalService;
@@ -51,8 +49,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final IPedidoService pedidoService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IFacturaVentaService facturaVentaService;
-  private final IFacturaService facturaService;
   private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
@@ -66,7 +62,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   @Autowired
   public MercadoPagoServiceImpl(
     IReciboService reciboService,
-    IFormaDePagoService formaDePagoService,
     IClienteService clienteService,
     INotaService notaService,
     ISucursalService sucursalService,
@@ -75,13 +70,10 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     IPedidoService pedidoService,
     IProductoService productoService,
     ICorreoElectronicoService correoElectronicoService,
-    IFacturaVentaService facturaVentaService,
-    IFacturaService facturaService,
     EncryptUtils encryptUtils,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.reciboService = reciboService;
-    this.formaDePagoService = formaDePagoService;
     this.clienteService = clienteService;
     this.notaService = notaService;
     this.sucursalService = sucursalService;
@@ -90,8 +82,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     this.pedidoService = pedidoService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.facturaVentaService = facturaVentaService;
-    this.facturaService = facturaService;
     this.encryptUtils = encryptUtils;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -264,28 +254,23 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   tipoDeEnvio =
                       TipoDeEnvio.valueOf(convertedObject.get("tipoDeEnvio").getAsString());
                   Pedido pedidoDePayment = pedidoService.getPedidoPorIdPayment(payment.getId());
-                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                   if (pedidoDePayment == null) {
-                    this.crearPedidoDelCarritoAndFacturarlo(
+                    this.verfificarStockAndCrearPedidoConPagoDelCarrito(
                         Long.parseLong(convertedObject.get(STRING_ID_USUARIO).getAsString()),
                         sucursal,
                         cliente,
                         tipoDeEnvio,
-                        payment.getId());
+                        payment);
                   } else {
-                    List<Factura> facturasGuardadas =
-                        facturaVentaService.getFacturasDelPedido(pedidoDePayment.getIdPedido());
-                    if (facturasGuardadas.isEmpty()) {
-                      List<FacturaVenta> facturasVentas = new ArrayList<>();
-                      facturasVentas.add(this.construirFacturaDelPedido(pedidoDePayment));
-                      facturaVentaService.guardar(
-                          facturasVentas, pedidoDePayment.getIdPedido(), null);
-                    } else {
-                      logger.warn(
-                          messageSource.getMessage(
-                              "mensaje_factura_payment_ya_existente",
-                              new Object[] {facturasGuardadas.get(0)},
-                              Locale.getDefault()));
+                    logger.warn(
+                        messageSource.getMessage(
+                            "mensaje_pedido_payment_ya_existente",
+                            new Object[] {pedidoDePayment},
+                            Locale.getDefault()));
+                    if (pedidoDePayment.getIdPayment() == null) {
+                      this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
+                      pedidoService.actualizarIdPaymentDePEdido(
+                          pedidoDePayment.getIdPedido(), payment.getId());
                     }
                   }
                   break;
@@ -309,8 +294,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
               List<ItemCarritoCompra> items =
                   carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
               if (this.virificarStockItemsDelCarrito(items)) {
-                this.crearPedidoPorNotificacion(
-                    sucursal, usuario, cliente, items, tipoDeEnvio, idPayment);
+                this.crearPedidoConPagoPorNotificacion(
+                    sucursal, usuario, cliente, items, tipoDeEnvio, null);
               } else {
                 correoElectronicoService.enviarEmail(
                     cliente.getEmail(),
@@ -393,17 +378,8 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         logger.warn(
             messageSource.getMessage(
                 "mensaje_pago_aprobado", new Object[] {payment}, Locale.getDefault()));
-        Recibo nuevoRecibo = new Recibo();
-        nuevoRecibo.setSucursal(sucursal);
-        nuevoRecibo.setFormaDePago(
-            formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
-        nuevoRecibo.setUsuario(usuario);
-        nuevoRecibo.setCliente(cliente);
-        nuevoRecibo.setFecha(LocalDateTime.now());
-        nuevoRecibo.setConcepto("Pago en MercadoPago (" + payment.getPaymentMethodId() + ")");
-        nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
-        nuevoRecibo.setIdPagoMercadoPago(payment.getId());
-        reciboService.guardar(nuevoRecibo);
+        reciboService.guardar(
+            reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment));
         break;
       case pending:
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
@@ -440,22 +416,16 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     notaService.autorizarNota(notaGuardada);
   }
 
-  private void crearPedidoDelCarritoAndFacturarlo(
+  private void verfificarStockAndCrearPedidoConPagoDelCarrito(
       Long idUsuario,
       Sucursal sucursal,
       Cliente cliente,
       TipoDeEnvio tipoDeEnvio,
-      String idPayment) {
+      Payment payment) {
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     List<ItemCarritoCompra> items = carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
     if (this.virificarStockItemsDelCarrito(items)) {
-      List<FacturaVenta> facturasVenta = new ArrayList<>();
-      Pedido pedido =
-          this.crearPedidoPorNotificacion(
-              sucursal, usuario, cliente, items, tipoDeEnvio, idPayment);
-      FacturaVenta facturaVentaDelPedido = this.construirFacturaDelPedido(pedido);
-      facturasVenta.add(facturaVentaDelPedido);
-      facturaVentaService.guardar(facturasVenta, pedido.getIdPedido(), null);
+      this.crearPedidoConPagoPorNotificacion(sucursal, usuario, cliente, items, tipoDeEnvio, payment);
       carritoCompraService.eliminarTodosLosItemsDelUsuario(usuario.getIdUsuario());
     } else {
       correoElectronicoService.enviarEmail(
@@ -471,13 +441,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     }
   }
 
-  private Pedido crearPedidoPorNotificacion(
+  private void crearPedidoConPagoPorNotificacion(
       Sucursal sucursal,
       Usuario usuario,
       Cliente cliente,
       List<ItemCarritoCompra> items,
       TipoDeEnvio tipoDeEnvio,
-      String idPayment) {
+      Payment payment) {
     Pedido pedido = new Pedido();
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
@@ -492,53 +462,17 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                     i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(tipoDeEnvio);
-    pedido.setIdPayment(idPayment);
-    return pedidoService.guardar(pedido);
-  }
-
-  private FacturaVenta construirFacturaDelPedido(Pedido pedido) {
-    FacturaVenta fv = new FacturaVenta();
-    fv.setPedido(pedido);
-    fv.setSucursal(pedido.getSucursal());
-    fv.setTipoComprobante(
-        facturaVentaService
-            .getTiposDeComprobanteVenta(pedido.getSucursal(), pedido.getCliente())[0]);
-    fv.setDescuentoPorcentaje(
-        pedido.getDescuentoPorcentaje() != null
-            ? pedido.getDescuentoPorcentaje()
-            : BigDecimal.ZERO);
-    fv.setRecargoPorcentaje(
-        pedido.getRecargoPorcentaje() != null ? pedido.getRecargoPorcentaje() : BigDecimal.ZERO);
-    if (pedido.getCliente().getUbicacionFacturacion() == null
-        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
-            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
-      throw new BusinessServiceException(
+    List<Recibo> recibos = new ArrayList<>();
+    if (payment != null) {
+      pedido.setIdPayment(payment.getId());
+      Recibo reciboDePedido =
+          reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment);
+      recibos.add(reciboDePedido);
+      logger.warn(
           messageSource.getMessage(
-              "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
+              "mensaje_pago_aprobado", new Object[] {payment}, Locale.getDefault()));
     }
-    fv.setCliente(pedido.getCliente());
-    fv.setClienteEmbedded(clienteService.crearClienteEmbedded(pedido.getCliente()));
-    fv.setFecha(LocalDateTime.now());
-    fv.setUsuario(pedido.getUsuario());
-    List<NuevoRenglonFacturaDTO> nuevoRenglonesFactura = new ArrayList<>();
-    pedido
-        .getRenglones()
-        .forEach(
-            renglonPedido -> {
-              NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-                  NuevoRenglonFacturaDTO.builder()
-                      .cantidad(renglonPedido.getCantidad())
-                      .idProducto(renglonPedido.getIdProductoItem())
-                      .build();
-              nuevoRenglonesFactura.add(nuevoRenglonFacturaDTO);
-            });
-
-    fv.setRenglones(
-        facturaService.calcularRenglones(
-            fv.getTipoComprobante(), Movimiento.VENTA, nuevoRenglonesFactura));
-    fv.setObservaciones(pedido.getObservaciones() != null ? pedido.getObservaciones() : "");
-    return fv;
+    pedidoService.guardar(pedido, recibos);
   }
 
   private boolean virificarStockItemsDelCarrito(List<ItemCarritoCompra> items) {

@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
@@ -37,7 +35,6 @@ import static org.mockito.Mockito.*;
 class MercadoPagoServiceImplTest {
 
   @MockBean IReciboService reciboService;
-  @MockBean IFormaDePagoService formaDePagoService;
   @MockBean IClienteService clienteService;
   @MockBean INotaService notaService;
   @MockBean ISucursalService sucursalService;
@@ -46,8 +43,6 @@ class MercadoPagoServiceImplTest {
   @MockBean IPedidoService pedidoService;
   @MockBean IProductoService productoService;
   @MockBean ICorreoElectronicoService correoElectronicoService;
-  @MockBean IFacturaVentaService facturaVentaService;
-  @MockBean IFacturaService facturaService;
   @MockBean MessageSource messageSource;
 
   @Autowired EncryptUtils encryptUtils;
@@ -128,29 +123,17 @@ class MercadoPagoServiceImplTest {
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
-    when(pedidoService.guardar(pedido)).thenReturn(pedido);
-    when(facturaVentaService.getTiposDeComprobanteVenta(any(), any()))
-        .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.FACTURA_A});
-    assertThrows(
-        BusinessServiceException.class,
-        () -> mercadoPagoService.crearComprobantePorNotificacion("24464889"));
-    verify(messageSource).getMessage(eq("mensaje_ubicacion_facturacion_vacia"), any(), any());
-
-    Ubicacion ubicacion = new Ubicacion();
-    pedido.getCliente().setUbicacionFacturacion(ubicacion);
-    pedido.setCliente(cliente);
-    when(pedidoService.guardar(pedido)).thenReturn(pedido);
+    when(pedidoService.guardar(pedido, null)).thenReturn(pedido);
     mercadoPagoService.crearComprobantePorNotificacion("24464889");
-    verify(reciboService, times(2)).getReciboPorIdMercadoPago(anyString());
-    verify(clienteService, times(2)).getClientePorIdUsuario(anyLong());
-    verify(sucursalService, times(2)).getSucursalPorId(any());
-    verify(pedidoService, times(2)).getPedidoPorIdPayment(anyString());
-    verify(messageSource, times(2)).getMessage(eq("mensaje_pago_aprobado"), any(), any());
-    verify(reciboService, times(2)).guardar(any());
-    verify(usuarioService, times(2)).getUsuarioNoEliminadoPorId(anyLong());
-    verify(carritoCompraService, times(2)).getItemsDelCarritoPorUsuario(any());
-    verify(pedidoService, times(2)).calcularRenglonPedido(anyLong(), any());
-    verify(pedidoService, times(2)).guardar(any());
+    verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyString());
+    verify(clienteService, times(1)).getClientePorIdUsuario(anyLong());
+    verify(sucursalService, times(1)).getSucursalPorId(any());
+    verify(pedidoService, times(1)).getPedidoPorIdPayment(anyString());
+    verify(messageSource, times(1)).getMessage(eq("mensaje_pago_aprobado"), any(), any());
+    verify(usuarioService, times(1)).getUsuarioNoEliminadoPorId(anyLong());
+    verify(carritoCompraService, times(1)).getItemsDelCarritoPorUsuario(any());
+    verify(pedidoService, times(1)).calcularRenglonPedido(anyLong(), any());
+    verify(pedidoService, times(1)).guardar(any(), any());
     verify(carritoCompraService).eliminarTodosLosItemsDelUsuario(anyLong());
   }
 }

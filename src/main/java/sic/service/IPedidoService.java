@@ -19,6 +19,8 @@ public interface IPedidoService {
 
   void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
 
+  void actualizarIdPaymentDePEdido(long idPedido, String idPayment);
+
   void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
   Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
@@ -41,7 +43,7 @@ public interface IPedidoService {
 
   byte[] getReportePedido(long idPedido);
 
-  Pedido guardar(Pedido pedido);
+  Pedido guardar(Pedido pedido, List<Recibo> recibos);
 
   RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad);
 

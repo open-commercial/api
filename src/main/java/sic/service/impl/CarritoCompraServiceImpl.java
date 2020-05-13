@@ -205,7 +205,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                     i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDePagoDTO.getTipoDeEnvio());
-    Pedido p = pedidoService.guardar(pedido);
+    Pedido p = pedidoService.guardar(pedido, null);
     this.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }

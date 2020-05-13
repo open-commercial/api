@@ -53,6 +53,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ICorreoElectronicoService correoElectronicoService;
   private final IConfiguracionSucursalService configuracionSucursal;
   private final ICuentaCorrienteService cuentaCorrienteService;
+  private final IReciboService reciboService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -71,6 +72,7 @@ public class PedidoServiceImpl implements IPedidoService {
     ICorreoElectronicoService correoElectronicoService,
     IConfiguracionSucursalService configuracionSucursal,
     ICuentaCorrienteService cuentaCorrienteService,
+    IReciboService reciboService,
     ModelMapper modelMapper,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -83,6 +85,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.correoElectronicoService = correoElectronicoService;
     this.configuracionSucursal = configuracionSucursal;
     this.cuentaCorrienteService = cuentaCorrienteService;
+    this.reciboService = reciboService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -203,7 +206,12 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public Pedido guardar(Pedido pedido) {
+  public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
+    if ((recibos == null || recibos.isEmpty()) && !pedido.getCliente().isPuedeComprarAPlazo()) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+    }
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -218,6 +226,18 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
+    }
+    if ((recibos != null && !recibos.isEmpty())) {
+      if (!pedido.getCliente().isPuedeComprarAPlazo()) {
+        BigDecimal totalRecibos =
+            recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (totalRecibos.compareTo(pedido.getTotalActual()) < 0) {
+          throw new BusinessServiceException(
+              messageSource.getMessage(
+                  "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));
+        }
+      }
+      recibos.forEach(reciboService::guardar);
     }
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
@@ -464,6 +484,11 @@ public class PedidoServiceImpl implements IPedidoService {
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
+  }
+
+  @Override
+  public void actualizarIdPaymentDePEdido(long idPedido, String idPayment) {
+    pedidoRepository.actualizarIdPaymentDePedido(idPedido, idPayment);
   }
 
   @Override

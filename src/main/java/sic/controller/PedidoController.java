@@ -1,6 +1,6 @@
 package sic.controller;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +32,7 @@ public class PedidoController {
     private final IUsuarioService usuarioService;
     private final ISucursalService sucursalService;
     private final IClienteService clienteService;
+    private final IReciboService reciboService;
     private final IAuthService authService;
     private final MessageSource messageSource;
     private static final Long ID_SUCURSAL_DEFAULT = 1L;
@@ -42,12 +43,14 @@ public class PedidoController {
       IUsuarioService usuarioService,
       ISucursalService sucursalService,
       IClienteService clienteService,
+      IReciboService reciboService,
       MessageSource messageSource,
       IAuthService authService) {
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
+    this.reciboService = reciboService;
     this.messageSource = messageSource;
     this.authService = authService;
   }
@@ -106,16 +109,19 @@ public class PedidoController {
     pedido.setObservaciones(pedidoDTO.getObservaciones());
     pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
     pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
+    Sucursal sucursalDePedido;
     if (pedidoDTO.getIdSucursal() == null) {
       if (!pedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
+        sucursalDePedido = sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
+        pedido.setSucursal(sucursalDePedido);
       } else {
         throw new BusinessServiceException(
             messageSource.getMessage(
                 "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
       }
     } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
+      sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
+      pedido.setSucursal(sucursalDePedido);
     }
     long idUsuario = (int) claims.get("idUsuario");
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
@@ -125,7 +131,15 @@ public class PedidoController {
         pedidoService.calcularRenglonesPedido(
             pedidoService.getArrayDeIdProducto(pedidoDTO.getRenglones()),
             pedidoService.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
-    return pedidoService.guardar(pedido);
+    return pedidoService.guardar(
+        pedido,
+        reciboService.construirRecibos(
+            pedidoDTO.getIdsFormaDePago(),
+            sucursalDePedido,
+            pedido.getCliente(),
+            pedido.getUsuario(),
+            pedidoDTO.getMontos(),
+            LocalDateTime.now()));
   }
 
   @PostMapping("/pedidos/busqueda/criteria")
