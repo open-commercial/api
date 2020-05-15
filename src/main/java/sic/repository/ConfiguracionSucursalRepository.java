@@ -1,5 +1,6 @@
 package sic.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
@@ -20,4 +21,11 @@ public interface ConfiguracionSucursalRepository
       "SELECT configuracionSucursal.facturaElectronicaHabilitada "
           + "FROM ConfiguracionSucursal configuracionSucursal WHERE configuracionSucursal.sucursal.idSucursal = :idSucursal")
   boolean isFacturaElectronicaHabilitada(@Param("idSucursal") long idSucursal);
+
+  @Query("SELECT cs FROM ConfiguracionSucursal cs" + " WHERE cs.predeterminada = true")
+  ConfiguracionSucursal findConfiguracionSucursalPredeterminada();
+
+  @Modifying
+  @Query("UPDATE ConfiguracionSucursal cs SET cs.predeterminada = false WHERE cs.predeterminada = true")
+  int desmarcarSucursalPredeterminada();
 }

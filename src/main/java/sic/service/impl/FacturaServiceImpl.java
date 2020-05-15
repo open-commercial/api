@@ -74,41 +74,6 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  @Transactional
-  public void eliminarFactura(long idFactura) {
-    Factura factura = this.getFacturaNoEliminadaPorId(idFactura);
-    if (factura instanceof FacturaVenta) {
-      if (factura.getCae() != 0L) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_eliminar_factura_aprobada", null, Locale.getDefault()));
-      }
-      if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
-      }
-      this.cuentaCorrienteService.asentarEnCuentaCorriente(
-          (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-      productoService.actualizarStockFactura(
-          this.getIdsProductosYCantidades(factura),
-          factura.getIdSucursal(),
-          TipoDeOperacion.ELIMINACION,
-          Movimiento.VENTA);
-      factura.setEliminada(true);
-      if (factura.getPedido() != null) {
-        factura.getPedido().setEstado(EstadoPedido.ABIERTO);
-        productoService.actualizarStockPedido(
-            factura.getPedido(), TipoDeOperacion.ACTUALIZACION);
-      }
-      facturaRepository.save(factura);
-    } else {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
-    }
-  }
-
-  @Override
   public TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(Sucursal sucursal) {
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[5];

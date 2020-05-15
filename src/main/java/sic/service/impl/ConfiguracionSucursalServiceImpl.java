@@ -53,6 +53,9 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   public ConfiguracionSucursal guardar(ConfiguracionSucursal configuracionSucursal) {
     customValidator.validar(configuracionSucursal);
     this.validarReglasDeNegocio(configuracionSucursal);
+    if (configuracionSucursal.isPredeterminada()) {
+      configuracionRepository.desmarcarSucursalPredeterminada();
+    }
     configuracionSucursal = configuracionRepository.save(configuracionSucursal);
     logger.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
     return configuracionSucursal;

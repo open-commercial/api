@@ -29,12 +29,6 @@ public class FacturaController {
     return facturaService.getFacturaNoEliminadaPorId(idFactura);
   }
 
-  @DeleteMapping("/facturas/{idFactura}")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public void eliminar(@PathVariable long idFactura) {
-    facturaService.eliminarFactura(idFactura);
-  }
-
   @GetMapping("/facturas/{idFactura}/renglones")
   public List<RenglonFactura> getRenglonesDeLaFactura(@PathVariable long idFactura) {
     return facturaService.getRenglonesDeLaFactura(idFactura);

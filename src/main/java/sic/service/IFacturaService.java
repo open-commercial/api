@@ -14,8 +14,6 @@ public interface IFacturaService {
 
   Factura getFacturaNoEliminadaPorId(long idFactura);
 
-  void eliminarFactura(long idFactura);
-
   TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(Sucursal sucursal);
 
   List<RenglonFactura> getRenglonesDeLaFactura(Long idFactura);

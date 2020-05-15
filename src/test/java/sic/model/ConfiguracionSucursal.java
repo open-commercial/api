@@ -29,6 +29,8 @@ public class ConfiguracionSucursal {
 
   private boolean puntoDeRetiro;
 
+  private boolean predeterminada;
+
   private long idSucursal;
 
   private String nombreSucursal;

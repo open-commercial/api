@@ -60,6 +60,8 @@ public class ConfiguracionSucursal implements Serializable {
 
   private boolean puntoDeRetiro;
 
+  private boolean predeterminada;
+
   private LocalDateTime fechaGeneracionTokenWSAA;
 
   private LocalDateTime fechaVencimientoTokenWSAA;

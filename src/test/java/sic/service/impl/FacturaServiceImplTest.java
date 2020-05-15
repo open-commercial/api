@@ -490,32 +490,4 @@ class FacturaServiceImplTest {
         arrayEsperado,
         CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevosRenglonsFactura));
   }
-
-  @Test
-  void shouldEliminarFacturaVenta() {
-    FacturaVenta factura = new FacturaVenta();
-    List<RenglonFactura> renglonFacturas = new ArrayList<>();
-    factura.setRenglones(renglonFacturas);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    factura.setSucursal(sucursal);
-    when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
-    facturaServiceImpl.eliminarFactura(1L);
-    verify(facturaRepository, times(1)).save(factura);
-    assertTrue(factura.isEliminada());
-    factura.setCae(23232L);
-    factura.setEliminada(false);
-    when(facturaRepository.findById(1L)).thenReturn(Optional.of(factura));
-    assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
-    verify(messageSource).getMessage(eq("mensaje_eliminar_factura_aprobada"), any(), any());
-    factura.setCae(0L);
-    when(notaService.existsByFacturaVentaAndEliminada(factura)).thenReturn(true);
-    assertThrows(BusinessServiceException.class, () -> facturaServiceImpl.eliminarFactura(1L));
-    verify(messageSource).getMessage(eq("mensaje_no_se_puede_eliminar"), any(), any());
-    when(notaService.existsByFacturaVentaAndEliminada(factura)).thenReturn(false);
-    Pedido pedido = new Pedido();
-    factura.setPedido(pedido);
-    facturaServiceImpl.eliminarFactura(1L);
-    verify(productoService, times(1)).actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
-  }
 }

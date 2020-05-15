@@ -61,10 +61,11 @@ public class FacturaVentaController {
     this.messageSource = messageSource;
   }
 
-  @PostMapping("/facturas/ventas")
+  @PostMapping("/facturas/ventas/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(
       @RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
+      @PathVariable Long idPedido,
       @RequestHeader("Authorization") String authorizationHeader) {
     List<TipoDeComprobante> tiposDeFacturaPermititos =
         Arrays.asList(
@@ -80,13 +81,9 @@ public class FacturaVentaController {
     }
     FacturaVenta fv = new FacturaVenta();
     Sucursal sucursal;
-    if (nuevaFacturaVentaDTO.getIdPedido() != null) {
-      Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(nuevaFacturaVentaDTO.getIdPedido());
-      fv.setPedido(pedido);
-      sucursal = pedido.getSucursal();
-    } else {
-      sucursal = sucursalService.getSucursalPorId(nuevaFacturaVentaDTO.getIdSucursal());
-    }
+    Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+    fv.setPedido(pedido);
+    sucursal = pedido.getSucursal();
     fv.setSucursal(sucursal);
     fv.setTipoComprobante(nuevaFacturaVentaDTO.getTipoDeComprobante());
     fv.setDescuentoPorcentaje(
@@ -137,7 +134,7 @@ public class FacturaVentaController {
       facturasGuardadas =
           facturaVentaService.guardar(
               facturaVentaService.dividirFactura(fv, nuevaFacturaVentaDTO.getIndices()),
-              nuevaFacturaVentaDTO.getIdPedido(),
+              idPedido,
               reciboService.construirRecibos(
                   nuevaFacturaVentaDTO.getIdsFormaDePago(),
                   sucursal,
@@ -151,7 +148,7 @@ public class FacturaVentaController {
       facturasGuardadas =
           facturaVentaService.guardar(
               facturas,
-              nuevaFacturaVentaDTO.getIdPedido(),
+              idPedido,
               reciboService.construirRecibos(
                   nuevaFacturaVentaDTO.getIdsFormaDePago(),
                   sucursal,

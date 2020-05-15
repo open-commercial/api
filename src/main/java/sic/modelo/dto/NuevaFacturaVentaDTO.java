@@ -17,7 +17,6 @@ import java.util.List;
 public class NuevaFacturaVentaDTO {
 
   private Long idSucursal;
-  private Long idPedido;
   private Long idCliente;
   private Long idTransportista;
   private LocalDate fechaVencimiento;

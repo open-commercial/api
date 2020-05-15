@@ -31,6 +31,8 @@ public class ConfiguracionSucursalDTO {
 
   private boolean puntoDeRetiro;
 
+  private boolean predeterminada;
+
   private long idSucursal;
 
   private String nombreSucursal;

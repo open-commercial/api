@@ -59,7 +59,7 @@ class FacturaVentaControllerTest {
         NuevaFacturaVentaDTO.builder().tipoDeComprobante(TipoDeComprobante.PEDIDO).build();
     assertThrows(
         BusinessServiceException.class,
-        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, "headers"));
+        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, 1L, "headers"));
     verify(messageSource).getMessage(eq("mensaje_tipo_de_comprobante_no_valido"), any(), any());
     Sucursal sucursal = new Sucursal();
     sucursal.setNombre("Sucursal prueba");
@@ -73,9 +73,13 @@ class FacturaVentaControllerTest {
             .idSucursal(2L)
             .idCliente(1L)
             .build();
+    Pedido pedido = new Pedido();
+    pedido.setIdPedido(1L);
+    pedido.setSucursal(sucursal);
+    when(pedidoService.getPedidoNoEliminadoPorId(1L)).thenReturn(new Pedido());
     assertThrows(
         BusinessServiceException.class,
-        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, "headers"));
+        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, 1L, "headers"));
     verify(messageSource).getMessage(eq("mensaje_ubicacion_facturacion_vacia"), any(), any());
     Transportista transportista = new Transportista();
     transportista.setNombre("OCA");
@@ -119,7 +123,7 @@ class FacturaVentaControllerTest {
     when(facturaVentaService.guardar(any(), any(), any())).thenReturn(facturas);
     assertEquals(
         facturaVenta,
-        facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta3DTO, "headers").get(0));
+        facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta3DTO, 1L, "headers").get(0));
   }
 
   @Test

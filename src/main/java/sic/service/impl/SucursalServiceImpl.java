@@ -60,6 +60,11 @@ public class SucursalServiceImpl implements ISucursalService {
   }
 
   @Override
+  public Sucursal getSucursalPredeterminada() {
+    return sucursalRepository.getSucursalPredeterminada();
+  }
+
+  @Override
   public List<Sucursal> getSucusales(boolean puntoDeRetiro) {
     if (puntoDeRetiro) {
       return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false).stream()

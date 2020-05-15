@@ -36,7 +36,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
 
   @Autowired
   public CarritoCompraServiceImpl(
@@ -176,18 +175,12 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
-    Cliente clienteParaPedido = clienteService.getClientePorIdUsuario(idUsuario);
-    if (!clienteParaPedido.isPuedeComprarAPlazo()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
-    }
     pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
     if (nuevaOrdenDePagoDTO.getIdSucursal() == null) {
       if (!nuevaOrdenDePagoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
+        pedido.setSucursal(sucursalService.getSucursalPredeterminada());
       } else {
         throw new BusinessServiceException(
             messageSource.getMessage(

@@ -51,7 +51,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private final ICorreoElectronicoService correoElectronicoService;
   private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private static final String STRING_ID_USUARIO = "idUsuario";
   private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
           new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
@@ -98,7 +97,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                 "mensaje_preference_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
 
       } else {
-        nuevaOrdenDeCompra.setIdSucursal(ID_SUCURSAL_DEFAULT);
+        nuevaOrdenDeCompra.setIdSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal());
       }
     }
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);

@@ -147,6 +147,7 @@ class AppIntegrationTest {
             apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
             ConfiguracionSucursal.class);
     configuracionSucursal.setPuntoDeRetiro(true);
+    configuracionSucursal.setPredeterminada(true);
     restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursal);
     configuracionSucursal =
         restTemplate.getForObject(
@@ -994,7 +995,6 @@ class AppIntegrationTest {
         NuevaFacturaVentaDTO.builder()
             .idCliente(1L)
             .idSucursal(1L)
-            .idPedido(pedidosRecuperados.get(0).getIdPedido())
             .tipoDeComprobante(TipoDeComprobante.FACTURA_A)
             .renglones(nuevosRenglones)
             .recargoPorcentaje(new BigDecimal("10"))
@@ -1003,7 +1003,7 @@ class AppIntegrationTest {
             .build();
     FacturaVenta[] facturas =
         restTemplate.postForObject(
-            apiPrefix + "/facturas/ventas", nuevaFacturaVentaDTO, FacturaVenta[].class);
+            apiPrefix + "/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(), nuevaFacturaVentaDTO, FacturaVenta[].class);
     Producto productoUno = restTemplate.getForObject(apiPrefix + "/productos/1", Producto.class);
     assertEquals(new BigDecimal("9.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", Producto.class);
@@ -1590,7 +1590,6 @@ class AppIntegrationTest {
         NuevaFacturaVentaDTO.builder()
             .idCliente(pedidosRecuperados.get(0).getCliente().getIdCliente())
             .idSucursal(pedidosRecuperados.get(0).getIdSucursal())
-            .idPedido(pedidosRecuperados.get(0).getIdPedido())
             .tipoDeComprobante(TipoDeComprobante.FACTURA_X)
             .renglones(nuevosRenglones)
             .recargoPorcentaje(new BigDecimal("10"))
@@ -1598,7 +1597,7 @@ class AppIntegrationTest {
             .indices(indices)
             .build();
     restTemplate.postForObject(
-        apiPrefix + "/facturas/ventas", nuevaFacturaVentaDTO, FacturaVenta[].class);
+        apiPrefix + "/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(), nuevaFacturaVentaDTO, FacturaVenta[].class);
     pedidoCriteria =
         BusquedaPedidoCriteria.builder().idSucursal(1L).estadoPedido(EstadoPedido.CERRADO).build();
     requestEntity = new HttpEntity<>(pedidoCriteria);
@@ -1644,104 +1643,8 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Eliminar el ultimo pedido, quitando primero su factura relacionada")
-  @Order(14)
-  void testEscenarioEliminarPedidoFacturado() {
-    this.iniciarSesionComoAdministrador();
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idSucursal(1L)
-            .numSerie(2L)
-            .numFactura(2L)
-            .tipoComprobante(TipoDeComprobante.FACTURA_X)
-            .build();
-    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity<>(criteria);
-    PaginaRespuestaRest<FacturaVenta> resultadoBusqueda =
-        restTemplate
-            .exchange(
-                apiPrefix + "/facturas/ventas/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
-            .getBody();
-    assertNotNull(resultadoBusqueda);
-    List<FacturaVenta> facturasRecuperadas = resultadoBusqueda.getContent();
-    restTemplate.delete(apiPrefix + "/facturas/" + facturasRecuperadas.get(0).getIdFactura());
-    BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
-    HttpEntity<BusquedaProductoCriteria> requestEntityProductos =
-        new HttpEntity<>(productosCriteria);
-    PaginaRespuestaRest<Producto> resultadoBusquedaProducto =
-        restTemplate
-            .exchange(
-                apiPrefix + "/productos/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntityProductos,
-                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
-            .getBody();
-    assertNotNull(resultadoBusqueda);
-    List<Producto> productosRecuperados = resultadoBusquedaProducto.getContent();
-    resultadoBusquedaProducto =
-        restTemplate
-            .exchange(
-                apiPrefix + "/productos/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntityProductos,
-                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
-            .getBody();
-    assertNotNull(resultadoBusqueda);
-    productosRecuperados = resultadoBusquedaProducto.getContent();
-    assertEquals(
-        new BigDecimal("0E-15"), productosRecuperados.get(2).getCantidadTotalEnSucursales());
-    assertEquals(
-        new BigDecimal("5.000000000000000"),
-        productosRecuperados.get(3).getCantidadTotalEnSucursales());
-    BusquedaPedidoCriteria pedidoCriteria =
-        BusquedaPedidoCriteria.builder().idSucursal(1L).estadoPedido(EstadoPedido.ABIERTO).build();
-    HttpEntity<BusquedaPedidoCriteria> requestEntityPedido = new HttpEntity<>(pedidoCriteria);
-    PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
-        restTemplate
-            .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntityPedido,
-                new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
-            .getBody();
-    assertNotNull(resultadoBusquedaPedido);
-    List<Pedido> pedidosRecuperados = resultadoBusquedaPedido.getContent();
-    assertEquals(1, pedidosRecuperados.size());
-    restTemplate.delete(apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido());
-    RestClientResponseException thrown =
-        assertThrows(
-            RestClientResponseException.class,
-            () -> restTemplate.getForObject(apiPrefix + "/pedidos/2", Pedido.class));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_pedido_no_existente", null, Locale.getDefault())));
-    resultadoBusquedaProducto =
-        restTemplate
-            .exchange(
-                apiPrefix + "/productos/busqueda/criteria",
-                HttpMethod.POST,
-                requestEntityProductos,
-                new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
-            .getBody();
-    assertNotNull(resultadoBusqueda);
-    productosRecuperados = resultadoBusquedaProducto.getContent();
-    assertEquals(
-        new BigDecimal("9.000000000000000"),
-        productosRecuperados.get(2).getCantidadTotalEnSucursales());
-    assertEquals(
-        new BigDecimal("10.000000000000000"),
-        productosRecuperados.get(3).getCantidadTotalEnSucursales());
-  }
-
-  @Test
   @DisplayName("Actualizar stock de un producto para tener cantidades en dos sucursales, luego realizar un pedido que requiera del stock de ambas")
-  @Order(15)
+  @Order(14)
   void testEscenarioPedidoConStockDeDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Sucursal sucursalNueva =
@@ -1850,7 +1753,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar el pedido anterior")
-  @Order(16)
+  @Order(15)
   void testEscenarioFacturarPedido() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria pedidoCriteria =
@@ -1903,7 +1806,6 @@ class AppIntegrationTest {
             NuevaFacturaVentaDTO.builder()
                     .idCliente(pedidosRecuperados.get(0).getCliente().getIdCliente())
                     .idSucursal(pedidosRecuperados.get(0).getIdSucursal())
-                    .idPedido(pedidosRecuperados.get(0).getIdPedido())
                     .tipoDeComprobante(TipoDeComprobante.FACTURA_X)
                     .renglones(nuevosRenglones)
                     .recargoPorcentaje(new BigDecimal("10"))
@@ -1911,12 +1813,12 @@ class AppIntegrationTest {
                     .indices(indices)
                     .build();
     restTemplate.postForObject(
-            apiPrefix + "/facturas/ventas", nuevaFacturaVentaDTO, FacturaVenta[].class);
+            apiPrefix + "/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(), nuevaFacturaVentaDTO, FacturaVenta[].class);
   }
 
   @Test
   @DisplayName("Verificar stock y cerrar caja")
-  @Order(17)
+  @Order(16)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
@@ -1939,11 +1841,10 @@ class AppIntegrationTest {
         new BigDecimal("90.000000000000000"),
         productosRecuperados.get(1).getCantidadTotalEnSucursales());
     assertEquals(
-        new BigDecimal("9.000000000000000"),
-        productosRecuperados.get(2).getCantidadTotalEnSucursales());
+            new BigDecimal("0E-15"), productosRecuperados.get(2).getCantidadTotalEnSucursales());
     assertEquals(
-        new BigDecimal("10.000000000000000"),
-        productosRecuperados.get(3).getCantidadTotalEnSucursales());
+            new BigDecimal("5.000000000000000"),
+            productosRecuperados.get(3).getCantidadTotalEnSucursales());
     List<Sucursal> sucursales =
         Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
     assertEquals(2, sucursales.size());

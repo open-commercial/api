@@ -285,7 +285,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
       pedido.setEstado(EstadoPedido.CERRADO);
-      productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
       this.calcularValoresFacturasVentaAndActualizarStock(facturas);
       facturas.forEach(f -> f.setPedido(pedido));
       for (FacturaVenta f : facturas) {
@@ -333,15 +332,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   private void calcularValoresFacturasVentaAndActualizarStock(List<FacturaVenta> facturas) {
-    facturas.forEach(
-        facturaVenta -> {
-          facturaService.calcularValoresFactura(facturaVenta);
-          productoService.actualizarStockFactura(
-              facturaService.getIdsProductosYCantidades(facturaVenta),
-              facturaVenta.getIdSucursal(),
-              TipoDeOperacion.ALTA,
-              Movimiento.VENTA);
-        });
+    facturas.forEach(facturaService::calcularValoresFactura);
   }
 
   @Override

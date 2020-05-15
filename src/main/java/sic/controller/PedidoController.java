@@ -35,7 +35,6 @@ public class PedidoController {
     private final IReciboService reciboService;
     private final IAuthService authService;
     private final MessageSource messageSource;
-    private static final Long ID_SUCURSAL_DEFAULT = 1L;
 
   @Autowired
   public PedidoController(
@@ -112,7 +111,7 @@ public class PedidoController {
     Sucursal sucursalDePedido;
     if (pedidoDTO.getIdSucursal() == null) {
       if (!pedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        sucursalDePedido = sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
+        sucursalDePedido = sucursalService.getSucursalPredeterminada();
         pedido.setSucursal(sucursalDePedido);
       } else {
         throw new BusinessServiceException(

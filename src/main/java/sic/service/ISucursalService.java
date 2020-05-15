@@ -8,6 +8,8 @@ public interface ISucursalService {
 
   Sucursal getSucursalPorId(Long idSucursal);
 
+  Sucursal getSucursalPredeterminada();
+
   void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida);
 
   void eliminar(Long idSucursal);
