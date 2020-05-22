@@ -266,7 +266,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                             "mensaje_pedido_payment_ya_existente",
                             new Object[] {pedidoDePayment},
                             Locale.getDefault()));
-                    if (pedidoDePayment.getIdPayment() == null) {
+                    if (pedidoDePayment.getIdPayment() == null) { //es para el caso del pending a approved
                       this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                       pedidoService.actualizarIdPaymentDePEdido(
                           pedidoDePayment.getIdPedido(), payment.getId());
@@ -427,6 +427,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       this.crearPedidoConPagoPorNotificacion(sucursal, usuario, cliente, items, tipoDeEnvio, payment);
       carritoCompraService.eliminarTodosLosItemsDelUsuario(usuario.getIdUsuario());
     } else {
+      this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
       correoElectronicoService.enviarEmail(
           cliente.getEmail(),
           this.emailUsername,

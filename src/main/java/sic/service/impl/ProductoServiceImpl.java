@@ -58,6 +58,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final ISucursalService sucursalService;
+  private final ITraspasoService traspasoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -72,6 +73,7 @@ public class ProductoServiceImpl implements IProductoService {
     ICarritoCompraService carritoCompraService,
     IPhotoVideoUploader photoVideoUploader,
     ISucursalService sucursalService,
+    ITraspasoService traspasoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -81,6 +83,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.carritoCompraService = carritoCompraService;
     this.photoVideoUploader = photoVideoUploader;
     this.sucursalService = sucursalService;
+    this.traspasoService = traspasoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -470,6 +473,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
+    traspasoService.guardarTraspasosPorPedido(pedido);
     pedido
         .getRenglones()
         .forEach(
@@ -554,6 +558,50 @@ public class ProductoServiceImpl implements IProductoService {
         });
   }
 
+  @Override
+  public void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion) {
+    switch (tipoDeOperacion) {
+      case ALTA:
+        traspaso
+            .getRenglones()
+            .forEach(
+                renglonTraspaso -> {
+                  Producto producto =
+                      this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                  this.quitarStock(
+                      producto,
+                      traspaso.getSucursalOrigen().getIdSucursal(),
+                      renglonTraspaso.getCantidadTraspaso());
+                  this.agregarStock(
+                      producto,
+                      traspaso.getSucursalDestino().getIdSucursal(),
+                      renglonTraspaso.getCantidadTraspaso());
+                });
+        break;
+      case ELIMINACION:
+        traspaso
+            .getRenglones()
+            .forEach(
+                renglonTraspaso -> {
+                  Producto producto =
+                      this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                  this.quitarStock(
+                      producto,
+                      traspaso.getSucursalDestino().getIdSucursal(),
+                      renglonTraspaso.getCantidadTraspaso());
+                  this.agregarStock(
+                      producto,
+                      traspaso.getSucursalOrigen().getIdSucursal(),
+                      renglonTraspaso.getCantidadTraspaso());
+                });
+        break;
+      default:
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_traspaso_operacion_no_soportada", null, Locale.getDefault()));
+    }
+  }
+
   private Producto agregarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
     producto
         .getCantidadEnSucursales()
@@ -572,42 +620,20 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   private Producto quitarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
-    for (CantidadEnSucursal cantidadEnSucursal : producto.getCantidadEnSucursales()) {
-      if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-        cantidad = this.quitarStockSegunCantidadEnSucursal(cantidadEnSucursal, cantidad);
-      }
-    }
-    if (cantidad.compareTo(BigDecimal.ZERO) > 0) {
-      List<CantidadEnSucursal> listaOrdenadaPorCantidad =
-          new ArrayList<>(producto.getCantidadEnSucursales());
-      listaOrdenadaPorCantidad.sort(
-          (cantidad1, cantidad2) -> cantidad2.getCantidad().compareTo(cantidad1.getCantidad()));
-      for (CantidadEnSucursal cantidadEnSucursal : listaOrdenadaPorCantidad) {
-        if (cantidadEnSucursal.getSucursal().getIdSucursal() != idSucursal) {
-          cantidad = this.quitarStockSegunCantidadEnSucursal(cantidadEnSucursal, cantidad);
-        }
-      }
-      listaOrdenadaPorCantidad.forEach(
-          cantidadEnSucursal -> producto.getCantidadEnSucursales().add(cantidadEnSucursal));
-    }
+    producto
+            .getCantidadEnSucursales()
+            .forEach(
+                    cantidadEnSucursal -> {
+                      if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                        cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
+                      }
+                    });
     producto.setCantidadTotalEnSucursales(
-        producto.getCantidadEnSucursales().stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
+            producto.getCantidadEnSucursales().stream()
+                    .map(CantidadEnSucursal::getCantidad)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     return productoRepository.save(producto);
-  }
-
-  private BigDecimal quitarStockSegunCantidadEnSucursal(
-      CantidadEnSucursal cantidadEnSucursal, BigDecimal cantidad) {
-    if (cantidadEnSucursal.getCantidad().compareTo(cantidad) > 0) {
-      cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
-      return BigDecimal.ZERO;
-    } else {
-      cantidad = cantidad.subtract(cantidadEnSucursal.getCantidad());
-      cantidadEnSucursal.setCantidad(BigDecimal.ZERO);
-      return cantidad;
-    }
   }
 
   @Override

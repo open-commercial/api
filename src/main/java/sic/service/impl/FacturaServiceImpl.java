@@ -14,7 +14,6 @@ import javax.persistence.EntityNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
@@ -31,9 +30,7 @@ public class FacturaServiceImpl implements IFacturaService {
   private final FacturaRepository<Factura> facturaRepository;
   private final RenglonFacturaRepository renglonFacturaRepository;
   private final IProductoService productoService;
-  private final IPedidoService pedidoService;
   private final INotaService notaService;
-  private final ICuentaCorrienteService cuentaCorrienteService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -47,17 +44,13 @@ public class FacturaServiceImpl implements IFacturaService {
     FacturaRepository<Factura> facturaRepository,
     RenglonFacturaRepository renglonFacturaRepository,
     IProductoService productoService,
-    IPedidoService pedidoService,
     INotaService notaService,
-    ICuentaCorrienteService cuentaCorrienteService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.facturaRepository = facturaRepository;
     this.renglonFacturaRepository = renglonFacturaRepository;
     this.productoService = productoService;
-    this.pedidoService = pedidoService;
     this.notaService = notaService;
-    this.cuentaCorrienteService = cuentaCorrienteService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }

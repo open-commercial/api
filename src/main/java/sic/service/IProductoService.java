@@ -18,10 +18,10 @@ public interface IProductoService {
 
   void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
-  void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
-
   void devolverStockPedido(
       Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores);
+
+  void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 
   void actualizarStockFactura(
       Map<Long, BigDecimal> idsYCantidades,
@@ -31,6 +31,8 @@ public interface IProductoService {
 
   void actualizarStockNotaCredito(
       Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion);
+
+  void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion);
 
   void validarReglasDeNegocio(TipoDeOperacion operacion, Producto producto);
 

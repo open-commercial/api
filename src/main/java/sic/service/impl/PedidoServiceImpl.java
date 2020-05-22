@@ -121,6 +121,23 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_detalle_envio_vacio", null, Locale.getDefault()));
     }
+    //Stock
+    long[] idProducto = new long[pedido.getRenglones().size()];
+    BigDecimal[] cantidad =  new BigDecimal[pedido.getRenglones().size()];
+    int i = 0;
+    for (RenglonPedido renglonPedido : pedido.getRenglones()) {
+      idProducto[i] = renglonPedido.getIdProductoItem();
+      cantidad[i] = renglonPedido.getCantidad();
+      i++;
+    }
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder()
+            .cantidad(cantidad)
+            .idProducto(idProducto)
+            .build();
+    if (!productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_preference_sin_stock", null, Locale.getDefault()));
+    }
   }
 
   @Override
@@ -496,7 +513,6 @@ public class PedidoServiceImpl implements IPedidoService {
   public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
     customValidator.validar(pedido);
     pedido.setFacturas(facturas);
-    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 
