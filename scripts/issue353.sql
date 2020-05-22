@@ -10,4 +10,3 @@ ADD predeterminada bit(1) after puntoDeRetiro;
 UPDATE configuracionsucursal
 SET predeterminada = 1
 WHERE configuracionsucursal.idSucursal = 1;
-
