@@ -10,3 +10,32 @@ ADD predeterminada bit(1) after puntoDeRetiro;
 UPDATE configuracionsucursal
 SET predeterminada = 1
 WHERE configuracionsucursal.idSucursal = 1;
+
+CREATE TABLE `traspaso` (
+  `idTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
+  `eliminado` bit(1) NOT NULL,
+  `fecha` datetime DEFAULT NULL,
+  `nroTraspaso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `idSucursalDestino` bigint(20) NOT NULL,
+  `idSucursalOrigen` bigint(20) NOT NULL,
+  `id_Usuario` bigint(20) NOT NULL,
+  PRIMARY KEY (`idTraspaso`),
+  KEY `FKhibkv915isglkcjkj6qtlhbch` (`idSucursalDestino`),
+  KEY `FKe8e6hd4na638nier9a3dopk7v` (`idSucursalOrigen`),
+  KEY `FKo4uhogytva0p0bmx8sr4kxd85` (`id_Usuario`),
+  CONSTRAINT `FKe8e6hd4na638nier9a3dopk7v` FOREIGN KEY (`idSucursalOrigen`) REFERENCES `sucursal` (`idSucursal`),
+  CONSTRAINT `FKhibkv915isglkcjkj6qtlhbch` FOREIGN KEY (`idSucursalDestino`) REFERENCES `sucursal` (`idSucursal`),
+  CONSTRAINT `FKo4uhogytva0p0bmx8sr4kxd85` FOREIGN KEY (`id_Usuario`) REFERENCES `usuario` (`id_Usuario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+
+CREATE TABLE `renglontraspaso` (
+  `idRenglonTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
+  `cantidadTraspaso` decimal(19,2) DEFAULT NULL,
+  `descripcionTraspaso` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `idProducto` bigint(20) NOT NULL,
+  `nombreMedidaTraspaso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `idTraspaso` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`idRenglonTraspaso`),
+  KEY `FKfrhlkj0h3rncjvqh76kgmq2u8` (`idTraspaso`),
+  CONSTRAINT `FKfrhlkj0h3rncjvqh76kgmq2u8` FOREIGN KEY (`idTraspaso`) REFERENCES `traspaso` (`idTraspaso`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
