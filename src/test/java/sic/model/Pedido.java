@@ -16,7 +16,7 @@ import java.util.List;
 @ToString(exclude = {"renglones", "cantidadArticulos"})
 @EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
 @Builder
-public class Pedido implements Serializable {
+public class Pedido {
 
   private long idPedido;
   private long nroPedido;

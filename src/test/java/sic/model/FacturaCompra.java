@@ -17,7 +17,7 @@ import java.util.List;
     callSuper = true,
     exclude = {"razonSocialProveedor", "idProveedor"})
 @Builder
-public class FacturaCompra extends Factura implements Serializable {
+public class FacturaCompra extends Factura {
 
   private Long idProveedor;
   private String razonSocialProveedor;

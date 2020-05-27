@@ -10,28 +10,16 @@ import lombok.*;
 public class ConfiguracionSucursal {
 
   private long idConfiguracionSucursal;
-
   private boolean usarFacturaVentaPreImpresa;
-
   private int cantidadMaximaDeRenglonesEnFactura;
-
   private boolean facturaElectronicaHabilitada;
-
   private byte[] certificadoAfip;
-
   private boolean existeCertificado;
-
   private String firmanteCertificadoAfip;
-
   private String passwordCertificadoAfip;
-
   private int nroPuntoDeVentaAfip;
-
   private boolean puntoDeRetiro;
-
   private boolean predeterminada;
-
   private long idSucursal;
-
   private String nombreSucursal;
 }

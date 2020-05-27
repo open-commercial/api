@@ -12,6 +12,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 public class TokenCard {
+
     private String id;
     private String public_key;
     private Long first_six_digits;

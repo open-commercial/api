@@ -42,7 +42,7 @@ import sic.modelo.TipoDeComprobante;
   @JsonSubTypes.Type(value = FacturaCompra.class, name = "FacturaCompra"),
   @JsonSubTypes.Type(value = FacturaVenta.class, name = "FacturaVenta"),
 })
-public abstract class Factura implements Serializable {
+public abstract class Factura {
 
   private long idFactura;
   private LocalDateTime fecha;
