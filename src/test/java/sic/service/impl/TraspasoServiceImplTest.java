@@ -9,7 +9,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
-import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.repository.TraspasoRepository;
 import sic.util.CustomValidator;
 
@@ -133,9 +132,9 @@ public class TraspasoServiceImplTest {
     Set<Long> idsEsperados = new HashSet<>();
     idsEsperados.add(1L);
     idsEsperados.add(3L);
-    assertEquals(idsEsperados, nuevosTraspasos.get(0).getProductosAndCantidades().keySet());
-    assertEquals(new BigDecimal("90"), nuevosTraspasos.get(0).getProductosAndCantidades().get(1L));
-    assertEquals(new BigDecimal("20"), nuevosTraspasos.get(0).getProductosAndCantidades().get(3L));
+    assertEquals(idsEsperados, nuevosTraspasos.get(0).getIdProductoConCantidad().keySet());
+    assertEquals(new BigDecimal("90"), nuevosTraspasos.get(0).getIdProductoConCantidad().get(1L));
+    assertEquals(new BigDecimal("20"), nuevosTraspasos.get(0).getIdProductoConCantidad().get(3L));
     traspasoService.guardarTraspasosPorPedido(pedido);
     verify(traspasoRepository, times(1)).save(any());
   }

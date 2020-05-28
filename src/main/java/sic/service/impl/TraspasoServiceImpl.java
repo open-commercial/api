@@ -57,7 +57,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
   @Override
   public Traspaso guardar(NuevoTraspasoDTO nuevoTraspasoDTO) {
     Traspaso traspaso = new Traspaso();
-    traspaso.setFecha(LocalDateTime.now());
+    traspaso.setFechaDeAlta(LocalDateTime.now());
     traspaso.setNroTraspaso(this.generarNroDeTraspaso());
     Sucursal sucursalOrigen =
         sucursalService.getSucursalPorId(nuevoTraspasoDTO.getIdSucursalOrigen());
@@ -68,15 +68,15 @@ public class TraspasoServiceImpl implements ITraspasoService {
     traspaso.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoTraspasoDTO.getIdUsuario()));
     List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
     nuevoTraspasoDTO
-        .getProductosAndCantidades()
+        .getIdProductoConCantidad()
         .forEach(
             (idProducto, cantidad) -> {
               Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
               RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
               renglonTraspaso.setIdProducto(producto.getIdProducto());
-              renglonTraspaso.setCantidadTraspaso(cantidad);
-              renglonTraspaso.setDescripcionTraspaso(producto.getDescripcion());
-              renglonTraspaso.setNombreMedidaTraspaso(producto.getNombreMedida());
+              renglonTraspaso.setCantidadProducto(cantidad);
+              renglonTraspaso.setDescripcionProducto(producto.getDescripcion());
+              renglonTraspaso.setNombreMedidaProducto(producto.getNombreMedida());
               renglonesTraspaso.add(renglonTraspaso);
             });
     traspaso.setRenglones(renglonesTraspaso);
@@ -89,7 +89,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
   public List<Traspaso> guardarTraspasosPorPedido(Pedido pedido) {
     List<Traspaso> traspasos = new ArrayList<>();
     this.construirNuevosTraspasosPorPedido(pedido).stream()
-        .filter(nuevoTraspaso -> !nuevoTraspaso.getProductosAndCantidades().isEmpty())
+        .filter(nuevoTraspaso -> !nuevoTraspaso.getIdProductoConCantidad().isEmpty())
         .forEach(nuevoTraspaso -> traspasos.add(this.guardar(nuevoTraspaso)));
     return traspasos;
   }
@@ -123,7 +123,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
                     NuevoTraspasoDTO.builder()
                         .idSucursalOrigen(sucursal.getIdSucursal())
                         .idUsuario(pedido.getUsuario().getIdUsuario())
-                        .productosAndCantidades(new HashMap<Long, BigDecimal>())
+                        .idProductoConCantidad(new HashMap<Long, BigDecimal>())
                         .build();
                 nuevosTraspasos.add(nuevoTraspasoDTO);
               });
@@ -152,7 +152,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
                       nuevoTraspaso -> {
                         nuevoTraspaso.setIdSucursalDestino(pedido.getSucursal().getIdSucursal());
                         nuevoTraspaso
-                            .getProductosAndCantidades()
+                            .getIdProductoConCantidad()
                             .put(
                                 producto.getIdProducto(),
                                 productoFaltante
@@ -171,7 +171,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
                       nuevoTraspaso -> {
                         nuevoTraspaso.setIdSucursalDestino(pedido.getSucursal().getIdSucursal());
                         nuevoTraspaso
-                            .getProductosAndCantidades()
+                            .getIdProductoConCantidad()
                             .put(producto.getIdProducto(), cantidadEnSucursal.getCantidad());
                       });
             }

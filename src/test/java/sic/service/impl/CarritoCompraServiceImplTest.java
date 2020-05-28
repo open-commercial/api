@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {CustomValidator.class, CarritoCompraServiceImpl.class})
-class CarritoCompraImplTest {
+class CarritoCompraServiceImplTest {
 
   @MockBean CarritoCompraRepository carritoCompraRepository;
   @MockBean IUsuarioService usuarioService;

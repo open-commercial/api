@@ -67,14 +67,14 @@ public class FacturaVentaController {
       @RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
       @PathVariable Long idPedido,
       @RequestHeader("Authorization") String authorizationHeader) {
-    List<TipoDeComprobante> tiposDeFacturaPermititos =
+    List<TipoDeComprobante> tiposDeFacturaPermitidos =
         Arrays.asList(
             TipoDeComprobante.FACTURA_A,
             TipoDeComprobante.FACTURA_B,
             TipoDeComprobante.FACTURA_C,
             TipoDeComprobante.FACTURA_X,
             TipoDeComprobante.PRESUPUESTO);
-    if (!tiposDeFacturaPermititos.contains(nuevaFacturaVentaDTO.getTipoDeComprobante())) {
+    if (!tiposDeFacturaPermitidos.contains(nuevaFacturaVentaDTO.getTipoDeComprobante())) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));

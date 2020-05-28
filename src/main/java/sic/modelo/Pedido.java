@@ -41,10 +41,11 @@ public class Pedido implements Serializable {
 
   private long nroPedido;
 
-  private String idPayment;
-
   @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private LocalDateTime fecha;
+
+  @NotNull(message = "{mensaje_pedido_fecha_vacia}")
+  private LocalDateTime fechaVencimiento;
 
   @Column(nullable = false)
   private String observaciones;

@@ -58,6 +58,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final int INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS = 72;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -136,7 +137,7 @@ public class PedidoServiceImpl implements IPedidoService {
             .build();
     if (!productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
       throw new BusinessServiceException(
-              messageSource.getMessage("mensaje_preference_sin_stock", null, Locale.getDefault()));
+              messageSource.getMessage("mensaje_pedido_sin_stock", null, Locale.getDefault()));
     }
   }
 
@@ -261,6 +262,10 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotalEstimado(total);
     pedido.setTotalActual(total);
+    if (pedido.getFecha() == null && pedido.getFechaVencimiento() == null) {
+      pedido.setFecha(LocalDateTime.now());
+      pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
+    }
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
@@ -299,6 +304,14 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     this.calcularTotalActualDePedido(pedido);
     return pedido;
+  }
+
+  @Override
+  @Transactional
+  public void cambiarFechaDeVencimiento(long idPedido) {
+    Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
+    pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
+    pedidoRepository.save(pedido);
   }
 
   private void calcularCantidadDeArticulos(Pedido pedido) {
@@ -504,11 +517,6 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public void actualizarIdPaymentDePEdido(long idPedido, String idPayment) {
-    pedidoRepository.actualizarIdPaymentDePedido(idPedido, idPayment);
-  }
-
-  @Override
   @Transactional
   public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
     customValidator.validar(pedido);
@@ -696,11 +704,6 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Override
-  public Pedido getPedidoPorIdPayment(String idPayment) {
-    return pedidoRepository.findByIdPaymentAndEliminado(idPayment, false);
-  }
-
   @Scheduled(cron = "30 0 0 * * *")
   public void cerrarPedidosAbiertos() {
     QPedido qPedido = QPedido.pedido;
@@ -709,10 +712,13 @@ public class PedidoServiceImpl implements IPedidoService {
     Iterable<Pedido> pedidosAbiertos = pedidoRepository.findAll(builder);
     pedidosAbiertos.forEach(
         pedido -> {
-          if (pedido.getFecha().isBefore(LocalDateTime.now().minusDays(2L))) {
-            pedido.setEstado(EstadoPedido.CERRADO);
+          if (pedido
+              .getFechaVencimiento()
+              .isBefore(LocalDateTime.now())) {
+            pedido.setEstado(EstadoPedido.CANCELADO);
             pedidoRepository.save(pedido);
-            productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+            productoService.actualizarStockPedido(
+                pedido, TipoDeOperacion.ACTUALIZACION);
           }
         });
   }

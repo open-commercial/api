@@ -30,11 +30,11 @@ public class RenglonTraspaso {
     @NotNull(message = "{mensaje_producto_vacio_descripcion}")
     @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
     @JsonView(Views.Comprador.class)
-    private String descripcionTraspaso;
+    private String descripcionProducto;
 
     @NotEmpty
-    private String nombreMedidaTraspaso;
+    private String nombreMedidaProducto;
 
     @Positive
-    private BigDecimal cantidadTraspaso;
+    private BigDecimal cantidadProducto;
 }

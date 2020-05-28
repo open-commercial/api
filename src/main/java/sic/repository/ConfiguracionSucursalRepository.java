@@ -22,10 +22,7 @@ public interface ConfiguracionSucursalRepository
           + "FROM ConfiguracionSucursal configuracionSucursal WHERE configuracionSucursal.sucursal.idSucursal = :idSucursal")
   boolean isFacturaElectronicaHabilitada(@Param("idSucursal") long idSucursal);
 
-  @Query("SELECT cs FROM ConfiguracionSucursal cs" + " WHERE cs.predeterminada = true")
-  ConfiguracionSucursal findConfiguracionSucursalPredeterminada();
-
   @Modifying
   @Query("UPDATE ConfiguracionSucursal cs SET cs.predeterminada = false WHERE cs.predeterminada = true")
-  int desmarcarSucursalPredeterminada();
+  void desmarcarSucursalPredeterminada();
 }

@@ -25,7 +25,7 @@ public class Traspaso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idTraspaso;
 
-    private LocalDateTime fecha;
+    private LocalDateTime fechaDeAlta;
 
     private String nroTraspaso;
 

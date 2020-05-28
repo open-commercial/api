@@ -1,6 +1,7 @@
 package sic.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -18,8 +19,6 @@ public interface IPedidoService {
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
   void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
-
-  void actualizarIdPaymentDePEdido(long idPedido, String idPayment);
 
   void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
@@ -45,13 +44,13 @@ public interface IPedidoService {
 
   Pedido guardar(Pedido pedido, List<Recibo> recibos);
 
+  void cambiarFechaDeVencimiento(long idPedido);
+
   RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad);
 
   List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
 
   Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
-
-  Pedido getPedidoPorIdPayment(String idPayment);
 
   long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
 

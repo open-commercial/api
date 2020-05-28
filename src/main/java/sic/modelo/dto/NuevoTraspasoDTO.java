@@ -11,7 +11,7 @@ import java.util.Map;
 @Builder
 public class NuevoTraspasoDTO {
 
-  private Map<Long, BigDecimal> productosAndCantidades;
+  private Map<Long, BigDecimal> idProductoConCantidad;
   private Long idSucursalOrigen;
   private Long idSucursalDestino;
   private Long idUsuario;

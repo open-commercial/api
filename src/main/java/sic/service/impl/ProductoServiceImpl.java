@@ -489,9 +489,10 @@ public class ProductoServiceImpl implements IProductoService {
                       pedido.getSucursal().getIdSucursal(),
                       renglones.getCantidad());
                 }
-                if (tipoDeOperacion == TipoDeOperacion.ELIMINACION
+                if ((tipoDeOperacion == TipoDeOperacion.ELIMINACION
+                        && pedido.getEstado() == EstadoPedido.ABIERTO)
                     || (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
-                        && pedido.getEstado() == EstadoPedido.CERRADO)) {
+                        && pedido.getEstado() == EstadoPedido.CANCELADO)) {
                   this.agregarStock(
                       producto.get(),
                       pedido.getSucursal().getIdSucursal(),
@@ -571,11 +572,11 @@ public class ProductoServiceImpl implements IProductoService {
                   this.quitarStock(
                       producto,
                       traspaso.getSucursalOrigen().getIdSucursal(),
-                      renglonTraspaso.getCantidadTraspaso());
+                      renglonTraspaso.getCantidadProducto());
                   this.agregarStock(
                       producto,
                       traspaso.getSucursalDestino().getIdSucursal(),
-                      renglonTraspaso.getCantidadTraspaso());
+                      renglonTraspaso.getCantidadProducto());
                 });
         break;
       case ELIMINACION:
@@ -588,11 +589,11 @@ public class ProductoServiceImpl implements IProductoService {
                   this.quitarStock(
                       producto,
                       traspaso.getSucursalDestino().getIdSucursal(),
-                      renglonTraspaso.getCantidadTraspaso());
+                      renglonTraspaso.getCantidadProducto());
                   this.agregarStock(
                       producto,
                       traspaso.getSucursalOrigen().getIdSucursal(),
-                      renglonTraspaso.getCantidadTraspaso());
+                      renglonTraspaso.getCantidadProducto());
                 });
         break;
       default:

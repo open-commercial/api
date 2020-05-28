@@ -1,5 +1,6 @@
 package sic.controller;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ import sic.service.*;
 @RestController
 @RequestMapping("/api/v1")
 public class PedidoController {
-    
+
     private final IPedidoService pedidoService;
     private final IUsuarioService usuarioService;
     private final ISucursalService sucursalService;
@@ -35,6 +36,7 @@ public class PedidoController {
     private final IReciboService reciboService;
     private final IAuthService authService;
     private final MessageSource messageSource;
+    private static final String ID_USUARIO = "idUsuario";
 
   @Autowired
   public PedidoController(
@@ -79,7 +81,7 @@ public class PedidoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
-    long idUsuario = (int) claims.get("idUsuario");
+    long idUsuario = (int) claims.get(ID_USUARIO);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     if (pedidoDTO.getIdSucursal() != null)
       pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
@@ -122,7 +124,7 @@ public class PedidoController {
       sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
       pedido.setSucursal(sucursalDePedido);
     }
-    long idUsuario = (int) claims.get("idUsuario");
+    long idUsuario = (int) claims.get(ID_USUARIO);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()));
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
@@ -146,7 +148,7 @@ public class PedidoController {
       @RequestBody BusquedaPedidoCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pedidoService.buscarPedidos(criteria, (int) claims.get("idUsuario"));
+    return pedidoService.buscarPedidos(criteria, (int) claims.get(ID_USUARIO));
   }
 
     @DeleteMapping("/pedidos/{idPedido}")

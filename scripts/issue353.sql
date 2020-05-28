@@ -11,10 +11,14 @@ UPDATE configuracionsucursal
 SET predeterminada = 1
 WHERE configuracionsucursal.idSucursal = 1;
 
+UPDATE configuracionsucursal
+SET predeterminada = 0
+WHERE configuracionsucursal.idSucursal <> 1;
+
 CREATE TABLE `traspaso` (
   `idTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
   `eliminado` bit(1) NOT NULL,
-  `fecha` datetime DEFAULT NULL,
+  `fechaDeAlta` datetime DEFAULT NULL,
   `nroTraspaso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `idSucursalDestino` bigint(20) NOT NULL,
   `idSucursalOrigen` bigint(20) NOT NULL,
@@ -30,10 +34,10 @@ CREATE TABLE `traspaso` (
 
 CREATE TABLE `renglontraspaso` (
   `idRenglonTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
-  `cantidadTraspaso` decimal(19,2) DEFAULT NULL,
-  `descripcionTraspaso` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  `cantidadProducto` decimal(19,2) DEFAULT NULL,
+  `descripcionProducto` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `idProducto` bigint(20) NOT NULL,
-  `nombreMedidaTraspaso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `nombreMedidaProducto` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `idTraspaso` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`idRenglonTraspaso`),
   KEY `FKfrhlkj0h3rncjvqh76kgmq2u8` (`idTraspaso`),
