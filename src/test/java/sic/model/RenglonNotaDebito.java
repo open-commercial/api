@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @ToString
 @Builder
 public class RenglonNotaDebito {
+
     private long idRenglonNotaDebito;
     private String descripcion;
     private BigDecimal monto;

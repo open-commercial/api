@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RenglonPedido implements Serializable {
+public class RenglonPedido {
 
   private long idRenglonPedido;
   private long idProductoItem;
