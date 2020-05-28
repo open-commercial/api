@@ -45,21 +45,30 @@ class PedidoServiceImplTest {
   @Autowired PedidoServiceImpl pedidoService;
 
   @Test
+  void shouldCancelarPedidoAbierto() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+    pedidoService.cancelar(1L);
+    verify(pedidoRepository, times(1)).save(pedido);
+  }
+
+  @Test
   void shouldEliminarPedidoAbierto() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.ABIERTO);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
     pedidoService.eliminar(1L);
-    verify(pedidoRepository, times(1)).save(pedido);
+    verify(pedidoRepository, times(1)).delete(pedido);
   }
 
   @Test
-  void shouldEliminarPedidoCerrado() {
+  void shouldNotCancelarPedidoCerrado() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CERRADO);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
-    assertThrows(BusinessServiceException.class, () -> pedidoService.eliminar(1L));
-    verify(messageSource).getMessage(eq("mensaje_no_se_puede_eliminar_pedido"), any(), any());
+    assertThrows(BusinessServiceException.class, () -> pedidoService.cancelar(1L));
+    verify(messageSource).getMessage(eq("mensaje_no_se_puede_cancelar_pedido"), any(), any());
   }
 
   @Test

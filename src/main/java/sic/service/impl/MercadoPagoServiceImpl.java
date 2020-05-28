@@ -205,9 +205,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       }
       try {
         preference = preference.save();
+        if (nuevaOrdenDeCompra.getMovimiento() == Movimiento.PEDIDO && pedido != null) {
+          carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuario);
+        }
       } catch (MPException ex) {
-        if (pedido != null) {
-          pedidoService.eliminar(pedido.getIdPedido()); // eliminar o cancelar?
+        if (nuevaOrdenDeCompra.getMovimiento() == Movimiento.PEDIDO && pedido != null) {
+          pedidoService.eliminar(pedido.getIdPedido());
         }
         this.logExceptionMercadoPago(ex);
       }

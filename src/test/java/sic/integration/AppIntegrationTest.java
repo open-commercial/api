@@ -1501,7 +1501,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Facturar un pedido, luego intentar eliminarlo sin éxito")
+  @DisplayName("Facturar un pedido, luego intentar cancelarlo sin éxito")
   @Order(13)
   void testEscenarioFacturarPedidoAndIntentarEliminarlo() {
     this.iniciarSesionComoAdministrador();
@@ -1630,14 +1630,15 @@ class AppIntegrationTest {
         productosRecuperados.get(3).getCantidadTotalEnSucursales());
     RestClientResponseException thrown =
         assertThrows(
-            RestClientResponseException.class, () -> restTemplate.delete(apiPrefix + "/pedidos/2"));
+            RestClientResponseException.class,
+            () -> restTemplate.put(apiPrefix + "/pedidos/2", null));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
             .getMessage()
             .contains(
                 messageSource.getMessage(
-                    "mensaje_no_se_puede_eliminar_pedido",
+                    "mensaje_no_se_puede_cancelar_pedido",
                     new Object[] {EstadoPedido.CERRADO},
                     Locale.getDefault())));
   }

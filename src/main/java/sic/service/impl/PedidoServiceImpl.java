@@ -526,12 +526,28 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
+  public void cancelar(long idPedido) {
+    Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
+    if (pedido.getEstado() == EstadoPedido.ABIERTO) {
+      pedido.setEstado(EstadoPedido.CANCELADO);
+      productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+      pedidoRepository.save(pedido);
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_no_se_puede_cancelar_pedido",
+              new Object[] {pedido.getEstado()},
+              Locale.getDefault()));
+    }
+  }
+
+  @Override
+  @Transactional
   public void eliminar(long idPedido) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
-      pedido.setEliminado(true);
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
-      pedidoRepository.save(pedido);
+      pedidoRepository.delete(pedido);
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage(

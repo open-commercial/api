@@ -1,6 +1,5 @@
 package sic.controller;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -151,12 +150,12 @@ public class PedidoController {
     return pedidoService.buscarPedidos(criteria, (int) claims.get(ID_USUARIO));
   }
 
-    @DeleteMapping("/pedidos/{idPedido}")
-    @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-    public void eliminar(@PathVariable long idPedido) {
-        pedidoService.eliminar(idPedido);
-    }       
-        
+  @PutMapping("/pedidos/{idPedido}")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public void cancelar(@PathVariable long idPedido) {
+    pedidoService.cancelar(idPedido);
+  }
+
     @GetMapping("/pedidos/{idPedido}/reporte")
     public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
         HttpHeaders headers = new HttpHeaders();

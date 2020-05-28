@@ -28,6 +28,8 @@ public interface IPedidoService {
 
   Pedido calcularTotalActualDePedido(Pedido pedido);
 
+  void cancelar(long idPedido);
+
   void eliminar(long idPedido);
 
   List<Factura> getFacturasDelPedido(long id);
