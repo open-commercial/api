@@ -38,7 +38,7 @@ public interface IPedidoService {
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
 
-  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido);
+  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(Long idPedido, boolean clonar);
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido);
 

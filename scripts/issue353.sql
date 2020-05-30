@@ -1,7 +1,15 @@
 SET SQL_SAFE_UPDATES = 0;
+
 UPDATE pedido
 SET pedido.estado = "CERRADO"
 WHERE pedido.estado = "ABIERTO" or pedido.estado = "ACTIVO";
+
+ALTER TABLE pedido
+ADD fechaVencimiento datetime after fecha;
+
+UPDATE pedido
+SET pedido.fechaVencimiento = pedido.fecha;
+
 SET SQL_SAFE_UPDATES = 1;
 
 ALTER TABLE configuracionsucursal

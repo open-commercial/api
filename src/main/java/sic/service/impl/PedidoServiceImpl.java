@@ -563,11 +563,13 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido) {
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(
+      Long idPedido, boolean clonar) {
     List<RenglonPedido> renglonPedidos =
-        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
+        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(
+            idPedido);
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
-    if (pedido.getEstado().equals(EstadoPedido.ABIERTO)) {
+    if (pedido.getEstado().equals(EstadoPedido.ABIERTO) || clonar) {
       long[] idProductoItem = new long[renglonPedidos.size()];
       BigDecimal[] cantidad = new BigDecimal[renglonPedidos.size()];
       for (int i = 0; i < renglonPedidos.size(); i++) {

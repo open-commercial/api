@@ -8,7 +8,6 @@ import sic.modelo.TipoDeComprobante;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -22,7 +21,7 @@ public class NuevaFacturaVentaDTO {
   private LocalDate fechaVencimiento;
   private TipoDeComprobante tipoDeComprobante;
   private String observaciones;
-  private List<NuevoRenglonFacturaDTO> renglones;
+  private boolean[] renglonMarcado;
   private Long[] idsFormaDePago;
   private BigDecimal[] montos;
   private int[] indices;

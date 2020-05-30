@@ -116,11 +116,49 @@ public class FacturaVentaController {
     fv.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(
             ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue()));
+    List<RenglonPedido> renglonesPedido =
+        pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
+    List<NuevoRenglonFacturaDTO> nuevosRenglonesDeFactura = new ArrayList<>();
+
+    if(nuevaFacturaVentaDTO.getRenglonMarcado() != null) {
+      if (nuevaFacturaVentaDTO.getRenglonMarcado().length != renglonesPedido.size()) {
+        throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_factura_renglones_marcados_incorrectos", null, Locale.getDefault()));
+      }
+      for (int indice = 0; indice < Objects.requireNonNull(nuevaFacturaVentaDTO.getRenglonMarcado()).length; indice++) {
+        int finalIndice = indice;
+        pedidoService
+                .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
+                .forEach(
+                        renglonPedido -> {
+                          NuevoRenglonFacturaDTO nuevoRenglonFactura =
+                                  NuevoRenglonFacturaDTO.builder()
+                                          .idProducto(renglonPedido.getIdProductoItem())
+                                          .cantidad(renglonPedido.getCantidad())
+                                          .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[finalIndice])
+                                          .build();
+                          nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
+                        });
+      }
+    } else {
+      pedidoService
+          .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
+          .forEach(
+              renglonPedido -> {
+                NuevoRenglonFacturaDTO nuevoRenglonFactura =
+                    NuevoRenglonFacturaDTO.builder()
+                        .idProducto(renglonPedido.getIdProductoItem())
+                        .cantidad(renglonPedido.getCantidad())
+                        .build();
+                nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
+              });
+    }
     fv.setRenglones(
         facturaService.calcularRenglones(
             nuevaFacturaVentaDTO.getTipoDeComprobante(),
             Movimiento.VENTA,
-            nuevaFacturaVentaDTO.getRenglones()));
+            nuevosRenglonesDeFactura));
     fv.setObservaciones(
         nuevaFacturaVentaDTO.getObservaciones() != null
             ? nuevaFacturaVentaDTO.getObservaciones()

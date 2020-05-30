@@ -980,14 +980,6 @@ class AppIntegrationTest {
         renglones.get(2).getImporteAnterior());
     assertEquals(
         new BigDecimal("108850.329000000000000000000000000000"), renglones.get(2).getImporte());
-    List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
-    renglones.forEach(
-        renglonFactura ->
-            nuevosRenglones.add(
-                NuevoRenglonFacturaDTO.builder()
-                    .cantidad(renglonFactura.getCantidad())
-                    .idProducto(renglonFactura.getIdProductoItem())
-                    .build()));
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
     assertNotNull(cliente);
     int[] indices = new int[] {0};
@@ -996,7 +988,6 @@ class AppIntegrationTest {
             .idCliente(1L)
             .idSucursal(1L)
             .tipoDeComprobante(TipoDeComprobante.FACTURA_A)
-            .renglones(nuevosRenglones)
             .recargoPorcentaje(new BigDecimal("10"))
             .descuentoPorcentaje(new BigDecimal("25"))
             .indices(indices)
@@ -1575,14 +1566,6 @@ class AppIntegrationTest {
         renglones.get(1).getImporteAnterior());
     assertEquals(
         new BigDecimal("4000.000000000000000000000000000000"), renglones.get(1).getImporte());
-    List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
-    renglones.forEach(
-        renglonFactura ->
-            nuevosRenglones.add(
-                NuevoRenglonFacturaDTO.builder()
-                    .cantidad(renglonFactura.getCantidad())
-                    .idProducto(renglonFactura.getIdProductoItem())
-                    .build()));
     Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
     assertNotNull(cliente);
     int[] indices = new int[] {0};
@@ -1591,7 +1574,6 @@ class AppIntegrationTest {
             .idCliente(pedidosRecuperados.get(0).getCliente().getIdCliente())
             .idSucursal(pedidosRecuperados.get(0).getIdSucursal())
             .tipoDeComprobante(TipoDeComprobante.FACTURA_X)
-            .renglones(nuevosRenglones)
             .recargoPorcentaje(new BigDecimal("10"))
             .descuentoPorcentaje(new BigDecimal("25"))
             .indices(indices)
@@ -1794,21 +1776,12 @@ class AppIntegrationTest {
             renglones.get(0).getImporteAnterior());
     assertEquals(
             new BigDecimal("40000.000000000000000000000000000000"), renglones.get(0).getImporte());
-    List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
-    renglones.forEach(
-            renglonFactura ->
-                    nuevosRenglones.add(
-                            NuevoRenglonFacturaDTO.builder()
-                                    .cantidad(renglonFactura.getCantidad())
-                                    .idProducto(renglonFactura.getIdProductoItem())
-                                    .build()));
     int[] indices = new int[] {0};
     NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
             NuevaFacturaVentaDTO.builder()
                     .idCliente(pedidosRecuperados.get(0).getCliente().getIdCliente())
                     .idSucursal(pedidosRecuperados.get(0).getIdSucursal())
                     .tipoDeComprobante(TipoDeComprobante.FACTURA_X)
-                    .renglones(nuevosRenglones)
                     .recargoPorcentaje(new BigDecimal("10"))
                     .descuentoPorcentaje(new BigDecimal("25"))
                     .indices(indices)
