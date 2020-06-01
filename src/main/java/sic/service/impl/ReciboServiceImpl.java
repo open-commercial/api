@@ -216,7 +216,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public List<Recibo> construirRecibos(
       Long[] idsFormaDePago,
-      Sucursal sucursal,
+      Long idSucursal,
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] montos,
@@ -237,6 +237,7 @@ public class ReciboServiceImpl implements IReciboService {
             Recibo recibo = new Recibo();
             recibo.setCliente(cliente);
             recibo.setUsuario(usuario);
+            Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
             recibo.setSucursal(sucursal);
             recibo.setFecha(fecha);
             FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);

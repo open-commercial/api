@@ -136,7 +136,7 @@ public class PedidoController {
         pedido,
         reciboService.construirRecibos(
             pedidoDTO.getIdsFormaDePago(),
-            sucursalDePedido,
+            sucursalDePedido.getIdSucursal(),
             pedido.getCliente(),
             pedido.getUsuario(),
             pedidoDTO.getMontos(),

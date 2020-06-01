@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import io.jsonwebtoken.Claims;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -19,6 +20,7 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaVentaRepository;
 import sic.service.*;
@@ -48,7 +50,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
-  private final IProductoService productoService;
+  private final ITransportistaService transportistaService;
+  private final ISucursalService sucursalService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
@@ -70,7 +73,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       ICuentaCorrienteService cuentaCorrienteService,
       IConfiguracionSucursalService configuracionSucursalService,
       IFacturaService facturaService,
-      IProductoService productoService,
+      ITransportistaService transportistaService,
+      ISucursalService sucursalService,
       MessageSource messageSource,
       CustomValidator customValidator) {
     this.facturaVentaRepository = facturaVentaRepository;
@@ -83,34 +87,135 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
-    this.productoService = productoService;
+    this.transportistaService = transportistaService;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
 
   @Override
-  public TipoDeComprobante[] getTiposDeComprobanteVenta(Sucursal sucursal, Cliente cliente) {
-    if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
-      if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
-        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
-        tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
-        tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-        tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
-        return tiposPermitidos;
+  public FacturaVenta construirFacuraVenta(
+      NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario) {
+    FacturaVenta fv = new FacturaVenta();
+    Sucursal sucursal;
+    Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+    fv.setPedido(pedido);
+    sucursal = pedido.getSucursal();
+    fv.setSucursal(sucursal);
+    fv.setTipoComprobante(nuevaFacturaVentaDTO.getTipoDeComprobante());
+    fv.setDescuentoPorcentaje(
+        nuevaFacturaVentaDTO.getDescuentoPorcentaje() != null
+            ? nuevaFacturaVentaDTO.getDescuentoPorcentaje()
+            : BigDecimal.ZERO);
+    fv.setRecargoPorcentaje(
+        nuevaFacturaVentaDTO.getRecargoPorcentaje() != null
+            ? nuevaFacturaVentaDTO.getRecargoPorcentaje()
+            : BigDecimal.ZERO);
+    Cliente cliente =
+        clienteService.getClienteNoEliminadoPorId(nuevaFacturaVentaDTO.getIdCliente());
+    if (cliente.getUbicacionFacturacion() == null
+        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
+            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
+    }
+    fv.setCliente(cliente);
+    fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
+    if (nuevaFacturaVentaDTO.getIdTransportista() != null) {
+      fv.setTransportista(
+          transportistaService.getTransportistaNoEliminadoPorId(
+              nuevaFacturaVentaDTO.getIdTransportista()));
+    }
+    fv.setFecha(LocalDateTime.now());
+    fv.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    List<RenglonPedido> renglonesPedido =
+        pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
+    List<NuevoRenglonFacturaDTO> nuevosRenglonesDeFactura = new ArrayList<>();
+
+    if (nuevaFacturaVentaDTO.getRenglonMarcado() != null) {
+      if (nuevaFacturaVentaDTO.getRenglonMarcado().length != renglonesPedido.size()) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_factura_renglones_marcados_incorrectos", null, Locale.getDefault()));
+      }
+      for (int indice = 0;
+          indice < Objects.requireNonNull(nuevaFacturaVentaDTO.getRenglonMarcado()).length;
+          indice++) {
+        int finalIndice = indice;
+        pedidoService
+            .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
+            .forEach(
+                renglonPedido -> {
+                  NuevoRenglonFacturaDTO nuevoRenglonFactura =
+                      NuevoRenglonFacturaDTO.builder()
+                          .idProducto(renglonPedido.getIdProductoItem())
+                          .cantidad(renglonPedido.getCantidad())
+                          .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[finalIndice])
+                          .build();
+                  nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
+                });
+      }
+    } else {
+      pedidoService
+          .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
+          .forEach(
+              renglonPedido -> {
+                NuevoRenglonFacturaDTO nuevoRenglonFactura =
+                    NuevoRenglonFacturaDTO.builder()
+                        .idProducto(renglonPedido.getIdProductoItem())
+                        .cantidad(renglonPedido.getCantidad())
+                        .build();
+                nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
+              });
+    }
+    fv.setRenglones(
+        facturaService.calcularRenglones(
+            nuevaFacturaVentaDTO.getTipoDeComprobante(),
+            Movimiento.VENTA,
+            nuevosRenglonesDeFactura));
+    fv.setObservaciones(
+        nuevaFacturaVentaDTO.getObservaciones() != null
+            ? nuevaFacturaVentaDTO.getObservaciones()
+            : "");
+    return fv;
+  }
+
+  @Override
+  public TipoDeComprobante[] getTiposDeComprobanteVenta(
+      Long idSucursal, Long idCliente, Long idUsuario) {
+    List<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
+    if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
+        || rolesDeUsuario.contains(Rol.ENCARGADO)
+        || rolesDeUsuario.contains(Rol.VENDEDOR)) {
+      Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
+      Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+      if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
+        if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
+          TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+          tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
+          tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
+          tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
+          return tiposPermitidos;
+        } else {
+          TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
+          tiposPermitidos[0] = TipoDeComprobante.FACTURA_B;
+          tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
+          tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
+          return tiposPermitidos;
+        }
       } else {
         TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
-        tiposPermitidos[0] = TipoDeComprobante.FACTURA_B;
+        tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
         tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
         tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
         return tiposPermitidos;
       }
-    } else {
-      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
-      tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
-      tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-      tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
-      return tiposPermitidos;
+    } else if (rolesDeUsuario.contains(Rol.VIAJANTE) || rolesDeUsuario.contains(Rol.COMPRADOR)) {
+      return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};
     }
+    return new TipoDeComprobante[0];
   }
 
   @Override

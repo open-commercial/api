@@ -29,7 +29,7 @@ public interface IReciboService {
 
   List<Recibo> construirRecibos(
       Long[] formaDePago,
-      Sucursal sucursal,
+      Long idSucursal,
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] monto,

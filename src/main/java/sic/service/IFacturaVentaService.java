@@ -4,13 +4,16 @@ import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.dto.NuevaFacturaVentaDTO;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface IFacturaVentaService {
 
-  TipoDeComprobante[] getTiposDeComprobanteVenta(Sucursal sucursal, Cliente cliente);
+  FacturaVenta construirFacuraVenta(NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario);
+
+  TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario);
 
   List<Factura> getFacturasDelPedido(Long idPedido);
 

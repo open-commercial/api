@@ -18,7 +18,6 @@ import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -27,12 +26,7 @@ public class FacturaVentaController {
 
   private final IFacturaVentaService facturaVentaService;
   private final IFacturaService facturaService;
-  private final ISucursalService sucursalService;
-  private final IClienteService clienteService;
-  private final IUsuarioService usuarioService;
-  private final ITransportistaService transportistaService;
   private final IReciboService reciboService;
-  private final IPedidoService pedidoService;
   private final IAuthService authService;
   private final MessageSource messageSource;
   private static final String CLAIM_ID_USUARIO = "idUsuario";
@@ -41,22 +35,12 @@ public class FacturaVentaController {
   public FacturaVentaController(
       IFacturaVentaService facturaVentaService,
       IFacturaService facturaService,
-      ISucursalService sucursalService,
-      IClienteService clienteService,
-      IUsuarioService usuarioService,
-      ITransportistaService transportistaService,
       IReciboService reciboService,
-      IPedidoService pedidoService,
       IAuthService authService,
       MessageSource messageSource) {
     this.facturaVentaService = facturaVentaService;
     this.facturaService = facturaService;
-    this.sucursalService = sucursalService;
-    this.clienteService = clienteService;
-    this.usuarioService = usuarioService;
-    this.transportistaService = transportistaService;
     this.reciboService = reciboService;
-    this.pedidoService = pedidoService;
     this.authService = authService;
     this.messageSource = messageSource;
   }
@@ -79,90 +63,10 @@ public class FacturaVentaController {
           messageSource.getMessage(
               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
-    FacturaVenta fv = new FacturaVenta();
-    Sucursal sucursal;
-    Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
-    fv.setPedido(pedido);
-    sucursal = pedido.getSucursal();
-    fv.setSucursal(sucursal);
-    fv.setTipoComprobante(nuevaFacturaVentaDTO.getTipoDeComprobante());
-    fv.setDescuentoPorcentaje(
-        nuevaFacturaVentaDTO.getDescuentoPorcentaje() != null
-            ? nuevaFacturaVentaDTO.getDescuentoPorcentaje()
-            : BigDecimal.ZERO);
-    fv.setRecargoPorcentaje(
-        nuevaFacturaVentaDTO.getRecargoPorcentaje() != null
-            ? nuevaFacturaVentaDTO.getRecargoPorcentaje()
-            : BigDecimal.ZERO);
-    Cliente cliente =
-        clienteService.getClienteNoEliminadoPorId(nuevaFacturaVentaDTO.getIdCliente());
-    if (cliente.getUbicacionFacturacion() == null
-        && (fv.getTipoComprobante() == TipoDeComprobante.FACTURA_A
-            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-            || fv.getTipoComprobante() == TipoDeComprobante.FACTURA_C)) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
-    }
-    fv.setCliente(cliente);
-    fv.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
-    if (nuevaFacturaVentaDTO.getIdTransportista() != null) {
-      fv.setTransportista(
-          transportistaService.getTransportistaNoEliminadoPorId(
-              nuevaFacturaVentaDTO.getIdTransportista()));
-    }
-    fv.setFecha(LocalDateTime.now());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    fv.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(
-            ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue()));
-    List<RenglonPedido> renglonesPedido =
-        pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
-    List<NuevoRenglonFacturaDTO> nuevosRenglonesDeFactura = new ArrayList<>();
-
-    if(nuevaFacturaVentaDTO.getRenglonMarcado() != null) {
-      if (nuevaFacturaVentaDTO.getRenglonMarcado().length != renglonesPedido.size()) {
-        throw new BusinessServiceException(
-                messageSource.getMessage(
-                        "mensaje_factura_renglones_marcados_incorrectos", null, Locale.getDefault()));
-      }
-      for (int indice = 0; indice < Objects.requireNonNull(nuevaFacturaVentaDTO.getRenglonMarcado()).length; indice++) {
-        int finalIndice = indice;
-        pedidoService
-                .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
-                .forEach(
-                        renglonPedido -> {
-                          NuevoRenglonFacturaDTO nuevoRenglonFactura =
-                                  NuevoRenglonFacturaDTO.builder()
-                                          .idProducto(renglonPedido.getIdProductoItem())
-                                          .cantidad(renglonPedido.getCantidad())
-                                          .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[finalIndice])
-                                          .build();
-                          nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
-                        });
-      }
-    } else {
-      pedidoService
-          .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
-          .forEach(
-              renglonPedido -> {
-                NuevoRenglonFacturaDTO nuevoRenglonFactura =
-                    NuevoRenglonFacturaDTO.builder()
-                        .idProducto(renglonPedido.getIdProductoItem())
-                        .cantidad(renglonPedido.getCantidad())
-                        .build();
-                nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
-              });
-    }
-    fv.setRenglones(
-        facturaService.calcularRenglones(
-            nuevaFacturaVentaDTO.getTipoDeComprobante(),
-            Movimiento.VENTA,
-            nuevosRenglonesDeFactura));
-    fv.setObservaciones(
-        nuevaFacturaVentaDTO.getObservaciones() != null
-            ? nuevaFacturaVentaDTO.getObservaciones()
-            : "");
+    FacturaVenta fv =
+        facturaVentaService.construirFacuraVenta(
+            nuevaFacturaVentaDTO, idPedido, ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
     List<FacturaVenta> facturasGuardadas;
     if (nuevaFacturaVentaDTO.getIndices() != null
         && nuevaFacturaVentaDTO.getIndices().length > 0
@@ -175,7 +79,7 @@ public class FacturaVentaController {
               idPedido,
               reciboService.construirRecibos(
                   nuevaFacturaVentaDTO.getIdsFormaDePago(),
-                  sucursal,
+                  nuevaFacturaVentaDTO.getIdSucursal(),
                   fv.getCliente(),
                   fv.getUsuario(),
                   nuevaFacturaVentaDTO.getMontos(),
@@ -189,7 +93,7 @@ public class FacturaVentaController {
               idPedido,
               reciboService.construirRecibos(
                   nuevaFacturaVentaDTO.getIdsFormaDePago(),
-                  sucursal,
+                  nuevaFacturaVentaDTO.getIdSucursal(),
                   fv.getCliente(),
                   fv.getUsuario(),
                   nuevaFacturaVentaDTO.getMontos(),
@@ -227,17 +131,7 @@ public class FacturaVentaController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get(CLAIM_ID_USUARIO);
-    List<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
-    if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
-        || rolesDeUsuario.contains(Rol.ENCARGADO)
-        || rolesDeUsuario.contains(Rol.VENDEDOR)) {
-      return facturaVentaService.getTiposDeComprobanteVenta(
-          sucursalService.getSucursalPorId(idSucursal),
-          clienteService.getClienteNoEliminadoPorId(idCliente));
-    } else if (rolesDeUsuario.contains(Rol.VIAJANTE) || rolesDeUsuario.contains(Rol.COMPRADOR)) {
-      return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};
-    }
-    return new TipoDeComprobante[0];
+    return facturaVentaService.getTiposDeComprobanteVenta(idSucursal, idCliente, idUsuario);
   }
 
   @GetMapping("/facturas/ventas/{idFactura}/reporte")

@@ -50,7 +50,7 @@ class ReciboServiceImplTest {
     Usuario usuario = new Usuario();
     List<Recibo> recibos =
         reciboServiceImpl.construirRecibos(
-            idsFormasDePago, sucursal, cliente, usuario, montos, LocalDateTime.now());
+            idsFormasDePago, 1L, cliente, usuario, montos, LocalDateTime.now());
     assertEquals(2, recibos.size());
     assertEquals(new BigDecimal("100"), recibos.get(0).getMonto());
     assertEquals(new BigDecimal("250"), recibos.get(1).getMonto());
@@ -77,7 +77,7 @@ class ReciboServiceImplTest {
     Usuario usuario = new Usuario();
     List<Recibo> recibos =
         reciboServiceImpl.construirRecibos(
-            idsFormasDePago, sucursal, cliente, usuario, montos, LocalDateTime.now());
+            idsFormasDePago, 1L, cliente, usuario, montos, LocalDateTime.now());
     assertEquals(1, recibos.size());
     assertEquals(new BigDecimal("350"), recibos.get(0).getMonto());
   }

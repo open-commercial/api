@@ -45,6 +45,7 @@ class FacturaVentaServiceImplTest {
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
+  @MockBean SucursalServiceImpl sucursalService;
   @MockBean MessageSource messageSource;
 
   @Autowired FacturaServiceImpl facturaServiceImpl;
@@ -52,57 +53,73 @@ class FacturaVentaServiceImplTest {
 
   @Test
   void shouldGetTipoFacturaVentaWhenSucursalDiscriminaYClienteTambien() {
-    Sucursal sucursal = Mockito.mock(Sucursal.class);
-    Cliente cliente = Mockito.mock(Cliente.class);
-    when(sucursal.getCategoriaIVA()).thenReturn(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    when(cliente.getCategoriaIVA()).thenReturn(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result =
-        facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
   @Test
   void shouldGetTipoFacturaVentaWhenSucursalDiscriminaYClienteNo() {
-    Sucursal sucursal = Mockito.mock(Sucursal.class);
-    Cliente cliente = Mockito.mock(Cliente.class);
-    when(sucursal.getCategoriaIVA()).thenReturn(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    when(cliente.getCategoriaIVA()).thenReturn(CategoriaIVA.MONOTRIBUTO);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result =
-        facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
   @Test
   void shouldGetTipoFacturaVentaWhenSucursalNoDiscriminaYClienteSi() {
-    Sucursal sucursal = Mockito.mock(Sucursal.class);
-    Cliente cliente = Mockito.mock(Cliente.class);
-    when(sucursal.getCategoriaIVA()).thenReturn(CategoriaIVA.MONOTRIBUTO);
-    when(cliente.getCategoriaIVA()).thenReturn(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result =
-        facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
   @Test
   void shouldGetTipoFacturaVentaWhenSucursalNoDiscriminaIVAYClienteNO() {
-    Sucursal sucursal = Mockito.mock(Sucursal.class);
-    Cliente cliente = Mockito.mock(Cliente.class);
-    when(sucursal.getCategoriaIVA()).thenReturn(CategoriaIVA.MONOTRIBUTO);
-    when(cliente.getCategoriaIVA()).thenReturn(CategoriaIVA.MONOTRIBUTO);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    Cliente cliente = new Cliente();
+    cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result =
-        facturaVentaServiceImpl.getTiposDeComprobanteVenta(sucursal, cliente);
+    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
