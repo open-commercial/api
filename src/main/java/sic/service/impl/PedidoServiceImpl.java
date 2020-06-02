@@ -722,7 +722,7 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Scheduled(cron = "30 0 0 * * *")
+  @Scheduled(cron = "0 0/30 * * * ?")
   public void cerrarPedidosAbiertos() {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
