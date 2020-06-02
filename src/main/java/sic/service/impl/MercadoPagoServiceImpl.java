@@ -30,6 +30,7 @@ import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 
 @Service
@@ -54,7 +55,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private static final String STRING_ID_USUARIO = "idUsuario";
   private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
           new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
-  private static final int INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS = 15;
+  private static final long INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS = 15;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -126,6 +127,14 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                 messageSource.getMessage(
                     "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
           }
+          preference.setExpires(true);
+          preference.setExpirationDateTo(
+              Date.from(
+                  pedido
+                      .getFecha()
+                      .plusMinutes(INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS - 1)
+                      .atZone(ZoneId.systemDefault())
+                      .toInstant()));
           monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
           title =
               "Pedido de ("
