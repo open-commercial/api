@@ -1,5 +1,7 @@
 package sic.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
   private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
   private final MessageSource messageSource;
+  private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
   @Autowired
   public TraspasoServiceImpl(
@@ -81,6 +84,9 @@ public class TraspasoServiceImpl implements ITraspasoService {
             });
     traspaso.setRenglones(renglonesTraspaso);
     traspaso = traspasoRepository.save(traspaso);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_traspaso_realizado", new Object[] {traspaso}, Locale.getDefault()));
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
     return traspaso;
   }

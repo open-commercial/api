@@ -722,7 +722,7 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Scheduled(cron = "0 0/15 * * * ?")
+  @Scheduled(cron = "0 0/5 * * * ?")
   @Transactional
   public void cerrarPedidosAbiertos() {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
