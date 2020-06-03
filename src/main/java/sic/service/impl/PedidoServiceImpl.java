@@ -722,11 +722,9 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Scheduled(cron = "0 0/2 * * * ?")
+  @Scheduled(cron = "0 0/15 * * * ?")
+  @Transactional
   public void cerrarPedidosAbiertos() {
-    QPedido qPedido = QPedido.pedido;
-    BooleanBuilder builder = new BooleanBuilder();
-    builder.and(qPedido.estado.eq(EstadoPedido.ABIERTO)).and(qPedido.eliminado.eq(false));
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
     Page<Pedido> paginaPedidos =
         pedidoRepository.findAllByEstadoAndEliminado(EstadoPedido.ABIERTO, pageable);
