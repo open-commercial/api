@@ -617,24 +617,36 @@ public class ProductoServiceImpl implements IProductoService {
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
-    return productoRepository.save(producto);
+    producto = productoRepository.save(producto);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_agrega_stock",
+            new Object[] {cantidad, producto.getDescripcion()},
+            Locale.getDefault()));
+    return producto;
   }
 
   private Producto quitarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
     producto
-            .getCantidadEnSucursales()
-            .forEach(
-                    cantidadEnSucursal -> {
-                      if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                        cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
-                      }
-                    });
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal -> {
+              if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
+              }
+            });
     producto.setCantidadTotalEnSucursales(
-            producto.getCantidadEnSucursales().stream()
-                    .map(CantidadEnSucursal::getCantidad)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add));
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
-    return productoRepository.save(producto);
+    producto = productoRepository.save(producto);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_quita_stock",
+            new Object[] {cantidad, producto.getDescripcion()},
+            Locale.getDefault()));
+    return producto;
   }
 
   @Override

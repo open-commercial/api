@@ -96,7 +96,6 @@ public class TraspasoServiceImpl implements ITraspasoService {
 
   @Override
   public List<NuevoTraspasoDTO> construirNuevosTraspasosPorPedido(Pedido pedido) {
-
     long[] idProducto = new long[pedido.getRenglones().size()];
     BigDecimal[] cantidad = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
