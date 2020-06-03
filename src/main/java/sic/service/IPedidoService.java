@@ -28,7 +28,7 @@ public interface IPedidoService {
 
   Pedido calcularTotalActualDePedido(Pedido pedido);
 
-  void cancelar(long idPedido);
+  void cancelar(Pedido pedido);
 
   void eliminar(long idPedido);
 

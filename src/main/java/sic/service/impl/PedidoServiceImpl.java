@@ -526,12 +526,14 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void cancelar(long idPedido) {
-    Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
+  public void cancelar(Pedido pedido) {
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       pedido.setEstado(EstadoPedido.CANCELADO);
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
-      pedidoRepository.save(pedido);
+      pedido = pedidoRepository.save(pedido);
+      logger.warn(
+          messageSource.getMessage(
+              "mensaje_pedido_cancelado", new Object[] {pedido}, Locale.getDefault()));
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage(
@@ -724,16 +726,14 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Scheduled(cron = "0 0/5 * * * ?")
   @Transactional
-  public void cerrarPedidosAbiertos() {
+  public void cancelarPedidosAbiertos() {
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
     Page<Pedido> paginaPedidos =
         pedidoRepository.findAllByEstadoAndEliminado(EstadoPedido.ABIERTO, pageable);
     paginaPedidos.forEach(
         pedido -> {
           if (pedido.getFechaVencimiento().isBefore(LocalDateTime.now())) {
-            pedido.setEstado(EstadoPedido.CANCELADO);
-            pedidoRepository.save(pedido);
-            productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+            this.cancelar(pedido);
           }
         });
   }

@@ -49,7 +49,7 @@ class PedidoServiceImplTest {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.ABIERTO);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
-    pedidoService.cancelar(1L);
+    pedidoService.cancelar(pedido);
     verify(pedidoRepository, times(1)).save(pedido);
   }
 
@@ -67,7 +67,7 @@ class PedidoServiceImplTest {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CERRADO);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
-    assertThrows(BusinessServiceException.class, () -> pedidoService.cancelar(1L));
+    assertThrows(BusinessServiceException.class, () -> pedidoService.cancelar(pedido));
     verify(messageSource).getMessage(eq("mensaje_no_se_puede_cancelar_pedido"), any(), any());
   }
 

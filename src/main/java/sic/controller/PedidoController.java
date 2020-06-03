@@ -154,7 +154,7 @@ public class PedidoController {
   @PutMapping("/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void cancelar(@PathVariable long idPedido) {
-    pedidoService.cancelar(idPedido);
+    pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
     @GetMapping("/pedidos/{idPedido}/reporte")
