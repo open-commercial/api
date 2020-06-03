@@ -722,21 +722,20 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Scheduled(cron = "0 0/30 * * * ?")
+  @Scheduled(cron = "0 0/5 * * * ?")
   public void cerrarPedidosAbiertos() {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(qPedido.estado.eq(EstadoPedido.ABIERTO)).and(qPedido.eliminado.eq(false));
-    Iterable<Pedido> pedidosAbiertos = pedidoRepository.findAll(builder);
-    pedidosAbiertos.forEach(
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+    Page<Pedido> paginaPedidos =
+        pedidoRepository.findAllByEstadoAndEliminado(EstadoPedido.ABIERTO, pageable);
+    paginaPedidos.forEach(
         pedido -> {
-          if (pedido
-              .getFechaVencimiento()
-              .isBefore(LocalDateTime.now())) {
+          if (pedido.getFechaVencimiento().isBefore(LocalDateTime.now())) {
             pedido.setEstado(EstadoPedido.CANCELADO);
             pedidoRepository.save(pedido);
-            productoService.actualizarStockPedido(
-                pedido, TipoDeOperacion.ACTUALIZACION);
+            productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
           }
         });
   }

@@ -1,13 +1,23 @@
 package sic.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Sucursal;
-import sic.modelo.Pedido;
+import org.springframework.data.repository.query.Param;
+import sic.modelo.*;
 
 public interface PedidoRepository
     extends PagingAndSortingRepository<Pedido, Long>, QuerydslPredicateExecutor<Pedido> {
 
   Pedido findByNroPedidoAndSucursalAndEliminado(
       long nroPedido, Sucursal sucursal, boolean eliminado);
+
+  @Query(
+      "SELECT p FROM Pedido p "
+          + "INNER JOIN p.renglones r "
+          + "WHERE p.estado = :estado "
+          + "AND p.eliminado = false")
+  Page<Pedido> findAllByEstadoAndEliminado(@Param("estado") EstadoPedido estado, Pageable page);
 }
