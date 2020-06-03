@@ -817,8 +817,7 @@ public class ProductoServiceImpl implements IProductoService {
       return producto.get();
     } else {
       throw new EntityNotFoundException(
-          messageSource.getMessage(
-              "mensaje_producto_no_existente", new Object[] {idProducto}, Locale.getDefault()));
+          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
   }
 
