@@ -49,7 +49,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
   @Override
   public Traspaso getTraspasoNoEliminadoPorid(Long idTraspaso) {
     Optional<Traspaso> traspaso = traspasoRepository.findById(idTraspaso);
-    if (traspaso.isPresent() && !traspaso.get().isEliminado()) {
+    if (traspaso.isPresent()) {
       return traspaso.get();
     } else {
       throw new EntityNotFoundException(
