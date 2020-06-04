@@ -1,9 +1,9 @@
 package sic.service.impl;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+//import com.google.gson.Gson;
+//import com.google.gson.JsonElement;
+//import com.google.gson.JsonObject;
+//import com.google.gson.JsonParser;
 import com.mercadopago.MercadoPago;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.Payment;
@@ -191,13 +191,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
               messageSource.getMessage(
                   "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
       }
-      JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-      try {
-        preference.setExternalReference(encryptUtils.encryptWhitAES(jsonObject.toString()));
-      } catch (GeneralSecurityException e) {
-        throw new ServiceException(
-            messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
-      }
+      //JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
+//      try {
+//        preference.setExternalReference(encryptUtils.encryptWhitAES(jsonObject.toString()));
+//      } catch (GeneralSecurityException e) {
+//        throw new ServiceException(
+//            messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
+//      }
       Item item = new Item();
       item.setTitle(title).setQuantity(1).setUnitPrice(monto);
       com.mercadopago.resources.datastructures.preference.Payer payer =
@@ -238,27 +238,27 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       payment = Payment.findById(idPayment);
       if (payment.getId() != null && payment.getExternalReference() != null) {
         Optional<Recibo> reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
-        JsonObject convertedObject =
-            new Gson()
-                .fromJson(
-                    encryptUtils.decryptWhitAES(payment.getExternalReference()), JsonObject.class);
-        JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
-        if (idUsuario == null) {
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
-        }
-        JsonElement idSucursal = convertedObject.get("idSucursal");
-        if (idSucursal == null) {
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
-        }
-        Cliente cliente =
-            clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
-        Sucursal sucursal =
-            sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
-        Movimiento movimiento = Movimiento.valueOf(convertedObject.get("movimiento").getAsString());
+//        JsonObject convertedObject =
+//            new Gson()
+//                .fromJson(
+//                    encryptUtils.decryptWhitAES(payment.getExternalReference()), JsonObject.class);
+//        JsonElement idUsuario = convertedObject.get(STRING_ID_USUARIO);
+//        if (idUsuario == null) {
+//          throw new BusinessServiceException(
+//              messageSource.getMessage(
+//                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+//        }
+//        JsonElement idSucursal = convertedObject.get("idSucursal");
+//        if (idSucursal == null) {
+//          throw new BusinessServiceException(
+//              messageSource.getMessage(
+//                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+//        }
+//        Cliente cliente =
+//            clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
+//        Sucursal sucursal =
+//            sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
+//        Movimiento movimiento = Movimiento.valueOf(convertedObject.get("movimiento").getAsString());
         long idPedido;
         switch (payment.getStatus()) {
           case approved:
@@ -269,22 +269,22 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                       new Object[] {payment.getId()},
                       Locale.getDefault()));
             } else {
-              switch (movimiento) {
-                case PEDIDO:
-                  idPedido = Long.parseLong(String.valueOf(convertedObject.get("idPedido")));
-                  pedidoService.cambiarFechaDeVencimiento(idPedido);
-                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
-                  break;
-                case DEPOSITO:
-                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
-                  break;
-                default:
-                  throw new BusinessServiceException(
-                      messageSource.getMessage(
-                          "mensaje_preference_tipo_de_movimiento_no_soportado",
-                          null,
-                          Locale.getDefault()));
-              }
+//              switch (movimiento) {
+//                case PEDIDO:
+//                  idPedido = Long.parseLong(String.valueOf(convertedObject.get("idPedido")));
+//                  pedidoService.cambiarFechaDeVencimiento(idPedido);
+//                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
+//                  break;
+//                case DEPOSITO:
+//                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
+//                  break;
+//                default:
+//                  throw new BusinessServiceException(
+//                      messageSource.getMessage(
+//                          "mensaje_preference_tipo_de_movimiento_no_soportado",
+//                          null,
+//                          Locale.getDefault()));
+//              }
             }
             break;
           case refunded:
@@ -293,11 +293,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   messageSource.getMessage(
                       "mensaje_recibo_no_existente", null, Locale.getDefault()));
             if (!notaService.existsNotaDebitoPorRecibo(reciboMP.get())) {
-              this.crearNotaDebito(
-                  reciboMP.get().getIdRecibo(),
-                  reciboMP.get().getIdCliente(),
-                  reciboMP.get().getSucursal().getIdSucursal(),
-                  cliente.getCredencial());
+//              this.crearNotaDebito(
+//                  reciboMP.get().getIdRecibo(),
+//                  reciboMP.get().getIdCliente(),
+//                  reciboMP.get().getSucursal().getIdSucursal(),
+//                  cliente.getCredencial());
             } else {
               logger.warn(
                   messageSource.getMessage(
@@ -325,10 +325,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       }
     } catch (MPException ex) {
       this.logExceptionMercadoPago(ex);
-    } catch (GeneralSecurityException e) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
     }
+//    catch (GeneralSecurityException e) {
+//      throw new ServiceException(
+//          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
+//    }
   }
 
   @Override
