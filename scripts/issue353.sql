@@ -25,7 +25,6 @@ WHERE configuracionsucursal.idSucursal <> 1;
 
 CREATE TABLE `traspaso` (
   `idTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
-  `eliminado` bit(1) NOT NULL,
   `fechaDeAlta` datetime DEFAULT NULL,
   `nroTraspaso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `idSucursalDestino` bigint(20) NOT NULL,
@@ -52,5 +51,3 @@ CREATE TABLE `renglontraspaso` (
   CONSTRAINT `FKfrhlkj0h3rncjvqh76kgmq2u8` FOREIGN KEY (`idTraspaso`) REFERENCES `traspaso` (`idTraspaso`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
-ALTER TABLE pedido
-ADD fechaVencimiento datetime after fecha;

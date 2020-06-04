@@ -21,34 +21,32 @@ import java.util.List;
 @JsonView(Views.Vendedor.class)
 public class Traspaso {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idTraspaso;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long idTraspaso;
 
-    private LocalDateTime fechaDeAlta;
+  private LocalDateTime fechaDeAlta;
 
-    private String nroTraspaso;
+  private String nroTraspaso;
 
-    @ManyToOne
-    @JoinColumn(name = "idSucursalOrigen", referencedColumnName = "idSucursal")
-    @NotNull
-    private Sucursal sucursalOrigen;
+  @ManyToOne
+  @JoinColumn(name = "idSucursalOrigen", referencedColumnName = "idSucursal")
+  @NotNull
+  private Sucursal sucursalOrigen;
 
-    @ManyToOne
-    @JoinColumn(name = "idSucursalDestino", referencedColumnName = "idSucursal")
-    @NotNull
-    private Sucursal sucursalDestino;
+  @ManyToOne
+  @JoinColumn(name = "idSucursalDestino", referencedColumnName = "idSucursal")
+  @NotNull
+  private Sucursal sucursalDestino;
 
-    @ManyToOne
-    @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
-    @NotNull(message = "{mensaje_factura_usuario_vacio}")
-    private Usuario usuario;
+  @ManyToOne
+  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @NotNull(message = "{mensaje_factura_usuario_vacio}")
+  private Usuario usuario;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "idTraspaso")
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @NotEmpty
-    private List<RenglonTraspaso> renglones;
-
-    private boolean eliminado;
+  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "idTraspaso")
+  @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+  @NotEmpty
+  private List<RenglonTraspaso> renglones;
 }
