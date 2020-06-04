@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
@@ -20,13 +21,15 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {CustomValidator.class, TraspasoServiceImpl.class})
+@ContextConfiguration(
+    classes = {CustomValidator.class, TraspasoServiceImpl.class, MessageSource.class})
 public class TraspasoServiceImplTest {
 
   @MockBean ProductoServiceImpl productoService;
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean UsuarioServiceImpl usuarioService;
   @MockBean TraspasoRepository traspasoRepository;
+  @MockBean MessageSource messageSource;
 
   @Autowired TraspasoServiceImpl traspasoService;
 
@@ -136,6 +139,7 @@ public class TraspasoServiceImplTest {
     assertEquals(new BigDecimal("90"), nuevosTraspasos.get(0).getIdProductoConCantidad().get(1L));
     assertEquals(new BigDecimal("20"), nuevosTraspasos.get(0).getIdProductoConCantidad().get(3L));
     traspasoService.guardarTraspasosPorPedido(pedido);
+    verify(messageSource).getMessage(eq("mensaje_traspaso_realizado"), any(), any());
     verify(traspasoRepository, times(1)).save(any());
   }
 

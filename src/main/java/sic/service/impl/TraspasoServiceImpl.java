@@ -206,7 +206,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroTraspaso = Long.toString(randomLong);
-      Traspaso t = traspasoRepository.findByNroTraspasoAndAndEliminado(nroTraspaso, false);
+      Traspaso t = traspasoRepository.findByNroTraspaso(nroTraspaso);
       if (t == null) esRepetido = false;
     }
     return Long.toString(randomLong);
