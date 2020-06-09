@@ -4,8 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
@@ -50,8 +53,10 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ISucursalService sucursalService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
 
   @Autowired
@@ -62,6 +67,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
       RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
       IUsuarioService usuarioService, IClienteService clienteService,
+      ISucursalService sucursalService,
       MessageSource messageSource) {
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
@@ -69,6 +75,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     this.renglonCuentaCorrienteRepository = renglonCuentaCorrienteRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
   }
 
@@ -428,6 +435,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 cuentaCorrienteCliente.getIdCuentaCorriente()));
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
+    Sucursal sucursalDefault =  sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
+    if (sucursalDefault.getLogo() != null && !sucursalDefault.getLogo().isEmpty()) {
+      try {
+        params.put(
+                "logo", new ImageIcon(ImageIO.read(new URL(sucursalDefault.getLogo()))).getImage());
+      } catch (IOException ex) {
+        throw new ServiceException(messageSource.getMessage(
+                "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+      }
+    }
     switch (formato) {
       case "xlsx":
         try {
