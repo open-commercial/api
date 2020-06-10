@@ -941,7 +941,7 @@ class FacturaServiceImplTest {
     BusinessServiceException thrown =
         assertThrows(
             BusinessServiceException.class,
-            () -> facturaVentaServiceImpl.getBuilderVenta(criteria, 1L));
+            () -> facturaVentaServiceImpl.getBuilderVenta(criteria));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -979,7 +979,7 @@ class FacturaServiceImplTest {
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
     assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
+        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idCliente(1L)
@@ -1001,7 +1001,7 @@ class FacturaServiceImplTest {
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
     assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
+        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idSucursal(1L)
@@ -1023,60 +1023,9 @@ class FacturaServiceImplTest {
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
     assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
-    roles = Collections.singletonList(Rol.COMPRADOR);
-    usuarioLogueado.setRoles(roles);
-    when(mockUsuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    Cliente clienteRelacionadoConUsuarioLogueado =  new Cliente();
-    clienteRelacionadoConUsuarioLogueado.setIdCliente(6L);
-    when(mockClienteService.getClientePorIdUsuario(1L))
-        .thenReturn(clienteRelacionadoConUsuarioLogueado);
-    criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idSucursal(1L)
-            .fechaHasta(LocalDateTime.MIN)
-            .tipoComprobante(TipoDeComprobante.FACTURA_A)
-            .idProducto(3L)
-            .numSerie(4L)
-            .numFactura(5L)
-            .idUsuario(7L)
-            .idViajante(9L)
-            .idCliente(1L)
-            .nroPedido(33L)
-            .build();
-    resultadoBuilder =
-        "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false " +
-                "&& facturaVenta.fecha < -999999999-01-01T23:59:59.999999999 " +
-                "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A " +
-                "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 " +
-                "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 " +
-                "&& any(facturaVenta.renglones).idProductoItem = 3 && facturaVenta.cliente.idCliente = 6";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
+        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     when(mockClienteService.getClientePorIdUsuario(1L))
             .thenReturn(null);
-    criteria =
-        BusquedaFacturaVentaCriteria.builder()
-            .idSucursal(1L)
-            .fechaHasta(LocalDateTime.MIN)
-            .tipoComprobante(TipoDeComprobante.FACTURA_A)
-            .idProducto(3L)
-            .numSerie(4L)
-            .numFactura(5L)
-            .idUsuario(7L)
-            .idViajante(9L)
-            .idCliente(1L)
-            .nroPedido(33L)
-            .build();
-    resultadoBuilder =
-        "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
-            + "&& facturaVenta.fecha < -999999999-01-01T23:59:59.999999999 "
-            + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
-            + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
-            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
-            + "&& any(facturaVenta.renglones).idProductoItem = 3 && facturaVenta.cliente is null";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria, 1L).toString());
   }
 
   @Test

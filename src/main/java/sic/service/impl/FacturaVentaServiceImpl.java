@@ -45,8 +45,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final IReciboService reciboService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final IPedidoService pedidoService;
-  private final IUsuarioService usuarioService;
-  private final IClienteService clienteService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
@@ -66,8 +64,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       IReciboService reciboService,
       ICorreoElectronicoService correoElectronicoService,
       IPedidoService pedidoService,
-      IUsuarioService usuarioService,
-      IClienteService clienteService,
       ICuentaCorrienteService cuentaCorrienteService,
       IConfiguracionSucursalService configuracionSucursalService,
       IFacturaService facturaService,
@@ -78,8 +74,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.afipService = afipService;
     this.correoElectronicoService = correoElectronicoService;
     this.pedidoService = pedidoService;
-    this.usuarioService = usuarioService;
-    this.clienteService = clienteService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
@@ -202,7 +196,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public Page<FacturaVenta> buscarFacturaVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     return facturaVentaRepository.findAll(
-        this.getBuilderVenta(criteria, idUsuarioLoggedIn),
+        this.getBuilderVenta(criteria),
         facturaService.getPageable(
             (criteria.getPagina() == null || criteria.getPagina() < 0) ? 0 : criteria.getPagina(),
             criteria.getOrdenarPor(),
@@ -210,8 +204,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public BooleanBuilder getBuilderVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() == null) {
@@ -266,32 +259,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getIdProducto() != null)
       builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
-    BooleanBuilder rsPredicate = new BooleanBuilder();
-    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
-        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
-        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
-      usuarioLogueado
-          .getRoles()
-          .forEach(
-              rol -> {
-                if (rol == Rol.VIAJANTE) {
-                  rsPredicate.or(
-                      qFacturaVenta.cliente.viajante.idUsuario.eq(usuarioLogueado.getIdUsuario()));
-                }
-                if (rol == Rol.COMPRADOR) {
-                  Cliente clienteRelacionado =
-                      clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
-                  if (clienteRelacionado != null) {
-                    rsPredicate.or(
-                        qFacturaVenta.cliente.idCliente.eq(clienteRelacionado.getIdCliente()));
-                  } else {
-                    rsPredicate.or(qFacturaVenta.cliente.isNull());
-                  }
-                }
-              });
-      builder.and(rsPredicate);
-    }
     return builder;
   }
 
@@ -393,8 +360,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public BigDecimal calcularTotalFacturadoVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     BigDecimal totalFacturado =
-        facturaVentaRepository.calcularTotalFacturadoVenta(
-            this.getBuilderVenta(criteria, idUsuarioLoggedIn));
+        facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilderVenta(criteria));
     return (totalFacturado != null ? totalFacturado : BigDecimal.ZERO);
   }
 
@@ -403,8 +369,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
     BigDecimal ivaVenta =
-        facturaVentaRepository.calcularIVAVenta(
-            this.getBuilderVenta(criteria, idUsuarioLoggedIn), tipoFactura);
+        facturaVentaRepository.calcularIVAVenta(this.getBuilderVenta(criteria), tipoFactura);
     return (ivaVenta != null ? ivaVenta : BigDecimal.ZERO);
   }
 
@@ -412,8 +377,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public BigDecimal calcularGananciaTotal(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     BigDecimal gananciaTotal =
-        facturaVentaRepository.calcularGananciaTotal(
-            this.getBuilderVenta(criteria, idUsuarioLoggedIn));
+        facturaVentaRepository.calcularGananciaTotal(this.getBuilderVenta(criteria));
     return (gananciaTotal != null ? gananciaTotal : BigDecimal.ZERO);
   }
 

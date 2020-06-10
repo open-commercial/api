@@ -175,6 +175,7 @@ public class FacturaVentaController {
   }
 
   @PostMapping("/facturas/ventas/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<FacturaVenta> buscarFacturaVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {

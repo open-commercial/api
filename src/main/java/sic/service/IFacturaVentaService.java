@@ -51,5 +51,5 @@ public interface IFacturaVentaService {
   void agregarRenglonesAFacturaSinIVA(
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 
-  BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria);
 }
