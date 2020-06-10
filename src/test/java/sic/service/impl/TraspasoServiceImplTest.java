@@ -10,6 +10,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.repository.RenglonTraspasoRepository;
 import sic.repository.TraspasoRepository;
 import sic.util.CustomValidator;
 
@@ -29,6 +30,7 @@ public class TraspasoServiceImplTest {
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean UsuarioServiceImpl usuarioService;
   @MockBean TraspasoRepository traspasoRepository;
+  @MockBean RenglonTraspasoRepository renglonTraspasoRepository;
   @MockBean MessageSource messageSource;
 
   @Autowired TraspasoServiceImpl traspasoService;
