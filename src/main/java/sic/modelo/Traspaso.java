@@ -1,5 +1,6 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -49,4 +50,29 @@ public class Traspaso {
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   @NotEmpty
   private List<RenglonTraspaso> renglones;
+
+  @JsonGetter("idSucursalOrigen")
+  public Long getIdSucursalOrigen() {
+    return sucursalOrigen.getIdSucursal();
+  }
+
+  @JsonGetter("nombreSucursalOrigen")
+  public String getNombreSucursalOrigen() {
+    return sucursalOrigen.getNombre();
+  }
+
+  @JsonGetter("idSucursalDestino")
+  public Long getIdSucursalDestino() {
+    return sucursalOrigen.getIdSucursal();
+  }
+
+  @JsonGetter("nombreSucursalDestino")
+  public String getNombreSucursalDestino() {
+    return sucursalOrigen.getNombre();
+  }
+
+  @JsonGetter("nombreUsuario")
+  public String getNombreUsuario() {
+    return usuario.getNombre() + " " + usuario.getApellido() + " (" + usuario.getUsername() + ")";
+  }
 }
