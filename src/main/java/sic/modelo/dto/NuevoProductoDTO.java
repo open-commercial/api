@@ -50,8 +50,6 @@ public class NuevoProductoDTO {
   private BigDecimal porcentajeBonificacionOferta;
   @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_superior_100}")
   private BigDecimal porcentajeBonificacionPrecio;
-  @DecimalMin(value = "0",message = "{mensaje_producto_precio_bonificado_igual_menor_cero}")
-  private BigDecimal precioBonificado;
   @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
   private BigDecimal precioLista;
   private boolean ilimitado;
