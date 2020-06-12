@@ -1,6 +1,7 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonView(Views.Vendedor.class)
+@JsonIgnoreProperties({"sucursalOrigen", "sucursalDestino", "renglones"})
 public class Traspaso {
 
   @Id
@@ -63,12 +65,12 @@ public class Traspaso {
 
   @JsonGetter("idSucursalDestino")
   public Long getIdSucursalDestino() {
-    return sucursalOrigen.getIdSucursal();
+    return sucursalDestino.getIdSucursal();
   }
 
   @JsonGetter("nombreSucursalDestino")
   public String getNombreSucursalDestino() {
-    return sucursalOrigen.getNombre();
+    return sucursalDestino.getNombre();
   }
 
   @JsonGetter("nombreUsuario")

@@ -363,7 +363,6 @@ public class ProductoServiceImpl implements IProductoService {
         nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
             ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
             : BigDecimal.ZERO);
-    producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());

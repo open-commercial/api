@@ -52,7 +52,6 @@ public class NuevoProductoDTO {
   private BigDecimal porcentajeBonificacionPrecio;
   @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
   private BigDecimal precioLista;
-  private boolean ilimitado;
   private boolean publico;
   private LocalDateTime fechaUltimaModificacion;
   private String estanteria;
