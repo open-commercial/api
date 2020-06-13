@@ -156,14 +156,19 @@ public class TraspasoServiceImpl implements ITraspasoService {
                 .subtract(productoFaltante.getCantidadDisponible());
         Producto producto =
             productoService.getProductoNoEliminadoPorId(productoFaltante.getIdProducto());
-        List<CantidadEnSucursal> listaOrdenadaPorCantidad =
-            new ArrayList<>(producto.getCantidadEnSucursales());
+        List<CantidadEnSucursal> listaOrdenadaPorCantidad = new ArrayList<>();
+        producto.getCantidadEnSucursales().stream()
+            .filter(
+                cantidadEnSucursal ->
+                    !cantidadEnSucursal.getIdSucursal().equals(pedido.getIdSucursal()))
+            .forEach(listaOrdenadaPorCantidad::add);
         listaOrdenadaPorCantidad.sort(
             (cantidad1, cantidad2) -> cantidad2.getCantidad().compareTo(cantidad1.getCantidad()));
         for (CantidadEnSucursal cantidadEnSucursal : listaOrdenadaPorCantidad) {
           if (cantidadFaltante.compareTo(BigDecimal.ZERO) != 0) {
-            if (cantidadFaltante.compareTo(cantidadEnSucursal.getCantidad()) <= 0) {
-              cantidadFaltante = cantidadFaltante.subtract(cantidadEnSucursal.getCantidad());
+            if (cantidadFaltante.compareTo(cantidadEnSucursal.getCantidad()) <= 0
+                && cantidadEnSucursal.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
+              BigDecimal cantidadFaltanteLambda = cantidadFaltante;
               nuevosTraspasos.stream()
                   .filter(
                       nuevoTraspaso ->
@@ -175,13 +180,10 @@ public class TraspasoServiceImpl implements ITraspasoService {
                         nuevoTraspaso.setIdSucursalDestino(pedido.getSucursal().getIdSucursal());
                         nuevoTraspaso
                             .getIdProductoConCantidad()
-                            .put(
-                                producto.getIdProducto(),
-                                productoFaltante
-                                    .getCantidadSolicitada()
-                                    .subtract(productoFaltante.getCantidadDisponible()));
+                            .put(producto.getIdProducto(), cantidadFaltanteLambda);
                       });
-            } else {
+              cantidadFaltante = BigDecimal.ZERO;
+            } else if (cantidadEnSucursal.getCantidad().compareTo(BigDecimal.ZERO) != 0) {
               cantidadFaltante = cantidadFaltante.subtract(cantidadEnSucursal.getCantidad());
               nuevosTraspasos.stream()
                   .filter(
