@@ -13,9 +13,12 @@ import sic.modelo.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
+import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
+import javax.swing.*;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -60,6 +63,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ISucursalService sucursalService;
   private final ITraspasoService traspasoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
+  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -977,6 +981,16 @@ public class ProductoServiceImpl implements IProductoService {
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
+    Sucursal sucursalDefault =  sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
+    if (sucursalDefault.getLogo() != null && !sucursalDefault.getLogo().isEmpty()) {
+      try {
+        params.put(
+                "logo", new ImageIcon(ImageIO.read(new URL(sucursalDefault.getLogo()))).getImage());
+      } catch (IOException ex) {
+        throw new ServiceException(messageSource.getMessage(
+                "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+      }
+    }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
     switch (formato) {
       case "xlsx":

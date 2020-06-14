@@ -6,19 +6,13 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaRepository;
@@ -78,54 +72,6 @@ class FacturaServiceImplTest {
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
     assertTrue(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")));
     assertFalse(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("3")));
-  }
-
-  @Test
-  void shouldCalcularRenglon() {
-    Producto productoParaRetorno = new Producto();
-    productoParaRetorno.setIdProducto(1L);
-    productoParaRetorno.setCodigo("1");
-    productoParaRetorno.setDescripcion("Producto para test");
-    productoParaRetorno.setMedida(new Medida());
-    productoParaRetorno.setPrecioCosto(new BigDecimal("89.35"));
-    productoParaRetorno.setGananciaPorcentaje(new BigDecimal("38.74"));
-    productoParaRetorno.setGananciaNeto(new BigDecimal("34.62"));
-    productoParaRetorno.setPrecioVentaPublico(new BigDecimal("123.97"));
-    productoParaRetorno.setIvaPorcentaje(new BigDecimal("21"));
-    productoParaRetorno.setIvaNeto(new BigDecimal("26.03"));
-    productoParaRetorno.setPrecioLista(new BigDecimal("150"));
-    productoParaRetorno.setPorcentajeBonificacionPrecio(new BigDecimal("10"));
-    productoParaRetorno.setPrecioBonificado(new BigDecimal("135"));
-    productoParaRetorno.setPorcentajeBonificacionOferta(BigDecimal.ZERO);
-    productoParaRetorno.setBulto(new BigDecimal("5"));
-    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
-    NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-        NuevoRenglonFacturaDTO.builder()
-            .renglonMarcado(true)
-            .idProducto(1L)
-            .cantidad(new BigDecimal("2"))
-            .build();
-    RenglonFactura renglonFacturaResultante =
-        facturaServiceImpl.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("223.146000000000000"), renglonFacturaResultante.getImporte());
-    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
-    renglonFacturaResultante =
-        facturaServiceImpl.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
-    nuevoRenglonFacturaDTO.setRenglonMarcado(true);
-    productoParaRetorno.setOferta(true);
-    productoParaRetorno.setPorcentajeBonificacionOferta(new BigDecimal("20"));
-    renglonFacturaResultante =
-        facturaServiceImpl.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("198.352000000000000"), renglonFacturaResultante.getImporte());
-    nuevoRenglonFacturaDTO.setRenglonMarcado(false);
-    renglonFacturaResultante =
-        facturaServiceImpl.calcularRenglon(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevoRenglonFacturaDTO);
-    assertEquals(new BigDecimal("247.94"), renglonFacturaResultante.getImporte());
   }
 
   @Test
@@ -487,7 +433,8 @@ class FacturaServiceImplTest {
     nuevosRenglonsFactura.add(
         NuevoRenglonFacturaDTO.builder().bonificacion(new BigDecimal("12")).build());
     assertArrayEquals(
-        arrayEsperado,
-        CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevosRenglonsFactura));
+            arrayEsperado,
+            CalculosComprobante.getArrayDeBonificacionesParaFactura(nuevosRenglonsFactura));
   }
+
 }

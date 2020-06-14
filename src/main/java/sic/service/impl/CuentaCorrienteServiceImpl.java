@@ -4,8 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
@@ -48,27 +51,31 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
+  private final ISucursalService sucursalService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public CuentaCorrienteServiceImpl(
-    CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
-    CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
-    CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-    RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
-    IUsuarioService usuarioService, IClienteService clienteService,
-    MessageSource messageSource,
-    CustomValidator customValidator) {
+      CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
+      CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
+      CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
+      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
+      IUsuarioService usuarioService, IClienteService clienteService,
+      ISucursalService sucursalService,
+            CustomValidator customValidator,
+      MessageSource messageSource) {
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
     this.renglonCuentaCorrienteRepository = renglonCuentaCorrienteRepository;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
+    this.sucursalService = sucursalService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -431,6 +438,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
                 cuentaCorrienteCliente.getIdCuentaCorriente()));
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
+    Sucursal sucursalDefault =  sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
+    if (sucursalDefault.getLogo() != null && !sucursalDefault.getLogo().isEmpty()) {
+      try {
+        params.put(
+                "logo", new ImageIcon(ImageIO.read(new URL(sucursalDefault.getLogo()))).getImage());
+      } catch (IOException ex) {
+        throw new ServiceException(messageSource.getMessage(
+                "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+      }
+    }
     switch (formato) {
       case "xlsx":
         try {

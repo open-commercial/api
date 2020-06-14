@@ -436,7 +436,7 @@ public class PedidoServiceImpl implements IPedidoService {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
           case VIAJANTE:
-            rsPredicate.or(qPedido.cliente.viajante.eq(usuarioLogueado));
+            rsPredicate.or(qPedido.usuario.eq(usuarioLogueado));
             break;
           case COMPRADOR:
             Cliente clienteRelacionado =

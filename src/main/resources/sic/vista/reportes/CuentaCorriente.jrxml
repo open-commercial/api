@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.6.0.final using JasperReports Library version 6.6.0  -->
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="CuentaCorriente" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="e47a212f-3954-4de9-aca2-5bd71a6098c5">
 	<property name="ireport.zoom" value="3.0"/>
 	<property name="ireport.x" value="0"/>
@@ -35,7 +35,7 @@
 			</line>
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="1" y="0" width="140" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47"/>
-				<imageExpression><![CDATA["https://res.cloudinary.com/hf0vu1bg2/image/upload/v1557317348/assets/logo-globodeoro-500x500px.png"]]></imageExpression>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
 			</image>
 			<staticText>
 				<reportElement positionType="FixRelativeToBottom" x="0" y="105" width="50" height="15" uuid="c23ab30f-f1da-44d0-b751-12dab0ff3001">
