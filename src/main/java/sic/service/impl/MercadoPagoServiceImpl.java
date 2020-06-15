@@ -191,13 +191,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
               messageSource.getMessage(
                   "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
       }
-      //JsonObject jsonObject = new JsonParser().parse(json).getAsJsonObject();
-//      try {
-//        preference.setExternalReference(encryptUtils.encryptWhitAES(jsonObject.toString()));
-//      } catch (GeneralSecurityException e) {
-//        throw new ServiceException(
-//            messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
-//      }
+      JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+      try {
+        preference.setExternalReference(encryptUtils.encryptWhitAES(jsonObject.toString()));
+      } catch (GeneralSecurityException e) {
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
+      }
       Item item = new Item();
       item.setTitle(title).setQuantity(1).setUnitPrice(monto);
       com.mercadopago.resources.datastructures.preference.Payer payer =
