@@ -1,6 +1,8 @@
 package sic.service;
 
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import sic.modelo.Pedido;
 import sic.modelo.RenglonTraspaso;
 import sic.modelo.Traspaso;
@@ -26,4 +28,8 @@ public interface ITraspasoService {
   String generarNroDeTraspaso();
 
   Page<Traspaso> buscarTraspasos(BusquedaTraspasoCriteria criteria);
+
+  BooleanBuilder getBuilderTraspaso(BusquedaTraspasoCriteria criteria);
+
+  Pageable getPageable(Integer pagina, String ordenarPor, String sentido);
 }

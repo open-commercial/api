@@ -5,10 +5,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.repository.RenglonTraspasoRepository;
@@ -17,6 +20,7 @@ import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -215,5 +219,66 @@ public class TraspasoServiceImplTest {
     assertThrows(
         EntityNotFoundException.class, () -> traspasoService.getTraspasoNoEliminadoPorid(1L));
     verify(messageSource).getMessage(eq("mensaje_traspaso_no_existente"), any(), any());
+  }
+
+  @Test
+  void shouldTestBusquedaTraspasoCriteria() {
+    BusquedaTraspasoCriteria criteria =
+        BusquedaTraspasoCriteria.builder()
+            .idSucursalOrigen(1L)
+            .idSucursalDestino(2L)
+            .fechaDesde(LocalDateTime.MIN)
+            .fechaHasta(LocalDateTime.MIN)
+            .idUsuario(7L)
+            .nroTraspaso("334")
+            .build();
+    String resultadoBuilder =
+        "traspaso.sucursalOrigen.idSucursal = 1 && traspaso.sucursalDestino.idSucursal = 2 "
+            + "&& traspaso.fechaDeAlta between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+            + "&& traspaso.usuario.idUsuario = 7 && traspaso.nroTraspaso = 334";
+    assertEquals(resultadoBuilder, traspasoService.getBuilderTraspaso(criteria).toString());
+    criteria =
+        BusquedaTraspasoCriteria.builder()
+            .idSucursalOrigen(1L)
+            .idSucursalDestino(2L)
+            .fechaDesde(LocalDateTime.MIN)
+            .idUsuario(7L)
+            .nroTraspaso("334")
+            .build();
+    resultadoBuilder =
+        "traspaso.sucursalOrigen.idSucursal = 1 && traspaso.sucursalDestino.idSucursal = 2 "
+            + "&& traspaso.fechaDeAlta > -999999999-01-01T00:00 "
+            + "&& traspaso.usuario.idUsuario = 7 && traspaso.nroTraspaso = 334";
+    assertEquals(resultadoBuilder, traspasoService.getBuilderTraspaso(criteria).toString());
+    criteria =
+        BusquedaTraspasoCriteria.builder()
+            .idSucursalOrigen(1L)
+            .idSucursalDestino(2L)
+            .fechaHasta(LocalDateTime.MIN)
+            .idUsuario(7L)
+            .nroTraspaso("334")
+            .build();
+    resultadoBuilder =
+        "traspaso.sucursalOrigen.idSucursal = 1 " +
+                "&& traspaso.sucursalDestino.idSucursal = 2 " +
+                "&& traspaso.fechaDeAlta < -999999999-01-01T23:59:59.999999999 " +
+                "&& traspaso.usuario.idUsuario = 7 && traspaso.nroTraspaso = 334";
+    assertEquals(resultadoBuilder, traspasoService.getBuilderTraspaso(criteria).toString());
+  }
+
+  @Test
+  void shouldGetPageableTraspaso() {
+    Pageable pageable = traspasoService.getPageable(0, null, null);
+    assertEquals("fecha: DESC", pageable.getSort().toString());
+    assertEquals(0, pageable.getPageNumber());
+    pageable = traspasoService.getPageable(1, "sucursalOrigen.nombre", "ASC");
+    assertEquals("sucursalOrigen.nombre: ASC", pageable.getSort().toString());
+    assertEquals(1, pageable.getPageNumber());
+    pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "DESC");
+    assertEquals("sucursalDestino.nombre: DESC", pageable.getSort().toString());
+    assertEquals(3, pageable.getPageNumber());
+    pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "NO");
+    assertEquals("sucursalDestino.nombre: DESC", pageable.getSort().toString());
+    assertEquals(3, pageable.getPageNumber());
   }
 }

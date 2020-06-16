@@ -240,7 +240,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
             criteria.getSentido()));
   }
 
-  private BooleanBuilder getBuilderTraspaso(BusquedaTraspasoCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilderTraspaso(BusquedaTraspasoCriteria criteria) {
     QTraspaso qTraspaso = QTraspaso.traspaso;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursalOrigen() != null) {
@@ -282,7 +283,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
     return builder;
   }
 
-  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+  @Override
+  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
     if (pagina == null) pagina = 0;
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
@@ -298,7 +300,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
               pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
           return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
       }
     }
   }
