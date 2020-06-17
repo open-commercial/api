@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
@@ -16,6 +17,7 @@ import sic.service.*;
 import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -87,10 +89,55 @@ class MercadoPagoServiceImplTest {
     assertNotEquals("", mercadoPagoPreferenceDTO.getId());
     assertNotNull(mercadoPagoPreferenceDTO.getInitPoint());
     assertNotEquals("", mercadoPagoPreferenceDTO.getInitPoint());
+    NuevaOrdenDePagoDTO ordenDePagoSinIdSucursalConRetiroEnLaMisma =
+        NuevaOrdenDePagoDTO.builder()
+            .movimiento(Movimiento.DEPOSITO)
+            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+            .monto(BigDecimal.TEN)
+            .build();
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            mercadoPagoService.crearNuevaPreference(
+                1L, ordenDePagoSinIdSucursalConRetiroEnLaMisma, "localhost"));
+    verify(messageSource)
+        .getMessage(eq("mensaje_preference_retiro_sucursal_no_seleccionada"), any(), any());
+    NuevaOrdenDePagoDTO ordenDePagoConUbicacionEnvio =
+        NuevaOrdenDePagoDTO.builder()
+            .movimiento(Movimiento.DEPOSITO)
+            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
+            .monto(BigDecimal.TEN)
+            .build();
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
+    cliente.setEmail(null);
+    when(clienteService.getClientePorIdUsuario(2L)).thenReturn(cliente);
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            mercadoPagoService.crearNuevaPreference(2L, ordenDePagoConUbicacionEnvio, "localhost"));
+    verify(messageSource).getMessage(eq("mensaje_preference_cliente_sin_email"), any(), any());
+    NuevaOrdenDePagoDTO ordenDePagoPedido =
+        NuevaOrdenDePagoDTO.builder()
+            .movimiento(Movimiento.PEDIDO)
+            .idSucursal(1L)
+            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+            .monto(BigDecimal.TEN)
+            .build();
+    cliente.setEmail("test@test.com");
+    when(clienteService.getClientePorIdUsuario(anyLong())).thenReturn(cliente);
+    Pedido pedido = new Pedido();
+    pedido.setFecha(LocalDateTime.now());
+    when(pedidoService.guardar(any(), any())).thenReturn(pedido);
+    when(carritoCompraService.calcularTotal(1L)).thenReturn(new BigDecimal("1000.00"));
+    MercadoPagoPreferenceDTO mercadoPagoPreference =
+        mercadoPagoService.crearNuevaPreference(1L, ordenDePagoPedido, "localhost");
+    assertNotNull(mercadoPagoPreference.getId());
+    assertNotNull(mercadoPagoPreference.getInitPoint());
+    assertEquals('-', mercadoPagoPreference.getId().charAt(9));
+    assertTrue(mercadoPagoPreference.getInitPoint().startsWith("https://www.mercadopago.com.ar/"));
   }
 
   @Test
-  @Disabled //volver a crear el test con un id de payment que tenga idPedido.
   void shouldCrearComprobantePorNotificacion() {
     Cliente cliente = new Cliente();
     cliente.setEmail("test@test.com");
@@ -125,15 +172,10 @@ class MercadoPagoServiceImplTest {
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
     when(pedidoService.guardar(pedido, null)).thenReturn(pedido);
-    mercadoPagoService.crearComprobantePorNotificacion("24464889");
+    mercadoPagoService.crearComprobantePorNotificacion("26800675");
     verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyString());
     verify(clienteService, times(1)).getClientePorIdUsuario(anyLong());
     verify(sucursalService, times(1)).getSucursalPorId(any());
     verify(messageSource, times(1)).getMessage(eq("mensaje_pago_aprobado"), any(), any());
-    verify(usuarioService, times(1)).getUsuarioNoEliminadoPorId(anyLong());
-    verify(carritoCompraService, times(1)).getItemsDelCarritoPorUsuario(any());
-    verify(pedidoService, times(1)).calcularRenglonPedido(anyLong(), any());
-    verify(pedidoService, times(1)).guardar(any(), any());
-    verify(carritoCompraService).eliminarTodosLosItemsDelUsuario(anyLong());
   }
 }
