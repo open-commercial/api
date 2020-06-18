@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import io.jsonwebtoken.Claims;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -133,7 +132,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<RenglonPedido> renglonesPedido =
         pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
     List<NuevoRenglonFacturaDTO> nuevosRenglonesDeFactura = new ArrayList<>();
-
     if (nuevaFacturaVentaDTO.getRenglonMarcado() != null) {
       if (nuevaFacturaVentaDTO.getRenglonMarcado().length != renglonesPedido.size()) {
         throw new BusinessServiceException(

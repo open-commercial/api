@@ -12,9 +12,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
+import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
+import sic.service.ITransportistaService;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
@@ -45,6 +47,7 @@ class FacturaVentaServiceImplTest {
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
   @MockBean SucursalServiceImpl sucursalService;
+  @MockBean TransportistaServiceImpl transportistaService;
   @MockBean MessageSource messageSource;
 
   @Autowired FacturaServiceImpl facturaServiceImpl;
@@ -305,8 +308,7 @@ class FacturaVentaServiceImplTest {
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
+    assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idCliente(1L)
@@ -327,8 +329,7 @@ class FacturaVentaServiceImplTest {
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
+    assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
         BusquedaFacturaVentaCriteria.builder()
             .idSucursal(1L)
@@ -349,8 +350,7 @@ class FacturaVentaServiceImplTest {
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
+    assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     roles = Collections.singletonList(Rol.COMPRADOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
@@ -378,8 +378,7 @@ class FacturaVentaServiceImplTest {
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
+    assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(null);
     criteria =
         BusquedaFacturaVentaCriteria.builder()
@@ -401,8 +400,7 @@ class FacturaVentaServiceImplTest {
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
-    assertEquals(
-        resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
+    assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
   }
 
   @Test
@@ -630,5 +628,68 @@ class FacturaVentaServiceImplTest {
             any(),
             any(),
             eq("Reporte.pdf"));
+  }
+
+  @Test
+  void shouldConstruirFacturaVenta() {
+    Pedido pedido = new Pedido();
+    pedido.setIdPedido(1L);
+    Sucursal sucursal = new Sucursal();
+    pedido.setSucursal(sucursal);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglones.add(renglonPedido);
+    pedido.setRenglones(renglones);
+    when(pedidoService.getPedidoNoEliminadoPorId(1L)).thenReturn(pedido);
+    when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglones);
+    NuevaFacturaVentaDTO nuevaFacturaVentaDTO = new NuevaFacturaVentaDTO();
+    nuevaFacturaVentaDTO.setTipoDeComprobante(TipoDeComprobante.FACTURA_A);
+    nuevaFacturaVentaDTO.setIdCliente(1L); // cliente para esta factura
+    nuevaFacturaVentaDTO.setIdTransportista(1L);
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(new Cliente());
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
+    verify(messageSource).getMessage(eq("mensaje_ubicacion_facturacion_vacia"), any(), any());
+
+    Cliente cliente = new Cliente();
+    cliente.setUbicacionFacturacion(new Ubicacion());
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
+    when(transportistaService.getTransportistaNoEliminadoPorId(1L)).thenReturn(new Transportista());
+    boolean[] renglonesMarcados = new boolean[] {true, false};
+    nuevaFacturaVentaDTO.setRenglonMarcado(renglonesMarcados);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
+    verify(messageSource)
+        .getMessage(eq("mensaje_factura_renglones_marcados_incorrectos"), any(), any());
+    renglonesMarcados = new boolean[] {true};
+    nuevaFacturaVentaDTO.setRenglonMarcado(renglonesMarcados);
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setBulto(new BigDecimal("5"));
+    Medida medidaProducto = new Medida();
+    medidaProducto.setNombre("Metro");
+    producto.setMedida(medidaProducto);
+    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioVentaPublico(new BigDecimal("100"));
+    producto.setPrecioLista(new BigDecimal("121"));
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
+    FacturaVenta facturaVenta =
+        facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L);
+    assertNotNull(facturaVenta);
+    assertEquals(TipoDeComprobante.FACTURA_A, facturaVenta.getTipoComprobante());
+    assertEquals(1L, facturaVenta.getPedido().getIdPedido());
+    assertEquals(1, facturaVenta.getRenglones().size());
+    assertEquals(new BigDecimal("10"), facturaVenta.getRenglones().get(0).getCantidad());
+    assertEquals(new BigDecimal("100"), facturaVenta.getRenglones().get(0).getPrecioUnitario());
+    assertEquals(new BigDecimal("21"), facturaVenta.getRenglones().get(0).getIvaPorcentaje());
+    assertEquals(
+        new BigDecimal("21.000000000000000000000000000000"),
+        facturaVenta.getRenglones().get(0).getIvaNeto());
+    assertEquals(new BigDecimal("1210"), facturaVenta.getRenglones().get(0).getImporteAnterior());
+    assertEquals(new BigDecimal("1000"), facturaVenta.getRenglones().get(0).getImporte());
   }
 }

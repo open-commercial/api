@@ -295,15 +295,10 @@ public class FacturaServiceImpl implements IFacturaService {
       }
     }
     if (movimiento == Movimiento.VENTA) {
-      switch (tipoDeComprobante) {
-        case FACTURA_A:
-        case FACTURA_X:
-          resultado = producto.getPrecioVentaPublico();
-          break;
-        default:
-          resultado = producto.getPrecioLista();
-          break;
-      }
+      resultado = switch (tipoDeComprobante) {
+        case FACTURA_A, FACTURA_X -> producto.getPrecioVentaPublico();
+        default -> producto.getPrecioLista();
+      };
     }
     if (movimiento == Movimiento.PEDIDO) {
       resultado = producto.getPrecioLista();
