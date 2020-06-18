@@ -103,6 +103,10 @@ public class PedidoServiceImpl implements IPedidoService {
         "mensaja_estado_no_valido", null, Locale.getDefault()));
     }
     // Duplicados
+    if (operacion == TipoDeOperacion.ALTA && pedido.getEstado() != EstadoPedido.ABIERTO) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaja_estado_no_valido", null, Locale.getDefault()));
+    }
     if (operacion == TipoDeOperacion.ALTA
         && pedidoRepository.findByNroPedidoAndSucursalAndEliminado(
                 pedido.getNroPedido(), pedido.getSucursal(), false)
@@ -270,7 +274,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
-    pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
@@ -435,16 +438,14 @@ public class PedidoServiceImpl implements IPedidoService {
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
-          case VIAJANTE:
-            rsPredicate.or(qPedido.usuario.eq(usuarioLogueado));
-            break;
-          case COMPRADOR:
+          case VIAJANTE -> rsPredicate.or(qPedido.usuario.eq(usuarioLogueado));
+          case COMPRADOR -> {
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
+                    clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qPedido.cliente.eq(clienteRelacionado));
             }
-            break;
+          }
         }
       }
       builder.and(rsPredicate);
@@ -460,17 +461,14 @@ public class PedidoServiceImpl implements IPedidoService {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      return switch (sentido) {
+        case "ASC" -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+      };
     }
   }
 

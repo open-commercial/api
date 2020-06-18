@@ -7,8 +7,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -39,6 +38,7 @@ class ProductoServiceImplTest {
   @MockBean RubroServiceImpl rubroService;
   @MockBean ProveedorServiceImpl proveedorService;
   @MockBean SucursalServiceImpl sucursalService;
+  @MockBean TraspasoServiceImpl traspasoService;
   @MockBean ProductoRepository productoRepository;
   @MockBean MessageSource messageSource;
 
@@ -68,9 +68,12 @@ class ProductoServiceImplTest {
     Proveedor proveedor = new Proveedor();
     Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
     CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    cantidadEnSucursal.setSucursal(sucursal);
     cantidadEnSucursales.add(cantidadEnSucursal);
     cantidadEnSucursal.setSucursal(sucursal);
     producto.setCantidadEnSucursales(cantidadEnSucursales);
+    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
     producto.setRubro(rubro);
     producto.setProveedor(proveedor);
     return producto;
@@ -371,5 +374,57 @@ class ProductoServiceImplTest {
                     .publico(true)
                     .build()));
     verify(messageSource).getMessage(eq("mensaje_error_ids_duplicados"), any(), any());
+  }
+
+  @Test
+  void shouldDevolverStockPedido() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglones.add(renglonPedido);
+    pedido.setRenglones(renglones);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    pedido.setSucursal(sucursal);
+    List<RenglonPedido> renglonesAnteriores = new ArrayList<>();
+    RenglonPedido renglonPedidoAnterior = new RenglonPedido();
+    renglonPedidoAnterior.setIdProductoItem(1L);
+    renglonesAnteriores.add(renglonPedido);
+    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores);
+    verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
+    Producto producto = this.construirProducto();
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    when(productoRepository.save(producto)).thenReturn(producto);
+    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores);
+    verify(messageSource).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
+    verify(productoRepository).save(producto);
+  }
+
+  @Test
+  void shouldActualizarStockPedido(){
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglones.add(renglonPedido);
+    pedido.setRenglones(renglones);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    pedido.setSucursal(sucursal);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
+    verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
+    Producto producto = this.construirProducto();
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    when(productoRepository.save(producto)).thenReturn(producto);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+    verify(messageSource, times(2)).getMessage(eq("mensaje_producto_quita_stock"), any(), any());
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
+    pedido.setEstado(EstadoPedido.CANCELADO);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+    verify(messageSource, times(2)).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
   }
 }

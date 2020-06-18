@@ -448,7 +448,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public void devolverStockPedido(
+  public Pedido devolverStockPedido(
       Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores) {
     if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
         && pedido.getEstado() == EstadoPedido.ABIERTO
@@ -472,10 +472,11 @@ public class ProductoServiceImpl implements IProductoService {
             }
           });
     }
+    return pedido;
   }
 
   @Override
-  public void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
+  public Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
     traspasoService.guardarTraspasosPorPedido(pedido);
     pedido
         .getRenglones()
@@ -509,6 +510,7 @@ public class ProductoServiceImpl implements IProductoService {
                         Locale.getDefault()));
               }
             });
+    return pedido;
   }
 
   @Override
@@ -565,44 +567,39 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion) {
     switch (tipoDeOperacion) {
-      case ALTA:
-        traspaso
-            .getRenglones()
-            .forEach(
-                renglonTraspaso -> {
-                  Producto producto =
-                      this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
-                  this.quitarStock(
-                      producto,
-                      traspaso.getSucursalOrigen().getIdSucursal(),
-                      renglonTraspaso.getCantidadProducto());
-                  this.agregarStock(
-                      producto,
-                      traspaso.getSucursalDestino().getIdSucursal(),
-                      renglonTraspaso.getCantidadProducto());
-                });
-        break;
-      case ELIMINACION:
-        traspaso
-            .getRenglones()
-            .forEach(
-                renglonTraspaso -> {
-                  Producto producto =
-                      this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
-                  this.quitarStock(
-                      producto,
-                      traspaso.getSucursalDestino().getIdSucursal(),
-                      renglonTraspaso.getCantidadProducto());
-                  this.agregarStock(
-                      producto,
-                      traspaso.getSucursalOrigen().getIdSucursal(),
-                      renglonTraspaso.getCantidadProducto());
-                });
-        break;
-      default:
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_traspaso_operacion_no_soportada", null, Locale.getDefault()));
+      case ALTA -> traspaso
+              .getRenglones()
+              .forEach(
+                      renglonTraspaso -> {
+                        Producto producto =
+                                this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                        this.quitarStock(
+                                producto,
+                                traspaso.getSucursalOrigen().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                        this.agregarStock(
+                                producto,
+                                traspaso.getSucursalDestino().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                      });
+      case ELIMINACION -> traspaso
+              .getRenglones()
+              .forEach(
+                      renglonTraspaso -> {
+                        Producto producto =
+                                this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                        this.quitarStock(
+                                producto,
+                                traspaso.getSucursalDestino().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                        this.agregarStock(
+                                producto,
+                                traspaso.getSucursalOrigen().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                      });
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_traspaso_operacion_no_soportada", null, Locale.getDefault()));
     }
   }
 

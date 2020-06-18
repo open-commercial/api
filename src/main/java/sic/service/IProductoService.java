@@ -18,10 +18,10 @@ public interface IProductoService {
 
   void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
-  void devolverStockPedido(
+  Pedido devolverStockPedido(
       Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores);
 
-  void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
+  Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 
   void actualizarStockFactura(
       Map<Long, BigDecimal> idsYCantidades,

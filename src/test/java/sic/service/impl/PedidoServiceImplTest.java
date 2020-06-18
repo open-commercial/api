@@ -11,17 +11,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.modelo.dto.UbicacionDTO;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -146,5 +145,70 @@ class PedidoServiceImplTest {
     assertEquals(idsProductoEsperado.length, idsProductoResultado.length);
     assertEquals(idsProductoEsperado[0], idsProductoResultado[0]);
     assertEquals(idsProductoEsperado[1], idsProductoResultado[1]);
+  }
+
+  @Test
+  void shouldGuardarPedido() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.CANCELADO);
+    pedido.setIdPedido(1L);
+    Sucursal sucursal = new Sucursal();
+    pedido.setSucursal(sucursal);
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCodigo("123");
+    producto.setDescripcion("desc producto");
+    producto.setUrlImagen("url");
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursal.setCantidad(BigDecimal.ONE);
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    producto.setCantidadEnSucursales(cantidadEnSucursales);
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setImporte(new BigDecimal("1000"));
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
+    Cliente cliente = new Cliente();
+    cliente.setPuedeComprarAPlazo(false);
+    cliente.setEmail("email@cliente.com");
+    pedido.setCliente(cliente);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(eq("mensaje_cliente_no_puede_comprar_a_plazo"), any(), any());
+    cliente.setPuedeComprarAPlazo(true);
+    pedido.setRecargoPorcentaje(BigDecimal.ZERO);
+    pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
+    when(pedidoRepository.save(pedido)).thenReturn(pedido);
+    when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+    pedido.setEstado(EstadoPedido.CANCELADO);
+    assertThrows(
+        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    assertThrows(
+            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
+    UbicacionDTO ubicacionDTO = new UbicacionDTO();
+    pedido.setDetalleEnvio(ubicacionDTO);
+    List<ProductoFaltanteDTO> faltantes = new ArrayList<>();
+    ProductoFaltanteDTO productoFaltante = new ProductoFaltanteDTO();
+    productoFaltante.setIdProducto(1L);
+    faltantes.add(productoFaltante);
+    when(productoService.getProductosSinStockDisponible(any())).thenReturn(faltantes);
+    assertThrows(
+            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(eq("mensaje_pedido_sin_stock"), any(), any());
+    when(productoService.getProductosSinStockDisponible(any())).thenReturn(new ArrayList<>());
+    Pedido pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>());
+    assertNotNull(pedidoGuardado);
+    assertEquals(1, pedidoGuardado.getRenglones().size());
+    assertEquals(new BigDecimal("100"), pedidoGuardado.getTotalActual());
+    assertEquals(EstadoPedido.ABIERTO, pedidoGuardado.getEstado());
   }
 }
