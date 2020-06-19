@@ -249,23 +249,23 @@ public class PedidoServiceImpl implements IPedidoService {
           messageSource.getMessage(
               "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
     }
-    if ((recibos != null && !recibos.isEmpty())) {
-      if (!pedido.getCliente().isPuedeComprarAPlazo()) {
-        BigDecimal totalRecibos =
-            recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (totalRecibos.compareTo(pedido.getTotalActual()) < 0) {
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));
-        }
-      }
-      recibos.forEach(reciboService::guardar);
-    }
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotalEstimado(total);
     pedido.setTotalActual(total);
+    if ((recibos != null && !recibos.isEmpty())) {
+      if (!pedido.getCliente().isPuedeComprarAPlazo()) {
+        BigDecimal totalRecibos =
+                recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (totalRecibos.compareTo(pedido.getTotalActual()) < 0) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));
+        }
+      }
+      recibos.forEach(reciboService::guardar);
+    }
     if (pedido.getFecha() == null && pedido.getFechaVencimiento() == null) {
       pedido.setFecha(LocalDateTime.now());
       pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
@@ -400,7 +400,8 @@ public class PedidoServiceImpl implements IPedidoService {
     return pedidos;
   }
 
-  private BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
+  @Override
+  public BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() != null) {

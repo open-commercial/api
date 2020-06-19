@@ -10,6 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.UbicacionDTO;
@@ -18,6 +19,7 @@ import sic.repository.RenglonPedidoRepository;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -178,8 +180,7 @@ class PedidoServiceImplTest {
     cliente.setEmail("email@cliente.com");
     pedido.setCliente(cliente);
     assertThrows(
-        BusinessServiceException.class,
-        () -> pedidoService.guardar(pedido, new ArrayList<>()));
+        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_cliente_no_puede_comprar_a_plazo"), any(), any());
     cliente.setPuedeComprarAPlazo(true);
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
@@ -188,7 +189,7 @@ class PedidoServiceImplTest {
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
     pedido.setEstado(EstadoPedido.ABIERTO);
     assertThrows(
-            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
     UbicacionDTO ubicacionDTO = new UbicacionDTO();
     pedido.setDetalleEnvio(ubicacionDTO);
@@ -198,7 +199,7 @@ class PedidoServiceImplTest {
     faltantes.add(productoFaltante);
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(faltantes);
     assertThrows(
-            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_sin_stock"), any(), any());
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(new ArrayList<>());
     Pedido pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>());
@@ -206,5 +207,131 @@ class PedidoServiceImplTest {
     assertEquals(1, pedidoGuardado.getRenglones().size());
     assertEquals(new BigDecimal("1000.000000000000000"), pedidoGuardado.getTotalEstimado());
     assertEquals(EstadoPedido.ABIERTO, pedidoGuardado.getEstado());
+    cliente.setPuedeComprarAPlazo(false);
+    pedido.setCliente(cliente);
+    List<Recibo> recibos = new ArrayList<>();
+    Recibo recibo = new Recibo();
+    recibo.setMonto(new BigDecimal("850"));
+    recibos.add(recibo);
+    assertThrows(BusinessServiceException.class, () -> pedidoService.guardar(pedido, recibos));
+    verify(messageSource).getMessage(eq("mensaje_pedido_monto_recibos_insuficiente"), any(), any());
+  }
+
+  @Test
+  void shouldValidarReglasDeNegocio() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.CERRADO);
+    pedido.setNroPedido(123L);
+    Sucursal sucursal = new Sucursal();
+    pedido.setSucursal(sucursal);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+    verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    when(pedidoRepository.findByNroPedidoAndSucursalAndEliminado(123L, sucursal, false))
+        .thenReturn(pedido);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+    when(pedidoRepository.findByNroPedidoAndSucursalAndEliminado(123L, sucursal, false))
+        .thenReturn(null);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido));
+    verify(messageSource).getMessage(eq("mensaje_pedido_duplicado"), any(), any());
+    verify(messageSource).getMessage(eq("mensaje_pedido_no_existente"), any(), any());
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setImporte(new BigDecimal("1000"));
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
+    List<ProductoFaltanteDTO> faltantes = new ArrayList<>();
+    ProductoFaltanteDTO faltante = new ProductoFaltanteDTO();
+    faltante.setIdProducto(1L);
+    faltantes.add(faltante);
+    when(productoService.getProductosSinStockDisponible(any())).thenReturn(faltantes);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+    verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
+    pedido.setDetalleEnvio(new UbicacionDTO());
+    assertThrows(
+        BusinessServiceException.class,
+        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+    verify(messageSource).getMessage(eq("mensaje_pedido_sin_stock"), any(), any());
+  }
+
+  @Test
+  void shouldCambiarFechaDeVencimiento() {
+    Pedido pedido = new Pedido();
+    pedido.setFecha(LocalDateTime.now());
+    when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+    pedidoService.cambiarFechaDeVencimiento(1L);
+    verify(pedidoRepository).save(pedido);
+  }
+
+  @Test
+  void shouldTestBusquedaDePedidos() {
+    BusquedaPedidoCriteria busquedaReciboCriteria =
+        BusquedaPedidoCriteria.builder()
+            .fechaDesde(LocalDateTime.MIN)
+            .fechaHasta(LocalDateTime.MIN)
+            .idCliente(2L)
+            .idUsuario(3L)
+            .idViajante(5L)
+            .nroPedido(123L)
+            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+            .idProducto(1L)
+            .idSucursal(7L)
+            .build();
+    Usuario usuario = new Usuario();
+    List<Rol> roles = new ArrayList<>();
+    roles.add(Rol.COMPRADOR);
+    usuario.setRoles(roles);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
+    String builder =
+        "pedido.sucursal.idSucursal = 7 && pedido.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+            + "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 "
+            + "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 "
+            + "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
+    assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
+    busquedaReciboCriteria =
+        BusquedaPedidoCriteria.builder()
+            .fechaDesde(LocalDateTime.MIN)
+            .idCliente(2L)
+            .idUsuario(3L)
+            .idViajante(5L)
+            .nroPedido(123L)
+            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+            .idProducto(1L)
+            .idSucursal(7L)
+            .build();
+    builder =
+        "pedido.sucursal.idSucursal = 7 && pedido.fecha > -999999999-01-01T00:00 " +
+                "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 " +
+                "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
+                "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 " +
+                "&& pedido.eliminado = false";
+    assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
+    busquedaReciboCriteria =
+        BusquedaPedidoCriteria.builder()
+            .fechaHasta(LocalDateTime.MIN)
+            .idCliente(2L)
+            .idUsuario(3L)
+            .idViajante(5L)
+            .nroPedido(123L)
+            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+            .idProducto(1L)
+            .idSucursal(7L)
+            .build();
+    builder =
+        "pedido.sucursal.idSucursal = 7 && pedido.fecha < -999999999-01-01T23:59:59.999999999 " +
+                "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 " +
+                "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
+                "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
+    assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
   }
 }

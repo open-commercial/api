@@ -1,10 +1,10 @@
 package sic.service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
@@ -23,6 +23,8 @@ public interface IPedidoService {
   void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
   Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
+
+  BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
   long generarNumeroPedido(Sucursal sucursal);
 
