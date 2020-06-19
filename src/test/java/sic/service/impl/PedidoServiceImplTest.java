@@ -186,10 +186,6 @@ class PedidoServiceImplTest {
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
     when(pedidoRepository.save(pedido)).thenReturn(pedido);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
-    pedido.setEstado(EstadoPedido.CANCELADO);
-    assertThrows(
-        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
-    verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
     pedido.setEstado(EstadoPedido.ABIERTO);
     assertThrows(
             BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
@@ -208,7 +204,7 @@ class PedidoServiceImplTest {
     Pedido pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>());
     assertNotNull(pedidoGuardado);
     assertEquals(1, pedidoGuardado.getRenglones().size());
-    assertEquals(new BigDecimal("100"), pedidoGuardado.getTotalActual());
+    assertEquals(new BigDecimal("1000.000000000000000"), pedidoGuardado.getTotalEstimado());
     assertEquals(EstadoPedido.ABIERTO, pedidoGuardado.getEstado());
   }
 }

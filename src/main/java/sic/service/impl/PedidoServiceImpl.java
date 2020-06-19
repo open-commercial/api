@@ -285,6 +285,7 @@ public class PedidoServiceImpl implements IPedidoService {
                     productoService
                         .getProductoNoEliminadoPorId(renglonPedido.getIdProductoItem())
                         .getUrlImagen()));
+    pedido.setEstado(EstadoPedido.ABIERTO);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
