@@ -46,4 +46,12 @@ public class TransportistaServiceImplTest {
     assertThrows(BusinessServiceException.class, () -> transportistaService.guardar(transportista));
     verify(messageSource).getMessage(eq("mensaje_transportista_duplicado_nombre"), any(), any());
   }
+
+  @Test
+  void shouldTestActualizarTransportista() {
+    Transportista transportista = new Transportista();
+    transportista.setNombre("nombre transportista");
+    transportistaService.guardar(transportista);
+    verify(transportistaRepository).save(transportista);
+  }
 }
