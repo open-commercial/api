@@ -51,7 +51,7 @@ public class TransportistaServiceImplTest {
   void shouldTestActualizarTransportista() {
     Transportista transportista = new Transportista();
     transportista.setNombre("nombre transportista");
-    transportistaService.guardar(transportista);
+    transportistaService.actualizar(transportista);
     verify(transportistaRepository).save(transportista);
   }
 }

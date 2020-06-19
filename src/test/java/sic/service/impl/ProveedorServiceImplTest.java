@@ -32,7 +32,7 @@ public class ProveedorServiceImplTest {
     proveedor.setRazonSocial("Razón social Proveedor");
     proveedor.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     proveedor.setEmail("proveedor@delaempresa.com");
-    proveedorService.guardar(proveedor);
+    proveedorService.actualizar(proveedor);
     verify(proveedorRepository).save(proveedor);
   }
 }

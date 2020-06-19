@@ -27,7 +27,7 @@ public class RubroServiceImplTest {
   void shouldTestActualizarRubro() {
     Rubro rubro = new Rubro();
     rubro.setNombre("nombre rubro");
-    rubroService.guardar(rubro);
+    rubroService.actualizar(rubro);
     verify(rubroRepository).save(rubro);
   }
 }
