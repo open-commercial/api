@@ -225,8 +225,9 @@ class FacturaVentaControllerTest {
     when(facturaService.calcularRenglones(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevosRenglonesFacturaDTO))
         .thenReturn(renglonesFacturas);
-    facturaVentaController.calcularRenglonesVenta(
-        nuevosRenglonesFacturaDTO, TipoDeComprobante.FACTURA_A);
+    assertNotNull(
+        facturaVentaController.calcularRenglonesVenta(
+            nuevosRenglonesFacturaDTO, TipoDeComprobante.FACTURA_A));
   }
 
   @Test
@@ -320,5 +321,6 @@ class FacturaVentaControllerTest {
   @Test
   void shouldEnviarFacturaVentaPorEmail() {
     facturaVentaController.enviarFacturaVentaPorEmail(1L);
+    verify(facturaVentaService).enviarFacturaVentaPorEmail(1L);
   }
 }

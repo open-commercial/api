@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
@@ -51,12 +52,13 @@ public class SucursalServiceImpl implements ISucursalService {
 
   @Override
   public Sucursal getSucursalPorId(Long idSucursal) {
-    return sucursalRepository
-        .findById(idSucursal)
-        .orElseThrow(
-            () ->
-                new EntityNotFoundException(messageSource.getMessage(
-                  "mensaje_sucursal_no_existente", null, Locale.getDefault())));
+    Optional<Sucursal> sucursal = sucursalRepository.findById(idSucursal);
+    if (sucursal.isPresent() && !sucursal.get().isEliminada()) {
+      return sucursal.get();
+    } else {
+      throw new EntityNotFoundException(
+          messageSource.getMessage("mensaje_sucursal_no_existente", null, Locale.getDefault()));
+    }
   }
 
   @Override
@@ -171,6 +173,11 @@ public class SucursalServiceImpl implements ISucursalService {
   @Transactional
   public void eliminar(Long idSucursal) {
     Sucursal sucursal = this.getSucursalPorId(idSucursal);
+    if (configuracionSucursalService.getConfiguracionSucursal(sucursal).isPredeterminada()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_sucursal_no_se_puede_eliminar_predeterminada", null, Locale.getDefault()));
+    }
     sucursal.setEliminada(true);
     sucursal.setUbicacion(null);
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {

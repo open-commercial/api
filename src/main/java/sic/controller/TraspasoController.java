@@ -25,12 +25,12 @@ public class TraspasoController {
 
   @PostMapping("/traspasos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Traspaso> getCajasCriteria(@RequestBody BusquedaTraspasoCriteria criteria) {
+  public Page<Traspaso> getTraspasosCriteria(@RequestBody BusquedaTraspasoCriteria criteria) {
     return traspasoService.buscarTraspasos(criteria);
   }
 
   @GetMapping("/traspasos/{idTraspaso}/renglones")
-  public List<RenglonTraspaso> getRenglonesDelPedido(@PathVariable long idTraspaso) {
+  public List<RenglonTraspaso> getRenglonesDelTraspaso(@PathVariable long idTraspaso) {
     return traspasoService.getRenglonesTraspaso(idTraspaso);
   }
 }

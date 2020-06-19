@@ -52,10 +52,10 @@ class ProductoServiceImplTest {
     producto.setMedida(new Medida());
     producto.setPrecioCosto(new BigDecimal("89.35"));
     producto.setGananciaPorcentaje(new BigDecimal("38.74"));
-    producto.setGananciaNeto(new BigDecimal("34.62"));
-    producto.setPrecioVentaPublico(new BigDecimal("123.97"));
+    producto.setGananciaNeto(new BigDecimal("34.614"));
+    producto.setPrecioVentaPublico(new BigDecimal("123.964"));
     producto.setIvaPorcentaje(new BigDecimal("21"));
-    producto.setIvaNeto(new BigDecimal("26.03"));
+    producto.setIvaNeto(new BigDecimal("26.032"));
     producto.setPrecioLista(new BigDecimal("150"));
     producto.setPorcentajeBonificacionPrecio(new BigDecimal("10"));
     producto.setPrecioBonificado(new BigDecimal("135"));
@@ -397,13 +397,13 @@ class ProductoServiceImplTest {
     Producto producto = this.construirProducto();
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     when(productoRepository.save(producto)).thenReturn(producto);
-    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores);
+    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
     verify(messageSource).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
     verify(productoRepository).save(producto);
   }
 
   @Test
-  void shouldActualizarStockPedido(){
+  void shouldActualizarStockPedido() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.ABIERTO);
     List<RenglonPedido> renglones = new ArrayList<>();
@@ -426,5 +426,48 @@ class ProductoServiceImplTest {
     pedido.setEstado(EstadoPedido.CANCELADO);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     verify(messageSource, times(2)).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
+  }
+
+  @Test
+  void shouldValidarReglasDeNegocio() {
+    Producto producto = this.construirProducto();
+    producto.setIdProducto(1L);
+    producto.setOferta(true);
+    producto.setPorcentajeBonificacionOferta(new BigDecimal("-1"));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> productoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, producto));
+    verify(messageSource).getMessage(eq("mensaje_producto_oferta_inferior_0"), any(), any());
+    producto.setPorcentajeBonificacionOferta(new BigDecimal("10"));
+    Producto productoDuplicado = this.construirProducto();
+    productoDuplicado.setIdProducto(2L);
+    when(productoRepository.findByCodigoAndEliminado(producto.getCodigo(), false))
+        .thenReturn(productoDuplicado);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> productoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, producto));
+    verify(messageSource).getMessage(eq("mensaje_producto_duplicado_codigo"), any(), any());
+  }
+
+  @Test
+  void shouldValidarCalculos() {
+    Producto producto = this.construirProducto();
+    producto.setIvaPorcentaje(BigDecimal.TEN);
+    assertThrows(BusinessServiceException.class, () -> productoService.validarCalculos(producto));
+    verify(messageSource).getMessage(eq("mensaje_error_iva_no_valido"), any(), any());
+    producto.setIvaPorcentaje(new BigDecimal("21.0"));
+    BigDecimal valorAuxiliar = producto.getGananciaNeto();
+    producto.setGananciaNeto(BigDecimal.ONE);
+    assertThrows(BusinessServiceException.class, () -> productoService.validarCalculos(producto));
+    verify(messageSource).getMessage(eq("mensaje_producto_ganancia_neta_incorrecta"), any(), any());
+    producto.setGananciaNeto(valorAuxiliar);
+    valorAuxiliar = producto.getIvaNeto();
+    producto.setIvaNeto(BigDecimal.ONE);
+    assertThrows(BusinessServiceException.class, () -> productoService.validarCalculos(producto));
+    verify(messageSource).getMessage(eq("mensaje_producto_iva_neto_incorrecto"), any(), any());
+    producto.setIvaNeto(valorAuxiliar);
+    producto.setPrecioLista(BigDecimal.ONE);
+    assertThrows(BusinessServiceException.class, () -> productoService.validarCalculos(producto));
+    verify(messageSource).getMessage(eq("mensaje_producto_precio_lista_incorrecto"), any(), any());
   }
 }

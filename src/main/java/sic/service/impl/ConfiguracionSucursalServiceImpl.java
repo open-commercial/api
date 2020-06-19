@@ -66,8 +66,12 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   public void actualizar(ConfiguracionSucursal configuracionSucursal) {
     customValidator.validar(configuracionSucursal);
     this.validarReglasDeNegocio(configuracionSucursal);
+    if (configuracionSucursal.isPredeterminada()) {
+      configuracionRepository.desmarcarSucursalPredeterminada();
+    }
     if (configuracionSucursal.getPasswordCertificadoAfip() != null) {
-      configuracionSucursal.setPasswordCertificadoAfip(configuracionSucursal.getPasswordCertificadoAfip());
+      configuracionSucursal.setPasswordCertificadoAfip(
+          configuracionSucursal.getPasswordCertificadoAfip());
     }
     configuracionRepository.save(configuracionSucursal);
   }
