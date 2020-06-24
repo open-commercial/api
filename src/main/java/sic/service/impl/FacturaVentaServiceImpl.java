@@ -138,20 +138,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             messageSource.getMessage(
                 "mensaje_factura_renglones_marcados_incorrectos", null, Locale.getDefault()));
       }
-      for (int indice = 0;
-          indice < Objects.requireNonNull(nuevaFacturaVentaDTO.getRenglonMarcado()).length;
-          indice++) {
-        int finalIndice = indice;
-        renglonesPedido.forEach(
-            renglonPedido -> {
-              NuevoRenglonFacturaDTO nuevoRenglonFactura =
-                  NuevoRenglonFacturaDTO.builder()
-                      .idProducto(renglonPedido.getIdProductoItem())
-                      .cantidad(renglonPedido.getCantidad())
-                      .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[finalIndice])
-                      .build();
-              nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
-            });
+      for (int indice = 0; indice < nuevaFacturaVentaDTO.getRenglonMarcado().length; indice++) {
+        NuevoRenglonFacturaDTO nuevoRenglonFactura =
+            NuevoRenglonFacturaDTO.builder()
+                .idProducto(renglonesPedido.get(indice).getIdProductoItem())
+                .cantidad(renglonesPedido.get(indice).getCantidad())
+                .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[indice])
+                .build();
+        nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
       }
     } else {
       renglonesPedido.forEach(

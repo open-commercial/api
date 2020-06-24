@@ -154,6 +154,7 @@ class AppIntegrationTest {
             apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
             ConfiguracionSucursal.class);
     assertTrue(configuracionSucursal.isPuntoDeRetiro());
+    assertTrue(configuracionSucursal.isPredeterminada());
     File resource = new ClassPathResource("/certificadoAfipTest.p12").getFile();
     byte[] certificadoAfip = new byte[(int) resource.length()];
     FileInputStream fileInputStream = new FileInputStream(resource);

@@ -621,7 +621,7 @@ public class ProductoServiceImpl implements IProductoService {
     logger.warn(
         messageSource.getMessage(
             "mensaje_producto_agrega_stock",
-            new Object[] {cantidad, producto.getDescripcion()},
+            new Object[] {cantidad, producto},
             Locale.getDefault()));
     return producto;
   }
