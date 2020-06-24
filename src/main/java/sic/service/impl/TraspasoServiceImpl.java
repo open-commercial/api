@@ -84,6 +84,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
         sucursalService.getSucursalPorId(nuevoTraspasoDTO.getIdSucursalDestino());
     traspaso.setSucursalOrigen(sucursalOrigen);
     traspaso.setSucursalDestino(sucursalDestino);
+    traspaso.setNroPedido(nuevoTraspasoDTO.getNroPedido());
     traspaso.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoTraspasoDTO.getIdUsuario()));
     List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
     nuevoTraspasoDTO
@@ -93,6 +94,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
               Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
               RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
               renglonTraspaso.setIdProducto(producto.getIdProducto());
+              renglonTraspaso.setCodigoProducto(producto.getCodigo());
               renglonTraspaso.setCantidadProducto(cantidad);
               renglonTraspaso.setDescripcionProducto(producto.getDescripcion());
               renglonTraspaso.setNombreMedidaProducto(producto.getNombreMedida());
@@ -143,6 +145,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
               sucursal -> {
                 NuevoTraspasoDTO nuevoTraspasoDTO =
                     NuevoTraspasoDTO.builder()
+                        .nroPedido(pedido.getNroPedido())
                         .idSucursalOrigen(sucursal.getIdSucursal())
                         .idUsuario(pedido.getUsuario().getIdUsuario())
                         .idProductoConCantidad(new HashMap<Long, BigDecimal>())

@@ -127,6 +127,7 @@ class MercadoPagoServiceImplTest {
     when(clienteService.getClientePorIdUsuario(anyLong())).thenReturn(cliente);
     Pedido pedido = new Pedido();
     pedido.setFecha(LocalDateTime.now());
+    pedido.setFechaVencimiento(LocalDateTime.now());
     when(pedidoService.guardar(any(), any())).thenReturn(pedido);
     when(carritoCompraService.calcularTotal(1L)).thenReturn(new BigDecimal("1000.00"));
     MercadoPagoPreferenceDTO mercadoPagoPreference =

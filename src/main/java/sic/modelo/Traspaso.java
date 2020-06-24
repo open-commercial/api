@@ -32,6 +32,8 @@ public class Traspaso {
 
   private String nroTraspaso;
 
+  private Long nroPedido;
+
   @ManyToOne
   @JoinColumn(name = "idSucursalOrigen", referencedColumnName = "idSucursal")
   @NotNull

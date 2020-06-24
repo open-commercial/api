@@ -1271,22 +1271,6 @@ class AppIntegrationTest {
     assertEquals(9, item2.getCantidad().doubleValue());
     NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
         NuevaOrdenDePagoDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
-    RestClientResponseException thrown =
-        assertThrows(
-            RestClientResponseException.class,
-            () ->
-                restTemplate.postForObject(
-                    apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage(
-                    "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault())));
-    cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
-    cliente.setPuedeComprarAPlazo(true);
-    restTemplate.put(apiPrefix + "/clientes", cliente);
     Pedido pedido =
         restTemplate.postForObject(
             apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);

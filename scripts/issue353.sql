@@ -30,6 +30,7 @@ WHERE configuracionsucursal.idSucursal <> 1;
 CREATE TABLE `traspaso` (
   `idTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
   `fechaDeAlta` datetime DEFAULT NULL,
+  `nroPedido` bigint(20) DEFAULT NULL,
   `nroTraspaso` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `idSucursalDestino` bigint(20) NOT NULL,
   `idSucursalOrigen` bigint(20) NOT NULL,
@@ -46,6 +47,7 @@ CREATE TABLE `traspaso` (
 CREATE TABLE `renglontraspaso` (
   `idRenglonTraspaso` bigint(20) NOT NULL AUTO_INCREMENT,
   `cantidadProducto` decimal(19,2) DEFAULT NULL,
+  `codigoProducto` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `descripcionProducto` varchar(255) COLLATE utf8_unicode_ci NOT NULL,
   `idProducto` bigint(20) NOT NULL,
   `nombreMedidaProducto` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,

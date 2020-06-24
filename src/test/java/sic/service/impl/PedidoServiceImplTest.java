@@ -179,9 +179,6 @@ class PedidoServiceImplTest {
     cliente.setPuedeComprarAPlazo(false);
     cliente.setEmail("email@cliente.com");
     pedido.setCliente(cliente);
-    assertThrows(
-        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
-    verify(messageSource).getMessage(eq("mensaje_cliente_no_puede_comprar_a_plazo"), any(), any());
     cliente.setPuedeComprarAPlazo(true);
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);

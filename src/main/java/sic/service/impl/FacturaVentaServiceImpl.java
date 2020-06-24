@@ -142,31 +142,27 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
           indice < Objects.requireNonNull(nuevaFacturaVentaDTO.getRenglonMarcado()).length;
           indice++) {
         int finalIndice = indice;
-        pedidoService
-            .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
-            .forEach(
-                renglonPedido -> {
-                  NuevoRenglonFacturaDTO nuevoRenglonFactura =
-                      NuevoRenglonFacturaDTO.builder()
-                          .idProducto(renglonPedido.getIdProductoItem())
-                          .cantidad(renglonPedido.getCantidad())
-                          .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[finalIndice])
-                          .build();
-                  nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
-                });
+        renglonesPedido.forEach(
+            renglonPedido -> {
+              NuevoRenglonFacturaDTO nuevoRenglonFactura =
+                  NuevoRenglonFacturaDTO.builder()
+                      .idProducto(renglonPedido.getIdProductoItem())
+                      .cantidad(renglonPedido.getCantidad())
+                      .renglonMarcado(nuevaFacturaVentaDTO.getRenglonMarcado()[finalIndice])
+                      .build();
+              nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
+            });
       }
     } else {
-      pedidoService
-          .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
-          .forEach(
-              renglonPedido -> {
-                NuevoRenglonFacturaDTO nuevoRenglonFactura =
-                    NuevoRenglonFacturaDTO.builder()
-                        .idProducto(renglonPedido.getIdProductoItem())
-                        .cantidad(renglonPedido.getCantidad())
-                        .build();
-                nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
-              });
+      renglonesPedido.forEach(
+          renglonPedido -> {
+            NuevoRenglonFacturaDTO nuevoRenglonFactura =
+                NuevoRenglonFacturaDTO.builder()
+                    .idProducto(renglonPedido.getIdProductoItem())
+                    .cantidad(renglonPedido.getCantidad())
+                    .build();
+            nuevosRenglonesDeFactura.add(nuevoRenglonFactura);
+          });
     }
     fv.setRenglones(
         facturaService.calcularRenglones(
@@ -414,6 +410,13 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   @Transactional
   public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
+    List<TipoDeComprobante> tiposAutorizables =
+        Arrays.asList(
+            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    if (!tiposAutorizables.contains(fv.getTipoComprobante())) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
+    }
     ComprobanteAFIP comprobante =
         ComprobanteAFIP.builder()
             .idComprobante(fv.getIdFactura())

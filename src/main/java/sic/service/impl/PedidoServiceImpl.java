@@ -59,6 +59,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final int INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS = 72;
+  private static final long INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS = 15;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -229,10 +230,15 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
-    if ((recibos == null || recibos.isEmpty()) && !pedido.getCliente().isPuedeComprarAPlazo()) {
-      throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+    if (pedido.getFecha() == null) {
+      pedido.setFecha(LocalDateTime.now());
+    }
+    if (pedido.getCliente().isPuedeComprarAPlazo()) {
+      pedido.setFechaVencimiento(
+              pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
+    } else {
+      pedido.setFechaVencimiento(
+              pedido.getFecha().plusMinutes(INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS));
     }
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
@@ -266,10 +272,7 @@ public class PedidoServiceImpl implements IPedidoService {
       }
       recibos.forEach(reciboService::guardar);
     }
-    if (pedido.getFecha() == null && pedido.getFechaVencimiento() == null) {
-      pedido.setFecha(LocalDateTime.now());
-      pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
-    }
+    pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);

@@ -27,6 +27,8 @@ public class RenglonTraspaso {
     @NotNull
     private Long idProducto;
 
+    private String codigoProducto;
+
     @NotNull(message = "{mensaje_producto_vacio_descripcion}")
     @NotEmpty(message = "{mensaje_producto_vacio_descripcion}")
     @JsonView(Views.Comprador.class)

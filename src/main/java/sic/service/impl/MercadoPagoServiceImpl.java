@@ -55,7 +55,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private static final String STRING_ID_USUARIO = "idUsuario";
   private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
           new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
-  private static final long INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS = 15;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -117,79 +116,78 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       float monto;
       Pedido pedido = null;
       switch (nuevaOrdenDeCompra.getMovimiento()) {
-        case PEDIDO:
+        case PEDIDO -> {
           Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
           pedido =
-              this.crearPedidoConPagoPorPreference(
-                  sucursal, usuario, clienteDeUsuario, items, nuevaOrdenDeCompra.getTipoDeEnvio());
+                  this.crearPedidoConPagoPorPreference(
+                          sucursal, usuario, clienteDeUsuario, items, nuevaOrdenDeCompra.getTipoDeEnvio());
           if (nuevaOrdenDeCompra.getTipoDeEnvio() == null) {
             throw new BusinessServiceException(
-                messageSource.getMessage(
-                    "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
+                    messageSource.getMessage(
+                            "mensaje_preference_sin_tipo_de_envio", null, Locale.getDefault()));
           }
           preference.setExpires(true);
           preference.setExpirationDateTo(
-              Date.from(
-                  pedido
-                      .getFecha()
-                      .plusMinutes(INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS - 1)
-                      .atZone(ZoneId.systemDefault())
-                      .toInstant()));
+                  Date.from(
+                          pedido
+                                  .getFechaVencimiento()
+                                  .plusMinutes(-1)
+                                  .atZone(ZoneId.systemDefault())
+                                  .toInstant()));
           monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
           title =
-              "Pedido de ("
-                  + clienteDeUsuario.getNroCliente()
-                  + ") "
-                  + clienteDeUsuario.getNombreFiscal();
+                  "Pedido de ("
+                          + clienteDeUsuario.getNroCliente()
+                          + ") "
+                          + clienteDeUsuario.getNombreFiscal();
           json =
-              "{ \""
-                  + STRING_ID_USUARIO
-                  + "\": "
-                  + idUsuario
-                  + " , \"idSucursal\": "
-                  + nuevaOrdenDeCompra.getIdSucursal()
-                  + " , \"tipoDeEnvio\": "
-                  + nuevaOrdenDeCompra.getTipoDeEnvio()
-                  + " , \"movimiento\": "
-                  + Movimiento.PEDIDO
-                  + " , \"idPedido\": "
-                  + pedido.getIdPedido()
-                  + "}";
+                  "{ \""
+                          + STRING_ID_USUARIO
+                          + "\": "
+                          + idUsuario
+                          + " , \"idSucursal\": "
+                          + nuevaOrdenDeCompra.getIdSucursal()
+                          + " , \"tipoDeEnvio\": "
+                          + nuevaOrdenDeCompra.getTipoDeEnvio()
+                          + " , \"movimiento\": "
+                          + Movimiento.PEDIDO
+                          + " , \"idPedido\": "
+                          + pedido.getIdPedido()
+                          + "}";
           backUrls =
-              new BackUrls(
-                  origin + "/checkout/aprobado",
-                  origin + "/checkout/pendiente",
-                  origin + "/carrito-compra");
-          break;
-        case DEPOSITO:
+                  new BackUrls(
+                          origin + "/checkout/aprobado",
+                          origin + "/checkout/pendiente",
+                          origin + "/carrito-compra");
+        }
+        case DEPOSITO -> {
           if (nuevaOrdenDeCompra.getMonto() == null) {
             throw new BusinessServiceException(
-                messageSource.getMessage(
-                    "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
+                    messageSource.getMessage(
+                            "mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
           }
           monto = nuevaOrdenDeCompra.getMonto().floatValue();
           title =
-              "Deposito de ("
-                  + clienteDeUsuario.getNroCliente()
-                  + ") "
-                  + clienteDeUsuario.getNombreFiscal();
+                  "Deposito de ("
+                          + clienteDeUsuario.getNroCliente()
+                          + ") "
+                          + clienteDeUsuario.getNombreFiscal();
           json =
-              "{ \""
-                  + STRING_ID_USUARIO
-                  + "\": "
-                  + idUsuario
-                  + " , \"idSucursal\": "
-                  + nuevaOrdenDeCompra.getIdSucursal()
-                  + " , \"movimiento\": "
-                  + Movimiento.DEPOSITO
-                  + "}";
+                  "{ \""
+                          + STRING_ID_USUARIO
+                          + "\": "
+                          + idUsuario
+                          + " , \"idSucursal\": "
+                          + nuevaOrdenDeCompra.getIdSucursal()
+                          + " , \"movimiento\": "
+                          + Movimiento.DEPOSITO
+                          + "}";
           String urlDeposito = origin + "/perfil";
           backUrls = new BackUrls(urlDeposito, urlDeposito, urlDeposito);
-          break;
-        default:
-          throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+        }
+        default -> throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
       }
       JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
       try {
@@ -415,8 +413,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(tipoDeEnvio);
     pedido.setFecha(LocalDateTime.now());
-    pedido.setFechaVencimiento(
-        pedido.getFecha().plusMinutes(INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS));
     return pedidoService.guardar(pedido, Collections.emptyList());
   }
 
