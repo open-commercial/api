@@ -99,7 +99,16 @@ public class PedidoController {
             pedidoService.calcularRenglonesPedido(
                 pedidoService.getArrayDeIdProducto(pedidoDTO.getRenglones()),
                 pedidoService.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
-    pedidoService.actualizar(pedido, renglonesAnteriores);
+    pedidoService.actualizar(
+        pedido,
+        renglonesAnteriores,
+        reciboService.construirRecibos(
+            pedidoDTO.getIdsFormaDePago(),
+            pedido.getSucursal().getIdSucursal(),
+            pedido.getCliente(),
+            pedido.getUsuario(),
+            pedidoDTO.getMontos(),
+            LocalDateTime.now()));
   }
 
   @PostMapping("/pedidos")

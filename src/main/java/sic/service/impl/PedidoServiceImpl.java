@@ -260,18 +260,7 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotalEstimado(total);
     pedido.setTotalActual(total);
-    if ((recibos != null && !recibos.isEmpty())) {
-      if (!pedido.getCliente().isPuedeComprarAPlazo()) {
-        BigDecimal totalRecibos =
-                recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (totalRecibos.compareTo(pedido.getTotalActual()) < 0) {
-          throw new BusinessServiceException(
-                  messageSource.getMessage(
-                          "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));
-        }
-      }
-      recibos.forEach(reciboService::guardar);
-    }
+    this.validarAndGuardarRecibos(pedido, recibos);
     pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
@@ -479,7 +468,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores) {
+  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, List<Recibo> recibos) {
     if (pedido.getEstado() == EstadoPedido.CERRADO) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pedido_facturado", null, Locale.getDefault()));
@@ -517,6 +506,22 @@ public class PedidoServiceImpl implements IPedidoService {
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
+    this.validarAndGuardarRecibos(pedido, recibos);
+  }
+
+  private void validarAndGuardarRecibos(Pedido pedido, List<Recibo> recibos) {
+    if ((recibos != null && !recibos.isEmpty())) {
+      if (!pedido.getCliente().isPuedeComprarAPlazo()) {
+        BigDecimal totalRecibos =
+                recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (totalRecibos.compareTo(pedido.getTotalActual()) < 0) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));
+        }
+      }
+      recibos.forEach(reciboService::guardar);
+    }
   }
 
   @Override
