@@ -14,6 +14,8 @@ ADD fechaVencimiento datetime after fecha;
 UPDATE pedido
 SET pedido.fechaVencimiento = pedido.fecha;
 
+ALTER TABLE pedido CHANGE `totalEstimado` `total` decimal(25,15);
+
 SET SQL_SAFE_UPDATES = 1;
 
 ALTER TABLE configuracionsucursal

@@ -107,10 +107,7 @@ public class Pedido implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_pedido_total_estimado_negativo}")
-  private BigDecimal totalEstimado;
-
-  @Transient
-  private BigDecimal totalActual;
+  private BigDecimal total;
 
   @Enumerated(EnumType.STRING)
   private EstadoPedido estado;

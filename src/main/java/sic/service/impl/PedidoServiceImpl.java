@@ -159,56 +159,6 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public Pedido calcularTotalActualDePedido(Pedido pedido) {
-    BigDecimal totalActual = BigDecimal.ZERO;
-    BigDecimal bonificacionNeta = BigDecimal.ZERO;
-    List<RenglonPedido> renglonesDelPedido =
-        this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
-    List<Long> idsProductos = new ArrayList<>();
-    renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
-    List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
-    for (int i = 0; i < renglonesDelPedido.size(); ++i) {
-      boolean cumpleCondicionDeOferta =
-          productos.get(i).isOferta() && productos.get(i).getPorcentajeBonificacionOferta() != null;
-      boolean cumpleCondicionDeCantidad =
-          renglonesDelPedido.get(i).getCantidad().compareTo(productos.get(i).getBulto()) >= 0;
-      if (cumpleCondicionDeOferta && cumpleCondicionDeCantidad) {
-        bonificacionNeta =
-            bonificacionNeta.add(
-                CalculosComprobante.calcularProporcion(
-                    productos.get(i).getPrecioLista(),
-                    productos.get(i).getPorcentajeBonificacionOferta()));
-      } else if (cumpleCondicionDeCantidad) {
-        bonificacionNeta =
-            bonificacionNeta.add(
-                CalculosComprobante.calcularProporcion(
-                    productos.get(i).getPrecioLista(),
-                    productos.get(i).getPorcentajeBonificacionPrecio()));
-      }
-      totalActual =
-          totalActual.add(
-              CalculosComprobante.calcularImporte(
-                  renglonesDelPedido.get(i).getCantidad(),
-                  productos.get(i).getPrecioLista(),
-                  bonificacionNeta));
-      bonificacionNeta = BigDecimal.ZERO;
-    }
-    BigDecimal porcentajeDescuento =
-        pedido.getDescuentoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP);
-    BigDecimal porcentajeRecargo =
-        pedido.getRecargoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP);
-    pedido.setTotalActual(
-        totalActual
-            .subtract(totalActual.multiply(porcentajeDescuento))
-            .add(totalActual.multiply(porcentajeRecargo)));
-    pedido
-        .getCliente()
-        .setSaldoCuentaCorriente(
-            cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
-    return pedido;
-  }
-
-  @Override
   public long generarNumeroPedido(Sucursal sucursal) {
     long min = 1L;
     long max = 9999999999L; // 10 digitos
@@ -258,10 +208,8 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
     pedido.setDescuentoNeto(descuentoNeto);
-    pedido.setTotalEstimado(total);
-    pedido.setTotalActual(total);
+    pedido.setTotal(total);
     this.validarAndGuardarRecibos(pedido, recibos);
-    pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
@@ -298,7 +246,6 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
-    this.calcularTotalActualDePedido(pedido);
     return pedido;
   }
 
@@ -379,17 +326,14 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
-    Page<Pedido> pedidos =
-        pedidoRepository.findAll(
+    return pedidoRepository.findAll(
             this.getBuilderPedido(criteria, idUsuarioLoggedIn),
             this.getPageable(
-                (criteria.getPagina() == null || criteria.getPagina() < 0)
-                    ? 0
-                    : criteria.getPagina(),
-                criteria.getOrdenarPor(),
-                criteria.getSentido()));
-    pedidos.getContent().forEach(this::calcularTotalActualDePedido);
-    return pedidos;
+                    (criteria.getPagina() == null || criteria.getPagina() < 0)
+                            ? 0
+                            : criteria.getPagina(),
+                    criteria.getOrdenarPor(),
+                    criteria.getSentido()));
   }
 
   @Override
@@ -498,8 +442,7 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setDescuentoNeto(resultados.getDescuentoNeto());
     pedido.setRecargoPorcentaje(resultados.getRecargoPorcentaje());
     pedido.setRecargoNeto(resultados.getRecargoNeto());
-    pedido.setTotalEstimado(resultados.getTotal());
-    pedido.setTotalActual(resultados.getTotal());
+    pedido.setTotal(resultados.getTotal());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
@@ -514,7 +457,7 @@ public class PedidoServiceImpl implements IPedidoService {
       if (!pedido.getCliente().isPuedeComprarAPlazo()) {
         BigDecimal totalRecibos =
                 recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (totalRecibos.compareTo(pedido.getTotalActual()) < 0) {
+        if (totalRecibos.compareTo(pedido.getTotal()) < 0) {
           throw new BusinessServiceException(
                   messageSource.getMessage(
                           "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));

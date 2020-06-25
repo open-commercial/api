@@ -28,8 +28,6 @@ public interface IPedidoService {
 
   long generarNumeroPedido(Sucursal sucursal);
 
-  Pedido calcularTotalActualDePedido(Pedido pedido);
-
   void cancelar(Pedido pedido);
 
   void eliminar(long idPedido);

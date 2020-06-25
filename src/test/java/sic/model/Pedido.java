@@ -21,6 +21,7 @@ public class Pedido {
   private long idPedido;
   private long nroPedido;
   private LocalDateTime fecha;
+  private LocalDateTime fechaVencimiento;
   private String observaciones;
   private long idSucursal;
   private String nombreSucursal;
@@ -35,8 +36,7 @@ public class Pedido {
   private BigDecimal recargoNeto;
   private BigDecimal descuentoPorcentaje;
   private BigDecimal descuentoNeto;
-  private BigDecimal totalEstimado;
-  private BigDecimal totalActual;
+  private BigDecimal total;
   private EstadoPedido estado;
   private BigDecimal cantidadArticulos;
 }

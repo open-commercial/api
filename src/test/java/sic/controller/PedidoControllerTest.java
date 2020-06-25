@@ -29,7 +29,6 @@ public class PedidoControllerTest {
     Pedido pedido = new Pedido();
     pedido.setNroPedido(1L);
     when(pedidoService.getPedidoNoEliminadoPorId(2L)).thenReturn(pedido);
-    when(pedidoService.calcularTotalActualDePedido(pedido)).thenReturn(pedido);
     assertEquals(pedido, pedidoController.getPedidoPorId(2L));
   }
 

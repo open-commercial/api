@@ -741,7 +741,7 @@ class AppIntegrationTest {
     productoDos = restTemplate.getForObject(apiPrefix + "/productos/2", Producto.class);
     assertEquals(new BigDecimal("9.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("10.000000000000000"), productoDos.getCantidadTotalEnSucursales());
-    assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotalEstimado());
+    assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotal());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =
         Arrays.asList(
@@ -1277,9 +1277,7 @@ class AppIntegrationTest {
             apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
     assertNotNull(pedido);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
-    assertEquals(
-        new BigDecimal("12796.00000000000000000000000000000000"),
-        pedido.getTotalActual());
+    assertEquals(new BigDecimal("12796.000000000000000"), pedido.getTotal());
     assertEquals(EstadoPedido.ABIERTO, pedido.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =
         Arrays.asList(
