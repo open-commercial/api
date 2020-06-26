@@ -16,6 +16,17 @@ SET pedido.fechaVencimiento = pedido.fecha;
 
 ALTER TABLE pedido CHANGE `totalEstimado` `total` decimal(25,15);
 
+ALTER TABLE configuracionsucursal
+ADD vencimientoCorto bigint(20) default 0 not null;
+ALTER TABLE configuracionsucursal
+ADD vencimientoLargo bigint(20) default 0 not null;
+
+UPDATE configuracionsucursal
+SET vencimientoCorto = 1;
+
+UPDATE configuracionsucursal
+SET vencimientoLargo = 1;
+
 SET SQL_SAFE_UPDATES = 1;
 
 ALTER TABLE configuracionsucursal

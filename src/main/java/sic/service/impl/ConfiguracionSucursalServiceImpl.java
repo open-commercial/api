@@ -63,17 +63,62 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public void actualizar(ConfiguracionSucursal configuracionSucursal) {
-    customValidator.validar(configuracionSucursal);
-    this.validarReglasDeNegocio(configuracionSucursal);
-    if (configuracionSucursal.isPredeterminada()) {
+  public void actualizar(
+      ConfiguracionSucursal configuracionSucursalPersistida,
+      ConfiguracionSucursal configuracionDeSucursalParaActualizar) {
+    if (!configuracionDeSucursalParaActualizar.isPredeterminada()
+        && configuracionSucursalPersistida.isPredeterminada()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_sucursal_quitar_predeterminada", null, Locale.getDefault()));
+    }
+    configuracionDeSucursalParaActualizar.setSucursal(
+        configuracionSucursalPersistida.getSucursal());
+    if (configuracionDeSucursalParaActualizar.isFacturaElectronicaHabilitada()) {
+      if (configuracionDeSucursalParaActualizar.getPasswordCertificadoAfip().equals("")) {
+        configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip(
+            configuracionSucursalPersistida.getPasswordCertificadoAfip());
+      }
+      if (configuracionDeSucursalParaActualizar.getCertificadoAfip() == null) {
+        configuracionDeSucursalParaActualizar.setCertificadoAfip(
+            configuracionSucursalPersistida.getCertificadoAfip());
+      }
+      if (configuracionDeSucursalParaActualizar.getSignTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setSignTokenWSAA(
+            configuracionSucursalPersistida.getSignTokenWSAA());
+      }
+      if (configuracionDeSucursalParaActualizar.getTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setTokenWSAA(
+            configuracionSucursalPersistida.getTokenWSAA());
+      }
+      if (configuracionDeSucursalParaActualizar.getFechaGeneracionTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setFechaGeneracionTokenWSAA(
+            configuracionSucursalPersistida.getFechaGeneracionTokenWSAA());
+      }
+      if (configuracionDeSucursalParaActualizar.getFechaVencimientoTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setFechaVencimientoTokenWSAA(
+            configuracionSucursalPersistida.getFechaVencimientoTokenWSAA());
+      }
+    }
+    if (configuracionDeSucursalParaActualizar.getVencimientoLargo() == 0L) {
+      configuracionDeSucursalParaActualizar.setVencimientoLargo(
+          configuracionSucursalPersistida.getVencimientoLargo());
+    }
+    if (configuracionDeSucursalParaActualizar.getVencimientoCorto() == 0L) {
+      configuracionDeSucursalParaActualizar.setVencimientoCorto(
+              configuracionSucursalPersistida.getVencimientoCorto());
+    }
+    customValidator.validar(configuracionDeSucursalParaActualizar);
+    this.validarReglasDeNegocio(configuracionDeSucursalParaActualizar);
+    if (!configuracionSucursalPersistida.isPredeterminada()
+        && configuracionDeSucursalParaActualizar.isPredeterminada()) {
       configuracionRepository.desmarcarSucursalPredeterminada();
     }
-    if (configuracionSucursal.getPasswordCertificadoAfip() != null) {
-      configuracionSucursal.setPasswordCertificadoAfip(
-          configuracionSucursal.getPasswordCertificadoAfip());
+    if (configuracionDeSucursalParaActualizar.getPasswordCertificadoAfip() == null) {
+      configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip(
+          configuracionSucursalPersistida.getPasswordCertificadoAfip());
     }
-    configuracionRepository.save(configuracionSucursal);
+    configuracionRepository.save(configuracionDeSucursalParaActualizar);
   }
 
   @Override

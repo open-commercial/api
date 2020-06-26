@@ -141,6 +141,10 @@ class PedidoServiceImplTest {
     when(pedidoRepository.save(pedido)).thenReturn(pedido);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
     pedido.setEstado(EstadoPedido.ABIERTO);
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    configuracionSucursal.setVencimientoLargo(1L);
+    configuracionSucursal.setVencimientoCorto(1L);
+    when(configuracionSucursalService.getConfiguracionSucursal(sucursal)).thenReturn(configuracionSucursal);
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
@@ -222,6 +226,10 @@ class PedidoServiceImplTest {
     Pedido pedido = new Pedido();
     pedido.setFecha(LocalDateTime.now());
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    configuracionSucursal.setVencimientoLargo(1L);
+    configuracionSucursal.setVencimientoCorto(1L);
+    when(configuracionSucursalService.getConfiguracionSucursal(any())).thenReturn(configuracionSucursal);
     pedidoService.cambiarFechaDeVencimiento(1L);
     verify(pedidoRepository).save(pedido);
   }

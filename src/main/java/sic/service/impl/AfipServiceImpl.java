@@ -107,7 +107,10 @@ public class AfipServiceImpl implements IAfipService {
               LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
           configuracionSucursal.setFechaVencimientoTokenWSAA(
               LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-          configuracionSucursalService.actualizar(configuracionSucursal);
+          ConfiguracionSucursal estadoAnteriorConfiguracionSucursal =
+              this.configuracionSucursalService.getConfiguracionSucursal(sucursal);
+          configuracionSucursalService.actualizar(
+              estadoAnteriorConfiguracionSucursal, configuracionSucursal);
           return feAuthRequest;
         } catch (DocumentException | IOException ex) {
           logger.error(

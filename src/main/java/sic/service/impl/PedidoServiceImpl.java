@@ -52,14 +52,11 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final IConfiguracionSucursalService configuracionSucursal;
-  private final ICuentaCorrienteService cuentaCorrienteService;
   private final IReciboService reciboService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private static final int INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS = 72;
-  private static final long INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS = 15;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -73,7 +70,6 @@ public class PedidoServiceImpl implements IPedidoService {
     IProductoService productoService,
     ICorreoElectronicoService correoElectronicoService,
     IConfiguracionSucursalService configuracionSucursal,
-    ICuentaCorrienteService cuentaCorrienteService,
     IReciboService reciboService,
     ModelMapper modelMapper,
     MessageSource messageSource,
@@ -86,7 +82,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
     this.configuracionSucursal = configuracionSucursal;
-    this.cuentaCorrienteService = cuentaCorrienteService;
     this.reciboService = reciboService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
@@ -185,10 +180,13 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (pedido.getCliente().isPuedeComprarAPlazo()) {
       pedido.setFechaVencimiento(
-              pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
-    } else {
+              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    } else { //Mensaje: No puede comprar a plazo. Sus pagos deben ser igual o superior a la deuda de su cuenta corriente.
+      //CASO 1: Si vienen recibos y no puede comprar a plazo - >  Se chequea el saldo CC y si cubre su deduda, se realiza la operación con un plazo largo
+      //CASO 2: Si no vienen recibos y NO TIENE DEUDA - > Se realiza la operación con un plazo corto
+      //CASO 3: Si no vienen recibos y SI TIENE DEUDA -> Se chequea el saldo CC y al tener deduda no puede continuar.// Mensaje: Debe saldar su deuda, antes de continuar con la operación
       pedido.setFechaVencimiento(
-              pedido.getFecha().plusMinutes(INCREMENTO_MINUTOS_VENCIMIENTO_PEDIDOS));
+              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
     }
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
@@ -253,7 +251,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void cambiarFechaDeVencimiento(long idPedido) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
-    pedido.setFechaVencimiento(pedido.getFecha().plusHours(INCREMENTO_HORAS_VENCIMIENTO_PEDIDOS));
+    pedido.setFechaVencimiento(pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
     pedidoRepository.save(pedido);
   }
 

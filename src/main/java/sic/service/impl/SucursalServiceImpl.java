@@ -134,6 +134,8 @@ public class SucursalServiceImpl implements ISucursalService {
     configuracionSucursal.setCantidadMaximaDeRenglonesEnFactura(28);
     configuracionSucursal.setFacturaElectronicaHabilitada(false);
     configuracionSucursal.setSucursal(sucursal);
+    configuracionSucursal.setVencimientoCorto(1);
+    configuracionSucursal.setVencimientoLargo(1);
     this.configuracionSucursalService.guardar(configuracionSucursal);
   }
 

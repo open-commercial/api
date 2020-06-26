@@ -33,6 +33,10 @@ public class ConfiguracionSucursalDTO {
 
   private boolean predeterminada;
 
+  private long vencimientoLargo;
+
+  private long vencimientoCorto;
+
   private long idSucursal;
 
   private String nombreSucursal;

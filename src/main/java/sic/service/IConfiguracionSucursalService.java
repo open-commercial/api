@@ -5,7 +5,7 @@ import sic.modelo.Sucursal;
 
 public interface IConfiguracionSucursalService {
 
-  void actualizar(ConfiguracionSucursal configuracionSucursal);
+  void actualizar(ConfiguracionSucursal configuracionSucursalPersistida, ConfiguracionSucursal configuracionSucursalPorActualizar);
 
   ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal);
 

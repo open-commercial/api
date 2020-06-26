@@ -37,28 +37,12 @@ public class ConfiguracionSucursalController {
   @PutMapping("/configuraciones-sucursal")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(@RequestBody ConfiguracionSucursalDTO configuracionSucursalDTO) {
-    ConfiguracionSucursal configuracionDeSucursal =
+    ConfiguracionSucursal configuracionDeSucursalParaActualizar =
         modelMapper.map(configuracionSucursalDTO, ConfiguracionSucursal.class);
     ConfiguracionSucursal configuracionSucursalRecuperada =
-        this.configuracionSucursal.getConfiguracionSucursalPorId(
-            configuracionSucursalDTO.getIdConfiguracionSucursal());
-    configuracionDeSucursal.setSucursal(configuracionSucursalRecuperada.getSucursal());
-    if (configuracionDeSucursal.isFacturaElectronicaHabilitada()) {
-      if (configuracionDeSucursal.getPasswordCertificadoAfip().equals("")) {
-        configuracionDeSucursal.setPasswordCertificadoAfip(
-            configuracionSucursalRecuperada.getPasswordCertificadoAfip());
-      }
-      if (configuracionDeSucursal.getCertificadoAfip() == null) {
-        configuracionDeSucursal.setCertificadoAfip(configuracionSucursalRecuperada.getCertificadoAfip());
-      }
-      configuracionDeSucursal.setSignTokenWSAA(configuracionSucursalRecuperada.getSignTokenWSAA());
-      configuracionDeSucursal.setTokenWSAA(configuracionSucursalRecuperada.getTokenWSAA());
-      configuracionDeSucursal.setFechaGeneracionTokenWSAA(
-          configuracionSucursalRecuperada.getFechaGeneracionTokenWSAA());
-      configuracionDeSucursal.setFechaVencimientoTokenWSAA(
-          configuracionSucursalRecuperada.getFechaVencimientoTokenWSAA());
-    }
-    this.configuracionSucursal.actualizar(configuracionDeSucursal);
+            this.configuracionSucursal.getConfiguracionSucursalPorId(
+                    configuracionSucursalDTO.getIdConfiguracionSucursal());
+    this.configuracionSucursal.actualizar(configuracionSucursalRecuperada, configuracionDeSucursalParaActualizar);
   }
 
   @PostMapping("/configuraciones-sucursal")
