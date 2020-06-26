@@ -53,6 +53,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ICorreoElectronicoService correoElectronicoService;
   private final IConfiguracionSucursalService configuracionSucursal;
   private final IReciboService reciboService;
+  private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -71,6 +72,7 @@ public class PedidoServiceImpl implements IPedidoService {
     ICorreoElectronicoService correoElectronicoService,
     IConfiguracionSucursalService configuracionSucursal,
     IReciboService reciboService,
+    ICuentaCorrienteService cuentaCorrienteService,
     ModelMapper modelMapper,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -83,6 +85,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.correoElectronicoService = correoElectronicoService;
     this.configuracionSucursal = configuracionSucursal;
     this.reciboService = reciboService;
+    this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -178,16 +181,6 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.getFecha() == null) {
       pedido.setFecha(LocalDateTime.now());
     }
-    if (pedido.getCliente().isPuedeComprarAPlazo()) {
-      pedido.setFechaVencimiento(
-              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
-    } else { //Mensaje: No puede comprar a plazo. Sus pagos deben ser igual o superior a la deuda de su cuenta corriente.
-      //CASO 1: Si vienen recibos y no puede comprar a plazo - >  Se chequea el saldo CC y si cubre su deduda, se realiza la operación con un plazo largo
-      //CASO 2: Si no vienen recibos y NO TIENE DEUDA - > Se realiza la operación con un plazo corto
-      //CASO 3: Si no vienen recibos y SI TIENE DEUDA -> Se chequea el saldo CC y al tener deduda no puede continuar.// Mensaje: Debe saldar su deuda, antes de continuar con la operación
-      pedido.setFechaVencimiento(
-              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
-    }
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -197,6 +190,33 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal descuentoNeto =
         importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    if (pedido.getCliente().isPuedeComprarAPlazo()) {
+      pedido.setFechaVencimiento(
+              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    } else {
+      BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
+      if (recibos != null && !recibos.isEmpty()) {
+        BigDecimal totalRecibos = recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal saldoParaCubrir = saldoCC.subtract(total);
+        if (totalRecibos.add(saldoParaCubrir).compareTo(BigDecimal.ZERO) < 0) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+        } else {
+          pedido.setFechaVencimiento(
+                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+        }
+      } else {
+          if (saldoCC.compareTo(BigDecimal.ZERO) >= 0) {
+            pedido.setFechaVencimiento(
+                pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
+          } else {
+            throw new BusinessServiceException(
+                    messageSource.getMessage(
+                            "mensaje_cliente_saldar_cc", null, Locale.getDefault()));
+          }
+      }
+    }
     if (pedido.getCliente().getMontoCompraMinima() != null
         && total.compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
       throw new BusinessServiceException(

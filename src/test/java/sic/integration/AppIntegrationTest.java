@@ -1158,7 +1158,7 @@ class AppIntegrationTest {
     NotaCredito notaCreditoGuardada =
         restTemplate.postForObject(
             apiPrefix + "/notas/credito", notaCreditoCalculada, NotaCredito.class);
-    assertEquals(notaCreditoCalculada, notaCreditoCalculada);
+    assertEquals(notaCreditoCalculada, notaCreditoGuardada);
     assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoCalculada.getTipoComprobante());
     BusquedaNotaCriteria criteriaNota =
         BusquedaNotaCriteria.builder()
@@ -1613,6 +1613,9 @@ class AppIntegrationTest {
   @Order(14)
   void testEscenarioPedidoConStockDeDosSucursales() {
     this.iniciarSesionComoAdministrador();
+    Cliente clienteParaEditar = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
+    clienteParaEditar.setPuedeComprarAPlazo(true);
+    restTemplate.put(apiPrefix + "/clientes", clienteParaEditar);
     Sucursal sucursalNueva =
             Sucursal.builder()
                     .nombre("Sucursal Centrica")

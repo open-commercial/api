@@ -20,6 +20,7 @@ import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -132,6 +133,7 @@ class PedidoServiceImplTest {
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
     Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
     cliente.setPuedeComprarAPlazo(false);
     cliente.setEmail("email@cliente.com");
     pedido.setCliente(cliente);
@@ -142,7 +144,7 @@ class PedidoServiceImplTest {
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
     pedido.setEstado(EstadoPedido.ABIERTO);
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
-    configuracionSucursal.setVencimientoLargo(1L);
+    configuracionSucursal.setVencimientoLargo(15L);
     configuracionSucursal.setVencimientoCorto(1L);
     when(configuracionSucursalService.getConfiguracionSucursal(sucursal)).thenReturn(configuracionSucursal);
     assertThrows(
@@ -168,10 +170,19 @@ class PedidoServiceImplTest {
     pedido.setCliente(cliente);
     List<Recibo> recibos = new ArrayList<>();
     Recibo recibo = new Recibo();
-    recibo.setMonto(new BigDecimal("850"));
+    recibo.setMonto(new BigDecimal("1000"));
     recibos.add(recibo);
+    when(cuentaCorrienteService.getSaldoCuentaCorriente(1L)).thenReturn(new BigDecimal("-1000"));
     assertThrows(BusinessServiceException.class, () -> pedidoService.guardar(pedido, recibos));
-    verify(messageSource).getMessage(eq("mensaje_pedido_monto_recibos_insuficiente"), any(), any());
+    verify(messageSource).getMessage(eq("mensaje_cliente_no_puede_comprar_a_plazo"), any(), any());
+    when(cuentaCorrienteService.getSaldoCuentaCorriente(1L)).thenReturn(new BigDecimal("-1000"));
+    assertThrows(BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(eq("mensaje_cliente_saldar_cc"), any(), any());
+    when(cuentaCorrienteService.getSaldoCuentaCorriente(1L)).thenReturn(new BigDecimal("0"));
+    pedidoGuardado = pedidoService.guardar(pedido, recibos);
+    assertEquals(pedidoGuardado.getFecha().plusMinutes(15L).truncatedTo(ChronoUnit.MINUTES), pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
+    pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>( ));
+    assertEquals(pedidoGuardado.getFecha().plusMinutes(1L).truncatedTo(ChronoUnit.MINUTES), pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
   }
 
   @Test
