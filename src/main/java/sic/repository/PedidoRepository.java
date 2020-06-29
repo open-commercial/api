@@ -14,10 +14,6 @@ public interface PedidoRepository
   Pedido findByNroPedidoAndSucursalAndEliminado(
       long nroPedido, Sucursal sucursal, boolean eliminado);
 
-  @Query(
-      "SELECT p FROM Pedido p "
-          + "INNER JOIN p.renglones r "
-          + "WHERE p.estado = :estado "
-          + "AND p.eliminado = false")
+  @Query("SELECT p FROM Pedido p " + "WHERE p.estado = :estado " + "AND p.eliminado = false")
   Page<Pedido> findAllByEstadoAndEliminado(@Param("estado") EstadoPedido estado, Pageable page);
 }
