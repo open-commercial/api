@@ -138,7 +138,8 @@ public class PedidoServiceImpl implements IPedidoService {
             .cantidad(cantidad)
             .idProducto(idProducto)
             .build();
-    if (!productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
+    if ((operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)
+            && !productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
       throw new BusinessServiceException(
               messageSource.getMessage("mensaje_pedido_sin_stock", null, Locale.getDefault()));
     }
@@ -171,11 +172,6 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<Factura> getFacturasDelPedido(long idPedido) {
-    return facturaVentaService.getFacturasDelPedido(idPedido);
-  }
-
-  @Override
   @Transactional
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
     if (pedido.getFecha() == null) {
@@ -190,44 +186,14 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal descuentoNeto =
         importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
-    if (pedido.getCliente().isPuedeComprarAPlazo()) {
-      pedido.setFechaVencimiento(
-              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
-    } else {
-      BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
-      if (recibos != null && !recibos.isEmpty()) {
-        BigDecimal totalRecibos = recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal saldoParaCubrir = saldoCC.subtract(total);
-        if (totalRecibos.add(saldoParaCubrir).compareTo(BigDecimal.ZERO) < 0) {
-          throw new BusinessServiceException(
-                  messageSource.getMessage(
-                          "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
-        } else {
-          pedido.setFechaVencimiento(
-                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
-        }
-      } else {
-          if (saldoCC.compareTo(BigDecimal.ZERO) >= 0) {
-            pedido.setFechaVencimiento(
-                pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
-          } else {
-            throw new BusinessServiceException(
-                    messageSource.getMessage(
-                            "mensaje_cliente_saldar_cc", null, Locale.getDefault()));
-          }
-      }
-    }
-    if (pedido.getCliente().getMontoCompraMinima() != null
-        && total.compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
-    }
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotal(total);
-    this.validarAndGuardarRecibos(pedido, recibos);
+    this.validarPedidoContraPagos(pedido, recibos);
+    if (recibos != null && !recibos.isEmpty()) {
+      recibos.forEach(reciboService::guardar);
+    }
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
@@ -461,27 +427,49 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setRecargoPorcentaje(resultados.getRecargoPorcentaje());
     pedido.setRecargoNeto(resultados.getRecargoNeto());
     pedido.setTotal(resultados.getTotal());
+    this.validarPedidoContraPagos(pedido, recibos);
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
-    this.validarAndGuardarRecibos(pedido, recibos);
   }
 
-  private void validarAndGuardarRecibos(Pedido pedido, List<Recibo> recibos) {
-    if ((recibos != null && !recibos.isEmpty())) {
-      if (!pedido.getCliente().isPuedeComprarAPlazo()) {
-        BigDecimal totalRecibos =
-                recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (totalRecibos.compareTo(pedido.getTotal()) < 0) {
+  private void validarPedidoContraPagos(Pedido pedido, List<Recibo> recibos) {
+    if (pedido.getCliente().isPuedeComprarAPlazo()) {
+      pedido.setFechaVencimiento(
+              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    } else {
+      BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
+      if (recibos != null && !recibos.isEmpty()) {
+        BigDecimal totalRecibos = recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal saldoParaCubrir = saldoCC.subtract(pedido.getTotal()).setScale(3, RoundingMode.HALF_UP);
+        if (totalRecibos.add(saldoParaCubrir).compareTo(BigDecimal.ZERO) < 0) {
           throw new BusinessServiceException(
                   messageSource.getMessage(
-                          "mensaje_pedido_monto_recibos_insuficiente", null, Locale.getDefault()));
+                          "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+        } else {
+          pedido.setFechaVencimiento(
+                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+        }
+        recibos.forEach(reciboService::guardar);
+      } else {
+        if (saldoCC.compareTo(BigDecimal.ZERO) >= 0) {
+          pedido.setFechaVencimiento(
+                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
+        } else {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_cliente_saldar_cc", null, Locale.getDefault()));
         }
       }
-      recibos.forEach(reciboService::guardar);
+    }
+    if (pedido.getCliente().getMontoCompraMinima() != null
+            && pedido.getTotal().compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
     }
   }
 
@@ -550,31 +538,6 @@ public class PedidoServiceImpl implements IPedidoService {
       renglonPedidos = this.calcularRenglonesPedido(idProductoItem, cantidad);
     }
     return renglonPedidos;
-  }
-
-  @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido) {
-    return renglonPedidoRepository.findByIdPedidoOrderByIdProductoItem(idPedido);
-  }
-
-  @Override
-  public Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long idPedido) {
-    List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-    this.getFacturasDelPedido(idPedido).forEach(f -> renglonesDeFacturas.addAll(f.getRenglones()));
-    HashMap<Long, BigDecimal> listaRenglonesUnificados = new HashMap<>();
-    if (!renglonesDeFacturas.isEmpty()) {
-      renglonesDeFacturas.forEach(
-          r -> {
-            if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
-              listaRenglonesUnificados.put(
-                  r.getIdProductoItem(),
-                  listaRenglonesUnificados.get(r.getIdProductoItem()).add(r.getCantidad()));
-            } else {
-              listaRenglonesUnificados.put(r.getIdProductoItem(), r.getCantidad());
-            }
-          });
-    }
-    return listaRenglonesUnificados;
   }
 
   @Override

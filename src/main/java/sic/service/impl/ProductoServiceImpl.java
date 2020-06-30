@@ -62,6 +62,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IPhotoVideoUploader photoVideoUploader;
   private final ISucursalService sucursalService;
   private final ITraspasoService traspasoService;
+  private final IPedidoService pedidoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
@@ -78,6 +79,7 @@ public class ProductoServiceImpl implements IProductoService {
     IPhotoVideoUploader photoVideoUploader,
     ISucursalService sucursalService,
     ITraspasoService traspasoService,
+    IPedidoService pedidoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -88,6 +90,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.photoVideoUploader = photoVideoUploader;
     this.sucursalService = sucursalService;
     this.traspasoService = traspasoService;
+    this.pedidoService = pedidoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -866,11 +869,22 @@ public class ProductoServiceImpl implements IProductoService {
     List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
+    HashMap<Long, BigDecimal> listaIdsAndCantidades = new HashMap<>();
     if (longitudIds == longitudCantidades) {
+      if (productosParaVerificarStockDTO.getIdPedido() != null) {
+        List<RenglonPedido> renglonesDelPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(productosParaVerificarStockDTO.getIdPedido());
+        if (!renglonesDelPedido.isEmpty()){
+        renglonesDelPedido.forEach(renglonPedido -> listaIdsAndCantidades.put(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
+        }
+      }
       for (int i = 0; i < longitudIds; i++) {
         Producto producto =
             this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        BigDecimal cantidadSolicitada = productosParaVerificarStockDTO.getCantidad()[i];
+        BigDecimal cantidadParaCalcular = productosParaVerificarStockDTO.getCantidad()[i];
+        if (!listaIdsAndCantidades.isEmpty() && listaIdsAndCantidades.get(producto.getIdProducto()) != null) {
+            cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
+        }
+        BigDecimal cantidadSolicitada = cantidadParaCalcular;
         if (productosParaVerificarStockDTO.getIdSucursal() != null) {
           producto.getCantidadEnSucursales().stream()
               .filter(
@@ -881,7 +895,8 @@ public class ProductoServiceImpl implements IProductoService {
               .forEach(
                   cantidadEnSucursal -> {
                     if (!producto.isIlimitado()
-                        && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0) {
+                        && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0
+                    && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
                       ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
                       productoFaltanteDTO.setIdProducto(producto.getIdProducto());
                       productoFaltanteDTO.setCodigo(producto.getCodigo());
@@ -893,7 +908,7 @@ public class ProductoServiceImpl implements IProductoService {
                   });
         } else if (producto
                 .getCantidadTotalEnSucursales()
-                .compareTo(productosParaVerificarStockDTO.getCantidad()[i])
+                .compareTo(cantidadSolicitada)
             < 0) {
           ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
           productoFaltanteDTO.setIdProducto(producto.getIdProducto());

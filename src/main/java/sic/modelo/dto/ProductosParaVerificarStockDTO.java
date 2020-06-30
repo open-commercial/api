@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 public class ProductosParaVerificarStockDTO {
 
   private Long idSucursal;
+  private Long idPedido;
   private long[] idProducto;
   private BigDecimal[] cantidad;
 }

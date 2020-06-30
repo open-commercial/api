@@ -215,61 +215,22 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
-    List<RenglonFactura> renglonesRestantes = new ArrayList<>();
-    List<RenglonPedido> renglonesPedido =
-        pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido);
-    Map<Long, BigDecimal> renglonesDeFacturas =
-        pedidoService.getRenglonesFacturadosDelPedido(idPedido);
-    if (renglonesDeFacturas != null) {
-      renglonesPedido.forEach(
-          r -> {
-            if (renglonesDeFacturas.containsKey(r.getIdProductoItem())) {
-              if (r.getCantidad().compareTo(renglonesDeFacturas.get(r.getIdProductoItem())) > 0) {
-                NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-                    NuevoRenglonFacturaDTO.builder()
-                        .cantidad(
-                            r.getCantidad()
-                                .subtract(renglonesDeFacturas.get(r.getIdProductoItem())))
-                        .idProducto(r.getIdProductoItem())
-                        .renglonMarcado(
-                            facturaService.marcarRenglonParaAplicarBonificacion(
-                                r.getIdProductoItem(), r.getCantidad()))
-                        .build();
-                renglonesRestantes.add(
-                    facturaService.calcularRenglon(
-                        tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
-              }
-            } else {
-              NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-                  NuevoRenglonFacturaDTO.builder()
-                      .cantidad(r.getCantidad())
-                      .idProducto(r.getIdProductoItem())
-                      .renglonMarcado(
-                          facturaService.marcarRenglonParaAplicarBonificacion(
-                              r.getIdProductoItem(), r.getCantidad()))
-                      .build();
-              renglonesRestantes.add(
-                  facturaService.calcularRenglon(
-                      tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
-            }
-          });
-    } else {
-      renglonesPedido.forEach(
-          r -> {
-            NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-                NuevoRenglonFacturaDTO.builder()
-                    .cantidad(r.getCantidad())
-                    .idProducto(r.getIdProductoItem())
-                    .renglonMarcado(
-                        facturaService.marcarRenglonParaAplicarBonificacion(
-                            r.getIdProductoItem(), r.getCantidad()))
-                    .build();
-            renglonesRestantes.add(
-                facturaService.calcularRenglon(
-                    tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
-          });
-    }
-    return renglonesRestantes;
+    List<RenglonFactura> renglonesParaFacturar = new ArrayList<>();
+    pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido).forEach(
+        r -> {
+          NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
+              NuevoRenglonFacturaDTO.builder()
+                  .cantidad(r.getCantidad())
+                  .idProducto(r.getIdProductoItem())
+                  .renglonMarcado(
+                      facturaService.marcarRenglonParaAplicarBonificacion(
+                          r.getIdProductoItem(), r.getCantidad()))
+                  .build();
+          renglonesParaFacturar.add(
+              facturaService.calcularRenglon(
+                  tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
+        });
+    return renglonesParaFacturar;
   }
 
   @Override

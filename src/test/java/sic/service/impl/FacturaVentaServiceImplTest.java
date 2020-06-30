@@ -547,7 +547,6 @@ class FacturaVentaServiceImplTest {
     renglonFactura2.setIdProductoItem(2L);
     renglonFactura2.setCantidad(new BigDecimal("5"));
     when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
-    when(pedidoService.getRenglonesFacturadosDelPedido(1L)).thenReturn(renglonesDeFacturas);
     Producto productoParaRetorno = new Producto();
     productoParaRetorno.setIdProducto(1L);
     productoParaRetorno.setCodigo("1");

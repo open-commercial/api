@@ -2,7 +2,6 @@ package sic.service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
@@ -32,15 +31,9 @@ public interface IPedidoService {
 
   void eliminar(long idPedido);
 
-  List<Factura> getFacturasDelPedido(long id);
-
-  Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long nroPedido);
-
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
 
   List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(Long idPedido, boolean clonar);
-
-  List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido);
 
   byte[] getReportePedido(long idPedido);
 
