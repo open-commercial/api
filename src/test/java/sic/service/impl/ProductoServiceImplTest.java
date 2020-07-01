@@ -39,6 +39,7 @@ class ProductoServiceImplTest {
   @MockBean ProveedorServiceImpl proveedorService;
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean TraspasoServiceImpl traspasoService;
+  @MockBean PedidoServiceImpl pedidoService;
   @MockBean ProductoRepository productoRepository;
   @MockBean MessageSource messageSource;
 
@@ -297,12 +298,12 @@ class ProductoServiceImplTest {
   void shouldGetProductosSinStockDisponible() {
     Producto producto = new Producto();
     producto.setIdProducto(1L);
-    producto.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto.setCantidadTotalEnSucursales(new BigDecimal("9"));
     Sucursal sucursal = new Sucursal();
     sucursal.setIdSucursal(1L);
     CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
     cantidadEnSucursal.setSucursal(sucursal);
-    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    cantidadEnSucursal.setCantidad(new BigDecimal("9"));
     Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
     cantidadEnSucursales.add(cantidadEnSucursal);
     producto.setCantidadEnSucursales(cantidadEnSucursales);
@@ -318,6 +319,25 @@ class ProductoServiceImplTest {
     List<ProductoFaltanteDTO> resultadoObtenido =
         productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
     Assertions.assertFalse(resultadoObtenido.isEmpty());
+    assertEquals(new BigDecimal("11"), resultadoObtenido.get(0).getCantidadSolicitada());
+    assertEquals(new BigDecimal("9"), resultadoObtenido.get(0).getCantidadDisponible());
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.ONE);
+    renglonesPedido.add(renglonPedido);
+    when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
+    productosParaVerificarStockDTO =
+            ProductosParaVerificarStockDTO.builder().build();
+    productosParaVerificarStockDTO.setIdSucursal(1L);
+    productosParaVerificarStockDTO.setCantidad(cantidad);
+    productosParaVerificarStockDTO.setIdProducto(idProducto);
+    productosParaVerificarStockDTO.setIdPedido(1L);
+    resultadoObtenido =
+            productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+    Assertions.assertFalse(resultadoObtenido.isEmpty());
+    assertEquals(new BigDecimal("10"), resultadoObtenido.get(0).getCantidadSolicitada());
+    assertEquals(new BigDecimal("9"), resultadoObtenido.get(0).getCantidadDisponible());
   }
 
   @Test
