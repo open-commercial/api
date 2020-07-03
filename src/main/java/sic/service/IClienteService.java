@@ -5,11 +5,9 @@ import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.embeddable.ClienteEmbeddable;
 
-import javax.validation.Valid;
-
 public interface IClienteService {
 
-  Cliente actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido);
+  Cliente actualizar(Cliente clientePorActualizar, Cliente clientePersistido);
 
   Page<Cliente> buscarClientes(BusquedaClienteCriteria criteria, long idUsuario);
 
@@ -23,9 +21,9 @@ public interface IClienteService {
 
   void setClientePredeterminado(Cliente cliente);
 
-  Cliente guardar(@Valid Cliente cliente);
+  Cliente guardar(Cliente cliente);
 
-  void validarOperacion(TipoDeOperacion operacion, Cliente cliente);
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Cliente cliente);
 
   Cliente getClientePorIdPedido(long idPedido);
 
@@ -33,9 +31,9 @@ public interface IClienteService {
 
   Cliente getClientePorCredencial(Usuario usuarioCredencial);
 
-  int desvincularClienteDeViajante(long idUsuarioViajante);
+  void desvincularClienteDeViajante(long idUsuarioViajante);
 
-  int desvincularClienteDeCredencial(long idUsuarioCliente);
+  void desvincularClienteDeCredencial(long idUsuarioCliente);
 
   String generarNroDeCliente();
 

@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
@@ -16,36 +15,38 @@ import sic.service.ICuentaCorrienteService;
 import sic.service.IFacturaCompraService;
 import sic.service.IFacturaService;
 import sic.service.IProductoService;
+import sic.util.CustomValidator;
 
-import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 @Service
-@Validated
 public class FacturaCompraServiceImpl implements IFacturaCompraService {
 
-  private IFacturaService facturaService;
-  private FacturaCompraRepository facturaCompraRepository;
-  private ICuentaCorrienteService cuentaCorrienteService;
-  private IProductoService productoService;
+  private final IFacturaService facturaService;
+  private final FacturaCompraRepository facturaCompraRepository;
+  private final ICuentaCorrienteService cuentaCorrienteService;
+  private final IProductoService productoService;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public FacturaCompraServiceImpl(
-      IFacturaService facturaService,
-      FacturaCompraRepository facturaCompraRepository,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IProductoService productoService,
-      MessageSource messageSource) {
+    IFacturaService facturaService,
+    FacturaCompraRepository facturaCompraRepository,
+    ICuentaCorrienteService cuentaCorrienteService,
+    IProductoService productoService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.facturaService = facturaService;
     this.facturaCompraRepository = facturaCompraRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.productoService = productoService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -147,7 +148,8 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
 
   @Override
   @Transactional
-  public List<FacturaCompra> guardar(@Valid List<FacturaCompra> facturas) {
+  public List<FacturaCompra> guardar(List<FacturaCompra> facturas) {
+    facturas.forEach(customValidator::validar);
     this.calcularValoresFacturasCompraAndActualizarStock(facturas);
     List<FacturaCompra> facturasProcesadas = new ArrayList<>();
     for (Factura f : facturas) {
@@ -181,12 +183,11 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
     facturas.forEach(
         facturaCompra -> {
           facturaService.calcularValoresFactura(facturaCompra);
-          productoService.actualizarStock(
+          productoService.actualizarStockFacturaCompra(
               facturaService.getIdsProductosYCantidades(facturaCompra),
               facturaCompra.getIdSucursal(),
               TipoDeOperacion.ALTA,
-              Movimiento.COMPRA,
-              facturaCompra.getTipoComprobante());
+              Movimiento.COMPRA);
         });
   }
 }

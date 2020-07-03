@@ -26,7 +26,7 @@ import java.util.List;
       "ubicacionCliente"
     })
 @Builder
-public class FacturaVenta extends Factura implements Serializable {
+public class FacturaVenta extends Factura {
 
   private Long idCliente;
   private String nombreFiscalCliente;

@@ -41,10 +41,11 @@ public class Pedido implements Serializable {
 
   private long nroPedido;
 
-  private String idPayment;
-
   @NotNull(message = "{mensaje_pedido_fecha_vacia}")
   private LocalDateTime fecha;
+
+  @NotNull(message = "{mensaje_pedido_fecha_vacia}")
+  private LocalDateTime fechaVencimiento;
 
   @Column(nullable = false)
   private String observaciones;
@@ -106,16 +107,13 @@ public class Pedido implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_pedido_total_estimado_negativo}")
-  private BigDecimal totalEstimado;
-
-  @Transient
-  private BigDecimal totalActual;
+  private BigDecimal total;
 
   @Enumerated(EnumType.STRING)
   private EstadoPedido estado;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_no_valida}", inclusive = false)
   private BigDecimal cantidadArticulos;
 
   @JsonGetter("idSucursal")

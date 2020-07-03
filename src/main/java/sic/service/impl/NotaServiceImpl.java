@@ -10,7 +10,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
@@ -28,7 +27,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaNotaCriteria;
 import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
@@ -41,9 +39,9 @@ import sic.service.*;
 import sic.repository.NotaRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class NotaServiceImpl implements INotaService {
 
   private final NotaRepository<Nota> notaRepository;
@@ -67,26 +65,28 @@ public class NotaServiceImpl implements INotaService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public NotaServiceImpl(
-      NotaRepository<Nota> notaRepository,
-      NotaCreditoRepository notaCreditoRepository,
-      NotaDebitoRepository notaDebitoRepository,
-      IFacturaService facturaService,
-      INotaService notaService,
-      IReciboService reciboService,
-      IClienteService clienteService,
-      IProveedorService proveedorService,
-      IUsuarioService usuarioService,
-      IProductoService productoService,
-      ISucursalService sucursalService,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IMercadoPagoService mercadoPagoService,
-      IConfiguracionSucursalService configuracionSucursalService,
-      IAfipService afipService,
-      MessageSource messageSource) {
+    NotaRepository<Nota> notaRepository,
+    NotaCreditoRepository notaCreditoRepository,
+    NotaDebitoRepository notaDebitoRepository,
+    IFacturaService facturaService,
+    INotaService notaService,
+    IReciboService reciboService,
+    IClienteService clienteService,
+    IProveedorService proveedorService,
+    IUsuarioService usuarioService,
+    IProductoService productoService,
+    ISucursalService sucursalService,
+    ICuentaCorrienteService cuentaCorrienteService,
+    IMercadoPagoService mercadoPagoService,
+    IConfiguracionSucursalService configuracionSucursalService,
+    IAfipService afipService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.notaRepository = notaRepository;
     this.notaCreditoRepository = notaCreditoRepository;
     this.notaDebitoRepository = notaDebitoRepository;
@@ -103,6 +103,7 @@ public class NotaServiceImpl implements INotaService {
     this.configuracionSucursalService = configuracionSucursalService;
     this.afipService = afipService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -134,11 +135,7 @@ public class NotaServiceImpl implements INotaService {
         NotaCredito nc = (NotaCredito) nota;
         if (nc.isModificaStock()) {
           this.actualizarStock(
-              nc.getRenglonesNotaCredito(),
-              nota.getIdSucursal(),
-              TipoDeOperacion.ELIMINACION,
-              nota.getMovimiento(),
-              nota.getTipoComprobante());
+              nc.getRenglonesNotaCredito(), nota.getIdSucursal(), TipoDeOperacion.ELIMINACION);
         }
       }
     }
@@ -562,7 +559,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private void validarOperacion(Nota nota) {
+  @Override
+  public void validarReglasDeNegocio(Nota nota) {
     if (nota instanceof NotaCredito && nota.getMovimiento().equals(Movimiento.VENTA)) {
       if (nota.getFacturaVenta() != null
           && nota.getFecha().isBefore(nota.getFacturaVenta().getFecha())) {
@@ -599,7 +597,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private void validarCalculosCredito(NotaCredito notaCredito) {
+  @Override
+  public void validarCalculosCredito(NotaCredito notaCredito) {
     List<RenglonNotaCredito> renglonesNotaCredito = notaCredito.getRenglonesNotaCredito();
     BigDecimal subTotal = BigDecimal.ZERO;
     BigDecimal[] importes = new BigDecimal[renglonesNotaCredito.size()];
@@ -708,7 +707,8 @@ public class NotaServiceImpl implements INotaService {
     }
   }
 
-  private void validarCalculosDebito(NotaDebito notaDebito) {
+  @Override
+  public void validarCalculosDebito(NotaDebito notaDebito) {
     // monto no gravado
     if ((notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C
             || notaDebito.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_X)
@@ -768,11 +768,12 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public NotaCredito guardarNotaCredito(@Valid NotaCredito notaCredito) {
+  public NotaCredito guardarNotaCredito(NotaCredito notaCredito) {
+    customValidator.validar(notaCredito);
     if (notaCredito.getFecha() == null) {
       notaCredito.setFecha(LocalDateTime.now());
     }
-    this.validarOperacion(notaCredito);
+    this.validarReglasDeNegocio(notaCredito);
     if (notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       if (notaCredito.getFacturaVenta() != null) {
         notaCredito.setTipoComprobante(
@@ -809,11 +810,7 @@ public class NotaServiceImpl implements INotaService {
     }
     if (notaCredito.isModificaStock()) {
       this.actualizarStock(
-          notaCredito.getRenglonesNotaCredito(),
-          notaCredito.getIdSucursal(),
-          TipoDeOperacion.ALTA,
-          notaCredito.getMovimiento(),
-          notaCredito.getTipoComprobante());
+          notaCredito.getRenglonesNotaCredito(), notaCredito.getIdSucursal(), TipoDeOperacion.ALTA);
     }
     this.validarCalculosCredito(notaCredito);
     notaCredito = notaCreditoRepository.save(notaCredito);
@@ -1116,11 +1113,12 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   @Transactional
-  public NotaDebito guardarNotaDebito(@Valid NotaDebito notaDebito) {
+  public NotaDebito guardarNotaDebito(NotaDebito notaDebito) {
+    customValidator.validar(notaDebito);
     if (notaDebito.getFecha() == null) {
       notaDebito.setFecha(LocalDateTime.now());
     }
-    this.validarOperacion(notaDebito);
+    this.validarReglasDeNegocio(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       if (!this.getTipoNotaDebitoCliente(
               notaDebito.getCliente().getIdCliente(), notaDebito.getSucursal().getIdSucursal())
@@ -1225,13 +1223,10 @@ public class NotaServiceImpl implements INotaService {
   private void actualizarStock(
       List<RenglonNotaCredito> renglonesNotaCredito,
       Long idSucursal,
-      TipoDeOperacion tipoOperacion,
-      Movimiento movimiento,
-      TipoDeComprobante tipoDeComprobante) {
+      TipoDeOperacion tipoOperacion) {
     HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
     renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
-    productoService.actualizarStock(
-        idsYCantidades, idSucursal, tipoOperacion, movimiento, tipoDeComprobante);
+    productoService.actualizarStockNotaCredito(idsYCantidades, idSucursal, tipoOperacion);
   }
 
   @Override

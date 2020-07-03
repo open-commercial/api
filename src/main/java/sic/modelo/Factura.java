@@ -126,7 +126,7 @@ public abstract class Factura implements Serializable {
   private String observaciones;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_negativa}", inclusive = false)
+  @DecimalMin(value = "0", message = "{mensaje_cantidad_de_productos_no_valida}", inclusive = false)
   private BigDecimal cantidadArticulos;
 
   @ManyToOne

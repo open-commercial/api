@@ -4,34 +4,35 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.Rubro;
 import sic.service.IRubroService;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.RubroRepository;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class RubroServiceImpl implements IRubroService {
 
   private final RubroRepository rubroRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
-  public RubroServiceImpl(RubroRepository rubroRepository,
-                          MessageSource messageSource) {
+  public RubroServiceImpl(
+    RubroRepository rubroRepository,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.rubroRepository = rubroRepository;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -56,7 +57,8 @@ public class RubroServiceImpl implements IRubroService {
     return rubroRepository.findByNombreAndEliminado(nombre, false);
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Rubro rubro) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Rubro rubro) {
     // Duplicados
     // Nombre
     Rubro rubroDuplicado = this.getRubroPorNombre(rubro.getNombre());
@@ -73,15 +75,17 @@ public class RubroServiceImpl implements IRubroService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Rubro rubro) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, rubro);
+  public void actualizar(Rubro rubro) {
+    customValidator.validar(rubro);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, rubro);
     rubroRepository.save(rubro);
   }
 
   @Override
   @Transactional
-  public Rubro guardar(@Valid Rubro rubro) {
-    this.validarOperacion(TipoDeOperacion.ALTA, rubro);
+  public Rubro guardar(Rubro rubro) {
+    customValidator.validar(rubro);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, rubro);
     rubro = rubroRepository.save(rubro);
     logger.warn("El Rubro {} se guardó correctamente.", rubro);
     return rubro;

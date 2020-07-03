@@ -10,13 +10,9 @@ import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 
-import javax.validation.Valid;
-
 public interface IFacturaService {
 
   Factura getFacturaNoEliminadaPorId(long idFactura);
-
-  void eliminarFactura(long idFactura);
 
   TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(Sucursal sucursal);
 
@@ -48,12 +44,12 @@ public interface IFacturaService {
   RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO);
+      NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO);
 
   List<RenglonFactura> calcularRenglones(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      @Valid List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO);
+      List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO);
 
   Resultados calcularResultadosFactura(NuevosResultadosComprobanteDTO nuevosResultadosComprobante);
 
@@ -64,6 +60,8 @@ public interface IFacturaService {
   Factura procesarFactura(Factura factura);
 
   Map<Long, BigDecimal> getIdsProductosYCantidades(Factura factura);
+
+  void validarReglasDeNegocio(Factura factura);
 
   void aplicarBonificacion(
           RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion);

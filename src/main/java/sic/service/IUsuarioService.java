@@ -4,8 +4,6 @@ import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaUsuarioCriteria;
 
-import javax.validation.Valid;
-
 public interface IUsuarioService {
 
   Usuario getUsuarioNoEliminadoPorId(Long idUsuario);
@@ -14,7 +12,7 @@ public interface IUsuarioService {
 
   Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario);
 
-  void actualizar(@Valid Usuario usuarioPorActualizar);
+  void actualizar(Usuario usuarioPorActualizar);
 
   void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
 
@@ -26,11 +24,11 @@ public interface IUsuarioService {
 
   Page<Usuario> buscarUsuarios(BusquedaUsuarioCriteria criteria);
 
-  void validarOperacion(TipoDeOperacion operacion, Usuario usuario);
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Usuario usuario);
 
-  Usuario guardar(@Valid Usuario usuario);
+  Usuario guardar(Usuario usuario);
 
-  int actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada);
+  void actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada);
 
   Page<Usuario> getUsuariosPorRol(Rol rol);
 

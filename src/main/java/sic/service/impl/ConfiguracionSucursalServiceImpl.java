@@ -1,36 +1,37 @@
 package sic.service.impl;
 
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
 import sic.service.IConfiguracionSucursalService;
 import sic.repository.ConfiguracionSucursalRepository;
 import sic.exception.BusinessServiceException;
+import sic.util.CustomValidator;
 
 import java.util.Locale;
 
 @Service
-@Validated
 public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalService {
 
   private final ConfiguracionSucursalRepository configuracionRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public ConfiguracionSucursalServiceImpl(
-    ConfiguracionSucursalRepository configuracionRepository, MessageSource messageSource) {
+    ConfiguracionSucursalRepository configuracionRepository,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.configuracionRepository = configuracionRepository;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -49,8 +50,12 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public ConfiguracionSucursal guardar(@Valid ConfiguracionSucursal configuracionSucursal) {
-    this.validarOperacion(configuracionSucursal);
+  public ConfiguracionSucursal guardar(ConfiguracionSucursal configuracionSucursal) {
+    customValidator.validar(configuracionSucursal);
+    this.validarReglasDeNegocio(configuracionSucursal);
+    if (configuracionSucursal.isPredeterminada()) {
+      configuracionRepository.desmarcarSucursalPredeterminada();
+    }
     configuracionSucursal = configuracionRepository.save(configuracionSucursal);
     logger.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
     return configuracionSucursal;
@@ -58,12 +63,62 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public void actualizar(@Valid ConfiguracionSucursal configuracionSucursal) {
-    this.validarOperacion(configuracionSucursal);
-    if (configuracionSucursal.getPasswordCertificadoAfip() != null) {
-      configuracionSucursal.setPasswordCertificadoAfip(configuracionSucursal.getPasswordCertificadoAfip());
+  public void actualizar(
+      ConfiguracionSucursal configuracionSucursalPersistida,
+      ConfiguracionSucursal configuracionDeSucursalParaActualizar) {
+    if (!configuracionDeSucursalParaActualizar.isPredeterminada()
+        && configuracionSucursalPersistida.isPredeterminada()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_sucursal_quitar_predeterminada", null, Locale.getDefault()));
     }
-    configuracionRepository.save(configuracionSucursal);
+    configuracionDeSucursalParaActualizar.setSucursal(
+        configuracionSucursalPersistida.getSucursal());
+    if (configuracionDeSucursalParaActualizar.isFacturaElectronicaHabilitada()) {
+      if (configuracionDeSucursalParaActualizar.getPasswordCertificadoAfip().equals("")) {
+        configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip(
+            configuracionSucursalPersistida.getPasswordCertificadoAfip());
+      }
+      if (configuracionDeSucursalParaActualizar.getCertificadoAfip() == null) {
+        configuracionDeSucursalParaActualizar.setCertificadoAfip(
+            configuracionSucursalPersistida.getCertificadoAfip());
+      }
+      if (configuracionDeSucursalParaActualizar.getSignTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setSignTokenWSAA(
+            configuracionSucursalPersistida.getSignTokenWSAA());
+      }
+      if (configuracionDeSucursalParaActualizar.getTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setTokenWSAA(
+            configuracionSucursalPersistida.getTokenWSAA());
+      }
+      if (configuracionDeSucursalParaActualizar.getFechaGeneracionTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setFechaGeneracionTokenWSAA(
+            configuracionSucursalPersistida.getFechaGeneracionTokenWSAA());
+      }
+      if (configuracionDeSucursalParaActualizar.getFechaVencimientoTokenWSAA() == null) {
+        configuracionDeSucursalParaActualizar.setFechaVencimientoTokenWSAA(
+            configuracionSucursalPersistida.getFechaVencimientoTokenWSAA());
+      }
+    }
+    if (configuracionDeSucursalParaActualizar.getVencimientoLargo() == 0L) {
+      configuracionDeSucursalParaActualizar.setVencimientoLargo(
+          configuracionSucursalPersistida.getVencimientoLargo());
+    }
+    if (configuracionDeSucursalParaActualizar.getVencimientoCorto() == 0L) {
+      configuracionDeSucursalParaActualizar.setVencimientoCorto(
+              configuracionSucursalPersistida.getVencimientoCorto());
+    }
+    customValidator.validar(configuracionDeSucursalParaActualizar);
+    this.validarReglasDeNegocio(configuracionDeSucursalParaActualizar);
+    if (!configuracionSucursalPersistida.isPredeterminada()
+        && configuracionDeSucursalParaActualizar.isPredeterminada()) {
+      configuracionRepository.desmarcarSucursalPredeterminada();
+    }
+    if (configuracionDeSucursalParaActualizar.getPasswordCertificadoAfip() == null) {
+      configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip(
+          configuracionSucursalPersistida.getPasswordCertificadoAfip());
+    }
+    configuracionRepository.save(configuracionDeSucursalParaActualizar);
   }
 
   @Override
@@ -73,7 +128,7 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   }
 
   @Override
-  public void validarOperacion(ConfiguracionSucursal configuracionSucursal) {
+  public void validarReglasDeNegocio(ConfiguracionSucursal configuracionSucursal) {
     if (configuracionSucursal.isFacturaElectronicaHabilitada()) {
       if (configuracionSucursal.getCertificadoAfip() == null) {
         throw new BusinessServiceException(messageSource.getMessage(

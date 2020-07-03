@@ -36,7 +36,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
 
   @Autowired
   public CarritoCompraServiceImpl(
@@ -176,18 +175,12 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     List<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
-    Cliente clienteParaPedido = clienteService.getClientePorIdUsuario(idUsuario);
-    if (!clienteParaPedido.isPuedeComprarAPlazo()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
-    }
     pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
     if (nuevaOrdenDePagoDTO.getIdSucursal() == null) {
       if (!nuevaOrdenDePagoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT));
+        pedido.setSucursal(sucursalService.getSucursalPredeterminada());
       } else {
         throw new BusinessServiceException(
             messageSource.getMessage(
@@ -205,8 +198,25 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                     i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDePagoDTO.getTipoDeEnvio());
-    Pedido p = pedidoService.guardar(pedido);
+    Pedido p = pedidoService.guardar(pedido, null);
     this.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
+  }
+
+  @Override
+  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario) {
+    List<ItemCarritoCompra> items =
+        this.getItemsDelCarritoPorUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    long[] idProducto = new long[items.size()];
+    BigDecimal[] cantidad = new BigDecimal[items.size()];
+    int indice = 0;
+    for (ItemCarritoCompra item : items) {
+      idProducto[indice] = item.getProducto().getIdProducto();
+      cantidad[indice] = item.getCantidad();
+      indice++;
+    }
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 }

@@ -6,14 +6,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,9 +24,9 @@ import sic.service.ITransportistaService;
 import sic.exception.BusinessServiceException;
 import sic.repository.TransportistaRepository;
 import sic.service.IUbicacionService;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class TransportistaServiceImpl implements ITransportistaService {
 
   private final TransportistaRepository transportistaRepository;
@@ -36,14 +34,18 @@ public class TransportistaServiceImpl implements ITransportistaService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
-  public TransportistaServiceImpl(TransportistaRepository transportistaRepository,
-                                  IUbicacionService ubicacionService,
-                                  MessageSource messageSource) {
+  public TransportistaServiceImpl(
+    TransportistaRepository transportistaRepository,
+    IUbicacionService ubicacionService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.transportistaRepository = transportistaRepository;
     this.ubicacionService = ubicacionService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -122,7 +124,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
     return transportistaRepository.findByNombreAndEliminado(nombre, false);
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Transportista transportista) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Transportista transportista) {
     // Duplicados
     // Nombre
     Transportista transportistaDuplicado = this.getTransportistaPorNombre(transportista.getNombre());
@@ -146,7 +149,8 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
   @Override
   @Transactional
-  public Transportista guardar(@Valid Transportista transportista) {
+  public Transportista guardar(Transportista transportista) {
+    customValidator.validar(transportista);
     if (transportista.getUbicacion() != null
         && transportista.getUbicacion().getIdLocalidad() != null) {
       transportista
@@ -154,7 +158,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
           .setLocalidad(
               ubicacionService.getLocalidadPorId(transportista.getUbicacion().getIdLocalidad()));
     }
-    this.validarOperacion(TipoDeOperacion.ALTA, transportista);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, transportista);
     transportista = transportistaRepository.save(transportista);
     logger.warn("El Transportista {} se guardó correctamente.", transportista);
     return transportista;
@@ -162,8 +166,9 @@ public class TransportistaServiceImpl implements ITransportistaService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Transportista transportista) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, transportista);
+  public void actualizar(Transportista transportista) {
+    customValidator.validar(transportista);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, transportista);
     transportistaRepository.save(transportista);
   }
 

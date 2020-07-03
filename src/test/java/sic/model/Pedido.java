@@ -16,11 +16,12 @@ import java.util.List;
 @ToString(exclude = {"renglones", "cantidadArticulos"})
 @EqualsAndHashCode(of = {"nroPedido", "nombreSucursal"})
 @Builder
-public class Pedido implements Serializable {
+public class Pedido {
 
   private long idPedido;
   private long nroPedido;
   private LocalDateTime fecha;
+  private LocalDateTime fechaVencimiento;
   private String observaciones;
   private long idSucursal;
   private String nombreSucursal;
@@ -35,8 +36,7 @@ public class Pedido implements Serializable {
   private BigDecimal recargoNeto;
   private BigDecimal descuentoPorcentaje;
   private BigDecimal descuentoNeto;
-  private BigDecimal totalEstimado;
-  private BigDecimal totalActual;
+  private BigDecimal total;
   private EstadoPedido estado;
   private BigDecimal cantidadArticulos;
 }

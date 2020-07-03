@@ -1,22 +1,23 @@
 package sic.service;
 
 import java.util.List;
-import sic.modelo.Rubro;
 
-import javax.validation.Valid;
+import sic.modelo.Rubro;
+import sic.modelo.TipoDeOperacion;
 
 public interface IRubroService {
 
-    Rubro getRubroNoEliminadoPorId(Long idRubro);
-    
-    void actualizar(@Valid Rubro rubro);
+  Rubro getRubroNoEliminadoPorId(Long idRubro);
 
-    void eliminar(long idRubro);
+  void validarReglasDeNegocio(TipoDeOperacion operacion, Rubro rubro);
 
-    Rubro getRubroPorNombre(String nombre);
+  void actualizar(Rubro rubro);
 
-    List<Rubro> getRubros();
+  void eliminar(long idRubro);
 
-    Rubro guardar(@Valid Rubro rubro);
-    
+  Rubro getRubroPorNombre(String nombre);
+
+  List<Rubro> getRubros();
+
+  Rubro guardar(Rubro rubro);
 }

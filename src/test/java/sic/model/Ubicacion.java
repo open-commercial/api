@@ -17,7 +17,7 @@ import java.io.Serializable;
       "idProvincia",
       "nombreProvincia"
     })
-public class Ubicacion implements Serializable {
+public class Ubicacion {
 
   private long idUbicacion;
   private String descripcion;

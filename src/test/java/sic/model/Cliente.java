@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
       "detalleUbicacionDeFacturacion",
       "detalleUbicacionDeEnvio"
     })
-public class Cliente implements Serializable {
+public class Cliente {
 
   private long idCliente;
   private String nroCliente;

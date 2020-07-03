@@ -2,17 +2,13 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 
-import java.io.*;
-
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -23,31 +19,36 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.*;
-import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.ProductoFaltanteDTO;
-import sic.modelo.dto.NuevoProductoDTO;
-import sic.modelo.dto.ProductosParaActualizarDTO;
-import sic.modelo.dto.ProductosParaVerificarStockDTO;
-import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.dto.NuevoProductoDTO;
+import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.modelo.dto.ProductosParaActualizarDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.repository.ProductoRepository;
+import sic.service.*;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Service
-@Validated
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
@@ -60,9 +61,12 @@ public class ProductoServiceImpl implements IProductoService {
   private final ICarritoCompraService carritoCompraService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final ISucursalService sucursalService;
+  private final ITraspasoService traspasoService;
+  private final IPedidoService pedidoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
@@ -74,7 +78,10 @@ public class ProductoServiceImpl implements IProductoService {
     ICarritoCompraService carritoCompraService,
     IPhotoVideoUploader photoVideoUploader,
     ISucursalService sucursalService,
-    MessageSource messageSource) {
+    ITraspasoService traspasoService,
+    IPedidoService pedidoService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.productoRepository = productoRepository;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
@@ -82,10 +89,14 @@ public class ProductoServiceImpl implements IProductoService {
     this.carritoCompraService = carritoCompraService;
     this.photoVideoUploader = photoVideoUploader;
     this.sucursalService = sucursalService;
+    this.traspasoService = traspasoService;
+    this.pedidoService = pedidoService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Producto producto) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Producto producto) {
     if (producto.isOferta()
         && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) <= 0) {
       throw new BusinessServiceException(
@@ -126,7 +137,8 @@ public class ProductoServiceImpl implements IProductoService {
     this.validarCalculos(producto);
   }
 
-  private void validarCalculos(Producto producto) {
+  @Override
+  public void validarCalculos(Producto producto) {
     Double[] iva = {10.5, 21.0, 0.0};
     if (!Arrays.asList(iva).contains(producto.getIvaPorcentaje().doubleValue())) {
       throw new BusinessServiceException(
@@ -296,7 +308,8 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public Producto guardar(
-      @Valid NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+      NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+    customValidator.validar(nuevoProductoDTO);
     if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
       throw new BusinessServiceException(
           messageSource.getMessage(
@@ -357,17 +370,18 @@ public class ProductoServiceImpl implements IProductoService {
         nuevoProductoDTO.getPorcentajeBonificacionPrecio() != null
             ? nuevoProductoDTO.getPorcentajeBonificacionPrecio()
             : BigDecimal.ZERO);
-    producto.setIlimitado(nuevoProductoDTO.isIlimitado());
     producto.setPublico(nuevoProductoDTO.isPublico());
     producto.setNota(nuevoProductoDTO.getNota());
     producto.setFechaVencimiento(nuevoProductoDTO.getFechaVencimiento());
     producto.setFechaAlta(LocalDateTime.now());
     producto.setFechaUltimaModificacion(LocalDateTime.now());
     this.calcularPrecioBonificado(producto);
-    this.validarOperacion(TipoDeOperacion.ALTA, producto);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, producto);
     producto.setIlimitado(false);
     producto = productoRepository.save(producto);
-    logger.warn("El Producto {} se guardó correctamente.", producto);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_guardado", new Object[] {producto}, Locale.getDefault()));
     if (nuevoProductoDTO.getImagen() != null)
       producto.setUrlImagen(
           this.subirImagenProducto(producto.getIdProducto(), nuevoProductoDTO.getImagen()));
@@ -376,7 +390,10 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+  public void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
+    productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
+    productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
+    customValidator.validar(productoPorActualizar);
     if (productoPorActualizar.isOferta()
         && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())
@@ -387,15 +404,13 @@ public class ProductoServiceImpl implements IProductoService {
               new Object[] {productoPorActualizar.getDescripcion()},
               Locale.getDefault()));
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
-    productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
-    productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
         && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(
           Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
@@ -404,7 +419,11 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
-    logger.warn("El Producto {} se modificó correctamente.", productoPorActualizar);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_actualizado",
+            new Object[] {productoPorActualizar},
+            Locale.getDefault()));
     if (imagen != null) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
   }
 
@@ -432,128 +451,214 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public void actualizarStock(
+  public Pedido devolverStockPedido(
+      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores) {
+    if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
+        && pedido.getEstado() == EstadoPedido.ABIERTO
+        && renglonesAnteriores != null
+        && !renglonesAnteriores.isEmpty()) {
+      renglonesAnteriores.forEach(
+          renglonAnterior -> {
+            Optional<Producto> productoAnterior =
+                productoRepository.findById(renglonAnterior.getIdProductoItem());
+            if (productoAnterior.isPresent() && !productoAnterior.get().isIlimitado()) {
+              this.agregarStock(
+                  productoAnterior.get(),
+                  pedido.getSucursal().getIdSucursal(),
+                  renglonAnterior.getCantidad());
+            } else {
+              logger.warn(
+                  messageSource.getMessage(
+                      "mensaje_error_actualizar_stock_producto_eliminado",
+                      null,
+                      Locale.getDefault()));
+            }
+          });
+    }
+    return pedido;
+  }
+
+  @Override
+  public Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
+    switch (tipoDeOperacion) {
+      case ALTA -> traspasoService.guardarTraspasosPorPedido(pedido);
+      case ELIMINACION -> traspasoService.eliminarTraspasoDePedido(pedido);
+      case ACTUALIZACION -> {
+        if (pedido.getEstado() == EstadoPedido.ABIERTO) {
+          traspasoService.eliminarTraspasoDePedido(pedido);
+          traspasoService.guardarTraspasosPorPedido(pedido);
+        } else if (pedido.getEstado() == EstadoPedido.CANCELADO) {
+          traspasoService.eliminarTraspasoDePedido(pedido);
+        }
+      }
+    }
+    pedido
+        .getRenglones()
+        .forEach(
+            renglones -> {
+              Optional<Producto> producto =
+                  productoRepository.findById(renglones.getIdProductoItem());
+              if (producto.isPresent() && !producto.get().isIlimitado()) {
+                if (tipoDeOperacion == TipoDeOperacion.ALTA
+                    || (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
+                        && pedido.getEstado() == EstadoPedido.ABIERTO)) {
+                  this.quitarStock(
+                      producto.get(),
+                      pedido.getSucursal().getIdSucursal(),
+                      renglones.getCantidad());
+                }
+                if ((tipoDeOperacion == TipoDeOperacion.ELIMINACION
+                        && pedido.getEstado() == EstadoPedido.ABIERTO)
+                    || (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
+                        && pedido.getEstado() == EstadoPedido.CANCELADO)) {
+                  this.agregarStock(
+                      producto.get(),
+                      pedido.getSucursal().getIdSucursal(),
+                      renglones.getCantidad());
+                }
+              } else {
+                logger.warn(
+                    messageSource.getMessage(
+                        "mensaje_error_actualizar_stock_producto_eliminado",
+                        null,
+                        Locale.getDefault()));
+              }
+            });
+    return pedido;
+  }
+
+  @Override
+  public void actualizarStockFacturaCompra(
       Map<Long, BigDecimal> idsYCantidades,
       Long idSucursal,
       TipoDeOperacion operacion,
-      Movimiento movimiento,
-      TipoDeComprobante tipoDeComprobante) {
+      Movimiento movimiento) {
     idsYCantidades.forEach(
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
           if (producto.isPresent() && !producto.get().isIlimitado()) {
-            List<TipoDeComprobante> tiposDeFactura =
-                Arrays.asList(
-                    TipoDeComprobante.FACTURA_A,
-                    TipoDeComprobante.FACTURA_B,
-                    TipoDeComprobante.FACTURA_C,
-                    TipoDeComprobante.FACTURA_X,
-                    TipoDeComprobante.FACTURA_Y,
-                    TipoDeComprobante.PRESUPUESTO);
-            List<TipoDeComprobante> tiposDeNotaCreditoQueAfectanStock =
-                Arrays.asList(
-                    TipoDeComprobante.NOTA_CREDITO_A,
-                    TipoDeComprobante.NOTA_CREDITO_B,
-                    TipoDeComprobante.NOTA_CREDITO_C,
-                    TipoDeComprobante.NOTA_CREDITO_X,
-                    TipoDeComprobante.NOTA_CREDITO_X,
-                    TipoDeComprobante.NOTA_CREDITO_Y,
-                    TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO);
-            switch (movimiento) {
-              case VENTA:
-                if (tiposDeFactura.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                break;
-              case COMPRA:
-                if (tiposDeFactura.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaCompraOrNotaCreditoVenta(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                if (tiposDeNotaCreditoQueAfectanStock.contains(tipoDeComprobante)) {
-                  this.cambiaStockPorFacturaVentaOrNotaCreditoCompra(
-                      idSucursal, operacion, producto.get(), cantidad);
-                }
-                break;
-              default:
-                throw new BusinessServiceException(
-                    messageSource.getMessage(
-                        "mensaje_movimiento_no_valido", null, Locale.getDefault()));
+            if (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ELIMINACION) {
+              this.quitarStock(producto.get(), idSucursal, cantidad);
             }
-            productoRepository.save(producto.get());
+            if (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ALTA) {
+              this.agregarStock(producto.get(), idSucursal, cantidad);
+            }
           } else {
-            logger.warn("Se intenta actualizar el stock de un producto eliminado.");
+            logger.warn(
+                messageSource.getMessage(
+                    "mensaje_error_actualizar_stock_producto_eliminado",
+                    null,
+                    Locale.getDefault()));
           }
         });
   }
 
-  private void cambiaStockPorFacturaVentaOrNotaCreditoCompra(
-      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
-    if (operacion == TipoDeOperacion.ALTA) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(
-                      cantidadEnSucursal.getCantidad().subtract(cantidad));
-                }
-              });
-    }
-    if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
-                }
-              });
-    }
-    producto.setCantidadTotalEnSucursales(
-        producto
-            .getCantidadEnSucursales()
-            .stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+  @Override
+  public void actualizarStockNotaCredito(
+      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion) {
+    idsYCantidades.forEach(
+        (idProducto, cantidad) -> {
+          Optional<Producto> producto = productoRepository.findById(idProducto);
+          if (producto.isPresent() && !producto.get().isIlimitado()) {
+            if (operacion == TipoDeOperacion.ALTA) {
+              this.agregarStock(producto.get(), idSucursal, cantidad);
+            }
+            if (operacion == TipoDeOperacion.ELIMINACION) {
+              this.quitarStock(producto.get(), idSucursal, cantidad);
+            }
+          } else {
+            logger.warn(
+                messageSource.getMessage(
+                    "mensaje_error_actualizar_stock_producto_eliminado",
+                    null,
+                    Locale.getDefault()));
+          }
+        });
   }
 
-  private void cambiaStockPorFacturaCompraOrNotaCreditoVenta(
-      Long idSucursal, TipoDeOperacion operacion, Producto producto, BigDecimal cantidad) {
-    if (operacion == TipoDeOperacion.ALTA) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
-                }
-              });
+  @Override
+  public void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion) {
+    switch (tipoDeOperacion) {
+      case ALTA -> traspaso
+              .getRenglones()
+              .forEach(
+                      renglonTraspaso -> {
+                        Producto producto =
+                                this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                        this.quitarStock(
+                                producto,
+                                traspaso.getSucursalOrigen().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                        this.agregarStock(
+                                producto,
+                                traspaso.getSucursalDestino().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                      });
+      case ELIMINACION -> traspaso
+              .getRenglones()
+              .forEach(
+                      renglonTraspaso -> {
+                        Producto producto =
+                                this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                        this.quitarStock(
+                                producto,
+                                traspaso.getSucursalDestino().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                        this.agregarStock(
+                                producto,
+                                traspaso.getSucursalOrigen().getIdSucursal(),
+                                renglonTraspaso.getCantidadProducto());
+                      });
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_traspaso_operacion_no_soportada", null, Locale.getDefault()));
     }
-    if (operacion == TipoDeOperacion.ELIMINACION) {
-      producto
-          .getCantidadEnSucursales()
-          .forEach(
-              cantidadEnSucursal -> {
-                if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
-                  cantidadEnSucursal.setCantidad(
-                      cantidadEnSucursal.getCantidad().subtract(cantidad));
-                }
-              });
-    }
+  }
+
+  private Producto agregarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
+    producto
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal -> {
+              if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
+              }
+            });
     producto.setCantidadTotalEnSucursales(
-        producto
-            .getCantidadEnSucursales()
-            .stream()
+        producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    producto = productoRepository.save(producto);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_agrega_stock",
+            new Object[] {cantidad, producto},
+            Locale.getDefault()));
+    return producto;
+  }
+
+  private Producto quitarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
+    producto
+        .getCantidadEnSucursales()
+        .forEach(
+            cantidadEnSucursal -> {
+              if (cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursal) {
+                cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
+              }
+            });
+    producto.setCantidadTotalEnSucursales(
+        producto.getCantidadEnSucursales().stream()
+            .map(CantidadEnSucursal::getCantidad)
+            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    producto.setHayStock(producto.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    producto = productoRepository.save(producto);
+    logger.warn(
+        messageSource.getMessage(
+            "mensaje_producto_quita_stock",
+            new Object[] {cantidad, producto.getDescripcion()},
+            Locale.getDefault()));
+    return producto;
   }
 
   @Override
@@ -675,7 +780,7 @@ public class ProductoServiceImpl implements IProductoService {
             productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
       }
       this.calcularPrecioBonificado(p);
-      this.validarOperacion(TipoDeOperacion.ACTUALIZACION, p);
+      this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.saveAll(productos);
     logger.warn("Los Productos {} se modificaron correctamente.", productos);
@@ -770,37 +875,58 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
-    if (productosParaVerificarStockDTO.getIdSucursal() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_consulta_stock_sin_sucursal", null, Locale.getDefault()));
-    }
     List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
+    HashMap<Long, BigDecimal> listaIdsAndCantidades = new HashMap<>();
     if (longitudIds == longitudCantidades) {
+      if (productosParaVerificarStockDTO.getIdPedido() != null) {
+        List<RenglonPedido> renglonesDelPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(productosParaVerificarStockDTO.getIdPedido());
+        if (!renglonesDelPedido.isEmpty()){
+        renglonesDelPedido.forEach(renglonPedido -> listaIdsAndCantidades.put(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
+        }
+      }
       for (int i = 0; i < longitudIds; i++) {
-        BigDecimal cantidadLambda = productosParaVerificarStockDTO.getCantidad()[i];
         Producto producto =
             this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        producto.getCantidadEnSucursales().stream()
-            .filter(
-                cantidadEnSucursal ->
-                    cantidadEnSucursal
-                        .getIdSucursal()
-                        .equals(productosParaVerificarStockDTO.getIdSucursal()))
-            .forEach(
-                cantidadEnSucursal -> {
-                  if (!producto.isIlimitado()
-                      && cantidadEnSucursal.getCantidad().compareTo(cantidadLambda) < 0) {
-                    ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
-                    productoFaltanteDTO.setIdProducto(producto.getIdProducto());
-                    productoFaltanteDTO.setCodigo(producto.getCodigo());
-                    productoFaltanteDTO.setDescripcion(producto.getDescripcion());
-                    productoFaltanteDTO.setCantidadSolicitada(cantidadLambda);
-                    productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
-                    productosFaltantes.add(productoFaltanteDTO);
-                  }
-                });
+        BigDecimal cantidadParaCalcular = productosParaVerificarStockDTO.getCantidad()[i];
+        if (!listaIdsAndCantidades.isEmpty() && listaIdsAndCantidades.get(producto.getIdProducto()) != null) {
+            cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
+        }
+        BigDecimal cantidadSolicitada = cantidadParaCalcular;
+        if (productosParaVerificarStockDTO.getIdSucursal() != null) {
+          producto.getCantidadEnSucursales().stream()
+              .filter(
+                  cantidadEnSucursal ->
+                      cantidadEnSucursal
+                          .getIdSucursal()
+                          .equals(productosParaVerificarStockDTO.getIdSucursal()))
+              .forEach(
+                  cantidadEnSucursal -> {
+                    if (!producto.isIlimitado()
+                        && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0
+                    && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
+                      ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+                      productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+                      productoFaltanteDTO.setCodigo(producto.getCodigo());
+                      productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+                      productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
+                      productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
+                      productosFaltantes.add(productoFaltanteDTO);
+                    }
+                  });
+        } else if (producto
+                .getCantidadTotalEnSucursales()
+                .compareTo(cantidadSolicitada)
+            < 0) {
+          ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+          productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+          productoFaltanteDTO.setCodigo(producto.getCodigo());
+          productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+          productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
+          productoFaltanteDTO.setCantidadDisponible(producto.getCantidadTotalEnSucursales());
+          productosFaltantes.add(productoFaltanteDTO);
+        }
       }
     } else {
       throw new BusinessServiceException(
@@ -892,7 +1018,6 @@ public class ProductoServiceImpl implements IProductoService {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          logger.error(ex.getMessage());
           throw new ServiceException(messageSource.getMessage(
             "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
@@ -901,7 +1026,6 @@ public class ProductoServiceImpl implements IProductoService {
           return JasperExportManager.exportReportToPdf(
               JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
-          logger.error(ex.getMessage());
           throw new ServiceException(messageSource.getMessage(
             "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
@@ -924,7 +1048,6 @@ public class ProductoServiceImpl implements IProductoService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
     } catch (IOException ex) {

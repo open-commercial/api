@@ -5,18 +5,15 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
@@ -25,40 +22,37 @@ import sic.exception.BusinessServiceException;
 import sic.repository.FacturaRepository;
 import sic.repository.RenglonFacturaRepository;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class FacturaServiceImpl implements IFacturaService {
 
   private final FacturaRepository<Factura> facturaRepository;
   private final RenglonFacturaRepository renglonFacturaRepository;
   private final IProductoService productoService;
-  private final IPedidoService pedidoService;
   private final INotaService notaService;
-  private final ICuentaCorrienteService cuentaCorrienteService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   @Lazy
   public FacturaServiceImpl(
-      FacturaRepository<Factura> facturaRepository,
-      RenglonFacturaRepository renglonFacturaRepository,
-      IProductoService productoService,
-      IPedidoService pedidoService,
-      INotaService notaService,
-      ICuentaCorrienteService cuentaCorrienteService,
-      MessageSource messageSource) {
+    FacturaRepository<Factura> facturaRepository,
+    RenglonFacturaRepository renglonFacturaRepository,
+    IProductoService productoService,
+    INotaService notaService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.facturaRepository = facturaRepository;
     this.renglonFacturaRepository = renglonFacturaRepository;
     this.productoService = productoService;
-    this.pedidoService = pedidoService;
     this.notaService = notaService;
-    this.cuentaCorrienteService = cuentaCorrienteService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -69,40 +63,6 @@ public class FacturaServiceImpl implements IFacturaService {
     } else {
       throw new EntityNotFoundException(
           messageSource.getMessage("mensaje_factura_eliminada", null, Locale.getDefault()));
-    }
-  }
-
-  @Override
-  @Transactional
-  public void eliminarFactura(long idFactura) {
-    Factura factura = this.getFacturaNoEliminadaPorId(idFactura);
-    if (factura instanceof FacturaVenta) {
-      if (factura.getCae() != 0L) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_eliminar_factura_aprobada", null, Locale.getDefault()));
-      }
-      if (notaService.existsByFacturaVentaAndEliminada((FacturaVenta) factura)) {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
-      }
-      this.cuentaCorrienteService.asentarEnCuentaCorriente(
-          (FacturaVenta) factura, TipoDeOperacion.ELIMINACION);
-      productoService.actualizarStock(
-          this.getIdsProductosYCantidades(factura),
-          factura.getIdSucursal(),
-          TipoDeOperacion.ELIMINACION,
-          Movimiento.VENTA,
-          factura.getTipoComprobante());
-      factura.setEliminada(true);
-      if (factura.getPedido() != null) {
-        pedidoService.actualizarEstadoPedido(factura.getPedido());
-      }
-      facturaRepository.save(factura);
-    } else {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -166,7 +126,7 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public Factura procesarFactura(Factura factura) {
     this.calcularCantidadDeArticulos(factura);
-    this.validarOperacion(factura);
+    this.validarReglasDeNegocio(factura);
     return factura;
   }
 
@@ -229,7 +189,8 @@ public class FacturaServiceImpl implements IFacturaService {
     return idsYCantidades;
   }
 
-  private void validarOperacion(Factura factura) {
+  @Override
+  public void validarReglasDeNegocio(Factura factura) {
     // Requeridos
     if (factura instanceof FacturaCompra && factura.getFecha().isAfter(LocalDateTime.now())) {
       throw new BusinessServiceException(
@@ -334,15 +295,10 @@ public class FacturaServiceImpl implements IFacturaService {
       }
     }
     if (movimiento == Movimiento.VENTA) {
-      switch (tipoDeComprobante) {
-        case FACTURA_A:
-        case FACTURA_X:
-          resultado = producto.getPrecioVentaPublico();
-          break;
-        default:
-          resultado = producto.getPrecioLista();
-          break;
-      }
+      resultado = switch (tipoDeComprobante) {
+        case FACTURA_A, FACTURA_X -> producto.getPrecioVentaPublico();
+        default -> producto.getPrecioLista();
+      };
     }
     if (movimiento == Movimiento.PEDIDO) {
       resultado = producto.getPrecioLista();
@@ -354,7 +310,8 @@ public class FacturaServiceImpl implements IFacturaService {
   public List<RenglonFactura> calcularRenglones(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      @Valid List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO) {
+      List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO) {
+    nuevosRenglonesFacturaDTO.forEach(customValidator::validar);
     List<RenglonFactura> renglones = new ArrayList<>();
     nuevosRenglonesFacturaDTO.forEach(
         nuevoRenglonFacturaDTO -> {
@@ -373,7 +330,8 @@ public class FacturaServiceImpl implements IFacturaService {
   public RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
       Movimiento movimiento,
-      @Valid NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO) {
+      NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO) {
+    customValidator.validar(nuevoRenglonFacturaDTO);
     Producto producto = productoService.getProductoNoEliminadoPorId(nuevoRenglonFacturaDTO.getIdProducto());
     RenglonFactura nuevoRenglon = new RenglonFactura();
     nuevoRenglon.setIdProductoItem(producto.getIdProducto());

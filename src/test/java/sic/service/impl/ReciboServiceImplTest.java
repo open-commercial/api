@@ -1,9 +1,11 @@
 package sic.service.impl;
 
+import com.mercadopago.resources.Payment;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
@@ -16,18 +18,19 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {ReciboServiceImpl.class})
 class ReciboServiceImplTest {
 
-  @Mock IConfiguracionSucursalService configuracionSucursalServiceInterfaceMock;
-  @Mock IFormaDePagoService formaDePagoServiceInterfaceMock;
-  @Mock ISucursalService sucursalServiceInterfaceMock;
-  @Mock ReciboRepository reciboRepositoryMock;
+  @MockBean IConfiguracionSucursalService configuracionSucursalServiceInterface;
+  @MockBean IFormaDePagoService formaDePagoService;
+  @MockBean ISucursalService sucursalService;
+  @MockBean ReciboRepository reciboRepository;
 
-  @InjectMocks ReciboServiceImpl reciboServiceImpl;
+  @Autowired ReciboServiceImpl reciboServiceImpl;
 
   @Test
   void shouldCrearDosRecibos() {
@@ -35,23 +38,23 @@ class ReciboServiceImplTest {
     sucursal.setNombre("Sucursal Test");
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
-    when(configuracionSucursalServiceInterfaceMock.getConfiguracionSucursal(sucursal))
+    when(configuracionSucursalServiceInterface.getConfiguracionSucursal(sucursal))
         .thenReturn(configuracionSucursal);
-    when(sucursalServiceInterfaceMock.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     FormaDePago formaDePago = new FormaDePago();
     formaDePago.setNombre("Efectivo");
-    when(formaDePagoServiceInterfaceMock.getFormasDePagoNoEliminadoPorId(1L)).thenReturn(formaDePago);
+    when(formaDePagoService.getFormasDePagoNoEliminadoPorId(1L)).thenReturn(formaDePago);
     formaDePago.setNombre("Tarjeta Nativa");
-    when(formaDePagoServiceInterfaceMock.getFormasDePagoNoEliminadoPorId(2L)).thenReturn(formaDePago);
-    when(reciboRepositoryMock.findTopBySucursalAndNumSerieOrderByNumReciboDesc(sucursal, 2)).thenReturn(null);
+    when(formaDePagoService.getFormasDePagoNoEliminadoPorId(2L)).thenReturn(formaDePago);
+    when(reciboRepository.findTopBySucursalAndNumSerieOrderByNumReciboDesc(sucursal, 2))
+        .thenReturn(null);
     Long[] idsFormasDePago = {1L, 2L};
     BigDecimal[] montos = {new BigDecimal("100"), new BigDecimal("250")};
-    BigDecimal totalFactura = new BigDecimal("350");
     Cliente cliente = new Cliente();
     Usuario usuario = new Usuario();
     List<Recibo> recibos =
         reciboServiceImpl.construirRecibos(
-            idsFormasDePago, sucursal, cliente, usuario, montos, totalFactura, LocalDateTime.now());
+            idsFormasDePago, 1L, cliente, usuario, montos, LocalDateTime.now());
     assertEquals(2, recibos.size());
     assertEquals(new BigDecimal("100"), recibos.get(0).getMonto());
     assertEquals(new BigDecimal("250"), recibos.get(1).getMonto());
@@ -63,23 +66,23 @@ class ReciboServiceImplTest {
     sucursal.setNombre("Sucursal Test");
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
-    when(configuracionSucursalServiceInterfaceMock.getConfiguracionSucursal(sucursal))
-            .thenReturn(configuracionSucursal);
-    when(sucursalServiceInterfaceMock.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(configuracionSucursalServiceInterface.getConfiguracionSucursal(sucursal))
+        .thenReturn(configuracionSucursal);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     FormaDePago formaDePago = new FormaDePago();
     formaDePago.setNombre("Efectivo");
-    when(formaDePagoServiceInterfaceMock.getFormasDePagoNoEliminadoPorId(1L)).thenReturn(formaDePago);
+    when(formaDePagoService.getFormasDePagoNoEliminadoPorId(1L)).thenReturn(formaDePago);
     formaDePago.setNombre("Tarjeta Nativa");
-    when(formaDePagoServiceInterfaceMock.getFormasDePagoNoEliminadoPorId(2L)).thenReturn(formaDePago);
-    when(reciboRepositoryMock.findTopBySucursalAndNumSerieOrderByNumReciboDesc(sucursal, 2)).thenReturn(null);
+    when(formaDePagoService.getFormasDePagoNoEliminadoPorId(2L)).thenReturn(formaDePago);
+    when(reciboRepository.findTopBySucursalAndNumSerieOrderByNumReciboDesc(sucursal, 2))
+        .thenReturn(null);
     Long[] idsFormasDePago = {2L, 2L};
     BigDecimal[] montos = {new BigDecimal("100"), new BigDecimal("250")};
-    BigDecimal totalFactura = new BigDecimal("350");
     Cliente cliente = new Cliente();
     Usuario usuario = new Usuario();
     List<Recibo> recibos =
-            reciboServiceImpl.construirRecibos(
-                    idsFormasDePago, sucursal, cliente, usuario, montos, totalFactura, LocalDateTime.now());
+        reciboServiceImpl.construirRecibos(
+            idsFormasDePago, 1L, cliente, usuario, montos, LocalDateTime.now());
     assertEquals(1, recibos.size());
     assertEquals(new BigDecimal("350"), recibos.get(0).getMonto());
   }
@@ -149,5 +152,24 @@ class ReciboServiceImplTest {
             .idSucursal(7L)
             .build();
     assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
+  }
+
+  @Test
+  void shouldConstruirReciboPorPayment() {
+    Sucursal sucursal = new Sucursal();
+    Usuario usuario = new Usuario();
+    Cliente cliente = new Cliente();
+    Payment payment = new Payment();
+    payment.setPaymentMethodId("PaymentMethodId");
+    payment.setTransactionAmount(100F);
+    FormaDePago formaDePago = new FormaDePago();
+    formaDePago.setNombre("Mercado Pago");
+    when(formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO))
+        .thenReturn(formaDePago);
+    Recibo recibo =
+        reciboServiceImpl.construirReciboPorPayment(sucursal, usuario, cliente, payment);
+    assertNotNull(recibo);
+    assertTrue(recibo.getConcepto().startsWith("Pago en MercadoPago"));
+    assertEquals(new BigDecimal("100.0"), recibo.getMonto());
   }
 }

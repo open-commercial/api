@@ -54,7 +54,6 @@ class ProductoRepositoryTest {
           producto.setBulto(BigDecimal.ONE);
           producto.setFechaAlta(LocalDateTime.now());
           producto.setFechaUltimaModificacion(LocalDateTime.now());
-
           Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
           CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
           cantidadEnSucursal.setCantidad(BigDecimal.ONE);
@@ -65,7 +64,6 @@ class ProductoRepositoryTest {
               producto.getCantidadEnSucursales().stream()
                   .map(CantidadEnSucursal::getCantidad)
                   .reduce(BigDecimal.ZERO, BigDecimal::add));
-
           Producto productoEnPrimeraInstancia = testEntityManager.persistFlushFind(producto);
           testEntityManager.detach(productoEnPrimeraInstancia);
           Producto productoEnSegundaInstancia =

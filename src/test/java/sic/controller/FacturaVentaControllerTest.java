@@ -6,9 +6,8 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.impl.crypto.MacProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,46 +30,34 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = AppTest.class)
+@ContextConfiguration(classes = {FacturaVentaController.class, MessageSource.class})
 class FacturaVentaControllerTest {
 
-  @Autowired MessageSource messageSourceTest;
+  @MockBean SucursalServiceImpl sucursalService;
+  @MockBean TransportistaServiceImpl transportistaService;
+  @MockBean ClienteServiceImpl clienteService;
+  @MockBean UsuarioServiceImpl usuarioService;
+  @MockBean FacturaServiceImpl facturaService;
+  @MockBean ReciboServiceImpl reciboService;
+  @MockBean FacturaVentaServiceImpl facturaVentaService;
+  @MockBean AuthServiceImpl authService;
+  @MockBean PedidoServiceImpl pedidoService;
+  @MockBean MessageSource messageSource;
 
-  @Mock MessageSource messageSourceTestMock;
-  @Mock SucursalServiceImpl sucursalService;
-  @Mock TransportistaServiceImpl transportistaService;
-  @Mock ClienteServiceImpl clienteService;
-  @Mock UsuarioServiceImpl usuarioService;
-  @Mock FacturaServiceImpl facturaService;
-  @Mock ReciboServiceImpl reciboService;
-  @Mock FacturaVentaServiceImpl facturaVentaService;
-  @Mock AuthServiceImpl authService;
-
-  @InjectMocks FacturaVentaController facturaVentaController;
+  @Autowired FacturaVentaController facturaVentaController;
 
   @Test
   void shouldGuardarFacturaVenta() {
     NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
         NuevaFacturaVentaDTO.builder().tipoDeComprobante(TipoDeComprobante.PEDIDO).build();
-    when(messageSourceTestMock.getMessage(
-            "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, "headers"));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSourceTest.getMessage(
-                    "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault())));
+    assertThrows(
+        BusinessServiceException.class,
+        () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, 1L, "headers"));
+    verify(messageSource).getMessage(eq("mensaje_tipo_de_comprobante_no_valido"), any(), any());
     Sucursal sucursal = new Sucursal();
     sucursal.setNombre("Sucursal prueba");
     when(sucursalService.getSucursalPorId(2L)).thenReturn(sucursal);
@@ -83,65 +70,43 @@ class FacturaVentaControllerTest {
             .idSucursal(2L)
             .idCliente(1L)
             .build();
-    when(messageSourceTestMock.getMessage(
-            "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()))
-        .thenReturn(
-            messageSourceTest.getMessage(
-                "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault()));
-    thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, "headers"));
-    assertNotNull(thrown.getMessage());
-    assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSourceTest.getMessage(
-                    "mensaje_ubicacion_facturacion_vacia", null, Locale.getDefault())));
-    Transportista transportista = new Transportista();
-    transportista.setNombre("OCA");
-    when(transportistaService.getTransportistaNoEliminadoPorId(4L)).thenReturn(transportista);
-    Ubicacion ubicacion = new Ubicacion();
-    cliente.setUbicacionFacturacion(ubicacion);
-    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
-    NuevaFacturaVentaDTO nuevaFacturaVenta3DTO =
-        NuevaFacturaVentaDTO.builder()
-            .tipoDeComprobante(TipoDeComprobante.FACTURA_A)
-            .idSucursal(2L)
-            .idCliente(1L)
-            .idTransportista(4L)
-            .build();
-    Usuario usuario = new Usuario();
-    usuario.setUsername("usuario");
-    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
+    Pedido pedido = new Pedido();
+    pedido.setIdPedido(1L);
+    pedido.setSucursal(sucursal);
+    when(pedidoService.getPedidoNoEliminadoPorId(1L)).thenReturn(new Pedido());
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
     ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
     List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
     SecretKey secretKey = MacProvider.generateKey();
     String token =
-        Jwts.builder()
-            .setIssuedAt(Date.from(zdtNow.toInstant()))
-            .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-            .signWith(SignatureAlgorithm.HS512, secretKey)
-            .claim("idUsuario", 1L)
-            .claim("roles", roles)
-            .claim("app", Aplicacion.SIC_COM)
-            .compact();
+            Jwts.builder()
+                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                    .claim("idUsuario", 1L)
+                    .claim("roles", roles)
+                    .claim("app", Aplicacion.SIC_COM)
+                    .compact();
     Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-    List<RenglonFactura> renglones = new ArrayList<>();
-    when(facturaService.calcularRenglones(any(), any(), any())).thenReturn(renglones);
-    List<FacturaVenta> facturas = new ArrayList<>();
+    Usuario usuario = new Usuario();
+    usuario.setUsername("usuario");
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     FacturaVenta facturaVenta = new FacturaVenta();
-    facturaVenta.setNumSerie(1L);
-    facturaVenta.setNumFactura(123L);
-    facturas.add(facturaVenta);
-    when(facturaVentaService.guardar(any(), any(), any())).thenReturn(facturas);
-    assertEquals(
-        facturaVenta,
-        facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta3DTO, "headers").get(0));
+    facturaVenta.setCliente(cliente);
+    facturaVenta.setUsuario(usuario);
+    facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
+    when(facturaVentaService.construirFacuraVenta(any(), any(), any())).thenReturn(facturaVenta);
+    facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, 1L, "headers");
+    List<FacturaVenta> facturaVentas = new ArrayList<>();
+    facturaVentas.add(facturaVenta);
+    verify(facturaVentaService, times(1))
+            .guardar(facturaVentas, 1L, Collections.emptyList());
+    facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_X);
+    when(facturaVentaService.construirFacuraVenta(any(), any(), any())).thenReturn(facturaVenta);
+    verify(facturaVentaService, times(1))
+            .guardar(facturaVentas, 1L, Collections.emptyList());
   }
 
   @Test
@@ -206,7 +171,7 @@ class FacturaVentaControllerTest {
     usuario.setUsername("usuario");
     usuario.setRoles(Collections.singletonList(Rol.ADMINISTRADOR));
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
-    when(facturaVentaService.getTiposDeComprobanteVenta(any(), any()))
+    when(facturaVentaService.getTiposDeComprobanteVenta(any(), any(), any()))
         .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.FACTURA_A});
     assertEquals(
         new TipoDeComprobante[] {TipoDeComprobante.FACTURA_A}[0],
@@ -225,7 +190,7 @@ class FacturaVentaControllerTest {
                     .compact())
             .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-    when(facturaVentaService.getTiposDeComprobanteVenta(any(), any()))
+    when(facturaVentaService.getTiposDeComprobanteVenta(any(), any(), any()))
         .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.PEDIDO});
     assertEquals(
         new TipoDeComprobante[] {TipoDeComprobante.PEDIDO}[0],
@@ -260,8 +225,9 @@ class FacturaVentaControllerTest {
     when(facturaService.calcularRenglones(
             TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevosRenglonesFacturaDTO))
         .thenReturn(renglonesFacturas);
-    facturaVentaController.calcularRenglonesVenta(
-        nuevosRenglonesFacturaDTO, TipoDeComprobante.FACTURA_A);
+    assertNotNull(
+        facturaVentaController.calcularRenglonesVenta(
+            nuevosRenglonesFacturaDTO, TipoDeComprobante.FACTURA_A));
   }
 
   @Test
@@ -355,5 +321,6 @@ class FacturaVentaControllerTest {
   @Test
   void shouldEnviarFacturaVentaPorEmail() {
     facturaVentaController.enviarFacturaVentaPorEmail(1L);
+    verify(facturaVentaService).enviarFacturaVentaPorEmail(1L);
   }
 }

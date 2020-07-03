@@ -5,12 +5,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
-
-import javax.validation.Valid;
 
 public interface IReciboService {
 
@@ -24,18 +23,20 @@ public interface IReciboService {
 
   BigDecimal getTotalRecibos(BusquedaReciboCriteria criteria);
 
-  Recibo guardar(@Valid Recibo recibo);
+  Recibo guardar(Recibo recibo);
 
-  void validarOperacion(Recibo recibo);
+  void validarReglasDeNegocio(Recibo recibo);
 
   List<Recibo> construirRecibos(
       Long[] formaDePago,
-      Sucursal sucursal,
+      Long idSucursal,
       Cliente cliente,
       Usuario usuario,
       BigDecimal[] monto,
-      BigDecimal totalFactura,
       LocalDateTime fecha);
+
+  Recibo construirReciboPorPayment(
+      Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment);
 
   long getSiguienteNumeroRecibo(long idSucursal, long serie);
 

@@ -7,7 +7,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +27,9 @@ import sic.exception.BusinessServiceException;
 import sic.repository.ProveedorRepository;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IUbicacionService;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class ProveedorServiceImpl implements IProveedorService {
 
   private final ProveedorRepository proveedorRepository;
@@ -40,17 +38,20 @@ public class ProveedorServiceImpl implements IProveedorService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public ProveedorServiceImpl(
-      ProveedorRepository proveedorRepository,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IUbicacionService ubicacionService,
-      MessageSource messageSource) {
+    ProveedorRepository proveedorRepository,
+    ICuentaCorrienteService cuentaCorrienteService,
+    IUbicacionService ubicacionService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.proveedorRepository = proveedorRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.ubicacionService = ubicacionService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -118,7 +119,8 @@ public class ProveedorServiceImpl implements IProveedorService {
     return proveedorRepository.findByRazonSocialAndEliminado(razonSocial, false);
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Proveedor proveedor) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Proveedor proveedor) {
     // Duplicados
     // ID Fiscal
     if (proveedor.getIdFiscal() != null) {
@@ -161,7 +163,8 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   @Override
   @Transactional
-  public Proveedor guardar(@Validated Proveedor proveedor) {
+  public Proveedor guardar(Proveedor proveedor) {
+    customValidator.validar(proveedor);
     proveedor.setNroProveedor(this.generarNroDeProveedor());
     if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getIdLocalidad() != null) {
       proveedor
@@ -169,7 +172,7 @@ public class ProveedorServiceImpl implements IProveedorService {
           .setLocalidad(
               ubicacionService.getLocalidadPorId(proveedor.getUbicacion().getIdLocalidad()));
     }
-    this.validarOperacion(TipoDeOperacion.ALTA, proveedor);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, proveedor);
     proveedor = proveedorRepository.save(proveedor);
     CuentaCorrienteProveedor cuentaCorrienteProveedor = new CuentaCorrienteProveedor();
     cuentaCorrienteProveedor.setProveedor(proveedor);
@@ -183,8 +186,9 @@ public class ProveedorServiceImpl implements IProveedorService {
 
   @Override
   @Transactional
-  public void actualizar(@Valid Proveedor proveedor) {
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, proveedor);
+  public void actualizar(Proveedor proveedor) {
+    customValidator.validar(proveedor);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, proveedor);
     proveedorRepository.save(proveedor);
   }
 

@@ -6,6 +6,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.persistence.*;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
@@ -59,6 +62,16 @@ public class ConfiguracionSucursal implements Serializable {
   private String signTokenWSAA;
 
   private boolean puntoDeRetiro;
+
+  private boolean predeterminada;
+
+  @NotNull(message = "{mensaje_cds_sin_vencimiento_largo}")
+  @DecimalMin(value = "1", message = "{mensaje_cds_valor_no_valido}")
+  private long vencimientoLargo;
+
+  @NotNull(message = "{mensaje_cds_sin_vencimiento_corto}")
+  @DecimalMin(value = "1", message = "{mensaje_cds_valor_no_valido}")
+  private long vencimientoCorto;
 
   private LocalDateTime fechaGeneracionTokenWSAA;
 

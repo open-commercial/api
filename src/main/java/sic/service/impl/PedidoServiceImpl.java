@@ -11,7 +11,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-import javax.validation.Valid;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperFillManager;
@@ -26,9 +25,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
@@ -40,9 +39,9 @@ import sic.repository.PedidoRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.util.CalculosComprobante;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
@@ -53,26 +52,30 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
   private final IConfiguracionSucursalService configuracionSucursal;
+  private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public PedidoServiceImpl(
-      PedidoRepository pedidoRepository,
-      RenglonPedidoRepository renglonPedidoRepository,
-      IFacturaVentaService facturaVentaService,
-      IUsuarioService usuarioService,
-      IClienteService clienteService,
-      IProductoService productoService,
-      ICorreoElectronicoService correoElectronicoService,
-      IConfiguracionSucursalService configuracionSucursal,
-      ICuentaCorrienteService cuentaCorrienteService,
-      ModelMapper modelMapper,
-      MessageSource messageSource) {
+    PedidoRepository pedidoRepository,
+    RenglonPedidoRepository renglonPedidoRepository,
+    IFacturaVentaService facturaVentaService,
+    IUsuarioService usuarioService,
+    IClienteService clienteService,
+    IProductoService productoService,
+    ICorreoElectronicoService correoElectronicoService,
+    IConfiguracionSucursalService configuracionSucursal,
+    IReciboService reciboService,
+    ICuentaCorrienteService cuentaCorrienteService,
+    ModelMapper modelMapper,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.facturaVentaService = facturaVentaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
@@ -81,22 +84,28 @@ public class PedidoServiceImpl implements IPedidoService {
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
     this.configuracionSucursal = configuracionSucursal;
+    this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
-  private void validarOperacion(TipoDeOperacion operacion, Pedido pedido) {
+  @Override
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Pedido pedido) {
     // Entrada de Datos
     // Validar Estado
     EstadoPedido estado = pedido.getEstado();
     if ((estado != EstadoPedido.ABIERTO)
-        && (estado != EstadoPedido.ACTIVO)
         && (estado != EstadoPedido.CERRADO)) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaja_estado_no_valido", null, Locale.getDefault()));
     }
     // Duplicados
+    if (operacion == TipoDeOperacion.ALTA && pedido.getEstado() != EstadoPedido.ABIERTO) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaja_estado_no_valido", null, Locale.getDefault()));
+    }
     if (operacion == TipoDeOperacion.ALTA
         && pedidoRepository.findByNroPedidoAndSucursalAndEliminado(
                 pedido.getNroPedido(), pedido.getSucursal(), false)
@@ -116,6 +125,25 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_detalle_envio_vacio", null, Locale.getDefault()));
     }
+    //Stock
+    long[] idProducto = new long[pedido.getRenglones().size()];
+    BigDecimal[] cantidad =  new BigDecimal[pedido.getRenglones().size()];
+    int i = 0;
+    for (RenglonPedido renglonPedido : pedido.getRenglones()) {
+      idProducto[i] = renglonPedido.getIdProductoItem();
+      cantidad[i] = renglonPedido.getCantidad();
+      i++;
+    }
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder()
+            .cantidad(cantidad)
+            .idProducto(idProducto)
+            .idPedido(pedido.getIdPedido())
+            .build();
+    if ((operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)
+            && !productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_pedido_sin_stock", null, Locale.getDefault()));
+    }
   }
 
   @Override
@@ -128,67 +156,6 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_pedido_no_existente", null, Locale.getDefault()));
     }
-  }
-
-  @Override
-  public void actualizarEstadoPedido(Pedido pedido) {
-    pedido.setEstado(EstadoPedido.ACTIVO);
-    if (this.getFacturasDelPedido(pedido.getIdPedido()).isEmpty()) {
-      pedido.setEstado(EstadoPedido.ABIERTO);
-    }
-    if (facturaVentaService.pedidoTotalmenteFacturado(pedido)) {
-      pedido.setEstado(EstadoPedido.CERRADO);
-    }
-  }
-
-  @Override
-  public Pedido calcularTotalActualDePedido(Pedido pedido) {
-    BigDecimal totalActual = BigDecimal.ZERO;
-    BigDecimal bonificacionNeta = BigDecimal.ZERO;
-    List<RenglonPedido> renglonesDelPedido =
-        this.getRenglonesDelPedidoOrdenadoPorIdProducto(pedido.getIdPedido());
-    List<Long> idsProductos = new ArrayList<>();
-    renglonesDelPedido.forEach(r -> idsProductos.add(r.getIdProductoItem()));
-    List<Producto> productos = productoService.getMultiplesProductosPorId(idsProductos);
-    for (int i = 0; i < renglonesDelPedido.size(); ++i) {
-      boolean cumpleCondicionDeOferta =
-          productos.get(i).isOferta() && productos.get(i).getPorcentajeBonificacionOferta() != null;
-      boolean cumpleCondicionDeCantidad =
-          renglonesDelPedido.get(i).getCantidad().compareTo(productos.get(i).getBulto()) >= 0;
-      if (cumpleCondicionDeOferta && cumpleCondicionDeCantidad) {
-        bonificacionNeta =
-            bonificacionNeta.add(
-                CalculosComprobante.calcularProporcion(
-                    productos.get(i).getPrecioLista(),
-                    productos.get(i).getPorcentajeBonificacionOferta()));
-      } else if (cumpleCondicionDeCantidad) {
-        bonificacionNeta =
-            bonificacionNeta.add(
-                CalculosComprobante.calcularProporcion(
-                    productos.get(i).getPrecioLista(),
-                    productos.get(i).getPorcentajeBonificacionPrecio()));
-      }
-      totalActual =
-          totalActual.add(
-              CalculosComprobante.calcularImporte(
-                  renglonesDelPedido.get(i).getCantidad(),
-                  productos.get(i).getPrecioLista(),
-                  bonificacionNeta));
-      bonificacionNeta = BigDecimal.ZERO;
-    }
-    BigDecimal porcentajeDescuento =
-        pedido.getDescuentoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP);
-    BigDecimal porcentajeRecargo =
-        pedido.getRecargoPorcentaje().divide(CIEN, 2, RoundingMode.HALF_UP);
-    pedido.setTotalActual(
-        totalActual
-            .subtract(totalActual.multiply(porcentajeDescuento))
-            .add(totalActual.multiply(porcentajeRecargo)));
-    pedido
-        .getCliente()
-        .setSaldoCuentaCorriente(
-            cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente()));
-    return pedido;
   }
 
   @Override
@@ -206,13 +173,11 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<Factura> getFacturasDelPedido(long idPedido) {
-    return facturaVentaService.getFacturasDelPedido(idPedido);
-  }
-
-  @Override
   @Transactional
-  public Pedido guardar(Pedido pedido) {
+  public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
+    if (pedido.getFecha() == null) {
+      pedido.setFecha(LocalDateTime.now());
+    }
     BigDecimal importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
@@ -222,22 +187,18 @@ public class PedidoServiceImpl implements IPedidoService {
     BigDecimal descuentoNeto =
         importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
     BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
-    if (pedido.getCliente().getMontoCompraMinima() != null
-        && total.compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
-    }
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
     pedido.setDescuentoNeto(descuentoNeto);
-    pedido.setTotalEstimado(total);
-    pedido.setTotalActual(total);
+    pedido.setTotal(total);
+    this.validarPedidoContraPagos(pedido, recibos);
+    if (recibos != null && !recibos.isEmpty()) {
+      recibos.forEach(reciboService::guardar);
+    }
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
-    pedido.setEstado(EstadoPedido.ABIERTO);
     if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
@@ -249,7 +210,9 @@ public class PedidoServiceImpl implements IPedidoService {
                     productoService
                         .getProductoNoEliminadoPorId(renglonPedido.getIdProductoItem())
                         .getUrlImagen()));
-    this.validarOperacion(TipoDeOperacion.ALTA, pedido);
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
@@ -268,8 +231,15 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
-    this.calcularTotalActualDePedido(pedido);
     return pedido;
+  }
+
+  @Override
+  @Transactional
+  public void cambiarFechaDeVencimiento(long idPedido) {
+    Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
+    pedido.setFechaVencimiento(pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    pedidoRepository.save(pedido);
   }
 
   private void calcularCantidadDeArticulos(Pedido pedido) {
@@ -341,20 +311,18 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
-    Page<Pedido> pedidos =
-        pedidoRepository.findAll(
+    return pedidoRepository.findAll(
             this.getBuilderPedido(criteria, idUsuarioLoggedIn),
             this.getPageable(
-                (criteria.getPagina() == null || criteria.getPagina() < 0)
-                    ? 0
-                    : criteria.getPagina(),
-                criteria.getOrdenarPor(),
-                criteria.getSentido()));
-    pedidos.getContent().forEach(this::calcularTotalActualDePedido);
-    return pedidos;
+                    (criteria.getPagina() == null || criteria.getPagina() < 0)
+                            ? 0
+                            : criteria.getPagina(),
+                    criteria.getOrdenarPor(),
+                    criteria.getSentido()));
   }
 
-  private BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
+  @Override
+  public BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn) {
     QPedido qPedido = QPedido.pedido;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() != null) {
@@ -393,16 +361,14 @@ public class PedidoServiceImpl implements IPedidoService {
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
-          case VIAJANTE:
-            rsPredicate.or(qPedido.usuario.eq(usuarioLogueado));
-            break;
-          case COMPRADOR:
+          case VIAJANTE -> rsPredicate.or(qPedido.usuario.eq(usuarioLogueado));
+          case COMPRADOR -> {
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
+                    clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qPedido.cliente.eq(clienteRelacionado));
             }
-            break;
+          }
         }
       }
       builder.and(rsPredicate);
@@ -418,30 +384,23 @@ public class PedidoServiceImpl implements IPedidoService {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      return switch (sentido) {
+        case "ASC" -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+      };
     }
   }
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido) {
+  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, List<Recibo> recibos) {
     if (pedido.getEstado() == EstadoPedido.CERRADO) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pedido_facturado", null, Locale.getDefault()));
-    }
-    if (pedido.getEstado() == EstadoPedido.ACTIVO) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_pedido_procesado", null, Locale.getDefault()));
     }
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
@@ -468,36 +427,94 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setDescuentoNeto(resultados.getDescuentoNeto());
     pedido.setRecargoPorcentaje(resultados.getRecargoPorcentaje());
     pedido.setRecargoNeto(resultados.getRecargoNeto());
-    pedido.setTotalEstimado(resultados.getTotal());
-    pedido.setTotalActual(resultados.getTotal());
+    pedido.setTotal(resultados.getTotal());
+    this.validarPedidoContraPagos(pedido, recibos);
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
+    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
+  }
+
+  private void validarPedidoContraPagos(Pedido pedido, List<Recibo> recibos) {
+    if (pedido.getCliente().isPuedeComprarAPlazo()) {
+      pedido.setFechaVencimiento(
+              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    } else {
+      BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
+      if (recibos != null && !recibos.isEmpty()) {
+        BigDecimal totalRecibos = recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal saldoParaCubrir = saldoCC.subtract(pedido.getTotal()).setScale(3, RoundingMode.HALF_UP);
+        if (totalRecibos.add(saldoParaCubrir).compareTo(BigDecimal.ZERO) < 0) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+        } else {
+          pedido.setFechaVencimiento(
+                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+        }
+        recibos.forEach(reciboService::guardar);
+      } else {
+        if (saldoCC.compareTo(BigDecimal.ZERO) >= 0) {
+          pedido.setFechaVencimiento(
+                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
+        } else {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_cliente_saldar_cc", null, Locale.getDefault()));
+        }
+      }
+    }
+    if (pedido.getCliente().getMontoCompraMinima() != null
+            && pedido.getTotal().compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));
+    }
   }
 
   @Override
   @Transactional
-  public void actualizarFacturasDelPedido(@Valid Pedido pedido, List<Factura> facturas) {
+  public void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas) {
+    customValidator.validar(pedido);
     pedido.setFacturas(facturas);
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, pedido);
     pedidoRepository.save(pedido);
   }
 
   @Override
   @Transactional
-  public boolean eliminar(long idPedido) {
+  public void cancelar(Pedido pedido) {
+    if (pedido.getEstado() == EstadoPedido.ABIERTO) {
+      pedido.setEstado(EstadoPedido.CANCELADO);
+      productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+      pedido = pedidoRepository.save(pedido);
+      logger.warn(
+          messageSource.getMessage(
+              "mensaje_pedido_cancelado", new Object[] {pedido}, Locale.getDefault()));
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_no_se_puede_cancelar_pedido",
+              new Object[] {pedido.getEstado()},
+              Locale.getDefault()));
+    }
+  }
+
+  @Override
+  @Transactional
+  public void eliminar(long idPedido) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
-      pedido.setEliminado(true);
-      pedidoRepository.save(pedido);
+      productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
+      pedidoRepository.delete(pedido);
+    } else {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_no_se_puede_eliminar_pedido",
+              new Object[] {pedido.getEstado()},
+              Locale.getDefault()));
     }
-    return pedido.isEliminado();
-  }
-
-  @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonAndProductosNoEliminados(Long idPedido) {
-    return renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
   }
 
   @Override
@@ -506,11 +523,13 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstado(Long idPedido) {
+  public List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(
+      Long idPedido, boolean clonar) {
     List<RenglonPedido> renglonPedidos =
-        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(idPedido);
+        renglonPedidoRepository.findByIdPedidoOrderByIdRenglonPedidoAndProductoNotEliminado(
+            idPedido);
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
-    if (pedido.getEstado().equals(EstadoPedido.ABIERTO)) {
+    if (pedido.getEstado().equals(EstadoPedido.ABIERTO) || clonar) {
       long[] idProductoItem = new long[renglonPedidos.size()];
       BigDecimal[] cantidad = new BigDecimal[renglonPedidos.size()];
       for (int i = 0; i < renglonPedidos.size(); i++) {
@@ -520,31 +539,6 @@ public class PedidoServiceImpl implements IPedidoService {
       renglonPedidos = this.calcularRenglonesPedido(idProductoItem, cantidad);
     }
     return renglonPedidos;
-  }
-
-  @Override
-  public List<RenglonPedido> getRenglonesDelPedidoOrdenadoPorIdProducto(Long idPedido) {
-    return renglonPedidoRepository.findByIdPedidoOrderByIdProductoItem(idPedido);
-  }
-
-  @Override
-  public Map<Long, BigDecimal> getRenglonesFacturadosDelPedido(long idPedido) {
-    List<RenglonFactura> renglonesDeFacturas = new ArrayList<>();
-    this.getFacturasDelPedido(idPedido).forEach(f -> renglonesDeFacturas.addAll(f.getRenglones()));
-    HashMap<Long, BigDecimal> listaRenglonesUnificados = new HashMap<>();
-    if (!renglonesDeFacturas.isEmpty()) {
-      renglonesDeFacturas.forEach(
-          r -> {
-            if (listaRenglonesUnificados.containsKey(r.getIdProductoItem())) {
-              listaRenglonesUnificados.put(
-                  r.getIdProductoItem(),
-                  listaRenglonesUnificados.get(r.getIdProductoItem()).add(r.getCantidad()));
-            } else {
-              listaRenglonesUnificados.put(r.getIdProductoItem(), r.getCantidad());
-            }
-          });
-    }
-    return listaRenglonesUnificados;
   }
 
   @Override
@@ -663,9 +657,21 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Override
-  public Pedido getPedidoPorIdPayment(String idPayment) {
-    return pedidoRepository.findByIdPaymentAndEliminado(idPayment, false);
+  @Scheduled(cron = "0 0/1 * * * ?")
+  @Transactional
+  public void cancelarPedidosAbiertos() {
+    logger.warn(
+            messageSource.getMessage(
+                    "mensaje_cron_job_cancelar_pedidos", null, Locale.getDefault()));
+    Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
+    Page<Pedido> paginaPedidos =
+        pedidoRepository.findAllByEstadoAndEliminado(EstadoPedido.ABIERTO, pageable);
+    paginaPedidos.forEach(
+        pedido -> {
+          if (pedido.getFechaVencimiento().isBefore(LocalDateTime.now())) {
+            this.cancelar(pedido);
+          }
+        });
   }
 
   @Override

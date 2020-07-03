@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +18,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.service.*;
 import sic.repository.ClienteRepository;
 import sic.exception.BusinessServiceException;
+import sic.util.CustomValidator;
 
 @Service
-@Validated
 public class ClienteServiceImpl implements IClienteService {
 
   private final ClienteRepository clienteRepository;
@@ -38,19 +36,22 @@ public class ClienteServiceImpl implements IClienteService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
+  private final CustomValidator customValidator;
 
   @Autowired
   public ClienteServiceImpl(
-      ClienteRepository clienteRepository,
-      ICuentaCorrienteService cuentaCorrienteService,
-      IUsuarioService usuarioService,
-      IUbicacionService ubicacionService,
-      MessageSource messageSource) {
+    ClienteRepository clienteRepository,
+    ICuentaCorrienteService cuentaCorrienteService,
+    IUsuarioService usuarioService,
+    IUbicacionService ubicacionService,
+    MessageSource messageSource,
+    CustomValidator customValidator) {
     this.clienteRepository = clienteRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.usuarioService = usuarioService;
     this.ubicacionService = ubicacionService;
     this.messageSource = messageSource;
+    this.customValidator = customValidator;
   }
 
   @Override
@@ -181,7 +182,7 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public void validarOperacion(TipoDeOperacion operacion, Cliente cliente) {
+  public void validarReglasDeNegocio(TipoDeOperacion operacion, Cliente cliente) {
     // Requeridos
     if (operacion == TipoDeOperacion.ALTA && cliente.getCredencial() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -233,7 +234,8 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public Cliente guardar(@Valid Cliente cliente) {
+  public Cliente guardar(Cliente cliente) {
+    customValidator.validar(cliente);
     cliente.setEliminado(false);
     cliente.setNroCliente(this.generarNroDeCliente());
     if (cliente.getUbicacionFacturacion() != null
@@ -251,7 +253,7 @@ public class ClienteServiceImpl implements IClienteService {
           .setLocalidad(
               ubicacionService.getLocalidadPorId(cliente.getUbicacionEnvio().getIdLocalidad()));
     }
-    this.validarOperacion(TipoDeOperacion.ALTA, cliente);
+    this.validarReglasDeNegocio(TipoDeOperacion.ALTA, cliente);
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentaCorrienteCliente.setCliente(cliente);
     cuentaCorrienteCliente.setFechaApertura(cliente.getFechaAlta());
@@ -277,12 +279,13 @@ public class ClienteServiceImpl implements IClienteService {
 
   @Override
   @Transactional
-  public Cliente actualizar(@Valid Cliente clientePorActualizar, Cliente clientePersistido) {
+  public Cliente actualizar(Cliente clientePorActualizar, Cliente clientePersistido) {
+    customValidator.validar(clientePorActualizar);
     clientePorActualizar.setNroCliente(clientePersistido.getNroCliente());
     clientePorActualizar.setFechaAlta(clientePersistido.getFechaAlta());
     clientePorActualizar.setPredeterminado(clientePersistido.isPredeterminado());
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
-    this.validarOperacion(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
       Cliente clienteYaAsignado =
           this.getClientePorIdUsuario(clientePorActualizar.getCredencial().getIdUsuario());
@@ -329,13 +332,13 @@ public class ClienteServiceImpl implements IClienteService {
   }
 
   @Override
-  public int desvincularClienteDeViajante(long idUsuarioViajante) {
-    return clienteRepository.desvincularClienteDeViajante(idUsuarioViajante);
+  public void desvincularClienteDeViajante(long idUsuarioViajante) {
+    clienteRepository.desvincularClienteDeViajante(idUsuarioViajante);
   }
 
   @Override
-  public int desvincularClienteDeCredencial(long idUsuarioCliente) {
-    return clienteRepository.desvincularClienteDeCredencial(idUsuarioCliente);
+  public void desvincularClienteDeCredencial(long idUsuarioCliente) {
+    clienteRepository.desvincularClienteDeCredencial(idUsuarioCliente);
   }
 
   @Override

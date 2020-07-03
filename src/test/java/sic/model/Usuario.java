@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode(of = {"username", "email", "roles"})
-public class Usuario implements Serializable {
+public class Usuario {
 
   private long idUsuario;
   private String username;
