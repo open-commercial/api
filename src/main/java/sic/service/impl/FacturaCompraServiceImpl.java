@@ -183,7 +183,7 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
     facturas.forEach(
         facturaCompra -> {
           facturaService.calcularValoresFactura(facturaCompra);
-          productoService.actualizarStockFactura(
+          productoService.actualizarStockFacturaCompra(
               facturaService.getIdsProductosYCantidades(facturaCompra),
               facturaCompra.getIdSucursal(),
               TipoDeOperacion.ALTA,

@@ -528,7 +528,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public void actualizarStockFactura(
+  public void actualizarStockFacturaCompra(
       Map<Long, BigDecimal> idsYCantidades,
       Long idSucursal,
       TipoDeOperacion operacion,
@@ -537,12 +537,10 @@ public class ProductoServiceImpl implements IProductoService {
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
           if (producto.isPresent() && !producto.get().isIlimitado()) {
-            if ((movimiento == Movimiento.VENTA && operacion == TipoDeOperacion.ALTA)
-                || (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ELIMINACION)) {
+            if (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ELIMINACION) {
               this.quitarStock(producto.get(), idSucursal, cantidad);
             }
-            if ((movimiento == Movimiento.VENTA && operacion == TipoDeOperacion.ELIMINACION)
-                || (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ALTA)) {
+            if (movimiento == Movimiento.COMPRA && operacion == TipoDeOperacion.ALTA) {
               this.agregarStock(producto.get(), idSucursal, cantidad);
             }
           } else {

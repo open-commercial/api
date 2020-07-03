@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -446,6 +447,8 @@ class ProductoServiceImplTest {
     pedido.setEstado(EstadoPedido.CANCELADO);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     verify(messageSource, times(2)).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
+    verify(traspasoService, times(3)).guardarTraspasosPorPedido(pedido);
+    verify(traspasoService, times(3)).eliminarTraspasoDePedido(pedido);
   }
 
   @Test

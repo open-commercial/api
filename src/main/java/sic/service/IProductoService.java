@@ -23,7 +23,7 @@ public interface IProductoService {
 
   Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 
-  void actualizarStockFactura(
+  void actualizarStockFacturaCompra(
       Map<Long, BigDecimal> idsYCantidades,
       Long idSucursal,
       TipoDeOperacion operacion,

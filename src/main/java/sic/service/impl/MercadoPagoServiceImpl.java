@@ -131,7 +131,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                   Date.from(
                           pedido
                                   .getFechaVencimiento()
-                                  .plusMinutes(-1)
+                                  .plusSeconds(-30)
                                   .atZone(ZoneId.systemDefault())
                                   .toInstant()));
           monto = carritoCompraService.calcularTotal(idUsuario).floatValue();
