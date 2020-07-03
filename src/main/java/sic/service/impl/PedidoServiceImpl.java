@@ -137,6 +137,7 @@ public class PedidoServiceImpl implements IPedidoService {
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder()
             .cantidad(cantidad)
             .idProducto(idProducto)
+            .idPedido(pedido.getIdPedido())
             .build();
     if ((operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)
             && !productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
@@ -656,7 +657,7 @@ public class PedidoServiceImpl implements IPedidoService {
     return resultados;
   }
 
-  @Scheduled(cron = "0 0/5 * * * ?")
+  @Scheduled(cron = "0 0/1 * * * ?")
   @Transactional
   public void cancelarPedidosAbiertos() {
     logger.warn(

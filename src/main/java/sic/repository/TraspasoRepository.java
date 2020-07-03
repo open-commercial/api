@@ -8,4 +8,6 @@ public interface TraspasoRepository
     extends PagingAndSortingRepository<Traspaso, Long>, QuerydslPredicateExecutor<Traspaso> {
 
     Traspaso findByNroTraspaso(String nroTraspaso);
+
+    Traspaso findByNroPedido(Long nroPedido);
 }

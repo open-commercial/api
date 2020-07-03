@@ -21,6 +21,8 @@ public interface ITraspasoService {
 
   List<Traspaso> guardarTraspasosPorPedido(Pedido pedido);
 
+  void eliminarTraspasoDePedido(Pedido pedido);
+
   List<NuevoTraspasoDTO> construirNuevosTraspasosPorPedido(Pedido pedido);
 
   void eliminar(Long idTraspaso);

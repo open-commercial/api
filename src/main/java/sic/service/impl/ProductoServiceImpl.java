@@ -480,7 +480,18 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
-    traspasoService.guardarTraspasosPorPedido(pedido);
+    switch (tipoDeOperacion) {
+      case ALTA -> traspasoService.guardarTraspasosPorPedido(pedido);
+      case ELIMINACION -> traspasoService.eliminarTraspasoDePedido(pedido);
+      case ACTUALIZACION -> {
+        if (pedido.getEstado() == EstadoPedido.ABIERTO) {
+          traspasoService.eliminarTraspasoDePedido(pedido);
+          traspasoService.guardarTraspasosPorPedido(pedido);
+        } else if (pedido.getEstado() == EstadoPedido.CANCELADO) {
+          traspasoService.eliminarTraspasoDePedido(pedido);
+        }
+      }
+    }
     pedido
         .getRenglones()
         .forEach(

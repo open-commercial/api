@@ -25,7 +25,7 @@ UPDATE configuracionsucursal
 SET vencimientoCorto = 20; -- 20 minutos
 
 UPDATE configuracionsucursal
-SET vencimientoLargo = 259200; -- 72 hrs
+SET vencimientoLargo = 4320; -- 72 hrs
 
 SET SQL_SAFE_UPDATES = 1;
 
