@@ -419,12 +419,12 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   private boolean verificarStockItemsDelCarrito(List<ItemCarritoCompra> items) {
     long[] idProducto = new long[items.size()];
     BigDecimal[] cantidad = new BigDecimal[items.size()];
-    int indice = 0;
-    items.forEach(
-        item -> {
-          idProducto[indice] = item.getProducto().getIdProducto();
-          cantidad[indice] = item.getCantidad();
-        });
+    int i = 0;
+    for (ItemCarritoCompra item : items) {
+      idProducto[i] = item.getProducto().getIdProducto();
+      cantidad[i] = item.getCantidad();
+      i++;
+    }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
         ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty();

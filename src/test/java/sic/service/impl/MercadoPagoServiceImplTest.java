@@ -13,6 +13,7 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
+import sic.modelo.dto.ProductosParaVerificarStockDTO;
 import sic.service.*;
 import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
@@ -66,12 +67,20 @@ class MercadoPagoServiceImplTest {
     sucursal.setNombre("9 de Julio");
     when(sucursalService.getSucursalPorId(anyLong())).thenReturn(sucursal);
     when(usuarioService.getUsuarioNoEliminadoPorId(2L)).thenReturn(usuario);
-    ItemCarritoCompra itemCarritoCompra = new ItemCarritoCompra();
-    Producto producto = new Producto();
-    producto.setIdProducto(1L);
-    itemCarritoCompra.setProducto(producto);
-    itemCarritoCompra.setCantidad(BigDecimal.ONE);
-    List<ItemCarritoCompra> itemCarritoCompras = Collections.singletonList(itemCarritoCompra);
+    ItemCarritoCompra itemCarritoCompra1 = new ItemCarritoCompra();
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    itemCarritoCompra1.setProducto(producto1);
+    itemCarritoCompra1.setCantidad(BigDecimal.ONE);
+    ItemCarritoCompra itemCarritoCompra2 = new ItemCarritoCompra();
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    itemCarritoCompra2.setProducto(producto2);
+    itemCarritoCompra2.setCantidad(BigDecimal.TEN);
+    List<ItemCarritoCompra> itemCarritoCompras = new ArrayList<>();
+    itemCarritoCompras.add(itemCarritoCompra1);
+    itemCarritoCompras.add(itemCarritoCompra2);
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     when(carritoCompraService.getItemsDelCarritoPorUsuario(usuario)).thenReturn(itemCarritoCompras);
     RenglonPedido renglonPedido = new RenglonPedido();
     when(pedidoService.calcularRenglonPedido(anyLong(), any())).thenReturn(renglonPedido);
@@ -84,6 +93,11 @@ class MercadoPagoServiceImplTest {
             .build();
     MercadoPagoPreferenceDTO mercadoPagoPreferenceDTO =
         mercadoPagoService.crearNuevaPreference(1L, nuevaOrdenDePagoDTO, "localhost");
+    long[] idProducto = new long[]{1L, 2L};
+    BigDecimal[] cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+            ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    verify(productoService).getProductosSinStockDisponible(productosParaVerificarStockDTO);
     assertNotNull(mercadoPagoPreferenceDTO);
     assertNotNull(mercadoPagoPreferenceDTO.getId());
     assertNotEquals("", mercadoPagoPreferenceDTO.getId());
