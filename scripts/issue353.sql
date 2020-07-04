@@ -22,7 +22,7 @@ ALTER TABLE configuracionsucursal
 ADD vencimientoLargo bigint(20) default 0 not null;
 
 UPDATE configuracionsucursal
-SET vencimientoCorto = 20; -- 20 minutos
+SET vencimientoCorto = 60; -- 60 minutos
 
 UPDATE configuracionsucursal
 SET vencimientoLargo = 4320; -- 72 hrs
