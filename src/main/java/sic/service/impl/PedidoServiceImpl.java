@@ -438,7 +438,9 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.getCliente().isPuedeComprarAPlazo()) {
       pedido.setFechaVencimiento(
               pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
-      recibos.forEach(reciboService::guardar);
+      if (recibos != null && !recibos.isEmpty()) {
+        recibos.forEach(reciboService::guardar);
+      }
     } else {
       BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
       if (recibos != null && !recibos.isEmpty()) {

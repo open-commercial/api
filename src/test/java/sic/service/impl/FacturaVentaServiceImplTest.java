@@ -651,8 +651,12 @@ class FacturaVentaServiceImplTest {
     assertThrows(
         BusinessServiceException.class,
         () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
+    verify(messageSource).getMessage(eq("mensaje_pedido_facturar_error_estado"), any(), any());
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    assertThrows(
+            BusinessServiceException.class,
+            () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
     verify(messageSource).getMessage(eq("mensaje_ubicacion_facturacion_vacia"), any(), any());
-
     Cliente cliente = new Cliente();
     cliente.setUbicacionFacturacion(new Ubicacion());
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);

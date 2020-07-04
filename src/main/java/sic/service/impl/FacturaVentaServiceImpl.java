@@ -98,6 +98,11 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     FacturaVenta fv = new FacturaVenta();
     Sucursal sucursal;
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+    if (pedido.getEstado() != EstadoPedido.ABIERTO) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_pedido_facturar_error_estado", null, Locale.getDefault()));
+    }
     fv.setPedido(pedido);
     sucursal = pedido.getSucursal();
     fv.setSucursal(sucursal);
