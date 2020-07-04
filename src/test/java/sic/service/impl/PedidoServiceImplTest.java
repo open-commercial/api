@@ -134,7 +134,6 @@ class PedidoServiceImplTest {
     pedido.setRenglones(renglonesPedido);
     Cliente cliente = new Cliente();
     cliente.setIdCliente(1L);
-    cliente.setPuedeComprarAPlazo(false);
     cliente.setEmail("email@cliente.com");
     pedido.setCliente(cliente);
     cliente.setPuedeComprarAPlazo(true);
