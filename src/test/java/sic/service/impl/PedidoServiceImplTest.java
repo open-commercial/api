@@ -183,6 +183,7 @@ class PedidoServiceImplTest {
     assertEquals(pedidoGuardado.getFecha().plusMinutes(15L).truncatedTo(ChronoUnit.MINUTES), pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
     pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>( ));
     assertEquals(pedidoGuardado.getFecha().plusMinutes(1L).truncatedTo(ChronoUnit.MINUTES), pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
+    verify(reciboService).guardar(any());
   }
 
   @Test

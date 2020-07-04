@@ -192,9 +192,6 @@ public class PedidoServiceImpl implements IPedidoService {
     pedido.setDescuentoNeto(descuentoNeto);
     pedido.setTotal(total);
     this.validarPedidoContraPagos(pedido, recibos);
-    if (recibos != null && !recibos.isEmpty()) {
-      recibos.forEach(reciboService::guardar);
-    }
     pedido.setFecha(LocalDateTime.now());
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
@@ -441,6 +438,7 @@ public class PedidoServiceImpl implements IPedidoService {
     if (pedido.getCliente().isPuedeComprarAPlazo()) {
       pedido.setFechaVencimiento(
               pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+      recibos.forEach(reciboService::guardar);
     } else {
       BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
       if (recibos != null && !recibos.isEmpty()) {
