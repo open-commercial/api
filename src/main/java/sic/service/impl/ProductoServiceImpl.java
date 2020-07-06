@@ -578,6 +578,21 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion) {
+    //control de stock
+    long[] idProducto = new long[traspaso.getRenglones().size()];
+    BigDecimal[] cantidad = new BigDecimal[traspaso.getRenglones().size()];
+    int indice = 0;
+    for (RenglonTraspaso renglon : traspaso.getRenglones()) {
+      idProducto[indice] = renglon.getIdProducto();
+      cantidad[indice] = renglon.getCantidadProducto();
+      indice++;
+    }
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+            ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    if (!this.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_traspaso_sin_stock", null, Locale.getDefault()));
+    }
     switch (tipoDeOperacion) {
       case ALTA -> traspaso
               .getRenglones()

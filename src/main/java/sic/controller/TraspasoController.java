@@ -8,6 +8,7 @@ import sic.modelo.RenglonTraspaso;
 import sic.modelo.Rol;
 import sic.modelo.Traspaso;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
+import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.service.ITraspasoService;
 
 import java.util.List;
@@ -32,5 +33,10 @@ public class TraspasoController {
   @GetMapping("/traspasos/{idTraspaso}/renglones")
   public List<RenglonTraspaso> getRenglonesDelTraspaso(@PathVariable long idTraspaso) {
     return traspasoService.getRenglonesTraspaso(idTraspaso);
+  }
+
+  @PostMapping("/traspasos")
+  public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO) {
+    return traspasoService.guardar(nuevoTraspasoDTO);
   }
 }
