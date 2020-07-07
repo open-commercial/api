@@ -19,7 +19,7 @@ public interface IProductoService {
   void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
   Pedido devolverStockPedido(
-      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores);
+      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen);
 
   Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 

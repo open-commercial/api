@@ -3,7 +3,6 @@ package sic.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.query.Param;
 import sic.modelo.Sucursal;
 
 public interface SucursalRepository extends PagingAndSortingRepository<Sucursal, Long> {

@@ -394,7 +394,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, List<Recibo> recibos) {
+  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen, List<Recibo> recibos) {
     if (pedido.getEstado() == EstadoPedido.CERRADO) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_pedido_facturado", null, Locale.getDefault()));
@@ -429,7 +429,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido);
-    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
+    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, idSucursalOrigen);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
   }
