@@ -39,6 +39,7 @@ public class Producto {
   private LocalDateTime fechaUltimaModificacion;
   private String estanteria;
   private String estante;
+  private Long idProveedor;
   private String razonSocialProveedor;
   private String nota;
   private LocalDateTime fechaAlta;

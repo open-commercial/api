@@ -165,6 +165,11 @@ public class Producto implements Serializable {
     return rubro.getNombre();
   }
 
+  @JsonGetter("idProveedor")
+  public Long getIdProveedor() {
+    return proveedor.getIdProveedor();
+  }
+
   @JsonGetter("razonSocialProveedor")
   public String getRazonSocialProveedor() {
     return proveedor.getRazonSocial();
