@@ -444,8 +444,8 @@ public class PedidoServiceImpl implements IPedidoService {
     } else {
       BigDecimal saldoCC = cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente());
       if (recibos != null && !recibos.isEmpty()) {
-        BigDecimal totalRecibos = recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(3, RoundingMode.HALF_UP);
-        BigDecimal saldoParaCubrir = saldoCC.subtract(pedido.getTotal()).setScale(3, RoundingMode.HALF_UP);
+        BigDecimal totalRecibos = recibos.stream().map(Recibo::getMonto).reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.DOWN);
+        BigDecimal saldoParaCubrir = saldoCC.subtract(pedido.getTotal()).setScale(2, RoundingMode.DOWN);
         if (totalRecibos.add(saldoParaCubrir).compareTo(BigDecimal.ZERO) < 0) {
           throw new BusinessServiceException(
                   messageSource.getMessage(
@@ -456,7 +456,7 @@ public class PedidoServiceImpl implements IPedidoService {
         }
         recibos.forEach(reciboService::guardar);
       } else {
-        if (saldoCC.compareTo(BigDecimal.ZERO) >= 0) {
+        if (saldoCC.setScale(2, RoundingMode.DOWN).compareTo(BigDecimal.ZERO) >= 0) {
           pedido.setFechaVencimiento(
                   pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
         } else {
@@ -467,7 +467,8 @@ public class PedidoServiceImpl implements IPedidoService {
       }
     }
     if (pedido.getCliente().getMontoCompraMinima() != null
-            && pedido.getTotal().compareTo(pedido.getCliente().getMontoCompraMinima()) < 0) {
+            && pedido.getTotal().setScale(2, RoundingMode.DOWN)
+            .compareTo(pedido.getCliente().getMontoCompraMinima().setScale(2, RoundingMode.DOWN)) < 0) {
       throw new BusinessServiceException(
               messageSource.getMessage(
                       "mensaje_pedido_monto_compra_minima", null, Locale.getDefault()));

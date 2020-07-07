@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -275,7 +276,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.guardarRenglonCuentaCorrienteDeFactura(facturaVenta, cc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
-      cc.setSaldo(cc.getSaldo().add(facturaVenta.getTotal()));
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(facturaVenta.getTotal()));
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
@@ -306,7 +307,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     rcc.setIdMovimiento(factura.getIdFactura());
     rcc.setMonto(factura.getTotal().negate());
     cc.getRenglones().add(rcc);
-    cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+    this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(rcc.getMonto()));
     cc.setFechaUltimoMovimiento(factura.getFecha());
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);
@@ -330,7 +331,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       if (nota instanceof NotaDebito) {
         rcc.setMonto(nota.getTotal().negate());
       }
-      cc.setSaldo(cc.getSaldo().add(rcc.getMonto()));
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(rcc.getMonto()));
       cc.setFechaUltimoMovimiento(nota.getFecha());
       rcc.setDescripcion(nota.getMotivo());
       rcc.setNota(nota);
@@ -344,7 +345,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
-      cc.setSaldo(cc.getSaldo().subtract(rcc.getMonto()));
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
       logger.warn(messageSource.getMessage(
@@ -386,7 +387,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
       }
       cc.getRenglones().add(rcc);
-      cc.setSaldo(cc.getSaldo().add(recibo.getMonto()));
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(recibo.getMonto()));
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
@@ -404,12 +405,20 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
       }
-      cc.setSaldo(cc.getSaldo().subtract(recibo.getMonto()));
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(recibo.getMonto()));
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
       logger.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+    }
+  }
+
+  private void setSaldoCuentaCorriente(CuentaCorriente cuentaCorriente, BigDecimal saldo) {
+    if (saldo.setScale(2, RoundingMode.DOWN).compareTo(BigDecimal.ZERO) == 0) {
+      cuentaCorriente.setSaldo(BigDecimal.ZERO);
+    } else {
+      cuentaCorriente.setSaldo(saldo);
     }
   }
 
