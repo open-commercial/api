@@ -21,6 +21,7 @@ public class Producto {
   private boolean hayStock;
   private BigDecimal cantMinima;
   private BigDecimal bulto;
+  private Long idMedida;
   private String nombreMedida;
   private BigDecimal precioCosto;
   private BigDecimal gananciaPorcentaje;
@@ -29,6 +30,7 @@ public class Producto {
   private BigDecimal ivaPorcentaje;
   private BigDecimal ivaNeto;
   private BigDecimal precioLista;
+  private Long idRubro;
   private String nombreRubro;
   private boolean ilimitado;
   private boolean publico;
