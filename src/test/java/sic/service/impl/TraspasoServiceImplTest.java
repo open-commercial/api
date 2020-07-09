@@ -31,7 +31,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {CustomValidator.class, TraspasoServiceImpl.class, MessageSource.class})
-public class TraspasoServiceImplTest {
+class TraspasoServiceImplTest {
 
   @MockBean ProductoServiceImpl productoService;
   @MockBean SucursalServiceImpl sucursalService;
@@ -203,6 +203,7 @@ public class TraspasoServiceImplTest {
     traspasoService.guardarTraspasosPorPedido(pedido);
     verify(messageSource, times(2)).getMessage(eq("mensaje_traspaso_realizado"), any(), any());
     verify(traspasoRepository, times(2)).save(any());
+    verify(productoService, times(2)).actualizarStockTraspaso(any(), eq(TipoDeOperacion.ALTA));
   }
 
   @Test

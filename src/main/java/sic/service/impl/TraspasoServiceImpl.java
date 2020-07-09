@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
@@ -148,7 +149,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
                         .nroPedido(pedido.getNroPedido())
                         .idSucursalOrigen(sucursal.getIdSucursal())
                         .idUsuario(pedido.getUsuario().getIdUsuario())
-                        .idProductoConCantidad(new HashMap<Long, BigDecimal>())
+                        .idProductoConCantidad(new HashMap<>())
                         .build();
                 nuevosTraspasos.add(nuevoTraspasoDTO);
               });
@@ -222,6 +223,14 @@ public class TraspasoServiceImpl implements ITraspasoService {
   @Override
   public void eliminar(Long idTraspaso) {
     Traspaso traspaso = this.getTraspasoNoEliminadoPorid(idTraspaso);
+    if (traspaso.getNroPedido() != null
+        && traspasoRepository.findByNroPedido(traspaso.getNroPedido()) != null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_traspaso_error_eliminar_con_pedido",
+              new Object[] {traspaso},
+              Locale.getDefault()));
+    }
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ELIMINACION);
     traspasoRepository.delete(traspaso);
   }

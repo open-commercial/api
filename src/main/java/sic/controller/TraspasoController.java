@@ -39,4 +39,9 @@ public class TraspasoController {
   public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO) {
     return traspasoService.guardar(nuevoTraspasoDTO);
   }
+
+  @DeleteMapping("/traspasos/{idTraspaso}")
+  public void eliminarTraspaso(@PathVariable long idTraspaso) {
+    traspasoService.eliminar(idTraspaso);
+  }
 }
