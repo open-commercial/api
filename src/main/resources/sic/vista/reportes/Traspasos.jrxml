@@ -128,10 +128,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{cantidad} != null ? $F{cantidad}.doubleValue() : ""]]></textFieldExpression>
 			</textField>
-			<textField>
+			<textField pattern="dd/MM/yyyy">
 				<reportElement x="0" y="0" width="90" height="20" uuid="dfe3da15-6014-4416-a380-45472bcca1b8"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{fecha} != null ? $F{fecha}.truncatedTo(java.time.temporal.ChronoUnit.MINUTES).atZone(java.time.ZoneId.systemDefault()) : ""
+				<textFieldExpression><![CDATA[$F{fecha} != null ? java.util.Date.from($F{fecha}.atZone(java.time.ZoneId.systemDefault()).toInstant())  : ""
 
 ]]></textFieldExpression>
 			</textField>
