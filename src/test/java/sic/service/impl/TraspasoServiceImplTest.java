@@ -36,6 +36,7 @@ class TraspasoServiceImplTest {
   @MockBean ProductoServiceImpl productoService;
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean UsuarioServiceImpl usuarioService;
+  @MockBean PedidoServiceImpl pedidoService;
   @MockBean TraspasoRepository traspasoRepository;
   @MockBean RenglonTraspasoRepository renglonTraspasoRepository;
   @MockBean MessageSource messageSource;
