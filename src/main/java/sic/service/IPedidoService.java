@@ -19,7 +19,7 @@ public interface IPedidoService {
 
   Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal);
 
-  void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, List<Recibo> recibos);
+  void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursal, List<Recibo> recibos);
 
   void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 

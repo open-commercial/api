@@ -413,12 +413,12 @@ class ProductoServiceImplTest {
     RenglonPedido renglonPedidoAnterior = new RenglonPedido();
     renglonPedidoAnterior.setIdProductoItem(1L);
     renglonesAnteriores.add(renglonPedido);
-    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores);
+    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores, 1L);
     verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
     Producto producto = this.construirProducto();
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     when(productoRepository.save(producto)).thenReturn(producto);
-    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores);
+    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
     verify(messageSource).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
     verify(productoRepository).save(producto);
   }

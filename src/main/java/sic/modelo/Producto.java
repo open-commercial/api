@@ -154,15 +154,31 @@ public class Producto implements Serializable {
   @Version
   private Long version;
 
+  @JsonGetter("idMedida")
+  @JsonView(Views.Comprador.class)
+  public Long getIdMedida() {
+    return medida.getIdMedida();
+  }
+
   @JsonGetter("nombreMedida")
   @JsonView(Views.Comprador.class)
   public String getNombreMedida() {
     return medida.getNombre();
   }
 
+  @JsonGetter("idRubro")
+  public Long getIdRubro() {
+    return rubro.getIdRubro();
+  }
+
   @JsonGetter("nombreRubro")
   public String getNombreRubro() {
     return rubro.getNombre();
+  }
+
+  @JsonGetter("idProveedor")
+  public Long getIdProveedor() {
+    return proveedor.getIdProveedor();
   }
 
   @JsonGetter("razonSocialProveedor")

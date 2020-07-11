@@ -90,6 +90,7 @@ public class ProveedorServiceImpl implements IProveedorService {
       builder.and(qProveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
       builder.and(qProveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
+    builder.and(qProveedor.eliminado.eq(false));
     return proveedorRepository.findAll(builder, this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 

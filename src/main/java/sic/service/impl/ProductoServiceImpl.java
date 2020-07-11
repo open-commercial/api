@@ -451,7 +451,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Pedido devolverStockPedido(
-      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores) {
+      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen) {
     if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
         && pedido.getEstado() == EstadoPedido.ABIERTO
         && renglonesAnteriores != null
@@ -463,7 +463,7 @@ public class ProductoServiceImpl implements IProductoService {
             if (productoAnterior.isPresent() && !productoAnterior.get().isIlimitado()) {
               this.agregarStock(
                   productoAnterior.get(),
-                  pedido.getSucursal().getIdSucursal(),
+                  (idSucursalOrigen != null ? idSucursalOrigen : pedido.getSucursal().getIdSucursal()),
                   renglonAnterior.getCantidad());
             } else {
               logger.warn(
