@@ -64,7 +64,6 @@ public class ProductoServiceImpl implements IProductoService {
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -1019,11 +1018,11 @@ public class ProductoServiceImpl implements IProductoService {
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
-    Sucursal sucursalDefault =  sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
-    if (sucursalDefault.getLogo() != null && !sucursalDefault.getLogo().isEmpty()) {
+    Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
         params.put(
-                "logo", new ImageIcon(ImageIO.read(new URL(sucursalDefault.getLogo()))).getImage());
+                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
       } catch (IOException ex) {
         throw new ServiceException(messageSource.getMessage(
                 "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);

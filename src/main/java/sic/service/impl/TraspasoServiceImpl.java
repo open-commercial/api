@@ -1,6 +1,10 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +16,25 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.modelo.dto.RenglonReporteTraspasoDTO;
 import sic.repository.RenglonTraspasoRepository;
 import sic.repository.TraspasoRepository;
-import sic.service.IProductoService;
-import sic.service.ISucursalService;
-import sic.service.ITraspasoService;
-import sic.service.IUsuarioService;
+import sic.service.*;
 
+import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
+import javax.swing.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -38,6 +47,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
   private final IProductoService productoService;
   private final ISucursalService sucursalService;
   private final IUsuarioService usuarioService;
+  private final IPedidoService pedidoService;
   private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -49,12 +59,14 @@ public class TraspasoServiceImpl implements ITraspasoService {
       IProductoService productoService,
       ISucursalService sucursalService,
       IUsuarioService usuarioService,
+      IPedidoService pedidoService,
       MessageSource messageSource) {
     this.traspasoRepository = traspasoRepository;
     this.renglonTraspasoRepository = renglonTraspasoRepository;
     this.productoService = productoService;
     this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
+    this.pedidoService = pedidoService;
     this.messageSource = messageSource;
   }
 
@@ -223,13 +235,17 @@ public class TraspasoServiceImpl implements ITraspasoService {
   @Override
   public void eliminar(Long idTraspaso) {
     Traspaso traspaso = this.getTraspasoNoEliminadoPorid(idTraspaso);
-    if (traspaso.getNroPedido() != null
-        && traspasoRepository.findByNroPedido(traspaso.getNroPedido()) != null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_traspaso_error_eliminar_con_pedido",
-              new Object[] {traspaso},
-              Locale.getDefault()));
+    if (traspaso.getNroPedido() != null) {
+      Pedido pedidoDeTraspaso =
+          pedidoService.getPedidoPorNumeroAndSucursal(
+              traspaso.getNroPedido(), traspaso.getSucursalDestino());
+      if (pedidoDeTraspaso != null && pedidoDeTraspaso.getEstado() == EstadoPedido.CERRADO) {
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_traspaso_error_eliminar_con_pedido",
+                new Object[] {traspaso},
+                Locale.getDefault()));
+      }
     }
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ELIMINACION);
     traspasoRepository.delete(traspaso);
@@ -322,6 +338,77 @@ public class TraspasoServiceImpl implements ITraspasoService {
           return PageRequest.of(
               pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
       }
+    }
+  }
+
+  @Override
+  public byte[] getReporteTraspaso(BusquedaTraspasoCriteria criteria) {
+    List<Traspaso> traspasosParaReporte =
+        traspasoRepository
+            .findAll(
+                this.getBuilderTraspaso(criteria),
+                this.getPageable(
+                    (criteria.getPagina() == null || criteria.getPagina() < 0)
+                        ? 0
+                        : criteria.getPagina(),
+                    criteria.getOrdenarPor(),
+                    criteria.getSentido()))
+            .getContent();
+    List<RenglonReporteTraspasoDTO> renglonesReporte = new ArrayList<>();
+    traspasosParaReporte.forEach(
+        traspaso -> {
+          RenglonReporteTraspasoDTO renglonReporteCabecera =
+              RenglonReporteTraspasoDTO.builder()
+                  .fecha(traspaso.getFechaDeAlta())
+                  .codigoAndDescripcion("Traspaso #" + traspaso.getNroTraspaso())
+                  .sucursalOrigen(traspaso.getNombreSucursalOrigen())
+                  .sucursalDestino(traspaso.getNombreSucursalDestino())
+                  .build();
+          if (traspaso.getNroPedido() != null) {
+            renglonReporteCabecera.setCodigoAndDescripcion(
+                renglonReporteCabecera
+                    .getCodigoAndDescripcion()
+                    .concat(" del Pedido #" + traspaso.getNroPedido()));
+          }
+          renglonesReporte.add(renglonReporteCabecera);
+          traspaso
+              .getRenglones()
+              .forEach(
+                  renglonTraspaso -> {
+                    RenglonReporteTraspasoDTO renglonReporte =
+                        RenglonReporteTraspasoDTO.builder()
+                            .codigoAndDescripcion(
+                                "    "
+                                    + renglonTraspaso.getCodigoProducto()
+                                    + " "
+                                    + renglonTraspaso.getDescripcionProducto())
+                            .cantidad(renglonTraspaso.getCantidadProducto())
+                            .build();
+                    renglonesReporte.add(renglonReporte);
+                  });
+        });
+    ClassLoader classLoader = TraspasoServiceImpl.class.getClassLoader();
+    InputStream isFileReport =
+        classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
+    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglonesReporte);
+    Map<String, Object> params = new HashMap<>();
+    Sucursal sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
+    if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
+      try {
+        params.put(
+            "logo",
+            new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+      } catch (IOException ex) {
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+      }
+    }
+    try {
+      return JasperExportManager.exportReportToPdf(
+          JasperFillManager.fillReport(isFileReport, params, ds));
+    } catch (JRException ex) {
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
   }
 }

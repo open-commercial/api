@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.12.2.final using JasperReports Library version 6.12.2-75c5e90a222ab406e416cbf590a5397028a52de3  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ListaPreciosProductos" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="608c624e-e655-4a3f-bb85-9c440082766b">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<property name="com.jaspersoft.studio.unit." value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageHeight" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.pageWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.topMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.bottomMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.leftMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
+	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
+	<parameter name="sucursal" class="sic.modelo.Sucursal"/>
+	<parameter name="logo" class="java.awt.Image"/>
+	<queryString language="hql">
+		<![CDATA[]]>
+	</queryString>
+	<field name="codigoAndDescripcion" class="java.lang.String">
+		<fieldDescription><![CDATA[codigoAndDescripcion]]></fieldDescription>
+	</field>
+	<field name="sucursalOrigen" class="java.lang.String">
+		<fieldDescription><![CDATA[sucursalOrigen]]></fieldDescription>
+	</field>
+	<field name="fecha" class="java.time.LocalDateTime"/>
+	<field name="sucursalDestino" class="java.lang.String">
+		<fieldDescription><![CDATA[sucursalDestino]]></fieldDescription>
+	</field>
+	<field name="cantidad" class="java.math.BigDecimal">
+		<fieldDescription><![CDATA[cantidad]]></fieldDescription>
+	</field>
+	<group name="Rubro">
+		<groupExpression><![CDATA[$F{cantidad}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="192" splitType="Stretch">
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="0" y="0" width="158" height="142" uuid="33e8c96a-1306-4242-b063-7ea538992edc"/>
+				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
+			</image>
+			<staticText>
+				<reportElement x="0" y="150" width="800" height="25" uuid="ff46f7f7-85b2-4514-afda-a8394f7c5111"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="16" isBold="true" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[Traspasos]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="170" y="80" width="610" height="30" uuid="d32784cb-2840-4275-a461-edaf16ddc32c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Email: ventas@globodistribuciones.com]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="175" width="800" height="1" uuid="0043f1bd-ce8f-4adc-a4a8-f2375e75254c"/>
+			</line>
+			<staticText>
+				<reportElement x="170" y="20" width="610" height="30" uuid="a1bf3069-06d3-419f-8ee7-7cc2721b4608"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Web: www.globodeoro.com]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="170" y="50" width="610" height="30" uuid="14a9eb15-9704-4c3f-9af7-85919fa4f6a3"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="true"/>
+				</textElement>
+				<text><![CDATA[Teléfono/WhatsApp: 379 4834638]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="469" y="175" width="125" height="16" uuid="14a1a091-819a-4e35-905d-2828a2e2e35c">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sucursal Origen]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="595" y="175" width="125" height="16" uuid="6c1675cf-0b06-4a07-a199-a046ee6461fe">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Sucursal Destino]]></text>
+			</staticText>
+			<line>
+				<reportElement x="0" y="189" width="800" height="3" uuid="71d8a141-a47c-4311-b9dd-1c3a2e1d0ebb"/>
+			</line>
+			<staticText>
+				<reportElement x="720" y="176" width="80" height="15" uuid="7cf0aec6-71fa-42b9-af76-f6b59bcb7690">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Cant.]]></text>
+			</staticText>
+		</band>
+	</title>
+	<detail>
+		<band height="21" splitType="Stretch">
+			<textField>
+				<reportElement x="90" y="0" width="379" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{codigoAndDescripcion}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="595" y="1" width="125" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{sucursalOrigen} != null ? $F{sucursalOrigen} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="469" y="0" width="125" height="20" uuid="009f171c-19d7-4c35-a69b-3fe1a41fe09a"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{sucursalDestino} != null ? $F{sucursalDestino} : ""]]></textFieldExpression>
+			</textField>
+			<textField pattern=" #,##0.##">
+				<reportElement x="720" y="1" width="80" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{cantidad} != null ? $F{cantidad}.doubleValue() : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="90" height="20" uuid="dfe3da15-6014-4416-a380-45472bcca1b8"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{fecha} != null ? $F{fecha}.truncatedTo(java.time.temporal.ChronoUnit.MINUTES).atZone(java.time.ZoneId.systemDefault()) : ""
+
+]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="12" splitType="Stretch">
+			<textField pattern="dd/MM/yyyy h:mm a">
+				<reportElement x="669" y="0" width="131" height="12" uuid="e7c10c67-236d-497b-9074-f1f8650df306"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA[java.util.Date.from(java.time.LocalDateTime.now().atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="0" y="0" width="40" height="12" uuid="a57c4be2-9a1d-415e-8c3a-9d42931472de">
+					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
+				</reportElement>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+					<paragraph lineSpacing="1_1_2"/>
+				</textElement>
+				<textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<textField evaluationTime="Report">
+				<reportElement x="40" y="0" width="46" height="12" uuid="6be878f5-09b2-4bd6-88ba-480ab719ff56"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle">
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["de " + $V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+</jasperReport>

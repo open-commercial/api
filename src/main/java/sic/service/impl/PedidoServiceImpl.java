@@ -46,7 +46,6 @@ public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
   private final RenglonPedidoRepository renglonPedidoRepository;
-  private final IFacturaVentaService facturaVentaService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProductoService productoService;
@@ -65,7 +64,6 @@ public class PedidoServiceImpl implements IPedidoService {
   public PedidoServiceImpl(
     PedidoRepository pedidoRepository,
     RenglonPedidoRepository renglonPedidoRepository,
-    IFacturaVentaService facturaVentaService,
     IUsuarioService usuarioService,
     IClienteService clienteService,
     IProductoService productoService,
@@ -76,7 +74,6 @@ public class PedidoServiceImpl implements IPedidoService {
     ModelMapper modelMapper,
     MessageSource messageSource,
     CustomValidator customValidator) {
-    this.facturaVentaService = facturaVentaService;
     this.pedidoRepository = pedidoRepository;
     this.renglonPedidoRepository = renglonPedidoRepository;
     this.usuarioService = usuarioService;
@@ -156,6 +153,11 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_pedido_no_existente", null, Locale.getDefault()));
     }
+  }
+
+  @Override
+  public Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal) {
+    return pedidoRepository.findByNroPedidoAndSucursalAndEliminado(nroPedido, sucursal, false);
   }
 
   @Override
