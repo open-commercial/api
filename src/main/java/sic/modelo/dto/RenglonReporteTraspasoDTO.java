@@ -19,4 +19,5 @@ public class RenglonReporteTraspasoDTO {
     private String sucursalOrigen;
     private String sucursalDestino;
     private BigDecimal cantidad;
+    private String medida;
 }

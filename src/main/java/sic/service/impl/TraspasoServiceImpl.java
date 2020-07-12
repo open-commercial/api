@@ -378,11 +378,12 @@ public class TraspasoServiceImpl implements ITraspasoService {
                     RenglonReporteTraspasoDTO renglonReporte =
                         RenglonReporteTraspasoDTO.builder()
                             .codigoAndDescripcion(
-                                "    "
+                                "     "
                                     + renglonTraspaso.getCodigoProducto()
                                     + " "
                                     + renglonTraspaso.getDescripcionProducto())
                             .cantidad(renglonTraspaso.getCantidadProducto())
+                            .medida(renglonTraspaso.getNombreMedidaProducto())
                             .build();
                     renglonesReporte.add(renglonReporte);
                   });
