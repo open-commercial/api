@@ -146,7 +146,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownBusinessExceptionAltaProductoCodigoDuplicado() {
+  void shouldThrownBusinessExceptionAltaProductoCodigoDuplicado() {
     NuevoProductoDTO nuevoProductoUno =
         NuevoProductoDTO.builder()
             .descripcion("Ventilador de pie")
@@ -187,7 +187,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownBusinessExceptionAltaProductoDescripcionDuplicado() {
+  void shouldThrownBusinessExceptionAltaProductoDescripcionDuplicado() {
     NuevoProductoDTO nuevoProductoUno =
         NuevoProductoDTO.builder()
             .descripcion("Ventilador de pie")
@@ -227,7 +227,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
+  void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
     Producto producto = this.construirProducto();
     producto.setOferta(true);
     assertThrows(
@@ -236,7 +236,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
+  void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
     Producto productoParaActualizar = this.construirProducto();
     productoParaActualizar.setIdProducto(1L);
     Producto productoPersistido = this.construirProducto();
@@ -250,7 +250,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldTestBusquedaCriteria() {
+  void shouldTestBusquedaCriteria() {
     BusquedaProductoCriteria criteria =
         BusquedaProductoCriteria.builder()
             .codigo("213")
@@ -271,7 +271,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldGetProductoConPrecioBonificadoPorOferta() {
+  void shouldGetProductoConPrecioBonificadoPorOferta() {
     Producto producto = new Producto();
     producto.setPrecioLista(new BigDecimal("100"));
     producto.setPorcentajeBonificacionOferta(new BigDecimal("10"));
@@ -283,7 +283,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldThrownEntityNotFoundException() {
+  void shouldThrownEntityNotFoundException() {
     when(productoRepository.findById(1L)).thenReturn(Optional.empty());
     assertThrows(
         EntityNotFoundException.class, () -> productoService.getProductoNoEliminadoPorId(1L));
@@ -291,7 +291,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  public void shouldDevolverNullSiCodigoVacio() {
+  void shouldDevolverNullSiCodigoVacio() {
     assertNull(productoService.getProductoPorCodigo("123"));
   }
 
@@ -492,5 +492,66 @@ class ProductoServiceImplTest {
     producto.setPrecioLista(BigDecimal.ONE);
     assertThrows(BusinessServiceException.class, () -> productoService.validarCalculos(producto));
     verify(messageSource).getMessage(eq("mensaje_producto_precio_lista_incorrecto"), any(), any());
+  }
+
+  @Test
+  void shouldActualizarStockTraspaso() {
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    producto1.setCantidadTotalEnSucursales(new BigDecimal("1"));
+    producto1.setDescripcion("Ventilador de pie");
+    Sucursal sucursalOrigen = new Sucursal();
+    sucursalOrigen.setIdSucursal(1L);
+    CantidadEnSucursal cantidadEnSucursalProducto1 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto1.setSucursal(sucursalOrigen);
+    cantidadEnSucursalProducto1.setCantidad(new BigDecimal("1"));
+    Set<CantidadEnSucursal> cantidadEnSucursalesProducto1 = new HashSet<>();
+    cantidadEnSucursalesProducto1.add(cantidadEnSucursalProducto1);
+    producto1.setCantidadEnSucursales(cantidadEnSucursalesProducto1);
+    producto1.setIlimitado(false);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
+    when(productoRepository.save(producto1)).thenReturn(producto1);
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    producto2.setCantidadTotalEnSucursales(new BigDecimal("2"));
+    producto2.setDescripcion("Duchas");
+    CantidadEnSucursal cantidadEnSucursalProducto2 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto2.setSucursal(sucursalOrigen);
+    cantidadEnSucursalProducto2.setCantidad(new BigDecimal("2"));
+    Set<CantidadEnSucursal> cantidadEnSucursalesProducto2 = new HashSet<>();
+    cantidadEnSucursalesProducto2.add(cantidadEnSucursalProducto2);
+    producto2.setCantidadEnSucursales(cantidadEnSucursalesProducto2);
+    producto2.setIlimitado(false);
+    when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
+    when(productoRepository.save(producto2)).thenReturn(producto2);
+    Traspaso traspaso = new Traspaso();
+    List<RenglonTraspaso> renglones = new ArrayList<>();
+    RenglonTraspaso renglonTraspaso1 = new RenglonTraspaso();
+    renglonTraspaso1.setIdProducto(1L);
+    renglonTraspaso1.setCantidadProducto(BigDecimal.TEN);
+    RenglonTraspaso renglonTraspaso2 = new RenglonTraspaso();
+    renglonTraspaso2.setIdProducto(2L);
+    renglonTraspaso2.setCantidadProducto(BigDecimal.ONE);
+    renglones.add(renglonTraspaso1);
+    renglones.add(renglonTraspaso2);
+    traspaso.setRenglones(renglones);
+    traspaso.setSucursalOrigen(sucursalOrigen);
+    Sucursal sucursalDestino = new Sucursal();
+    sucursalDestino.setIdSucursal(2L);
+    traspaso.setSucursalDestino(sucursalDestino);
+    assertThrows(
+            BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
+    verify(messageSource).getMessage(eq("mensaje_traspaso_sin_stock"), any(), any());
+
+    producto1.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto1
+        .getCantidadEnSucursales()
+        .forEach(cantidadEnSucursal -> cantidadEnSucursal.setCantidad(BigDecimal.TEN));
+    productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
+    productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ELIMINACION);
+    verify(productoRepository, times(8)).save(any());
+    assertThrows(
+            BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ACTUALIZACION));
+    verify(messageSource).getMessage(eq("mensaje_traspaso_operacion_no_soportada"), any(), any());
   }
 }

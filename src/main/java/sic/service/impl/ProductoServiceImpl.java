@@ -64,7 +64,6 @@ public class ProductoServiceImpl implements IProductoService {
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
-  private static final Long ID_SUCURSAL_DEFAULT = 1L;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -579,21 +578,38 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion) {
     switch (tipoDeOperacion) {
-      case ALTA -> traspaso
-              .getRenglones()
-              .forEach(
-                      renglonTraspaso -> {
-                        Producto producto =
-                                this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
-                        this.quitarStock(
-                                producto,
-                                traspaso.getSucursalOrigen().getIdSucursal(),
-                                renglonTraspaso.getCantidadProducto());
-                        this.agregarStock(
-                                producto,
-                                traspaso.getSucursalDestino().getIdSucursal(),
-                                renglonTraspaso.getCantidadProducto());
-                      });
+      case ALTA -> {
+        //control de stock
+        long[] idProducto = new long[traspaso.getRenglones().size()];
+        BigDecimal[] cantidad = new BigDecimal[traspaso.getRenglones().size()];
+        int indice = 0;
+        for (RenglonTraspaso renglon : traspaso.getRenglones()) {
+          idProducto[indice] = renglon.getIdProducto();
+          cantidad[indice] = renglon.getCantidadProducto();
+          indice++;
+        }
+        ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+                ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+        if (!this.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage("mensaje_traspaso_sin_stock", null, Locale.getDefault()));
+        }
+        traspaso
+        .getRenglones()
+        .forEach(
+                renglonTraspaso -> {
+                  Producto producto =
+                          this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
+                  this.quitarStock(
+                          producto,
+                          traspaso.getSucursalOrigen().getIdSucursal(),
+                          renglonTraspaso.getCantidadProducto());
+                  this.agregarStock(
+                          producto,
+                          traspaso.getSucursalDestino().getIdSucursal(),
+                          renglonTraspaso.getCantidadProducto());
+                });
+      }
       case ELIMINACION -> traspaso
               .getRenglones()
               .forEach(
@@ -1002,11 +1018,11 @@ public class ProductoServiceImpl implements IProductoService {
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
-    Sucursal sucursalDefault =  sucursalService.getSucursalPorId(ID_SUCURSAL_DEFAULT);
-    if (sucursalDefault.getLogo() != null && !sucursalDefault.getLogo().isEmpty()) {
+    Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
         params.put(
-                "logo", new ImageIcon(ImageIO.read(new URL(sucursalDefault.getLogo()))).getImage());
+                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
       } catch (IOException ex) {
         throw new ServiceException(messageSource.getMessage(
                 "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);

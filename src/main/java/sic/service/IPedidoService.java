@@ -17,6 +17,8 @@ public interface IPedidoService {
 
   Pedido getPedidoNoEliminadoPorId(long idPedido);
 
+  Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal);
+
   void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursal, List<Recibo> recibos);
 
   void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);

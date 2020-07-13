@@ -156,6 +156,11 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
+  public Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal) {
+    return pedidoRepository.findByNroPedidoAndSucursalAndEliminado(nroPedido, sucursal, false);
+  }
+
+  @Override
   public long generarNumeroPedido(Sucursal sucursal) {
     long min = 1L;
     long max = 9999999999L; // 10 digitos

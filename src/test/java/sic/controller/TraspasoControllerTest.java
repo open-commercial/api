@@ -6,14 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.modelo.Traspaso;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
+import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.service.impl.TraspasoServiceImpl;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TraspasoController.class})
-public class TraspasoControllerTest {
+class TraspasoControllerTest {
 
   @MockBean TraspasoServiceImpl traspasoService;
 
@@ -30,5 +33,18 @@ public class TraspasoControllerTest {
   void shouldGetRenglones() {
     traspasoController.getRenglonesDelTraspaso(1L);
     verify(traspasoService).getRenglonesTraspaso(1L);
+  }
+
+  @Test
+  void shouldGuardarTraspaso() {
+    traspasoController.guardarTraspaso(NuevoTraspasoDTO.builder().build());
+    verify(traspasoService).guardar(NuevoTraspasoDTO.builder().build());
+  }
+
+  @Test
+  void shouldEliminarTraspaso() {
+    when(traspasoService.getTraspasoNoEliminadoPorid(1L)).thenReturn(new Traspaso());
+    traspasoController.eliminarTraspaso(1L);
+    verify(traspasoService).eliminar(1L);
   }
 }

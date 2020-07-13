@@ -34,4 +34,6 @@ public interface ITraspasoService {
   BooleanBuilder getBuilderTraspaso(BusquedaTraspasoCriteria criteria);
 
   Pageable getPageable(Integer pagina, String ordenarPor, String sentido);
+
+  byte[] getReporteTraspaso(BusquedaTraspasoCriteria criteria);
 }
