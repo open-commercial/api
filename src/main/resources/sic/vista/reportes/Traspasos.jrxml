@@ -131,12 +131,12 @@
 			<textField>
 				<reportElement x="580" y="0" width="109" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{sucursalOrigen} != null ? $F{sucursalOrigen} : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{sucursalDestino}!= null ? $F{sucursalDestino} : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="470" y="0" width="110" height="20" uuid="009f171c-19d7-4c35-a69b-3fe1a41fe09a"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{sucursalDestino} != null ? $F{sucursalDestino} : ""]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{sucursalOrigen} != null ? $F{sucursalOrigen}: ""]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.##">
 				<reportElement x="690" y="0" width="60" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
