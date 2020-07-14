@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -23,8 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -282,5 +282,36 @@ class TraspasoServiceImplTest {
     pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "NO");
     assertEquals("sucursalDestino.nombre: DESC", pageable.getSort().toString());
     assertEquals(3, pageable.getPageNumber());
+  }
+
+  @Test
+  void shouldGetReporteTraspasos() {
+    Sucursal sucursalOrigen = new Sucursal();
+    sucursalOrigen.setNombre("Sucursal Origen");
+    Sucursal sucursalDestino = new Sucursal();
+    sucursalDestino.setNombre("Sucursal Destino");
+    List<Traspaso> traspasos = new ArrayList<>();
+    Traspaso traspaso = new Traspaso();
+    traspaso.setFechaDeAlta(LocalDateTime.now());
+    traspaso.setNroTraspaso("123");
+    traspaso.setSucursalOrigen(sucursalOrigen);
+    traspaso.setSucursalDestino(sucursalDestino);
+    traspaso.setNroPedido(123L);
+    RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
+    renglonTraspaso.setCantidadProducto(BigDecimal.ONE);
+    renglonTraspaso.setNombreMedidaProducto("Metro");
+    renglonTraspaso.setDescripcionProducto("Soga");
+    renglonTraspaso.setCodigoProducto("123");
+    List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
+    renglonesTraspaso.add(renglonTraspaso);
+    traspaso.setRenglones(renglonesTraspaso);
+    BusquedaTraspasoCriteria criteria = BusquedaTraspasoCriteria.builder().build();
+    when(traspasoRepository.findAll(
+            traspasoService.getBuilderTraspaso(criteria),
+            traspasoService.getPageable(null, null, null)))
+        .thenReturn(new PageImpl<>(traspasos));
+    Sucursal sucursal = new Sucursal();
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
+    assertNotNull(traspasoService.getReporteTraspaso(criteria));
   }
 }
