@@ -266,6 +266,22 @@ class TraspasoServiceImplTest {
                 "&& traspaso.fechaDeAlta < -999999999-01-01T23:59:59.999999999 " +
                 "&& traspaso.usuario.idUsuario = 7 && traspaso.nroTraspaso = 334";
     assertEquals(resultadoBuilder, traspasoService.getBuilderTraspaso(criteria).toString());
+    criteria =
+            BusquedaTraspasoCriteria.builder()
+                    .idSucursalOrigen(1L)
+                    .idSucursalDestino(2L)
+                    .fechaHasta(LocalDateTime.MIN)
+                    .idUsuario(7L)
+                    .nroTraspaso("334")
+                    .nroPedido(132L)
+                    .build();
+    resultadoBuilder =
+            "traspaso.sucursalOrigen.idSucursal = 1 " +
+                    "&& traspaso.sucursalDestino.idSucursal = 2 " +
+                    "&& traspaso.fechaDeAlta < -999999999-01-01T23:59:59.999999999 " +
+                    "&& traspaso.usuario.idUsuario = 7 && traspaso.nroTraspaso = 334 " +
+                    "&& traspaso.nroPedido = 132";
+    assertEquals(resultadoBuilder, traspasoService.getBuilderTraspaso(criteria).toString());
   }
 
   @Test
