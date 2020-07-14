@@ -16,6 +16,7 @@ public class BusquedaTraspasoCriteria {
   private LocalDateTime fechaDesde;
   private LocalDateTime fechaHasta;
   private String nroTraspaso;
+  private Long nroPedido;
   private Long idSucursalOrigen;
   private Long idSucursalDestino;
   private Long idUsuario;
