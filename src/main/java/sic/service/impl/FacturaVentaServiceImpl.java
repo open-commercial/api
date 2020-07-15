@@ -178,7 +178,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   public TipoDeComprobante[] getTiposDeComprobanteVenta(
       Long idSucursal, Long idCliente, Long idUsuario) {
-    List<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
+    Set<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {

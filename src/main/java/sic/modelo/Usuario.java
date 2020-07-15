@@ -67,7 +67,7 @@ public class Usuario implements Serializable {
     @Enumerated(EnumType.STRING)
     @Column(name="nombre")
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
-    private List<Rol> roles;
+    private Set<Rol> roles;
 
     @ElementCollection 
     @CollectionTable(name="tokenAcceso", joinColumns = @JoinColumn(name = "idUsuario"))

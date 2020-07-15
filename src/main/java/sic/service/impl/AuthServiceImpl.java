@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 @Service
 public class AuthServiceImpl implements IAuthService {
@@ -50,7 +50,7 @@ public class AuthServiceImpl implements IAuthService {
   }
 
   @Override
-  public String generarToken(long idUsuario, Aplicacion aplicacion, List<Rol> rolesDeUsuario) {
+  public String generarToken(long idUsuario, Aplicacion aplicacion, Set<Rol> rolesDeUsuario) {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
     ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());

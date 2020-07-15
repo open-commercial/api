@@ -169,7 +169,7 @@ class FacturaVentaControllerTest {
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
-    usuario.setRoles(Collections.singletonList(Rol.ADMINISTRADOR));
+    usuario.setRoles(Collections.singleton(Rol.ADMINISTRADOR));
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     when(facturaVentaService.getTiposDeComprobanteVenta(any(), any(), any()))
         .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.FACTURA_A});

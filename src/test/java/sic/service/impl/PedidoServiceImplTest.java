@@ -260,7 +260,7 @@ class PedidoServiceImplTest {
             .idSucursal(7L)
             .build();
     Usuario usuario = new Usuario();
-    List<Rol> roles = new ArrayList<>();
+    Set<Rol> roles = new HashSet<>();
     roles.add(Rol.COMPRADOR);
     usuario.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);

@@ -125,7 +125,7 @@ class AppIntegrationTest {
             .nombre("Max")
             .apellido("Power")
             .email("liderDeLaEmpresa@yahoo.com.br")
-            .roles(new ArrayList<>(Collections.singletonList(Rol.ADMINISTRADOR)))
+            .roles(Collections.singleton(Rol.ADMINISTRADOR))
             .build();
     credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, Usuario.class);
     credencial.setHabilitado(true);
@@ -689,7 +689,7 @@ class AppIntegrationTest {
             .nombre("Juan")
             .apellido("Canete")
             .email("caniete@yahoo.com.br")
-            .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
+            .roles(Collections.singleton(Rol.COMPRADOR))
             .habilitado(true)
             .build();
     Usuario credencialDadaDeAlta =

@@ -57,7 +57,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     nuevoUsuario.setApellido(registracionClienteAndUsuarioDTO.getApellido());
     nuevoUsuario.setEmail(registracionClienteAndUsuarioDTO.getEmail());
     nuevoUsuario.setPassword(registracionClienteAndUsuarioDTO.getPassword());
-    nuevoUsuario.setRoles(Collections.singletonList(Rol.COMPRADOR));
+    nuevoUsuario.setRoles(Collections.singleton(Rol.COMPRADOR));
     Cliente nuevoCliente = new Cliente();
     nuevoCliente.setTelefono(registracionClienteAndUsuarioDTO.getTelefono());
     nuevoCliente.setEmail(registracionClienteAndUsuarioDTO.getEmail());

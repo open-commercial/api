@@ -2,10 +2,7 @@ package sic.model;
 
 import lombok.*;
 import sic.modelo.Rol;
-
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -23,7 +20,7 @@ public class Usuario {
   private String token;
   private long idSucursalPredeterminada;
   private String passwordRecoveryKey;
-  private List<Rol> roles;
+  private Set<Rol> roles;
   private boolean habilitado;
   private boolean eliminado;
 }

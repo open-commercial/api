@@ -60,7 +60,7 @@ class FacturaVentaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Usuario usuario = new Usuario();
-    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    usuario.setRoles(new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO)));
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
@@ -78,7 +78,7 @@ class FacturaVentaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Usuario usuario = new Usuario();
-    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    usuario.setRoles(new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO)));
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
@@ -96,7 +96,7 @@ class FacturaVentaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     Usuario usuario = new Usuario();
-    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    usuario.setRoles(new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO)));
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
@@ -114,7 +114,7 @@ class FacturaVentaServiceImplTest {
     Cliente cliente = new Cliente();
     cliente.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
     Usuario usuario = new Usuario();
-    usuario.setRoles(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO));
+    usuario.setRoles(new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO)));
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
@@ -284,7 +284,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldTestBusquedaFacturaVentaCriteria() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
@@ -351,7 +351,7 @@ class FacturaVentaServiceImplTest {
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
-    roles = Collections.singletonList(Rol.COMPRADOR);
+    roles = Collections.singleton(Rol.COMPRADOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     Cliente clienteRelacionadoConUsuarioLogueado = new Cliente();
@@ -406,7 +406,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldCalcularTotalFacturadoVenta() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
@@ -426,7 +426,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldCalcularTotalFacturadoVentaAndReturnZero() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
@@ -447,7 +447,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldCalcularIvaVenta() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
@@ -468,7 +468,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldCalcularIvaVentaAndReturnZero() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
@@ -489,7 +489,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldCalcularGananciaTotalVenta() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
@@ -509,7 +509,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldCalcularGananciaTotalVentaAndReturnZero() {
     Usuario usuarioLogueado = new Usuario();
-    List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
+    Set<Rol> roles = new HashSet<>(Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR));
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
     BusquedaFacturaVentaCriteria criteria =
