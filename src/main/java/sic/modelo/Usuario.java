@@ -62,14 +62,14 @@ public class Usuario implements Serializable {
 
     private LocalDateTime passwordRecoveryKeyExpirationDate;
     
-    @ElementCollection(targetClass = Rol.class)
+    @ElementCollection(targetClass = Rol.class, fetch = FetchType.EAGER)
     @CollectionTable(name="rol", joinColumns = @JoinColumn(name = "id_Usuario"))
     @Enumerated(EnumType.STRING)
     @Column(name="nombre")
     @NotEmpty(message = "{mensaje_usuario_no_selecciono_rol}")
     private List<Rol> roles;
 
-    @ElementCollection 
+    @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name="tokenAcceso", joinColumns = @JoinColumn(name = "idUsuario"))
     private Set<TokenAcceso> tokens;
 
