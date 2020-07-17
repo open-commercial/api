@@ -33,6 +33,11 @@ public class TraspasoController {
     this.messageSource = messageSource;
   }
 
+  @GetMapping("/traspasos/{idTraspaso}")
+  public Traspaso getTraspasoPorId(@PathVariable long idTraspaso) {
+    return traspasoService.getTraspasoNoEliminadoPorid(idTraspaso);
+  }
+
   @PostMapping("/traspasos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Traspaso> getTraspasosCriteria(@RequestBody BusquedaTraspasoCriteria criteria) {
