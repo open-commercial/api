@@ -109,33 +109,14 @@ public class ProductoController {
     }
     switch (formato) {
       case "xlsx" -> {
-        return this.getListaDePreciosEnXls(headers, criteria);
+        return productoService.getListaDePreciosEnXls(criteria);
       }
       case "pdf" -> {
-        return this.getListaDePreciosEnPdf(headers, criteria);
+        return productoService.getListaDePreciosEnPdf(criteria);
       }
       default -> throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
-  }
-
-  private ResponseEntity<byte[]> getListaDePreciosEnXls(HttpHeaders headers, BusquedaProductoCriteria criteria) {
-    headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-    headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-    List<Producto> productos = productoService.buscarProductosParaReporte(criteria);
-    byte[] reporteXls =
-            productoService.getListaDePrecios(productos, "xlsx");
-    headers.setContentLength(reporteXls.length);
-    return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-  }
-
-  private ResponseEntity<byte[]> getListaDePreciosEnPdf(HttpHeaders headers,BusquedaProductoCriteria criteria) {
-    headers.setContentType(MediaType.APPLICATION_PDF);
-    headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-    List<Producto> productos = productoService.buscarProductosParaReporte(criteria);
-    byte[] reportePDF =
-            productoService.getListaDePrecios(productos, "pdf");
-    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
   @DeleteMapping("/productos")
