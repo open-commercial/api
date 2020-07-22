@@ -9,6 +9,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -240,7 +244,8 @@ public class ProductoServiceImpl implements IProductoService {
         .getContent();
   }
 
-  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina) {
+  @Override
+  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina) {
     if (pagina == null) pagina = 0;
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
@@ -1051,6 +1056,30 @@ public class ProductoServiceImpl implements IProductoService {
     }
   }
 
+  @Override
+  public ResponseEntity<byte[]> getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+    headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+    headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+    List<Producto> productos = this.buscarProductosParaReporte(criteria);
+    byte[] reporteXls =
+            this.getListaDePrecios(productos, "xlsx");
+    headers.setContentLength(reporteXls.length);
+    return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+  }
+
+  @Override
+  public ResponseEntity<byte[]> getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+    List<Producto> productos = this.buscarProductosParaReporte(criteria);
+    byte[] reportePDF =
+            this.getListaDePrecios(productos, "pdf");
+    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
+
   private byte[] xlsReportToArray(JasperPrint jasperPrint) {
     byte[] bytes = null;
     try {
@@ -1070,11 +1099,6 @@ public class ProductoServiceImpl implements IProductoService {
       logger.error(ex.getMessage());
     }
     return bytes;
-  }
-
-  @Override
-  public List<Producto> getMultiplesProductosPorId(List<Long> idsProductos) {
-    return productoRepository.findByIdProductoInOrderByIdProductoAsc(idsProductos);
   }
 
   private boolean contieneDuplicados(long[] array) {
