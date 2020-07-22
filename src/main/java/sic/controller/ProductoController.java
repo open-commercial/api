@@ -103,31 +103,19 @@ public class ProductoController {
     @RequestBody BusquedaProductoCriteria criteria,
     @RequestParam(required = false) String formato) {
     HttpHeaders headers = new HttpHeaders();
-    List<Producto> productos;
+    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     if (formato == null || formato.isEmpty()) {
       formato = "xlsx";
     }
     switch (formato) {
-      case "xlsx":
-        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos = productoService.buscarProductosParaReporte(criteria);
-        byte[] reporteXls =
-          productoService.getListaDePrecios(productos, formato);
-        headers.setContentLength(reporteXls.length);
-        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-      case "pdf":
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        productos = productoService.buscarProductosParaReporte(criteria);
-        byte[] reportePDF =
-          productoService.getListaDePrecios(productos, formato);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_formato_no_valido", null, Locale.getDefault()));
+      case "xlsx" -> {
+        return productoService.getListaDePreciosEnXls(criteria);
+      }
+      case "pdf" -> {
+        return productoService.getListaDePreciosEnPdf(criteria);
+      }
+      default -> throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 

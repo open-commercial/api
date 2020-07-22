@@ -3,6 +3,9 @@ package sic.service;
 import java.math.BigDecimal;
 
 import com.querydsl.core.BooleanBuilder;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import sic.modelo.*;
 
 import java.util.List;
@@ -78,6 +81,10 @@ public interface IProductoService {
 
   byte[] getListaDePrecios(List<Producto> productos, String formato);
 
+  ResponseEntity<byte[]> getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
+
+  ResponseEntity<byte[]> getListaDePreciosEnPdf(BusquedaProductoCriteria criteria);
+
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
   void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
@@ -86,5 +93,5 @@ public interface IProductoService {
 
   String subirImagenProducto(long idProducto, byte[] imagen);
 
-  List<Producto> getMultiplesProductosPorId(List<Long> idsProductos);
+  Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina);
 }

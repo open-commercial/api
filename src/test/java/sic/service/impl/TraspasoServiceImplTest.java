@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
@@ -209,9 +210,40 @@ class TraspasoServiceImplTest {
 
   @Test
   void shouldEliminarTraspaso() {
+    Sucursal sucursalOrigen = new Sucursal();
+    sucursalOrigen.setNombre("Sucursal Origen");
+    Sucursal sucursalDestino = new Sucursal();
+    sucursalDestino.setNombre("Sucursal Destino");
     Traspaso traspaso = new Traspaso();
+    traspaso.setSucursalOrigen(sucursalOrigen);
+    traspaso.setSucursalDestino(sucursalDestino);
     when(traspasoRepository.findById(1L)).thenReturn(Optional.of(traspaso));
     traspasoService.eliminar(1L);
+    Pedido pedido = new Pedido();
+    pedido.setNroPedido(123L);
+    pedido.setEstado(EstadoPedido.CERRADO);
+    traspaso.setNroPedido(123L);
+    when(pedidoService.getPedidoPorNumeroAndSucursal(123L, traspaso.getSucursalDestino()))
+        .thenReturn(pedido);
+    assertThrows(BusinessServiceException.class, () -> traspasoService.eliminar(1L));
+    verify(messageSource)
+        .getMessage(eq("mensaje_traspaso_error_eliminar_con_pedido"), any(), any());
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    when(pedidoService.getPedidoPorNumeroAndSucursal(123L, traspaso.getSucursalDestino()))
+        .thenReturn(pedido);
+    traspasoService.eliminar(1L);
+    verify(traspasoRepository, times(2)).delete(traspaso);
+  }
+
+  @Test
+  void shouldEliminarTraspasoDePedido() {
+    Pedido pedido = new Pedido();
+    pedido.setNroPedido(123L);
+    Traspaso traspaso = new Traspaso();
+    traspaso.setIdTraspaso(1L);
+    when(traspasoRepository.findByNroPedido(123L)).thenReturn(traspaso);
+    when(traspasoRepository.findById(1L)).thenReturn(Optional.of(traspaso));
+    traspasoService.eliminarTraspasoDePedido(pedido);
     verify(traspasoRepository, times(1)).delete(traspaso);
   }
 
@@ -282,6 +314,14 @@ class TraspasoServiceImplTest {
                     "&& traspaso.usuario.idUsuario = 7 && traspaso.nroTraspaso = 334 " +
                     "&& traspaso.nroPedido = 132";
     assertEquals(resultadoBuilder, traspasoService.getBuilderTraspaso(criteria).toString());
+    List<Traspaso> traspasos = new ArrayList<>();
+    Traspaso traspaso = new Traspaso();
+    traspasos.add(traspaso);
+    when(traspasoRepository.findAll(
+            traspasoService.getBuilderTraspaso(criteria),
+            traspasoService.getPageable(null, null, null)))
+            .thenReturn(new PageImpl<>(traspasos));
+    assertNotNull(traspasoService.buscarTraspasos(criteria));
   }
 
   @Test
@@ -321,13 +361,36 @@ class TraspasoServiceImplTest {
     List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
     renglonesTraspaso.add(renglonTraspaso);
     traspaso.setRenglones(renglonesTraspaso);
+    traspasos.add(traspaso);
     BusquedaTraspasoCriteria criteria = BusquedaTraspasoCriteria.builder().build();
     when(traspasoRepository.findAll(
             traspasoService.getBuilderTraspaso(criteria),
             traspasoService.getPageable(null, null, null)))
         .thenReturn(new PageImpl<>(traspasos));
     Sucursal sucursal = new Sucursal();
+    sucursal.setLogo("errorLogo");
     when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
+    assertThrows(ServiceException.class, () -> traspasoService.getReporteTraspaso(criteria));
+    verify(messageSource)
+            .getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
+    sucursal.setLogo(null);
     assertNotNull(traspasoService.getReporteTraspaso(criteria));
+  }
+
+  @Test
+  void shouldGetRenglonesTraspasos() {
+    List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
+    RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
+    renglonTraspaso.setCodigoProducto("123");
+    renglonTraspaso.setDescripcionProducto("codigo123");
+    renglonTraspaso.setCantidadProducto(BigDecimal.TEN);
+    renglonTraspaso.setNombreMedidaProducto("Kilo");
+    renglonTraspaso.setIdProducto(1L);
+    renglonTraspaso.setIdRenglonTraspaso(1L);
+    renglonesTraspaso.add(renglonTraspaso);
+    when(renglonTraspasoRepository.findByIdTraspasoOrderByIdRenglonTraspaso(1L))
+        .thenReturn(renglonesTraspaso);
+    assertNotNull(traspasoService.getRenglonesTraspaso(1L));
+    verify(renglonTraspasoRepository).findByIdTraspasoOrderByIdRenglonTraspaso(1L);
   }
 }

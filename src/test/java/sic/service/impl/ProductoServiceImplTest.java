@@ -16,9 +16,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.NuevoProductoDTO;
@@ -542,7 +545,6 @@ class ProductoServiceImplTest {
     assertThrows(
             BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
     verify(messageSource).getMessage(eq("mensaje_traspaso_sin_stock"), any(), any());
-
     producto1.setCantidadTotalEnSucursales(BigDecimal.TEN);
     producto1
         .getCantidadEnSucursales()
@@ -553,5 +555,47 @@ class ProductoServiceImplTest {
     assertThrows(
             BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ACTUALIZACION));
     verify(messageSource).getMessage(eq("mensaje_traspaso_operacion_no_soportada"), any(), any());
+  }
+
+  @Test
+  void shouldTestReporteListaDePrecios() {
+    List<Producto> productos = new ArrayList<>();
+    Producto productoParaReporte = new Producto();
+    productos.add(productoParaReporte);
+    when(productoRepository.findAll(
+            productoService.getBuilder(BusquedaProductoCriteria.builder().build()),
+            productoService.getPageable(null, null, null, Integer.MAX_VALUE)))
+            .thenReturn(new PageImpl<>(productos));
+    Sucursal sucursal = new Sucursal();
+    sucursal.setLogo("noTieneImagen");
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
+    assertThrows(
+            ServiceException.class, () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build()));
+    assertThrows(
+            ServiceException.class, () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
+    verify(messageSource, times(2)).getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
+    sucursal.setLogo(null);
+    BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
+    assertNotNull(productoService.getListaDePreciosEnPdf(criteria));
+    assertNotNull(productoService.getListaDePreciosEnXls(criteria));
+  }
+
+  @Test
+  void shouldGetPageableProducto() {
+    Pageable pageable = productoService.getPageable(0, null, null, Integer.MAX_VALUE);
+    assertEquals("descripcion: ASC", pageable.getSort().toString());
+    assertEquals(0, pageable.getPageNumber());
+    pageable = productoService.getPageable(1, "rubro.nombre", "ASC", Integer.MAX_VALUE);
+    assertEquals("rubro.nombre: ASC", pageable.getSort().toString());
+    assertEquals(1, pageable.getPageNumber());
+    pageable = productoService.getPageable(3, "rubro.nombre", "DESC", Integer.MAX_VALUE);
+    assertEquals("rubro.nombre: DESC", pageable.getSort().toString());
+    assertEquals(3, pageable.getPageNumber());
+    pageable = productoService.getPageable(3, "codigo", "NO", Integer.MAX_VALUE);
+    assertEquals("descripcion: DESC", pageable.getSort().toString());
+    assertEquals(3, pageable.getPageNumber());
+    pageable = productoService.getPageable(null, "codigo", "NO", Integer.MAX_VALUE);
+    assertEquals("descripcion: DESC", pageable.getSort().toString());
+    assertEquals(0, pageable.getPageNumber());
   }
 }
