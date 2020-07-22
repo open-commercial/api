@@ -1,5 +1,6 @@
 package sic.controller;
 
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import sic.modelo.Rol;
 import sic.modelo.Traspaso;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
+import sic.service.IAuthService;
 import sic.service.ITraspasoService;
 
 import java.util.List;
@@ -25,11 +27,14 @@ import java.util.Locale;
 public class TraspasoController {
 
   private final ITraspasoService traspasoService;
+  private final IAuthService authService;
   private final MessageSource messageSource;
 
   @Autowired
-  public TraspasoController(ITraspasoService traspasoService, MessageSource messageSource) {
+  public TraspasoController(
+      ITraspasoService traspasoService, IAuthService authService, MessageSource messageSource) {
     this.traspasoService = traspasoService;
+    this.authService = authService;
     this.messageSource = messageSource;
   }
 
@@ -52,8 +57,11 @@ public class TraspasoController {
 
   @PostMapping("/traspasos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO) {
-    return traspasoService.guardar(nuevoTraspasoDTO);
+  public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO,
+                                  @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    return traspasoService.guardarTraspaso(nuevoTraspasoDTO, idUsuarioLoggedIn);
   }
 
   @DeleteMapping("/traspasos/{idTraspaso}")

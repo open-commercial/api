@@ -19,10 +19,7 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
-import sic.modelo.dto.NuevoTraspasoDTO;
-import sic.modelo.dto.ProductoFaltanteDTO;
-import sic.modelo.dto.ProductosParaVerificarStockDTO;
-import sic.modelo.dto.RenglonReporteTraspasoDTO;
+import sic.modelo.dto.*;
 import sic.repository.RenglonTraspasoRepository;
 import sic.repository.TraspasoRepository;
 import sic.service.*;
@@ -34,7 +31,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -87,20 +83,20 @@ public class TraspasoServiceImpl implements ITraspasoService {
   }
 
   @Override
-  public Traspaso guardar(NuevoTraspasoDTO nuevoTraspasoDTO) {
+  public Traspaso guardarTraspasoDePedido(NuevoTraspasoDePedidoDTO nuevoTraspasoDePedidoDTO) {
     Traspaso traspaso = new Traspaso();
     traspaso.setFechaDeAlta(LocalDateTime.now());
     traspaso.setNroTraspaso(this.generarNroDeTraspaso());
     Sucursal sucursalOrigen =
-        sucursalService.getSucursalPorId(nuevoTraspasoDTO.getIdSucursalOrigen());
+        sucursalService.getSucursalPorId(nuevoTraspasoDePedidoDTO.getIdSucursalOrigen());
     Sucursal sucursalDestino =
-        sucursalService.getSucursalPorId(nuevoTraspasoDTO.getIdSucursalDestino());
+        sucursalService.getSucursalPorId(nuevoTraspasoDePedidoDTO.getIdSucursalDestino());
     traspaso.setSucursalOrigen(sucursalOrigen);
     traspaso.setSucursalDestino(sucursalDestino);
-    traspaso.setNroPedido(nuevoTraspasoDTO.getNroPedido());
-    traspaso.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoTraspasoDTO.getIdUsuario()));
+    traspaso.setNroPedido(nuevoTraspasoDePedidoDTO.getNroPedido());
+    traspaso.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(nuevoTraspasoDePedidoDTO.getIdUsuario()));
     List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
-    nuevoTraspasoDTO
+    nuevoTraspasoDePedidoDTO
         .getIdProductoConCantidad()
         .forEach(
             (idProducto, cantidad) -> {
@@ -123,16 +119,51 @@ public class TraspasoServiceImpl implements ITraspasoService {
   }
 
   @Override
+  public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO, long idUsuario) {
+    Traspaso traspaso = new Traspaso();
+    traspaso.setFechaDeAlta(LocalDateTime.now());
+    traspaso.setNroTraspaso(this.generarNroDeTraspaso());
+    Sucursal sucursalOrigen =
+            sucursalService.getSucursalPorId(nuevoTraspasoDTO.getIdSucursalOrigen());
+    Sucursal sucursalDestino =
+            sucursalService.getSucursalPorId(nuevoTraspasoDTO.getIdSucursalDestino());
+    traspaso.setSucursalOrigen(sucursalOrigen);
+    traspaso.setSucursalDestino(sucursalDestino);
+    traspaso.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
+    nuevoTraspasoDTO
+            .getIdProductoConCantidad()
+            .forEach(
+                    (idProducto, cantidad) -> {
+                      Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+                      RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
+                      renglonTraspaso.setIdProducto(producto.getIdProducto());
+                      renglonTraspaso.setCodigoProducto(producto.getCodigo());
+                      renglonTraspaso.setCantidadProducto(cantidad);
+                      renglonTraspaso.setDescripcionProducto(producto.getDescripcion());
+                      renglonTraspaso.setNombreMedidaProducto(producto.getNombreMedida());
+                      renglonesTraspaso.add(renglonTraspaso);
+                    });
+    traspaso.setRenglones(renglonesTraspaso);
+    traspaso = traspasoRepository.save(traspaso);
+    logger.warn(
+            messageSource.getMessage(
+                    "mensaje_traspaso_realizado", new Object[] {traspaso}, Locale.getDefault()));
+    productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
+    return traspaso;
+  }
+
+  @Override
   public List<Traspaso> guardarTraspasosPorPedido(Pedido pedido) {
     List<Traspaso> traspasos = new ArrayList<>();
     this.construirNuevosTraspasosPorPedido(pedido).stream()
         .filter(nuevoTraspaso -> !nuevoTraspaso.getIdProductoConCantidad().isEmpty())
-        .forEach(nuevoTraspaso -> traspasos.add(this.guardar(nuevoTraspaso)));
+        .forEach(nuevoTraspaso -> traspasos.add(this.guardarTraspasoDePedido(nuevoTraspaso)));
     return traspasos;
   }
 
   @Override
-  public List<NuevoTraspasoDTO> construirNuevosTraspasosPorPedido(Pedido pedido) {
+  public List<NuevoTraspasoDePedidoDTO> construirNuevosTraspasosPorPedido(Pedido pedido) {
     long[] idProducto = new long[pedido.getRenglones().size()];
     BigDecimal[] cantidad = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
@@ -151,19 +182,19 @@ public class TraspasoServiceImpl implements ITraspasoService {
         productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
     if (!faltantes.isEmpty()) {
       List<Sucursal> sucursales = sucursalService.getSucusales(false);
-      List<NuevoTraspasoDTO> nuevosTraspasos = new ArrayList<>();
+      List<NuevoTraspasoDePedidoDTO> nuevosTraspasos = new ArrayList<>();
       sucursales.stream()
           .filter(sucursal -> sucursal.getIdSucursal() != pedido.getSucursal().getIdSucursal())
           .forEach(
               sucursal -> {
-                NuevoTraspasoDTO nuevoTraspasoDTO =
-                    NuevoTraspasoDTO.builder()
+                NuevoTraspasoDePedidoDTO nuevoTraspasoDePedidoDTO =
+                    NuevoTraspasoDePedidoDTO.builder()
                         .nroPedido(pedido.getNroPedido())
                         .idSucursalOrigen(sucursal.getIdSucursal())
                         .idUsuario(pedido.getUsuario().getIdUsuario())
                         .idProductoConCantidad(new HashMap<>())
                         .build();
-                nuevosTraspasos.add(nuevoTraspasoDTO);
+                nuevosTraspasos.add(nuevoTraspasoDePedidoDTO);
               });
       for (ProductoFaltanteDTO productoFaltante : faltantes) {
         BigDecimal cantidadFaltante =

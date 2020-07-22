@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {CarritoCompraController.class, MessageSource.class})
-public class CarritoCompraControllerTest {
+class CarritoCompraControllerTest {
 
   @MockBean CarritoCompraServiceImpl carritoCompraService;
   @MockBean AuthServiceImpl authService;

@@ -1,6 +1,9 @@
 package sic.modelo.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -11,9 +14,7 @@ import java.util.Map;
 @Builder
 public class NuevoTraspasoDTO {
 
-  private Map<Long, BigDecimal> idProductoConCantidad;
-  private Long nroPedido;
-  private Long idSucursalOrigen;
-  private Long idSucursalDestino;
-  private Long idUsuario;
+    private Map<Long, BigDecimal> idProductoConCantidad;
+    private Long idSucursalOrigen;
+    private Long idSucursalDestino;
 }
