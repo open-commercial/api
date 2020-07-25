@@ -57,7 +57,7 @@ public class TraspasoController {
 
   @PostMapping("/traspasos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO,
+  public Traspaso guardarTraspaso(@RequestBody NuevoTraspasoDTO nuevoTraspasoDTO,
                                   @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
