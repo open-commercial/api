@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -73,6 +72,11 @@ public class RenglonCuentaCorriente implements Serializable {
     @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")  
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
+
+    @OneToOne
+    @JoinColumn(name = "idRemito", referencedColumnName = "idRemito")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Remito remito;
 
     @JsonGetter("idSucursal")
     public Long getIdSucursal() {

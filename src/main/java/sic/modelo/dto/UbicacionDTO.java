@@ -4,9 +4,18 @@ import lombok.*;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
-@EqualsAndHashCode(exclude = {"idUbicacion", "idLocalidad", "nombreLocalidad", "codigoPostal", "idProvincia", "nombreProvincia"})
+@EqualsAndHashCode(
+    exclude = {
+      "idUbicacion",
+      "idLocalidad",
+      "nombreLocalidad",
+      "codigoPostal",
+      "idProvincia",
+      "nombreProvincia"
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,6 +32,7 @@ public class UbicacionDTO implements Serializable {
   private String departamento;
   private Long idLocalidad;
   private String nombreLocalidad;
+  private BigDecimal costoDeEnvio;
   private String codigoPostal;
   private Long idProvincia;
   private String nombreProvincia;

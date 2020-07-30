@@ -15,8 +15,6 @@ public interface IFacturaVentaService {
 
   TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario);
 
-  List<Factura> getFacturasDelPedido(Long idPedido);
-
   List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante);
 
@@ -26,6 +24,10 @@ public interface IFacturaVentaService {
   List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
 
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
+
+  void asignarRemitoConFactura(Remito remito, long idFactura);
+
+  FacturaVenta getFacturaVentaDelRemito(Remito remito);
 
   BigDecimal calcularTotalFacturadoVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);

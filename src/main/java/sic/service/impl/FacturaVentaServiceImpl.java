@@ -212,12 +212,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public List<Factura> getFacturasDelPedido(Long idPedido) {
-    return facturaVentaRepository.findAllByPedidoAndEliminada(
-        pedidoService.getPedidoNoEliminadoPorId(idPedido), false);
-  }
-
-  @Override
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesParaFacturar = new ArrayList<>();
@@ -400,6 +394,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
     return fv;
+  }
+
+  @Override
+  public void asignarRemitoConFactura(Remito remito, long idFactura) {
+    facturaVentaRepository.modificarFacturaParaAgregarRemito(remito, idFactura);
+  }
+
+  @Override
+  public FacturaVenta getFacturaVentaDelRemito(Remito remito) {
+    return facturaVentaRepository.buscarFacturaPorRemito(remito);
   }
 
   @Override
