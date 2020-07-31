@@ -15,8 +15,6 @@ public interface IFacturaVentaService {
 
   TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario);
 
-  List<Factura> getFacturasDelPedido(Long idPedido);
-
   List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante);
 

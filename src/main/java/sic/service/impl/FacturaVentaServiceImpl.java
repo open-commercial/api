@@ -212,12 +212,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public List<Factura> getFacturasDelPedido(Long idPedido) {
-    return facturaVentaRepository.findAllByPedidoAndEliminada(
-        pedidoService.getPedidoNoEliminadoPorId(idPedido), false);
-  }
-
-  @Override
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesParaFacturar = new ArrayList<>();
