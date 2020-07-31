@@ -65,7 +65,7 @@ public class FacturaVentaController {
     }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     FacturaVenta fv =
-        facturaVentaService.construirFacuraVenta(
+        facturaVentaService.construirFacturaVenta(
             nuevaFacturaVentaDTO, idPedido, ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
     List<FacturaVenta> facturasGuardadas;
     if (nuevaFacturaVentaDTO.getIndices() != null

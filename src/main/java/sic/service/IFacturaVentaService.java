@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface IFacturaVentaService {
 
-  FacturaVenta construirFacuraVenta(NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario);
+  FacturaVenta construirFacturaVenta(NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario);
 
   TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario);
 
@@ -42,10 +42,10 @@ public interface IFacturaVentaService {
 
   void enviarFacturaVentaPorEmail(long idFactura);
 
-  void agregarRenglonesAFacturaConIVA(
+  void agregarRenglonesEnFacturaConIVA(
       FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones);
 
-  void agregarRenglonesAFacturaSinIVA(
+  void agregarRenglonesEnFacturaSinIVA(
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 
   BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria);
