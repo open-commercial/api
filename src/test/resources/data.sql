@@ -1,10 +1,10 @@
 INSERT INTO provincia(nombre) VALUES ('Corrientes'),('Misiones'),('Chaco');
 
 INSERT INTO localidad(codigo_postal, costo_envio, envio_gratuito, nombre, id_provincia)
-VALUES ('N3400',0.000000000000000,false,'Corrientes',1),
-       ('W3470',0.000000000000000,false,'Mercedes',1),
-       ('N3300',0.000000000000000,false,'Posadas',2),
-       ('H3500',0.000000000000000,false,'Resistencia',3);
+VALUES ('N3400',50.000000000000000,false,'Corrientes',1),
+       ('W3470',300.000000000000000,false,'Mercedes',1),
+       ('N3300',800.000000000000000,false,'Posadas',2),
+       ('H3500',150.000000000000000,false,'Resistencia',3);
 
 INSERT INTO formadepago(afecta_caja, eliminada, nombre, predeterminado)
 VALUES (true,false,'Efectivo',true), (false, false, 'Cheque de 3ros', false);

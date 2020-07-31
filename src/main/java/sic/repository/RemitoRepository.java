@@ -11,7 +11,7 @@ public interface RemitoRepository extends PagingAndSortingRepository<Remito, Lon
         QuerydslPredicateExecutor<Remito> {
 
     @Query(
-            "SELECT max(r.nroNota) FROM Remito r "
+            "SELECT max(r.nroRemito) FROM Remito r "
                     + "WHERE r.tipoComprobante = :tipoComprobante "
                     + "AND r.serie = :serie")
     Long buscarMayorNumRemitoSegunTipo(

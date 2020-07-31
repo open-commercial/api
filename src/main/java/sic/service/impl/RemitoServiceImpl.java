@@ -10,6 +10,7 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.repository.RemitoRepository;
+import sic.repository.RenglonRemitoRepository;
 import sic.service.*;
 import sic.util.CustomValidator;
 
@@ -29,6 +30,7 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IFacturaService facturaService;
     private final IFacturaVentaService facturaVentaService;
     private final RemitoRepository remitoRepository;
+    private final RenglonRemitoRepository renglonRemitoRepository;
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final IConfiguracionSucursalService configuracionSucursalService;
@@ -41,6 +43,7 @@ public class RemitoServiceImpl implements IRemitoService {
     public RemitoServiceImpl (IFacturaService facturaService,
                               IFacturaVentaService facturaVentaService,
                               RemitoRepository remitoRepository,
+                              RenglonRemitoRepository renglonRemitoRepository,
                               IClienteService clienteService,
                               IUsuarioService usuarioService,
                               IConfiguracionSucursalService configuracionSucursalService,
@@ -50,6 +53,7 @@ public class RemitoServiceImpl implements IRemitoService {
         this.facturaService = facturaService;
         this.facturaVentaService = facturaVentaService;
         this.remitoRepository = remitoRepository;
+        this.renglonRemitoRepository = renglonRemitoRepository;
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.configuracionSucursalService = configuracionSucursalService;
@@ -110,7 +114,7 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setSerie(configuracionSucursalService
             .getConfiguracionSucursal(remito.getSucursal())
             .getNroPuntoDeVentaAfip());
-       remito.setNroNota(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
+       remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
        remitoRepository.save(remito);
        facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura());
@@ -137,7 +141,7 @@ public class RemitoServiceImpl implements IRemitoService {
 
     @Override
     public void eliminar(long idRemito) {
-          Remito remito = this.getRemitoPorId(idRemito);
+        Remito remito = this.getRemitoPorId(idRemito);
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
         facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
         remitoRepository.delete(remito);
@@ -148,5 +152,10 @@ public class RemitoServiceImpl implements IRemitoService {
         Long numeroNota =
                 remitoRepository.buscarMayorNumRemitoSegunTipo(tipoDeComprobante, nroSerie);
         return (numeroNota == null) ? 1 : numeroNota + 1;
+    }
+
+    @Override
+    public List<RenglonRemito> getRenglonesDelRemito(long idRemito) {
+        return renglonRemitoRepository.findByIdRemitoOrderByIdRenglonRemito(idRemito);
     }
 }

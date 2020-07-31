@@ -102,9 +102,9 @@ public class FacturaVentaController {
     List<TipoDeComprobante> tiposAutorizables =
         Arrays.asList(
             TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    facturasGuardadas.stream()
-        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
-        .forEach(facturaVentaService::autorizarFacturaVenta);
+//    facturasGuardadas.stream()
+//        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+//        .forEach(facturaVentaService::autorizarFacturaVenta);
     return facturasGuardadas;
   }
 

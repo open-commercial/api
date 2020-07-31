@@ -5,10 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Remito;
+import sic.modelo.RenglonPedido;
+import sic.modelo.RenglonRemito;
 import sic.modelo.Rol;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.service.IAuthService;
 import sic.service.IRemitoService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -43,5 +47,10 @@ public class RemitoController {
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idRemito) {
     remitoService.eliminar(idRemito);
+  }
+
+  @GetMapping("/remitos/{idRemito}/renglones")
+  public List<RenglonRemito> getRenglonesDelRemito(@PathVariable long idRemito) {
+    return remitoService.getRenglonesDelRemito(idRemito);
   }
 }

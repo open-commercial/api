@@ -1,9 +1,13 @@
 package sic.modelo;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import sic.controller.Views;
 import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.ClienteEmbeddable;
 
@@ -21,6 +25,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"cliente", "usuario", "sucursal", "clienteEmbedded", "renglones"})
+@JsonView(Views.Comprador.class)
 public class Remito implements Serializable {
 
   @Id
@@ -33,7 +39,7 @@ public class Remito implements Serializable {
   private long serie;
 
   @Column(nullable = false)
-  private long nroNota;
+  private long nroRemito;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -69,4 +75,54 @@ public class Remito implements Serializable {
   private BigDecimal total;
 
   private boolean contraEntrega;
+
+  @JsonGetter("idCliente")
+  public Long getIdCliente() {
+    return cliente.getIdCliente();
+  }
+
+  @JsonGetter("nombreFiscalCliente")
+  public String getNombreFiscalCliente() {
+    return clienteEmbedded.getNombreFiscalCliente();
+  }
+
+  @JsonGetter("nroDeCliente")
+  public String getNroDeCliente() {
+    return clienteEmbedded.getNroCliente();
+  }
+
+  @JsonGetter("categoriaIVACliente")
+  public CategoriaIVA getCategoriaIVA() {
+    return clienteEmbedded.getCategoriaIVACliente();
+  }
+
+  @JsonGetter("detalleEnvio")
+  public String getEnvio() {
+    return (detalleEnvio.getCalle() != null ? detalleEnvio.getCalle() + " " : "")
+        + (detalleEnvio.getNumero() != null ? detalleEnvio.getNumero() + " " : "")
+        + (detalleEnvio.getPiso() != null ? detalleEnvio.getPiso() + " " : "")
+        + (detalleEnvio.getDepartamento() != null ? detalleEnvio.getDepartamento() + " " : "")
+        + (detalleEnvio.getNombreLocalidad() != null ? detalleEnvio.getNombreLocalidad() + " " : "")
+        + (detalleEnvio.getNombreProvincia() != null ? detalleEnvio.getNombreProvincia() : "");
+  }
+
+  @JsonGetter("idSucursal")
+  public long getIdSucursal() {
+    return sucursal.getIdSucursal();
+  }
+
+  @JsonGetter("nombreSucursal")
+  public String getNombreSucursal() {
+    return sucursal.getNombre();
+  }
+
+  @JsonGetter("idUsuario")
+  public long getIdUsuario() {
+    return usuario.getIdUsuario();
+  }
+
+  @JsonGetter("nombreUsuario")
+  public String getNombreUsuario() {
+    return usuario.getUsername();
+  }
 }

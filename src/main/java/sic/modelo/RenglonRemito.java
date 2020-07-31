@@ -27,7 +27,7 @@ public class RenglonRemito {
     private String descripcionItem;
 
     @Column(nullable = false)
-    private String medidaItem;//TipoDeBulto
+    private String medidaItem;
 
     @Column(precision = 25, scale = 15)
     @NotNull

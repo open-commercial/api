@@ -16,4 +16,6 @@ public interface IRemitoService {
   List<RenglonRemito> construirRenglonesDeRemito(FacturaVenta facturaVenta);
 
   long getSiguienteNumeroRemito(TipoDeComprobante tipoDeComprobante, Long nroSerie);
+
+  List<RenglonRemito> getRenglonesDelRemito(long idRemito);
 }
