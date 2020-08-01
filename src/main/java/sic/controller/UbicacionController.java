@@ -9,6 +9,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaLocalidadCriteria;
 import sic.modelo.dto.LocalidadDTO;
+import sic.modelo.dto.LocalidadesParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
@@ -93,5 +94,12 @@ public class UbicacionController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Localidad> buscarLocalidades(@RequestBody BusquedaLocalidadCriteria criteria) {
     return ubicacionService.buscarLocalidades(criteria);
+  }
+
+  @PutMapping("/ubicaciones/multiples")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void actualizarMultiplesUbicaciones(
+      @RequestBody LocalidadesParaActualizarDTO localidadesParaActualizarDTO) {
+    ubicacionService.actualizarMultiplesLocalidades(localidadesParaActualizarDTO);
   }
 }

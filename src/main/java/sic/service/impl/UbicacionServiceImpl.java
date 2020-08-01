@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaLocalidadCriteria;
+import sic.modelo.dto.LocalidadesParaActualizarDTO;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
@@ -21,6 +22,7 @@ import sic.exception.BusinessServiceException;
 import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -105,6 +107,26 @@ public class UbicacionServiceImpl implements IUbicacionService {
     customValidator.validar(localidad);
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, localidad);
     localidadRepository.save(localidad);
+  }
+
+  @Override
+  public void actualizarMultiplesLocalidades(
+      LocalidadesParaActualizarDTO localidadesParaActualizar) {
+    List<Localidad> localidadesParaModificar = new ArrayList<>();
+    for (int i = 0; i < localidadesParaActualizar.getIdLocalidad().length; ++i) {
+      localidadesParaModificar.add(
+          localidadRepository.findById(localidadesParaActualizar.getIdLocalidad()[i]));
+    }
+    localidadesParaModificar.forEach(
+        localidad -> {
+          if (localidadesParaActualizar.getEnvioGratuito() != null) {
+            localidad.setEnvioGratuito(localidadesParaActualizar.getEnvioGratuito());
+          }
+          if (localidadesParaActualizar.getCostoDeEnvio() != null) {
+            localidad.setCostoEnvio(localidadesParaActualizar.getCostoDeEnvio());
+          }
+        });
+    localidadesParaModificar.forEach(this::actualizarLocalidad);
   }
 
   @Override

@@ -11,10 +11,13 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.Localidad;
 import sic.modelo.Provincia;
 import sic.modelo.Ubicacion;
+import sic.modelo.dto.LocalidadesParaActualizarDTO;
 import sic.repository.LocalidadRepository;
 import sic.repository.ProvinciaRepository;
 import sic.repository.UbicacionRepository;
 import sic.util.CustomValidator;
+
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -23,7 +26,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {UbicacionServiceImpl.class, CustomValidator.class, MessageSource.class})
-public class UbicacionServiceImplTest {
+class UbicacionServiceImplTest {
 
   @MockBean MessageSource messageSource;
   @MockBean UbicacionRepository UbicacionRepository;
@@ -67,4 +70,28 @@ public class UbicacionServiceImplTest {
         BusinessServiceException.class, () -> ubicacionService.actualizarLocalidad(localidad));
     verify(messageSource).getMessage(eq("mensaje_localidad_duplicado_nombre"), any(), any());
   }
+
+  @Test
+  void shouldActualizarMultiplesLocalidades() {
+    Localidad localidad1 = new Localidad();
+    localidad1.setIdLocalidad(1L);
+    localidad1.setNombre("Corrientes");
+    Localidad localidad2 = new Localidad();
+    localidad2.setIdLocalidad(2L);
+    localidad2.setNombre("Misiones");
+    Provincia provincia = new Provincia();
+    localidad1.setProvincia(provincia);
+    localidad2.setProvincia(provincia);
+    LocalidadesParaActualizarDTO localidadesParaActualizar = LocalidadesParaActualizarDTO.builder()
+            .idLocalidad(new long[]{1L, 2L})
+            .costoDeEnvio(BigDecimal.TEN)
+            .envioGratuito(true)
+            .build();
+    when(localidadRepository.findById(1L)).thenReturn(localidad1);
+    when(localidadRepository.findById(2L)).thenReturn(localidad2);
+    ubicacionService.actualizarMultiplesLocalidades(localidadesParaActualizar);
+    verify(localidadRepository).save(localidad1);
+    verify(localidadRepository).save(localidad2);
+  }
+
 }
