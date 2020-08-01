@@ -119,7 +119,9 @@ public class UbicacionServiceImpl implements IUbicacionService {
     }
     localidadesParaModificar.forEach(
         localidad -> {
-          localidad.setEnvioGratuito(localidadesParaActualizar.isEnvioGratuito());
+          if (localidadesParaActualizar.getEnvioGratuito() != null) {
+            localidad.setEnvioGratuito(localidadesParaActualizar.getEnvioGratuito());
+          }
           if (localidadesParaActualizar.getCostoDeEnvio() != null) {
             localidad.setCostoEnvio(localidadesParaActualizar.getCostoDeEnvio());
           }

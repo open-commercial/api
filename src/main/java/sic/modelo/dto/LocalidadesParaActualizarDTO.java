@@ -15,5 +15,5 @@ public class LocalidadesParaActualizarDTO {
 
     private long[] idLocalidad;
     private BigDecimal costoDeEnvio;
-    private boolean envioGratuito;
+    private Boolean envioGratuito;
 }
