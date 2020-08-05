@@ -400,21 +400,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   public void asignarRemitoConFactura(Remito remito, long idFactura) {
-    FacturaVenta facturaVenta =
-        facturaVentaRepository.modificarFacturaParaAgregarRemito(remito, idFactura);
-    if (remito != null) {
-      logger.warn(
-          messageSource.getMessage(
-              "mensaje_factura_remito_relacionado_correctamente",
-              new Object[] {facturaVenta},
-              Locale.getDefault()));
-    } else {
-      logger.warn(
-          messageSource.getMessage(
-              "mensaje_factura_remito_desasignado_correctamente",
-              new Object[] {facturaVenta},
-              Locale.getDefault()));
-    }
+    facturaVentaRepository.modificarFacturaParaAgregarRemito(remito, idFactura);
   }
 
   @Override
