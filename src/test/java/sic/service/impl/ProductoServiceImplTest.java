@@ -501,15 +501,23 @@ class ProductoServiceImplTest {
   void shouldActualizarStockTraspaso() {
     Producto producto1 = new Producto();
     producto1.setIdProducto(1L);
-    producto1.setCantidadTotalEnSucursales(new BigDecimal("1"));
+    producto1.setCantidadTotalEnSucursales(new BigDecimal("5"));
     producto1.setDescripcion("Ventilador de pie");
     Sucursal sucursalOrigen = new Sucursal();
     sucursalOrigen.setIdSucursal(1L);
+    sucursalOrigen.setNombre("Sucursal Uno");
+    Sucursal sucursalDestino = new Sucursal();
+    sucursalDestino.setIdSucursal(2L);
+    sucursalDestino.setNombre("Sucursal dos");
     CantidadEnSucursal cantidadEnSucursalProducto1 = new CantidadEnSucursal();
     cantidadEnSucursalProducto1.setSucursal(sucursalOrigen);
-    cantidadEnSucursalProducto1.setCantidad(new BigDecimal("1"));
+    cantidadEnSucursalProducto1.setCantidad(new BigDecimal("3"));
+    CantidadEnSucursal cantidadEnSucursal2Producto1 = new CantidadEnSucursal();
+    cantidadEnSucursal2Producto1.setSucursal(sucursalDestino);
+    cantidadEnSucursal2Producto1.setCantidad(new BigDecimal("2"));
     Set<CantidadEnSucursal> cantidadEnSucursalesProducto1 = new HashSet<>();
     cantidadEnSucursalesProducto1.add(cantidadEnSucursalProducto1);
+    cantidadEnSucursalesProducto1.add(cantidadEnSucursal2Producto1);
     producto1.setCantidadEnSucursales(cantidadEnSucursalesProducto1);
     producto1.setIlimitado(false);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
@@ -539,13 +547,11 @@ class ProductoServiceImplTest {
     renglones.add(renglonTraspaso2);
     traspaso.setRenglones(renglones);
     traspaso.setSucursalOrigen(sucursalOrigen);
-    Sucursal sucursalDestino = new Sucursal();
-    sucursalDestino.setIdSucursal(2L);
     traspaso.setSucursalDestino(sucursalDestino);
     assertThrows(
             BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
     verify(messageSource).getMessage(eq("mensaje_traspaso_sin_stock"), any(), any());
-    producto1.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto1.setCantidadTotalEnSucursales(new BigDecimal("20"));
     producto1
         .getCantidadEnSucursales()
         .forEach(cantidadEnSucursal -> cantidadEnSucursal.setCantidad(BigDecimal.TEN));

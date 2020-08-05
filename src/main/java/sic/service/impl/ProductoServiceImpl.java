@@ -594,7 +594,10 @@ public class ProductoServiceImpl implements IProductoService {
           indice++;
         }
         ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-                ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+                ProductosParaVerificarStockDTO.builder()
+                        .idProducto(idProducto)
+                        .cantidad(cantidad)
+                        .idSucursal(traspaso.getSucursalOrigen().getIdSucursal()).build();
         if (!this.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
           throw new BusinessServiceException(
                   messageSource.getMessage("mensaje_traspaso_sin_stock", null, Locale.getDefault()));
