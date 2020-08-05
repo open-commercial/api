@@ -21,13 +21,7 @@ public class RenglonRemito {
     private long idRenglonRemito;
 
     @Column(nullable = false)
-    private String codigoItem;
-
-    @Column(nullable = false)
-    private String descripcionItem;
-
-    @Column(nullable = false)
-    private String medidaItem;
+    private TipoBulto tipoBulto;
 
     @Column(precision = 25, scale = 15)
     @NotNull

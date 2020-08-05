@@ -215,20 +215,22 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesParaFacturar = new ArrayList<>();
-    pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido).forEach(
-        r -> {
-          NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-              NuevoRenglonFacturaDTO.builder()
-                  .cantidad(r.getCantidad())
-                  .idProducto(r.getIdProductoItem())
-                  .renglonMarcado(
-                      facturaService.marcarRenglonParaAplicarBonificacion(
-                          r.getIdProductoItem(), r.getCantidad()))
-                  .build();
-          renglonesParaFacturar.add(
-              facturaService.calcularRenglon(
-                  tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
-        });
+    pedidoService
+        .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
+        .forEach(
+            r -> {
+              NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(r.getCantidad())
+                      .idProducto(r.getIdProductoItem())
+                      .renglonMarcado(
+                          facturaService.marcarRenglonParaAplicarBonificacion(
+                              r.getIdProductoItem(), r.getCantidad()))
+                      .build();
+              renglonesParaFacturar.add(
+                  facturaService.calcularRenglon(
+                      tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
+            });
     return renglonesParaFacturar;
   }
 
@@ -398,7 +400,21 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   public void asignarRemitoConFactura(Remito remito, long idFactura) {
-    facturaVentaRepository.modificarFacturaParaAgregarRemito(remito, idFactura);
+    FacturaVenta facturaVenta =
+        facturaVentaRepository.modificarFacturaParaAgregarRemito(remito, idFactura);
+    if (remito != null) {
+      logger.warn(
+          messageSource.getMessage(
+              "mensaje_factura_remito_relacionado_correctamente",
+              new Object[] {facturaVenta},
+              Locale.getDefault()));
+    } else {
+      logger.warn(
+          messageSource.getMessage(
+              "mensaje_factura_remito_desasignado_correctamente",
+              new Object[] {facturaVenta},
+              Locale.getDefault()));
+    }
   }
 
   @Override

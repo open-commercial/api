@@ -1,13 +1,19 @@
 package sic.service.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.repository.RemitoRepository;
 import sic.repository.RenglonRemitoRepository;
@@ -36,6 +42,7 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IConfiguracionSucursalService configuracionSucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
+    private static final int TAMANIO_PAGINA_DEFAULT = 25;
     private final CustomValidator customValidator;
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -108,7 +115,7 @@ public class RemitoServiceImpl implements IRemitoService {
         } else {
          remito.setTotal(facturaVenta.getPedido().getDetalleEnvio().getCostoDeEnvio());
        }
-       remito.setRenglones(this.construirRenglonesDeRemito(facturaVenta));
+       remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
        remito.setContraEntrega(nuevoRemitoDTO.isContraEntrega());
        remito.setSucursal(facturaVenta.getSucursal());
        remito.setSerie(configuracionSucursalService
@@ -116,7 +123,13 @@ public class RemitoServiceImpl implements IRemitoService {
             .getNroPuntoDeVentaAfip());
        remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+       customValidator.validar(remito);
        remitoRepository.save(remito);
+       logger.warn(
+               messageSource.getMessage(
+                       "mensaje_remito_guardado_correctamente",
+                       new Object[] {remito},
+                       Locale.getDefault()));
        facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura());
        cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ALTA);
        return remito;
@@ -124,18 +137,19 @@ public class RemitoServiceImpl implements IRemitoService {
     }
 
     @Override
-    public List<RenglonRemito> construirRenglonesDeRemito(FacturaVenta facturaVenta) {
+    public List<RenglonRemito> construirRenglonesDeRemito(NuevoRemitoDTO nuevoRemitoDTO) {
       List<RenglonRemito> renglonesParaRemito = new ArrayList<>();
-      List<RenglonFactura> renglonesDeFactura =
-          facturaService.getRenglonesDeLaFactura(facturaVenta.getIdFactura());
-      renglonesDeFactura.forEach(renglonFactura -> {
-        RenglonRemito renglonRemito = new RenglonRemito();
-        renglonRemito.setCantidad(renglonFactura.getCantidad());
-        renglonRemito.setCodigoItem(renglonFactura.getCodigoItem());
-        renglonRemito.setDescripcionItem(renglonFactura.getDescripcionItem());
-        renglonRemito.setMedidaItem(renglonFactura.getMedidaItem());
-        renglonesParaRemito.add(renglonRemito);
-    });
+      if (nuevoRemitoDTO.getCantidadDeBultos().length != nuevoRemitoDTO.getTiposDeBulto().length) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_remito_error_renglones", null, Locale.getDefault()));
+      }
+      for (int i = 0; i < nuevoRemitoDTO.getTiposDeBulto().length; i++) {
+          RenglonRemito renglonRemito = new RenglonRemito();
+          renglonRemito.setCantidad(nuevoRemitoDTO.getCantidadDeBultos()[i]);
+          renglonRemito.setTipoBulto(nuevoRemitoDTO.getTiposDeBulto()[i]);
+          renglonesParaRemito.add(renglonRemito);
+      }
       return renglonesParaRemito;
     }
 
@@ -145,6 +159,11 @@ public class RemitoServiceImpl implements IRemitoService {
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
         facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
         remitoRepository.delete(remito);
+        logger.warn(
+                messageSource.getMessage(
+                        "mensaje_remito_eliminado_correctamente",
+                        new Object[] {remito},
+                        Locale.getDefault()));
     }
 
     @Override
@@ -157,5 +176,66 @@ public class RemitoServiceImpl implements IRemitoService {
     @Override
     public List<RenglonRemito> getRenglonesDelRemito(long idRemito) {
         return renglonRemitoRepository.findByIdRemitoOrderByIdRenglonRemito(idRemito);
+    }
+
+    @Override
+    public Page<Remito> buscarRemito(BusquedaRemitoCriteria criteria) {
+        return remitoRepository.findAll(this.getBuilder(criteria), this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
+    }
+
+    @Override
+    public Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+        if (pagina == null) pagina = 0;
+        String ordenDefault = "fecha";
+        if (ordenarPor == null || sentido == null) {
+            return PageRequest.of(
+                    pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+        } else {
+            return switch (sentido) {
+                case "ASC" -> PageRequest.of(
+                        pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+                case "DESC" -> PageRequest.of(
+                        pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+                default -> PageRequest.of(
+                        pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+            };
+        }
+    }
+
+    @Override
+    public BooleanBuilder getBuilder(BusquedaRemitoCriteria criteria) {
+        QRemito qRemito = QRemito.remito;
+        BooleanBuilder builder = new BooleanBuilder();
+        if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
+            criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+            criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+            if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+                builder.and(
+                        qRemito.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
+            } else if (criteria.getFechaDesde() != null) {
+                builder.and(qRemito.fecha.after(criteria.getFechaDesde()));
+            } else if (criteria.getFechaHasta() != null) {
+                builder.and(qRemito.fecha.before(criteria.getFechaHasta()));
+            }
+        }
+        if (criteria.getSerie() != null && criteria.getNroRemito() != null) {
+            builder.and(qRemito.serie.eq(criteria.getSerie()).and(qRemito.nroRemito.eq(criteria.getNroRemito())));
+        }
+        if (criteria.getTipoDeRemito() != null) {
+            builder.and(qRemito.tipoComprobante.eq(criteria.getTipoDeRemito()));
+        }
+        if (criteria.getIdCliente() != null) {
+            builder.and(qRemito.cliente.idCliente.eq(criteria.getIdCliente()));
+        }
+        if (criteria.getIdSucursal() != null) {
+            builder.and(qRemito.sucursal.idSucursal.eq(criteria.getIdSucursal()));
+        }
+        if (criteria.getIdUsuario() != null) {
+            builder.and(qRemito.usuario.idUsuario.eq(criteria.getIdUsuario()));
+        }
+        if (criteria.getContraEntrega() != null) {
+            builder.and(qRemito.contraEntrega.eq(criteria.getContraEntrega()));
+        }
+        return builder;
     }
 }

@@ -20,18 +20,27 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import sic.model.*;
+import sic.model.Caja;
+import sic.model.CantidadEnSucursal;
+import sic.model.Cliente;
+import sic.model.ConfiguracionSucursal;
+import sic.model.FacturaCompra;
+import sic.model.FacturaVenta;
+import sic.model.Gasto;
+import sic.model.Medida;
+import sic.model.NotaCredito;
+import sic.model.NotaDebito;
+import sic.model.Pedido;
+import sic.model.Producto;
+import sic.model.Proveedor;
+import sic.model.Recibo;
+import sic.model.Remito;
+import sic.model.Rubro;
+import sic.model.Sucursal;
+import sic.model.Ubicacion;
+import sic.model.Usuario;
+import sic.modelo.*;
 import sic.modelo.RenglonFactura;
-import sic.modelo.Credencial;
-import sic.modelo.Aplicacion;
-import sic.modelo.Rol;
-import sic.modelo.CategoriaIVA;
-import sic.modelo.EstadoCaja;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.TipoDeEnvio;
-import sic.modelo.EstadoPedido;
-import sic.modelo.MovimientoCaja;
-import sic.modelo.ItemCarritoCompra;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
 
@@ -1005,7 +1014,7 @@ class AppIntegrationTest {
     assertEquals(2, facturas.length);
     assertEquals(TipoDeComprobante.FACTURA_A, facturas[1].getTipoComprobante());
     assertEquals(TipoDeComprobante.FACTURA_X, facturas[0].getTipoComprobante());
-    //assertNotEquals(0L, facturas[1].getCae());
+    assertNotEquals(0L, facturas[1].getCae());
     assertNotNull(
         restTemplate.getForObject(
             apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte",
@@ -1115,14 +1124,19 @@ class AppIntegrationTest {
     pedidosRecuperados = resultadoBusquedaPedido.getContent();
     assertEquals(1, pedidosRecuperados.size());
     assertEquals(EstadoPedido.CERRADO, pedidosRecuperados.get(0).getEstado());
-    // remito
+    BigDecimal[] cantidadesDeBultos = new BigDecimal[]{new BigDecimal("6"), BigDecimal.TEN};
+    TipoBulto[] tipoBulto = new TipoBulto[]{TipoBulto.CAJA, TipoBulto.ATADO};
     Remito remitoResultanteFacturaX =
         restTemplate.postForObject(
             apiPrefix + "/remitos",
             NuevoRemitoDTO.builder()
                 .idFacturaVenta(facturas[0].getIdFactura())
                 .dividir(true)
-                .contraEntrega(false).build(), Remito.class);
+                .cantidadDeBultos(cantidadesDeBultos)
+                .tiposDeBulto(tipoBulto)
+                .contraEntrega(false)
+                .build(),
+            Remito.class);
     assertNotNull(remitoResultanteFacturaX);
     assertEquals(1L, remitoResultanteFacturaX.getIdRemito());
     assertNotNull(remitoResultanteFacturaX.getFecha());
@@ -1140,12 +1154,16 @@ class AppIntegrationTest {
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaX.getDetalleEnvio());
     assertEquals(new BigDecimal("25.00"), remitoResultanteFacturaX.getTotal());
     assertFalse(remitoResultanteFacturaX.isContraEntrega());
+    cantidadesDeBultos = new BigDecimal[]{new BigDecimal("3"), BigDecimal.ONE};
+    tipoBulto = new TipoBulto[]{TipoBulto.ATADO, TipoBulto.ROLLO};
     Remito remitoResultanteFacturaA =
             restTemplate.postForObject(
                     apiPrefix + "/remitos",
                     NuevoRemitoDTO.builder()
                             .idFacturaVenta(facturas[1].getIdFactura())
                             .dividir(true)
+                            .tiposDeBulto(tipoBulto)
+                            .cantidadDeBultos(cantidadesDeBultos)
                             .contraEntrega(false).build(), Remito.class);
     assertNotNull(remitoResultanteFacturaA);
     assertEquals(2L, remitoResultanteFacturaA.getIdRemito());
@@ -1165,7 +1183,11 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("25.00"), remitoResultanteFacturaA.getTotal());
     assertFalse(remitoResultanteFacturaA.isContraEntrega());
     facturas[0] = restTemplate.getForObject(apiPrefix + "/facturas/" + facturas[0].getIdFactura(), FacturaVenta.class);
+    assertNotNull(facturas[0].getRemito());
+    assertEquals(1L,facturas[0].getRemito().getIdRemito());
     facturas[1] = restTemplate.getForObject(apiPrefix + "/facturas/" + facturas[1].getIdFactura(), FacturaVenta.class);
+    assertNotNull(facturas[1].getRemito());
+    assertEquals(2L,facturas[1].getRemito().getIdRemito());
   }
 
   @Test

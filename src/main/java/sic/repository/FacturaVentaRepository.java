@@ -19,7 +19,7 @@ public interface FacturaVentaRepository
   @Modifying
   @Query(
           "UPDATE FacturaVenta fv SET fv.remito = :remito WHERE fv.idFactura = :idFactura")
-  int modificarFacturaParaAgregarRemito(@Param("remito") Remito remito, @Param("idFactura") long idFactura);
+  FacturaVenta modificarFacturaParaAgregarRemito(@Param("remito") Remito remito, @Param("idFactura") long idFactura);
 
   @Query("SELECT fv FROM FacturaVenta fv WHERE fv.remito = :remito")
   FacturaVenta buscarFacturaPorRemito(@Param("remito") Remito remito);

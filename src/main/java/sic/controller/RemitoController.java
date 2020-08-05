@@ -2,12 +2,13 @@ package sic.controller;
 
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Remito;
-import sic.modelo.RenglonPedido;
 import sic.modelo.RenglonRemito;
 import sic.modelo.Rol;
+import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.service.IAuthService;
 import sic.service.IRemitoService;
@@ -52,5 +53,11 @@ public class RemitoController {
   @GetMapping("/remitos/{idRemito}/renglones")
   public List<RenglonRemito> getRenglonesDelRemito(@PathVariable long idRemito) {
     return remitoService.getRenglonesDelRemito(idRemito);
+  }
+
+  @PostMapping("/remitos/busqueda/criteria")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public Page<Remito> getRemitosCriteria(@RequestBody BusquedaRemitoCriteria criteria) {
+    return remitoService.buscarRemito(criteria);
   }
 }

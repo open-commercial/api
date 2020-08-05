@@ -1,6 +1,10 @@
 package sic.service;
 
+import com.querydsl.core.BooleanBuilder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
+import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
 
 import java.util.List;
@@ -13,9 +17,15 @@ public interface IRemitoService {
 
   void eliminar(long idRemito);
 
-  List<RenglonRemito> construirRenglonesDeRemito(FacturaVenta facturaVenta);
+  List<RenglonRemito> construirRenglonesDeRemito(NuevoRemitoDTO nuevoRemitoDTO);
 
   long getSiguienteNumeroRemito(TipoDeComprobante tipoDeComprobante, Long nroSerie);
 
   List<RenglonRemito> getRenglonesDelRemito(long idRemito);
+
+  Page<Remito> buscarRemito(BusquedaRemitoCriteria criteria);
+
+  Pageable getPageable(Integer pagina, String ordenarPor, String sentido);
+
+  BooleanBuilder getBuilder(BusquedaRemitoCriteria criteria);
 }
