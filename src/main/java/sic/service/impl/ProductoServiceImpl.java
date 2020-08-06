@@ -559,16 +559,24 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStockNotaCredito(
-      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion) {
+      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento) {
     idsYCantidades.forEach(
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
           if (producto.isPresent() && !producto.get().isIlimitado()) {
             if (operacion == TipoDeOperacion.ALTA) {
-              this.agregarStock(producto.get(), idSucursal, cantidad);
+              if (movimiento == Movimiento.VENTA) {
+                this.agregarStock(producto.get(), idSucursal, cantidad);
+              } else if (movimiento == Movimiento.COMPRA){
+                this.quitarStock(producto.get(), idSucursal, cantidad);
+              }
             }
             if (operacion == TipoDeOperacion.ELIMINACION) {
-              this.quitarStock(producto.get(), idSucursal, cantidad);
+              if (movimiento == Movimiento.VENTA) {
+                this.quitarStock(producto.get(), idSucursal, cantidad);
+              } else if (movimiento == Movimiento.COMPRA) {
+                this.agregarStock(producto.get(), idSucursal, cantidad);
+              }
             }
           } else {
             logger.warn(
