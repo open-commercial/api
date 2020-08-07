@@ -564,19 +564,25 @@ public class ProductoServiceImpl implements IProductoService {
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
           if (producto.isPresent() && !producto.get().isIlimitado()) {
-            if (operacion == TipoDeOperacion.ALTA) {
-              if (movimiento == Movimiento.VENTA) {
-                this.agregarStock(producto.get(), idSucursal, cantidad);
-              } else if (movimiento == Movimiento.COMPRA){
-                this.quitarStock(producto.get(), idSucursal, cantidad);
+            switch (operacion) {
+              case ALTA -> {
+                switch (movimiento) {
+                  case VENTA -> this.agregarStock(producto.get(), idSucursal, cantidad);
+                  case COMPRA -> this.quitarStock(producto.get(), idSucursal, cantidad);
+                  default -> throw new BusinessServiceException(
+                          messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+                }
               }
-            }
-            if (operacion == TipoDeOperacion.ELIMINACION) {
-              if (movimiento == Movimiento.VENTA) {
-                this.quitarStock(producto.get(), idSucursal, cantidad);
-              } else if (movimiento == Movimiento.COMPRA) {
-                this.agregarStock(producto.get(), idSucursal, cantidad);
+              case ELIMINACION -> {
+                switch (movimiento) {
+                  case VENTA -> this.quitarStock(producto.get(), idSucursal, cantidad);
+                  case COMPRA -> this.agregarStock(producto.get(), idSucursal, cantidad);
+                  default -> throw new BusinessServiceException(
+                          messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+                }
               }
+              default -> throw new BusinessServiceException(
+                      messageSource.getMessage("mensaje_operacion_no_soportada", null, Locale.getDefault()));
             }
           } else {
             logger.warn(
@@ -643,7 +649,7 @@ public class ProductoServiceImpl implements IProductoService {
                       });
       default -> throw new BusinessServiceException(
               messageSource.getMessage(
-                      "mensaje_traspaso_operacion_no_soportada", null, Locale.getDefault()));
+                      "mensaje_operacion_no_soportada", null, Locale.getDefault()));
     }
   }
 

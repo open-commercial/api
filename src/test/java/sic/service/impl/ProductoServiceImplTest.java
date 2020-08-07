@@ -331,14 +331,13 @@ class ProductoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.ONE);
     renglonesPedido.add(renglonPedido);
     when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
-    productosParaVerificarStockDTO =
-            ProductosParaVerificarStockDTO.builder().build();
+    productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder().build();
     productosParaVerificarStockDTO.setIdSucursal(1L);
     productosParaVerificarStockDTO.setCantidad(cantidad);
     productosParaVerificarStockDTO.setIdProducto(idProducto);
     productosParaVerificarStockDTO.setIdPedido(1L);
     resultadoObtenido =
-            productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
     Assertions.assertFalse(resultadoObtenido.isEmpty());
     assertEquals(new BigDecimal("10"), resultadoObtenido.get(0).getCantidadSolicitada());
     assertEquals(new BigDecimal("9"), resultadoObtenido.get(0).getCantidadDisponible());
@@ -451,14 +450,16 @@ class ProductoServiceImplTest {
     when(productoRepository.findAll(
             productoService.getBuilder(BusquedaProductoCriteria.builder().build()),
             productoService.getPageable(null, null, null, Integer.MAX_VALUE)))
-            .thenReturn(new PageImpl<>(productos));
+        .thenReturn(new PageImpl<>(productos));
     Sucursal sucursal = new Sucursal();
     sucursal.setLogo("noTieneImagen");
     when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
     assertThrows(
-            ServiceException.class, () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build()));
+        ServiceException.class,
+        () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build()));
     assertThrows(
-            ServiceException.class, () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
+        ServiceException.class,
+        () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
     verify(messageSource, times(2)).getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
     sucursal.setLogo(null);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
@@ -537,18 +538,20 @@ class ProductoServiceImplTest {
     traspaso.setSucursalOrigen(sucursalOrigen);
     traspaso.setSucursalDestino(sucursalDestino);
     assertThrows(
-            BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
+        BusinessServiceException.class,
+        () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
     verify(messageSource).getMessage(eq("mensaje_traspaso_sin_stock"), any(), any());
     producto1.setCantidadTotalEnSucursales(new BigDecimal("20"));
     producto1
-            .getCantidadEnSucursales()
-            .forEach(cantidadEnSucursal -> cantidadEnSucursal.setCantidad(BigDecimal.TEN));
+        .getCantidadEnSucursales()
+        .forEach(cantidadEnSucursal -> cantidadEnSucursal.setCantidad(BigDecimal.TEN));
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ELIMINACION);
     verify(productoRepository, times(8)).save(any());
     assertThrows(
-            BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ACTUALIZACION));
-    verify(messageSource).getMessage(eq("mensaje_traspaso_operacion_no_soportada"), any(), any());
+        BusinessServiceException.class,
+        () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ACTUALIZACION));
+    verify(messageSource).getMessage(eq("mensaje_operacion_no_soportada"), any(), any());
   }
 
   @Test
@@ -567,12 +570,15 @@ class ProductoServiceImplTest {
     RenglonPedido renglonPedidoAnterior = new RenglonPedido();
     renglonPedidoAnterior.setIdProductoItem(1L);
     renglonesAnteriores.add(renglonPedido);
-    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores, 1L);
-    verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
+    productoService.devolverStockPedido(
+        pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
+    verify(messageSource)
+        .getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
     Producto producto = this.construirProducto();
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     when(productoRepository.save(producto)).thenReturn(producto);
-    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
+    productoService.devolverStockPedido(
+        pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
     verify(messageSource).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
     verify(productoRepository).save(producto);
   }
@@ -590,7 +596,8 @@ class ProductoServiceImplTest {
     sucursal.setIdSucursal(1L);
     pedido.setSucursal(sucursal);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
-    verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
+    verify(messageSource)
+        .getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
     Producto producto = this.construirProducto();
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     when(productoRepository.save(producto)).thenReturn(producto);
@@ -644,6 +651,29 @@ class ProductoServiceImplTest {
         .getMessage(eq("mensaje_producto_agrega_stock"), any(), eq(Locale.getDefault()));
     verify(messageSource, times(4))
         .getMessage(eq("mensaje_producto_quita_stock"), any(), eq(Locale.getDefault()));
+    verify(productoRepository, times(8)).save(any());
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.actualizarStockNotaCredito(
+                idsYCantidades, 1L, TipoDeOperacion.ACTUALIZACION, Movimiento.VENTA));
+    verify(messageSource)
+        .getMessage(eq("mensaje_operacion_no_soportada"), any(), eq(Locale.getDefault()));
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.actualizarStockNotaCredito(
+                idsYCantidades, 1L, TipoDeOperacion.ALTA, Movimiento.PEDIDO));
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.actualizarStockNotaCredito(
+                idsYCantidades, 1L, TipoDeOperacion.ELIMINACION, Movimiento.PEDIDO));
+    verify(messageSource, times(2))
+        .getMessage(
+            eq("mensaje_preference_tipo_de_movimiento_no_soportado"),
+            any(),
+            eq(Locale.getDefault()));
     idsYCantidades.clear();
     idsYCantidades.put(3L, BigDecimal.ONE);
     productoService.actualizarStockNotaCredito(
