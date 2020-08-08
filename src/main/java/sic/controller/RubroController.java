@@ -19,16 +19,19 @@ public class RubroController {
   private final ModelMapper modelMapper;
 
   @Autowired
-  public RubroController(
-      IRubroService rubroService, ModelMapper modelMapper) {
+  public RubroController(IRubroService rubroService, ModelMapper modelMapper) {
     this.rubroService = rubroService;
     this.modelMapper = modelMapper;
   }
 
   @GetMapping("/rubros/{idRubro}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Rubro getRubroPorId(@PathVariable long idRubro) {
     return rubroService.getRubroNoEliminadoPorId(idRubro);
+  }
+
+  @GetMapping("/rubros")
+  public List<Rubro> getRubros() {
+    return rubroService.getRubros();
   }
 
   @PutMapping("/rubros")
@@ -53,10 +56,5 @@ public class RubroController {
   public Rubro guardar(@RequestBody RubroDTO rubroDTO) {
     Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);
     return rubroService.guardar(rubro);
-  }
-
-  @GetMapping("/rubros")
-  public List<Rubro> getRubros() {
-    return rubroService.getRubros();
   }
 }

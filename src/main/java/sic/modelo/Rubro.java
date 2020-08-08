@@ -4,6 +4,7 @@ import java.io.Serializable;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotEmpty;
 @EqualsAndHashCode(of = "nombre")
 @ToString
 @JsonView(Views.Comprador.class)
+@JsonIgnoreProperties({"eliminado"})
 public class Rubro implements Serializable {
 
   @Id
