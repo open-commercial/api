@@ -26,6 +26,8 @@ public class Remito {
   private long idUsuario;
   private String nombreUsuario;
   private String detalleEnvio;
+  private BigDecimal totalEnvio;
+  private BigDecimal totalPedido;
   private BigDecimal total;
   private boolean contraEntrega;
 }

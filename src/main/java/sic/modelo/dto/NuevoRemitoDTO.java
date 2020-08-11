@@ -19,4 +19,5 @@ public class NuevoRemitoDTO {
   private boolean contraEntrega;
   private TipoBulto[] tiposDeBulto;
   private BigDecimal[] cantidadDeBultos;
+  private BigDecimal costoDeEnvio;
 }

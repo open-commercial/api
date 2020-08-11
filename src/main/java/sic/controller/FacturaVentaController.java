@@ -99,12 +99,12 @@ public class FacturaVentaController {
                   nuevaFacturaVentaDTO.getMontos(),
                   fv.getFecha()));
     }
-    List<TipoDeComprobante> tiposAutorizables =
-        Arrays.asList(
-            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    facturasGuardadas.stream()
-        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
-        .forEach(facturaVentaService::autorizarFacturaVenta);
+//    List<TipoDeComprobante> tiposAutorizables =
+//        Arrays.asList(
+//            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+//    facturasGuardadas.stream()
+//        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+//        .forEach(facturaVentaService::autorizarFacturaVenta);
     return facturasGuardadas;
   }
 

@@ -63,6 +63,11 @@ class RemitoServiceImplTest {
     NuevoRemitoDTO nuevoRemitoDTO = NuevoRemitoDTO.builder().build();
     nuevoRemitoDTO.setIdFacturaVenta(1L);
     assertThrows(
+            BusinessServiceException.class,
+            () -> remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, 1L));
+    verify(messageSource).getMessage(eq("mensaje_remito_sin_costo_de_envio"), any(), any());
+    nuevoRemitoDTO.setCostoDeEnvio(new BigDecimal("100"));
+    assertThrows(
         BusinessServiceException.class,
         () -> remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, 1L));
     verify(messageSource).getMessage(eq("mensaje_tipo_de_comprobante_no_valido"), any(), any());
@@ -117,7 +122,7 @@ class RemitoServiceImplTest {
     assertEquals(new BigDecimal("6"), remito.getRenglones().get(0).getCantidad());
     assertEquals(TipoBulto.ATADO, remito.getRenglones().get(1).getTipoBulto());
     assertEquals(BigDecimal.TEN, remito.getRenglones().get(1).getCantidad());
-    assertEquals(new BigDecimal("50"), remito.getCostoDeEnvio());
+    assertEquals(new BigDecimal("50"), remito.getTotalEnvio());
     assertEquals(new BigDecimal("100"), remito.getTotalPedido());
     assertEquals(new BigDecimal("150"), remito.getTotal());
     assertFalse(remito.isContraEntrega());

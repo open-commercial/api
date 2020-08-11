@@ -370,7 +370,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc.setTipoComprobante(remito.getTipoComprobante());
       rcc.setSerie(remito.getSerie());
       rcc.setNumero(remito.getNroRemito());
-      rcc.setMonto(remito.getCostoDeEnvio().negate());
+      rcc.setMonto(remito.getTotalEnvio().negate());
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(rcc.getMonto()));
       cc.setFechaUltimoMovimiento(remito.getFecha());
       rcc.setRemito(remito);

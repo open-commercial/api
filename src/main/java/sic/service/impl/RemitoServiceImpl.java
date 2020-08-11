@@ -82,6 +82,11 @@ public class RemitoServiceImpl implements IRemitoService {
 
     @Override
     public Remito crearRemitoDeFacturaVenta(NuevoRemitoDTO nuevoRemitoDTO, long idUsuario) {
+       if (nuevoRemitoDTO.getCostoDeEnvio() == null) {
+           throw new BusinessServiceException(
+                   messageSource.getMessage(
+                           "mensaje_remito_sin_costo_de_envio", null, Locale.getDefault()));
+       }
        Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevoRemitoDTO.getIdFacturaVenta());
        if (!(factura instanceof FacturaVenta)) {
            throw new BusinessServiceException(
@@ -107,16 +112,13 @@ public class RemitoServiceImpl implements IRemitoService {
        }
        remito.setTotalPedido(factura.getPedido().getTotal());
        if (nuevoRemitoDTO.isDividir()) {
-         remito.setCostoDeEnvio(
-             facturaVenta
-                 .getPedido()
-                 .getDetalleEnvio()
-                 .getCostoDeEnvio()
+         remito.setTotalEnvio(
+             nuevoRemitoDTO.getCostoDeEnvio()
                  .divide(new BigDecimal("2"), RoundingMode.HALF_UP));
         } else {
-         remito.setCostoDeEnvio(facturaVenta.getPedido().getDetalleEnvio().getCostoDeEnvio());
+         remito.setTotalEnvio(nuevoRemitoDTO.getCostoDeEnvio());
        }
-       remito.setTotal(remito.getTotalPedido().add(remito.getCostoDeEnvio()));
+       remito.setTotal(remito.getTotalPedido().add(remito.getTotalEnvio()));
        remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
        remito.setContraEntrega(nuevoRemitoDTO.isContraEntrega());
        remito.setSucursal(facturaVenta.getSucursal());
