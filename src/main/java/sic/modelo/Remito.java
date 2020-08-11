@@ -71,6 +71,14 @@ public class Remito implements Serializable {
   @Embedded private UbicacionDTO detalleEnvio;
 
   @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_remito_total_envio_negativo}")
+  private BigDecimal costoDeEnvio;
+
+  @Column(precision = 25, scale = 15)
+  @DecimalMin(value = "0", message = "{mensaje_remito_total_pedido_negativo}")
+  private BigDecimal totalPedido;
+
+  @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_negativo}")
   private BigDecimal total;
 

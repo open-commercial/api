@@ -16,7 +16,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {CustomValidator.class, RubroServiceImpl.class, MessageSource.class})
-public class RubroServiceImplTest {
+class RubroServiceImplTest {
 
   @MockBean MessageSource messageSource;
   @MockBean RubroRepository rubroRepository;

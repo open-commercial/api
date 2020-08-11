@@ -105,16 +105,18 @@ public class RemitoServiceImpl implements IRemitoService {
                    messageSource.getMessage(
                            "mensaje_remito_tipo_no_valido", null, Locale.getDefault()));
        }
+       remito.setTotalPedido(factura.getPedido().getTotal());
        if (nuevoRemitoDTO.isDividir()) {
-         remito.setTotal(
+         remito.setCostoDeEnvio(
              facturaVenta
                  .getPedido()
                  .getDetalleEnvio()
                  .getCostoDeEnvio()
                  .divide(new BigDecimal("2"), RoundingMode.HALF_UP));
         } else {
-         remito.setTotal(facturaVenta.getPedido().getDetalleEnvio().getCostoDeEnvio());
+         remito.setCostoDeEnvio(facturaVenta.getPedido().getDetalleEnvio().getCostoDeEnvio());
        }
+       remito.setTotal(remito.getTotalPedido().add(remito.getCostoDeEnvio()));
        remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
        remito.setContraEntrega(nuevoRemitoDTO.isContraEntrega());
        remito.setSucursal(facturaVenta.getSucursal());
@@ -167,7 +169,7 @@ public class RemitoServiceImpl implements IRemitoService {
     }
 
     @Override
-    public  long getSiguienteNumeroRemito(TipoDeComprobante tipoDeComprobante, Long nroSerie) {
+    public long getSiguienteNumeroRemito(TipoDeComprobante tipoDeComprobante, Long nroSerie) {
         Long numeroNota =
                 remitoRepository.buscarMayorNumRemitoSegunTipo(tipoDeComprobante, nroSerie);
         return (numeroNota == null) ? 1 : numeroNota + 1;
@@ -207,15 +209,15 @@ public class RemitoServiceImpl implements IRemitoService {
         QRemito qRemito = QRemito.remito;
         BooleanBuilder builder = new BooleanBuilder();
         if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-            criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-            criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
             if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
                 builder.and(
                         qRemito.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
-            } else if (criteria.getFechaDesde() != null) {
+            } else if (criteria.getFechaDesde() != null && criteria.getFechaHasta() == null) {
                 builder.and(qRemito.fecha.after(criteria.getFechaDesde()));
-            } else if (criteria.getFechaHasta() != null) {
+                builder.and(qRemito.fecha.before(LocalDateTime.MAX));
+            } else if (criteria.getFechaHasta() != null && criteria.getFechaDesde() == null) {
                 builder.and(qRemito.fecha.before(criteria.getFechaHasta()));
+                builder.and(qRemito.fecha.after(LocalDateTime.MIN));
             }
         }
         if (criteria.getSerie() != null && criteria.getNroRemito() != null) {
