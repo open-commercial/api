@@ -3,6 +3,10 @@ package sic.controller;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Remito;
@@ -12,7 +16,6 @@ import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.service.IAuthService;
 import sic.service.IRemitoService;
-
 import java.util.List;
 
 @RestController
@@ -59,5 +62,15 @@ public class RemitoController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Remito> getRemitosCriteria(@RequestBody BusquedaRemitoCriteria criteria) {
     return remitoService.buscarRemito(criteria);
+  }
+
+  @GetMapping("/remitos/{idRemito}/reporte")
+  public ResponseEntity<byte[]> getReporteRemito(@PathVariable long idRemito) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.add("content-disposition", "inline; filename=Remito.pdf");
+    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+    byte[] reportePDF = remitoService.getReporteRemito(idRemito);
+    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 }

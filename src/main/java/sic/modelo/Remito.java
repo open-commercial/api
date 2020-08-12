@@ -62,6 +62,10 @@ public class Remito implements Serializable {
   @NotNull(message = "{mensaje_remito_usuario_vacio}")
   private Usuario usuario;
 
+  @ManyToOne
+  @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
+  private Transportista transportista;
+
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "idRemito")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -72,17 +76,23 @@ public class Remito implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_envio_negativo}")
-  private BigDecimal totalEnvio;
+  private BigDecimal costoEnvioRemito;
 
   @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_remito_total_pedido_negativo}")
-  private BigDecimal totalPedido;
+  @DecimalMin(value = "0", message = "{mensaje_remito_total_factura_negativo}")
+  private BigDecimal totalFactura;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_negativo}")
   private BigDecimal total;
 
-  private boolean contraEntrega;
+  private BigDecimal pesoTotalKg;
+
+  private BigDecimal volumenM3;
+
+  private BigDecimal cantidadDeBultos;
+
+  private String observaciones;
 
   @JsonGetter("idCliente")
   public Long getIdCliente() {
@@ -132,5 +142,15 @@ public class Remito implements Serializable {
   @JsonGetter("nombreUsuario")
   public String getNombreUsuario() {
     return usuario.getUsername();
+  }
+
+  @JsonGetter("idTransportista")
+  public long getIdTransportista() {
+    return transportista.getIdTransportista();
+  }
+
+  @JsonGetter("nombreTransportista")
+  public String getNombreTransportista() {
+    return transportista.getNombre();
   }
 }

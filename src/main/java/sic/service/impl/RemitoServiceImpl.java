@@ -1,6 +1,10 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
@@ -20,14 +25,16 @@ import sic.repository.RenglonRemitoRepository;
 import sic.service.*;
 import sic.util.CustomValidator;
 
+import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
+import javax.swing.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @Transactional
@@ -39,6 +46,7 @@ public class RemitoServiceImpl implements IRemitoService {
     private final RenglonRemitoRepository renglonRemitoRepository;
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
+    private final ITransportistaService transportistaService;
     private final IConfiguracionSucursalService configuracionSucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
@@ -53,6 +61,7 @@ public class RemitoServiceImpl implements IRemitoService {
                               RenglonRemitoRepository renglonRemitoRepository,
                               IClienteService clienteService,
                               IUsuarioService usuarioService,
+                              ITransportistaService transportistaService,
                               IConfiguracionSucursalService configuracionSucursalService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               MessageSource messageSource,
@@ -63,6 +72,7 @@ public class RemitoServiceImpl implements IRemitoService {
         this.renglonRemitoRepository = renglonRemitoRepository;
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
+        this.transportistaService = transportistaService;
         this.configuracionSucursalService = configuracionSucursalService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.messageSource = messageSource;
@@ -110,23 +120,29 @@ public class RemitoServiceImpl implements IRemitoService {
                    messageSource.getMessage(
                            "mensaje_remito_tipo_no_valido", null, Locale.getDefault()));
        }
-       remito.setTotalPedido(factura.getPedido().getTotal());
+       remito.setTotalFactura(factura.getTotal());
        if (nuevoRemitoDTO.isDividir()) {
-         remito.setTotalEnvio(
+         remito.setCostoEnvioRemito(
              nuevoRemitoDTO.getCostoDeEnvio()
                  .divide(new BigDecimal("2"), RoundingMode.HALF_UP));
         } else {
-         remito.setTotalEnvio(nuevoRemitoDTO.getCostoDeEnvio());
+         remito.setCostoEnvioRemito(nuevoRemitoDTO.getCostoDeEnvio());
        }
-       remito.setTotal(remito.getTotalPedido().add(remito.getTotalEnvio()));
+       remito.setTotal(factura.getTotal().add(remito.getCostoEnvioRemito()));
        remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
-       remito.setContraEntrega(nuevoRemitoDTO.isContraEntrega());
+       remito.setCantidadDeBultos(remito.getRenglones().stream()
+                   .map(RenglonRemito::getCantidad)
+                   .reduce(BigDecimal.ZERO, BigDecimal::add));
+       remito.setPesoTotalKg(nuevoRemitoDTO.getPesoTotalKg());
+       remito.setVolumenM3(nuevoRemitoDTO.getVolumenM3());
+       remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
        remito.setSucursal(facturaVenta.getSucursal());
        remito.setSerie(configuracionSucursalService
             .getConfiguracionSucursal(remito.getSucursal())
             .getNroPuntoDeVentaAfip());
        remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+       remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));
        customValidator.validar(remito);
        remitoRepository.save(remito);
        logger.warn(
@@ -143,14 +159,14 @@ public class RemitoServiceImpl implements IRemitoService {
     @Override
     public List<RenglonRemito> construirRenglonesDeRemito(NuevoRemitoDTO nuevoRemitoDTO) {
       List<RenglonRemito> renglonesParaRemito = new ArrayList<>();
-      if (nuevoRemitoDTO.getCantidadDeBultos().length != nuevoRemitoDTO.getTiposDeBulto().length) {
+      if (nuevoRemitoDTO.getCantidadPorBulto().length != nuevoRemitoDTO.getTiposDeBulto().length) {
           throw new BusinessServiceException(
                   messageSource.getMessage(
                           "mensaje_remito_error_renglones", null, Locale.getDefault()));
       }
       for (int i = 0; i < nuevoRemitoDTO.getTiposDeBulto().length; i++) {
           RenglonRemito renglonRemito = new RenglonRemito();
-          renglonRemito.setCantidad(nuevoRemitoDTO.getCantidadDeBultos()[i]);
+          renglonRemito.setCantidad(nuevoRemitoDTO.getCantidadPorBulto()[i]);
           renglonRemito.setTipoBulto(nuevoRemitoDTO.getTiposDeBulto()[i]);
           renglonesParaRemito.add(renglonRemito);
       }
@@ -237,9 +253,35 @@ public class RemitoServiceImpl implements IRemitoService {
         if (criteria.getIdUsuario() != null) {
             builder.and(qRemito.usuario.idUsuario.eq(criteria.getIdUsuario()));
         }
-        if (criteria.getContraEntrega() != null) {
-            builder.and(qRemito.contraEntrega.eq(criteria.getContraEntrega()));
-        }
         return builder;
+    }
+
+    @Override
+    public byte[] getReporteRemito(long idRemito) {
+        Remito remitoParaReporte = this.getRemitoPorId(idRemito);
+        ClassLoader classLoader = RemitoServiceImpl.class.getClassLoader();
+        InputStream isFileReport =
+                classLoader.getResourceAsStream("sic/vista/reportes/Remito.jasper");
+        Map<String, Object> params = new HashMap<>();
+        params.put("remito", remitoParaReporte);
+        if (remitoParaReporte.getSucursal().getLogo() != null && !remitoParaReporte.getSucursal().getLogo().isEmpty()) {
+            try {
+                params.put(
+                        "logo",
+                        new ImageIcon(ImageIO.read(new URL(remitoParaReporte.getSucursal().getLogo()))).getImage());
+            } catch (IOException ex) {
+                throw new ServiceException(
+                        messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+            }
+        }
+        List<RenglonRemito> renglones = this.getRenglonesDelRemito(idRemito);
+        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+        try {
+            return JasperExportManager.exportReportToPdf(
+                    JasperFillManager.fillReport(isFileReport, params, ds));
+        } catch (JRException ex) {
+            throw new ServiceException(
+                    messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
+        }
     }
 }

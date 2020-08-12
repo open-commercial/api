@@ -28,4 +28,6 @@ public interface IRemitoService {
   Pageable getPageable(Integer pagina, String ordenarPor, String sentido);
 
   BooleanBuilder getBuilder(BusquedaRemitoCriteria criteria);
+
+  byte[] getReporteRemito(long idRemito);
 }

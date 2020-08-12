@@ -16,8 +16,11 @@ public class NuevoRemitoDTO {
 
   private long idFacturaVenta;
   private boolean dividir;
-  private boolean contraEntrega;
+  private long idTransportista;
   private TipoBulto[] tiposDeBulto;
-  private BigDecimal[] cantidadDeBultos;
+  private BigDecimal[] cantidadPorBulto;
   private BigDecimal costoDeEnvio;
+  private BigDecimal pesoTotalKg;
+  private BigDecimal volumenM3;
+  private String observaciones;
 }

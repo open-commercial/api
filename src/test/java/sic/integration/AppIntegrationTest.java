@@ -914,7 +914,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName(
-      "Facturar pedido al cliente RI con factura dividida y remito, luego saldar la CC con efectivo y verificar stock")
+      "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo y verificar stock")
   @Order(8)
   void testEscenarioVenta1() {
     this.iniciarSesionComoAdministrador();
@@ -1014,7 +1014,7 @@ class AppIntegrationTest {
     assertEquals(2, facturas.length);
     assertEquals(TipoDeComprobante.FACTURA_A, facturas[1].getTipoComprobante());
     assertEquals(TipoDeComprobante.FACTURA_X, facturas[0].getTipoComprobante());
-    //assertNotEquals(0L, facturas[1].getCae());
+    assertNotEquals(0L, facturas[1].getCae());
     assertNotNull(
         restTemplate.getForObject(
             apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte",
@@ -1124,18 +1124,53 @@ class AppIntegrationTest {
     pedidosRecuperados = resultadoBusquedaPedido.getContent();
     assertEquals(1, pedidosRecuperados.size());
     assertEquals(EstadoPedido.CERRADO, pedidosRecuperados.get(0).getEstado());
+  }
+
+  @Test
+  @DisplayName(
+          "Dar de alta un transportista, luego crear dos remitos por las facturas anteriores usando ese transportista")
+  @Order(9)
+  void testEscenarioRemito() {
+    this.iniciarSesionComoAdministrador();
+    TransportistaDTO transportistaNuevo = new TransportistaDTO();
+    UbicacionDTO ubicacionParaTransportista = new UbicacionDTO();
+    ubicacionParaTransportista.setIdLocalidad(1L);
+    ubicacionParaTransportista.setIdProvincia(1L);
+    transportistaNuevo.setUbicacion(ubicacionParaTransportista);
+    transportistaNuevo.setNombre("Transportista nuevo");
+    transportistaNuevo.setTelefono("3795448866");
+    transportistaNuevo.setWeb("transportista.com.ar");
+    transportistaNuevo = restTemplate.postForObject(apiPrefix + "/transportistas", transportistaNuevo, TransportistaDTO.class);
+    assertEquals("Transportista nuevo", transportistaNuevo.getNombre());
+    assertEquals("3795448866", transportistaNuevo.getTelefono());
+    assertEquals("transportista.com.ar", transportistaNuevo.getWeb());
+    BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity<>(criteria);
+    PaginaRespuestaRest<FacturaVenta> resultadoBusquedaFactura =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/facturas/ventas/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntity,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusquedaFactura);
+    List<FacturaVenta> facturasVenta = resultadoBusquedaFactura.getContent();
+    assertEquals(2, facturasVenta.size());
     BigDecimal[] cantidadesDeBultos = new BigDecimal[]{new BigDecimal("6"), BigDecimal.TEN};
     TipoBulto[] tipoBulto = new TipoBulto[]{TipoBulto.CAJA, TipoBulto.ATADO};
     Remito remitoResultanteFacturaX =
         restTemplate.postForObject(
             apiPrefix + "/remitos",
             NuevoRemitoDTO.builder()
-                .idFacturaVenta(facturas[0].getIdFactura())
+                .idFacturaVenta(facturasVenta.get(1).getIdFactura())
                 .dividir(true)
-                .cantidadDeBultos(cantidadesDeBultos)
+                .cantidadPorBulto(cantidadesDeBultos)
                 .tiposDeBulto(tipoBulto)
-                .contraEntrega(false)
                 .costoDeEnvio(new BigDecimal("50"))
+                .idTransportista(1L)
+                .pesoTotalKg(new BigDecimal("72"))
+                .volumenM3(new BigDecimal("118"))
                 .build(),
             Remito.class);
     assertNotNull(remitoResultanteFacturaX);
@@ -1153,22 +1188,27 @@ class AppIntegrationTest {
     assertEquals(2L, remitoResultanteFacturaX.getIdUsuario());
     assertEquals("dueño", remitoResultanteFacturaX.getNombreUsuario());
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaX.getDetalleEnvio());
-    assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getTotalEnvio());
-    assertEquals(new BigDecimal("114994.456200000000000"), remitoResultanteFacturaX.getTotalPedido());
-    assertEquals(new BigDecimal("115019.456200000000000"), remitoResultanteFacturaX.getTotal());
-    assertFalse(remitoResultanteFacturaX.isContraEntrega());
+    assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getCostoEnvioRemito());
+    assertEquals(new BigDecimal("1360.000000000000000"), remitoResultanteFacturaX.getTotalFactura());
+    assertEquals(new BigDecimal("1385.000000000000000"), remitoResultanteFacturaX.getTotal());
+    assertEquals(new BigDecimal("72"), remitoResultanteFacturaX.getPesoTotalKg());
+    assertEquals(new BigDecimal("118"), remitoResultanteFacturaX.getVolumenM3());
+    assertEquals(new BigDecimal("16"), remitoResultanteFacturaX.getCantidadDeBultos());
+    assertEquals(remitoResultanteFacturaX.getNombreTransportista(), transportistaNuevo.getNombre());
+    //assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaX.getIdRemito() + "/reporte", byte[].class));
     cantidadesDeBultos = new BigDecimal[]{new BigDecimal("3"), BigDecimal.ONE};
     tipoBulto = new TipoBulto[]{TipoBulto.ATADO, TipoBulto.ROLLO};
     Remito remitoResultanteFacturaA =
             restTemplate.postForObject(
                     apiPrefix + "/remitos",
                     NuevoRemitoDTO.builder()
-                            .idFacturaVenta(facturas[1].getIdFactura())
+                            .idFacturaVenta(facturasVenta.get(0).getIdFactura())
                             .dividir(true)
                             .tiposDeBulto(tipoBulto)
-                            .cantidadDeBultos(cantidadesDeBultos)
+                            .cantidadPorBulto(cantidadesDeBultos)
                             .costoDeEnvio(new BigDecimal("50"))
-                            .contraEntrega(false).build(), Remito.class);
+                            .idTransportista(1L)
+                            .build(), Remito.class);
     assertNotNull(remitoResultanteFacturaA);
     assertEquals(2L, remitoResultanteFacturaA.getIdRemito());
     assertNotNull(remitoResultanteFacturaA.getFecha());
@@ -1184,21 +1224,34 @@ class AppIntegrationTest {
     assertEquals(2L, remitoResultanteFacturaA.getIdUsuario());
     assertEquals("dueño", remitoResultanteFacturaA.getNombreUsuario());
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaA.getDetalleEnvio());
-    assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getTotalEnvio());
-    assertEquals(new BigDecimal("114994.456200000000000"), remitoResultanteFacturaA.getTotalPedido());
-    assertEquals(new BigDecimal("115019.456200000000000"), remitoResultanteFacturaA.getTotal());
-    assertFalse(remitoResultanteFacturaA.isContraEntrega());
-    facturas[0] = restTemplate.getForObject(apiPrefix + "/facturas/" + facturas[0].getIdFactura(), FacturaVenta.class);
-    assertNotNull(facturas[0].getRemito());
-    assertEquals(1L,facturas[0].getRemito().getIdRemito());
-    facturas[1] = restTemplate.getForObject(apiPrefix + "/facturas/" + facturas[1].getIdFactura(), FacturaVenta.class);
-    assertNotNull(facturas[1].getRemito());
-    assertEquals(2L,facturas[1].getRemito().getIdRemito());
+    assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getCostoEnvioRemito());
+    assertEquals(new BigDecimal("106960.271513250000000"), remitoResultanteFacturaA.getTotalFactura());
+    assertEquals(new BigDecimal("106985.271513250000000"), remitoResultanteFacturaA.getTotal());
+    assertNull(remitoResultanteFacturaA.getPesoTotalKg());
+    assertNull(remitoResultanteFacturaA.getVolumenM3());
+    assertEquals(new BigDecimal("4"), remitoResultanteFacturaA.getCantidadDeBultos());
+    assertEquals(remitoResultanteFacturaA.getNombreTransportista(), transportistaNuevo.getNombre());
+    //assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaA.getIdRemito() + "/reporte", byte[].class));
+    resultadoBusquedaFactura =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/facturas/ventas/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntity,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusquedaFactura);
+    facturasVenta = resultadoBusquedaFactura.getContent();
+    assertEquals(2, facturasVenta.size());
+    assertNotNull(facturasVenta.get(1).getRemito());
+    assertEquals(1L,facturasVenta.get(1).getRemito().getIdRemito());
+    assertNotNull(facturasVenta.get(0).getRemito());
+    assertEquals( 2L,facturasVenta.get(0).getRemito().getIdRemito());
   }
 
   @Test
   @DisplayName("Realizar devolucion parcial de productos y verificar saldo CC")
-  @Order(9)
+  @Order(10)
   void testEscenarioVenta2() {
     this.iniciarSesionComoAdministrador();
     BusquedaFacturaVentaCriteria criteria =
@@ -1294,7 +1347,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Registrar un cliente nuevo y enviar un pedido mediante carrito de compra")
-  @Order(10)
+  @Order(11)
   void testEscenarioRegistracionYPedidoDelNuevoCliente() {
     RegistracionClienteAndUsuarioDTO registro =
         RegistracionClienteAndUsuarioDTO.builder()
@@ -1400,7 +1453,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Cerrar caja y verificar movimientos")
-  @Order(11)
+  @Order(12)
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1475,7 +1528,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo")
-  @Order(12)
+  @Order(13)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1555,7 +1608,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar un pedido, luego intentar cancelarlo sin éxito")
-  @Order(13)
+  @Order(14)
   void testEscenarioFacturarPedidoAndIntentarEliminarlo() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
@@ -1689,7 +1742,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Actualizar stock de un producto para tener cantidades en dos sucursales, luego realizar un pedido que requiera del stock de ambas")
-  @Order(14)
+  @Order(15)
   void testEscenarioPedidoConStockDeDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Cliente clienteParaEditar = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
@@ -1801,7 +1854,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar el pedido anterior")
-  @Order(15)
+  @Order(16)
   void testEscenarioFacturarPedido() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria pedidoCriteria =
@@ -1857,7 +1910,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Verificar stock y cerrar caja")
-  @Order(16)
+  @Order(17)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();

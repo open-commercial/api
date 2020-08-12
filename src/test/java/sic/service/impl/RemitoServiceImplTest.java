@@ -42,6 +42,7 @@ class RemitoServiceImplTest {
   @MockBean RenglonRemitoRepository renglonRemitoRepository;
   @MockBean IClienteService clienteService;
   @MockBean IUsuarioService usuarioService;
+  @MockBean ITransportistaService transportistaService;
   @MockBean IConfiguracionSucursalService configuracionSucursalService;
   @MockBean ICuentaCorrienteService cuentaCorrienteService;
   @MockBean MessageSource messageSource;
@@ -60,7 +61,15 @@ class RemitoServiceImplTest {
   void shouldCrearRemitoDeFacturaVenta() {
     Factura factura = new FacturaCompra();
     when(facturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(factura);
+    Transportista transportista = new Transportista();
+    transportista.setIdTransportista(1L);
+    transportista.setNombre("Transportista Test");
+    when(transportistaService.getTransportistaNoEliminadoPorId(1L)).thenReturn(transportista);
     NuevoRemitoDTO nuevoRemitoDTO = NuevoRemitoDTO.builder().build();
+    nuevoRemitoDTO.setIdTransportista(1L);
+    nuevoRemitoDTO.setPesoTotalKg(BigDecimal.TEN);
+    nuevoRemitoDTO.setVolumenM3(BigDecimal.ONE);
+    nuevoRemitoDTO.setObservaciones("Envio Nuevo");
     nuevoRemitoDTO.setIdFacturaVenta(1L);
     assertThrows(
             BusinessServiceException.class,
@@ -81,10 +90,10 @@ class RemitoServiceImplTest {
     when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
         .thenReturn(configuracionSucursal);
     facturaVenta.setSucursal(sucursal);
+    facturaVenta.setTotal(new BigDecimal("100"));
     Pedido pedido = new Pedido();
     UbicacionDTO ubicacionDTO = UbicacionDTO.builder().costoDeEnvio(new BigDecimal("100")).build();
     pedido.setDetalleEnvio(ubicacionDTO);
-    pedido.setTotal(new BigDecimal("100"));
     facturaVenta.setPedido(pedido);
     Cliente cliente = new Cliente();
     facturaVenta.setCliente(cliente);
@@ -99,7 +108,7 @@ class RemitoServiceImplTest {
     nuevoRemitoDTO.setDividir(true);
     BigDecimal[] cantidadesDeBultos = new BigDecimal[] {new BigDecimal("6"), BigDecimal.TEN};
     TipoBulto[] tipoBulto = new TipoBulto[] {TipoBulto.CAJA};
-    nuevoRemitoDTO.setCantidadDeBultos(cantidadesDeBultos);
+    nuevoRemitoDTO.setCantidadPorBulto(cantidadesDeBultos);
     nuevoRemitoDTO.setTiposDeBulto(tipoBulto);
     assertThrows(
         BusinessServiceException.class,
@@ -122,10 +131,13 @@ class RemitoServiceImplTest {
     assertEquals(new BigDecimal("6"), remito.getRenglones().get(0).getCantidad());
     assertEquals(TipoBulto.ATADO, remito.getRenglones().get(1).getTipoBulto());
     assertEquals(BigDecimal.TEN, remito.getRenglones().get(1).getCantidad());
-    assertEquals(new BigDecimal("50"), remito.getTotalEnvio());
-    assertEquals(new BigDecimal("100"), remito.getTotalPedido());
+    assertEquals(new BigDecimal("50"), remito.getCostoEnvioRemito());
+    assertEquals(new BigDecimal("100"), remito.getTotalFactura());
     assertEquals(new BigDecimal("150"), remito.getTotal());
-    assertFalse(remito.isContraEntrega());
+    assertEquals(BigDecimal.TEN, remito.getPesoTotalKg());
+    assertEquals(BigDecimal.ONE, remito.getVolumenM3());
+    assertEquals("Envio Nuevo", remito.getObservaciones());
+    assertEquals(new BigDecimal("16"), remito.getCantidadDeBultos());
     verify(messageSource)
         .getMessage(eq("mensaje_remito_guardado_correctamente"), any(), eq(Locale.getDefault()));
     verify(facturaVentaService).asignarRemitoConFactura(any(), eq(2L));
@@ -140,14 +152,14 @@ class RemitoServiceImplTest {
     NuevoRemitoDTO nuevoRemitoDTO =
         NuevoRemitoDTO.builder()
             .tiposDeBulto(tipoBulto)
-            .cantidadDeBultos(cantidadesDeBultos)
+            .cantidadPorBulto(cantidadesDeBultos)
             .build();
     assertThrows(
         BusinessServiceException.class,
         () -> remitoService.construirRenglonesDeRemito(nuevoRemitoDTO));
     verify(messageSource).getMessage(eq("mensaje_remito_error_renglones"), any(), any());
     cantidadesDeBultos = new BigDecimal[] {BigDecimal.TEN};
-    nuevoRemitoDTO.setCantidadDeBultos(cantidadesDeBultos);
+    nuevoRemitoDTO.setCantidadPorBulto(cantidadesDeBultos);
     List<RenglonRemito> renglonesParaRemito =
         remitoService.construirRenglonesDeRemito(nuevoRemitoDTO);
     assertNotNull(renglonesParaRemito);
@@ -198,14 +210,12 @@ class RemitoServiceImplTest {
             .idCliente(1L)
             .idSucursal(1L)
             .idUsuario(1L)
-            .contraEntrega(true)
             .build();
     BooleanBuilder builder = remitoService.getBuilder(criteria);
     assertEquals(
         "remito.fecha between -999999999-01-01T00:00 and +999999999-12-31T23:59:59.999999999 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
-            + "&& remito.contraEntrega = true",
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()
@@ -216,14 +226,12 @@ class RemitoServiceImplTest {
             .idCliente(1L)
             .idSucursal(1L)
             .idUsuario(1L)
-            .contraEntrega(true)
             .build();
     builder = remitoService.getBuilder(criteria);
     assertEquals(
         "remito.fecha > -999999999-01-01T00:00 && remito.fecha < +999999999-12-31T23:59:59.999999999 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
-            + "&& remito.contraEntrega = true",
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()
@@ -234,14 +242,12 @@ class RemitoServiceImplTest {
             .idCliente(1L)
             .idSucursal(1L)
             .idUsuario(1L)
-            .contraEntrega(true)
             .build();
     builder = remitoService.getBuilder(criteria);
     assertEquals(
         "remito.fecha < +999999999-12-31T23:59:59.999999999 && remito.fecha > -999999999-01-01T00:00 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
-            + "&& remito.contraEntrega = true",
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1",
         builder.toString());
     Pageable pageable = remitoService.getPageable(3, "cliente.razonSocial", "ASC");
     assertEquals(3, pageable.getPageNumber());

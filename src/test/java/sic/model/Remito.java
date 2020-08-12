@@ -25,9 +25,14 @@ public class Remito {
   private String nombreSucursal;
   private long idUsuario;
   private String nombreUsuario;
+  private long idTransportista;
+  private String nombreTransportista;
   private String detalleEnvio;
-  private BigDecimal totalEnvio;
-  private BigDecimal totalPedido;
+  private BigDecimal costoEnvioRemito;
+  private BigDecimal totalFactura;
   private BigDecimal total;
-  private boolean contraEntrega;
+  private BigDecimal pesoTotalKg;
+  private BigDecimal volumenM3;
+  private BigDecimal cantidadDeBultos;
+  private String observaciones;
 }

@@ -22,7 +22,6 @@ public class BusquedaRemitoCriteria {
   private Long idCliente;
   private Long idSucursal;
   private Long idUsuario;
-  private Boolean contraEntrega;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;
