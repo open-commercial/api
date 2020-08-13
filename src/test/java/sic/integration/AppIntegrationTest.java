@@ -1169,8 +1169,8 @@ class AppIntegrationTest {
                 .tiposDeBulto(tipoBulto)
                 .costoDeEnvio(new BigDecimal("50"))
                 .idTransportista(1L)
-                .pesoTotalKg(new BigDecimal("72"))
-                .volumenM3(new BigDecimal("118"))
+                .pesoTotalEnKg(new BigDecimal("72"))
+                .volumenTotalEnM3(new BigDecimal("118"))
                 .build(),
             Remito.class);
     assertNotNull(remitoResultanteFacturaX);
@@ -1188,7 +1188,7 @@ class AppIntegrationTest {
     assertEquals(2L, remitoResultanteFacturaX.getIdUsuario());
     assertEquals("dueño", remitoResultanteFacturaX.getNombreUsuario());
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaX.getDetalleEnvio());
-    assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getCostoEnvioRemito());
+    assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getCostoDeEnvio());
     assertEquals(new BigDecimal("1360.000000000000000"), remitoResultanteFacturaX.getTotalFactura());
     assertEquals(new BigDecimal("1385.000000000000000"), remitoResultanteFacturaX.getTotal());
     assertEquals(new BigDecimal("72"), remitoResultanteFacturaX.getPesoTotalEnKg());
@@ -1224,7 +1224,7 @@ class AppIntegrationTest {
     assertEquals(2L, remitoResultanteFacturaA.getIdUsuario());
     assertEquals("dueño", remitoResultanteFacturaA.getNombreUsuario());
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaA.getDetalleEnvio());
-    assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getCostoEnvioRemito());
+    assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getCostoDeEnvio());
     assertEquals(new BigDecimal("106960.271513250000000"), remitoResultanteFacturaA.getTotalFactura());
     assertEquals(new BigDecimal("106985.271513250000000"), remitoResultanteFacturaA.getTotal());
     assertNull(remitoResultanteFacturaA.getPesoTotalEnKg());

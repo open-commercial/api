@@ -32,7 +32,6 @@ public class UbicacionDTO implements Serializable {
   private String departamento;
   private Long idLocalidad;
   private String nombreLocalidad;
-  private BigDecimal costoDeEnvio;
   private String codigoPostal;
   private Long idProvincia;
   private String nombreProvincia;

@@ -67,8 +67,8 @@ class RemitoServiceImplTest {
     when(transportistaService.getTransportistaNoEliminadoPorId(1L)).thenReturn(transportista);
     NuevoRemitoDTO nuevoRemitoDTO = NuevoRemitoDTO.builder().build();
     nuevoRemitoDTO.setIdTransportista(1L);
-    nuevoRemitoDTO.setPesoTotalKg(BigDecimal.TEN);
-    nuevoRemitoDTO.setVolumenM3(BigDecimal.ONE);
+    nuevoRemitoDTO.setPesoTotalEnKg(BigDecimal.TEN);
+    nuevoRemitoDTO.setVolumenTotalEnM3(BigDecimal.ONE);
     nuevoRemitoDTO.setObservaciones("Envio Nuevo");
     nuevoRemitoDTO.setIdFacturaVenta(1L);
     assertThrows(
@@ -92,7 +92,7 @@ class RemitoServiceImplTest {
     facturaVenta.setSucursal(sucursal);
     facturaVenta.setTotal(new BigDecimal("100"));
     Pedido pedido = new Pedido();
-    UbicacionDTO ubicacionDTO = UbicacionDTO.builder().costoDeEnvio(new BigDecimal("100")).build();
+    UbicacionDTO ubicacionDTO = UbicacionDTO.builder().build();
     pedido.setDetalleEnvio(ubicacionDTO);
     facturaVenta.setPedido(pedido);
     Cliente cliente = new Cliente();
@@ -131,7 +131,7 @@ class RemitoServiceImplTest {
     assertEquals(new BigDecimal("6"), remito.getRenglones().get(0).getCantidad());
     assertEquals(TipoBulto.ATADO.toString(), remito.getRenglones().get(1).getTipoBulto());
     assertEquals(BigDecimal.TEN, remito.getRenglones().get(1).getCantidad());
-    assertEquals(new BigDecimal("50"), remito.getCostoEnvioRemito());
+    assertEquals(new BigDecimal("50"), remito.getCostoDeEnvio());
     assertEquals(new BigDecimal("100"), remito.getTotalFactura());
     assertEquals(new BigDecimal("150"), remito.getTotal());
     assertEquals(BigDecimal.TEN, remito.getPesoTotalEnKg());

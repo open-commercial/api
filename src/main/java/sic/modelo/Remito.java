@@ -76,7 +76,7 @@ public class Remito implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_envio_negativo}")
-  private BigDecimal costoEnvioRemito;
+  private BigDecimal costoDeEnvio;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_factura_negativo}")

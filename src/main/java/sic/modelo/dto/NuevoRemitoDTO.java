@@ -20,7 +20,7 @@ public class NuevoRemitoDTO {
   private TipoBulto[] tiposDeBulto;
   private BigDecimal[] cantidadPorBulto;
   private BigDecimal costoDeEnvio;
-  private BigDecimal pesoTotalKg;
-  private BigDecimal volumenM3;
+  private BigDecimal pesoTotalEnKg;
+  private BigDecimal volumenTotalEnM3;
   private String observaciones;
 }

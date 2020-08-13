@@ -122,19 +122,19 @@ public class RemitoServiceImpl implements IRemitoService {
        }
        remito.setTotalFactura(factura.getTotal());
        if (nuevoRemitoDTO.isDividir()) {
-         remito.setCostoEnvioRemito(
+         remito.setCostoDeEnvio(
              nuevoRemitoDTO.getCostoDeEnvio()
                  .divide(new BigDecimal("2"), RoundingMode.HALF_UP));
         } else {
-         remito.setCostoEnvioRemito(nuevoRemitoDTO.getCostoDeEnvio());
+         remito.setCostoDeEnvio(nuevoRemitoDTO.getCostoDeEnvio());
        }
-       remito.setTotal(factura.getTotal().add(remito.getCostoEnvioRemito()));
+       remito.setTotal(factura.getTotal().add(remito.getCostoDeEnvio()));
        remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
        remito.setCantidadDeBultos(remito.getRenglones().stream()
                    .map(RenglonRemito::getCantidad)
                    .reduce(BigDecimal.ZERO, BigDecimal::add));
-       remito.setPesoTotalEnKg(nuevoRemitoDTO.getPesoTotalKg());
-       remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenM3());
+       remito.setPesoTotalEnKg(nuevoRemitoDTO.getPesoTotalEnKg());
+       remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenTotalEnM3());
        remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
        remito.setSucursal(facturaVenta.getSucursal());
        remito.setSerie(configuracionSucursalService
