@@ -86,9 +86,9 @@ public class Remito implements Serializable {
   @DecimalMin(value = "0", message = "{mensaje_remito_total_negativo}")
   private BigDecimal total;
 
-  private BigDecimal pesoTotalKg;
+  private BigDecimal pesoTotalEnKg;
 
-  private BigDecimal volumenM3;
+  private BigDecimal volumenTotalEnM3;
 
   private BigDecimal cantidadDeBultos;
 

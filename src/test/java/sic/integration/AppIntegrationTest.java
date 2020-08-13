@@ -1191,11 +1191,11 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getCostoEnvioRemito());
     assertEquals(new BigDecimal("1360.000000000000000"), remitoResultanteFacturaX.getTotalFactura());
     assertEquals(new BigDecimal("1385.000000000000000"), remitoResultanteFacturaX.getTotal());
-    assertEquals(new BigDecimal("72"), remitoResultanteFacturaX.getPesoTotalKg());
-    assertEquals(new BigDecimal("118"), remitoResultanteFacturaX.getVolumenM3());
+    assertEquals(new BigDecimal("72"), remitoResultanteFacturaX.getPesoTotalEnKg());
+    assertEquals(new BigDecimal("118"), remitoResultanteFacturaX.getVolumenTotalEnM3());
     assertEquals(new BigDecimal("16"), remitoResultanteFacturaX.getCantidadDeBultos());
     assertEquals(remitoResultanteFacturaX.getNombreTransportista(), transportistaNuevo.getNombre());
-    //assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaX.getIdRemito() + "/reporte", byte[].class));
+    assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaX.getIdRemito() + "/reporte", byte[].class));
     cantidadesDeBultos = new BigDecimal[]{new BigDecimal("3"), BigDecimal.ONE};
     tipoBulto = new TipoBulto[]{TipoBulto.ATADO, TipoBulto.ROLLO};
     Remito remitoResultanteFacturaA =
@@ -1227,11 +1227,11 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getCostoEnvioRemito());
     assertEquals(new BigDecimal("106960.271513250000000"), remitoResultanteFacturaA.getTotalFactura());
     assertEquals(new BigDecimal("106985.271513250000000"), remitoResultanteFacturaA.getTotal());
-    assertNull(remitoResultanteFacturaA.getPesoTotalKg());
-    assertNull(remitoResultanteFacturaA.getVolumenM3());
+    assertNull(remitoResultanteFacturaA.getPesoTotalEnKg());
+    assertNull(remitoResultanteFacturaA.getVolumenTotalEnM3());
     assertEquals(new BigDecimal("4"), remitoResultanteFacturaA.getCantidadDeBultos());
     assertEquals(remitoResultanteFacturaA.getNombreTransportista(), transportistaNuevo.getNombre());
-    //assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaA.getIdRemito() + "/reporte", byte[].class));
+    assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaA.getIdRemito() + "/reporte", byte[].class));
     resultadoBusquedaFactura =
             restTemplate
                     .exchange(

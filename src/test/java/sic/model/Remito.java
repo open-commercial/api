@@ -31,8 +31,8 @@ public class Remito {
   private BigDecimal costoEnvioRemito;
   private BigDecimal totalFactura;
   private BigDecimal total;
-  private BigDecimal pesoTotalKg;
-  private BigDecimal volumenM3;
+  private BigDecimal pesoTotalEnKg;
+  private BigDecimal volumenTotalEnM3;
   private BigDecimal cantidadDeBultos;
   private String observaciones;
 }

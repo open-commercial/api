@@ -127,15 +127,15 @@ class RemitoServiceImplTest {
     assertEquals(sucursal, remito.getSucursal());
     assertEquals(usuario, remito.getUsuario());
     assertEquals(2, remito.getRenglones().size());
-    assertEquals(TipoBulto.CAJA, remito.getRenglones().get(0).getTipoBulto());
+    assertEquals(TipoBulto.CAJA.toString(), remito.getRenglones().get(0).getTipoBulto());
     assertEquals(new BigDecimal("6"), remito.getRenglones().get(0).getCantidad());
-    assertEquals(TipoBulto.ATADO, remito.getRenglones().get(1).getTipoBulto());
+    assertEquals(TipoBulto.ATADO.toString(), remito.getRenglones().get(1).getTipoBulto());
     assertEquals(BigDecimal.TEN, remito.getRenglones().get(1).getCantidad());
     assertEquals(new BigDecimal("50"), remito.getCostoEnvioRemito());
     assertEquals(new BigDecimal("100"), remito.getTotalFactura());
     assertEquals(new BigDecimal("150"), remito.getTotal());
-    assertEquals(BigDecimal.TEN, remito.getPesoTotalKg());
-    assertEquals(BigDecimal.ONE, remito.getVolumenM3());
+    assertEquals(BigDecimal.TEN, remito.getPesoTotalEnKg());
+    assertEquals(BigDecimal.ONE, remito.getVolumenTotalEnM3());
     assertEquals("Envio Nuevo", remito.getObservaciones());
     assertEquals(new BigDecimal("16"), remito.getCantidadDeBultos());
     verify(messageSource)
@@ -165,7 +165,7 @@ class RemitoServiceImplTest {
     assertNotNull(renglonesParaRemito);
     assertEquals(1, cantidadesDeBultos.length);
     assertEquals(new BigDecimal("10"), renglonesParaRemito.get(0).getCantidad());
-    assertEquals(TipoBulto.CAJA, renglonesParaRemito.get(0).getTipoBulto());
+    assertEquals(TipoBulto.CAJA.toString(), renglonesParaRemito.get(0).getTipoBulto());
   }
 
   @Test

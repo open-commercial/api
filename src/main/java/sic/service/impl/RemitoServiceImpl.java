@@ -133,8 +133,8 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setCantidadDeBultos(remito.getRenglones().stream()
                    .map(RenglonRemito::getCantidad)
                    .reduce(BigDecimal.ZERO, BigDecimal::add));
-       remito.setPesoTotalKg(nuevoRemitoDTO.getPesoTotalKg());
-       remito.setVolumenM3(nuevoRemitoDTO.getVolumenM3());
+       remito.setPesoTotalEnKg(nuevoRemitoDTO.getPesoTotalKg());
+       remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenM3());
        remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
        remito.setSucursal(facturaVenta.getSucursal());
        remito.setSerie(configuracionSucursalService
@@ -167,7 +167,7 @@ public class RemitoServiceImpl implements IRemitoService {
       for (int i = 0; i < nuevoRemitoDTO.getTiposDeBulto().length; i++) {
           RenglonRemito renglonRemito = new RenglonRemito();
           renglonRemito.setCantidad(nuevoRemitoDTO.getCantidadPorBulto()[i]);
-          renglonRemito.setTipoBulto(nuevoRemitoDTO.getTiposDeBulto()[i]);
+          renglonRemito.setTipoBulto(nuevoRemitoDTO.getTiposDeBulto()[i].toString());
           renglonesParaRemito.add(renglonRemito);
       }
       return renglonesParaRemito;

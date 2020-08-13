@@ -21,7 +21,7 @@ public class RenglonRemito {
     private long idRenglonRemito;
 
     @Column(nullable = false)
-    private TipoBulto tipoBulto;
+    private String tipoBulto;
 
     @Column(precision = 25, scale = 15)
     @NotNull
