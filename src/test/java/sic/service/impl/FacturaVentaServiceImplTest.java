@@ -16,7 +16,6 @@ import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
-import sic.service.ITransportistaService;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
@@ -650,12 +649,12 @@ class FacturaVentaServiceImplTest {
     when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(new Cliente());
     assertThrows(
         BusinessServiceException.class,
-        () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
+        () -> facturaVentaServiceImpl.construirFacturaVenta(nuevaFacturaVentaDTO, 1L, 1L));
     verify(messageSource).getMessage(eq("mensaje_pedido_facturar_error_estado"), any(), any());
     pedido.setEstado(EstadoPedido.ABIERTO);
     assertThrows(
             BusinessServiceException.class,
-            () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
+            () -> facturaVentaServiceImpl.construirFacturaVenta(nuevaFacturaVentaDTO, 1L, 1L));
     verify(messageSource).getMessage(eq("mensaje_ubicacion_facturacion_vacia"), any(), any());
     Cliente cliente = new Cliente();
     cliente.setUbicacionFacturacion(new Ubicacion());
@@ -665,7 +664,7 @@ class FacturaVentaServiceImplTest {
     nuevaFacturaVentaDTO.setRenglonMarcado(renglonesMarcados);
     assertThrows(
         BusinessServiceException.class,
-        () -> facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L));
+        () -> facturaVentaServiceImpl.construirFacturaVenta(nuevaFacturaVentaDTO, 1L, 1L));
     verify(messageSource)
         .getMessage(eq("mensaje_factura_renglones_marcados_incorrectos"), any(), any());
     renglonesMarcados = new boolean[] {true};
@@ -681,7 +680,7 @@ class FacturaVentaServiceImplTest {
     producto.setPrecioLista(new BigDecimal("121"));
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
     FacturaVenta facturaVenta =
-        facturaVentaServiceImpl.construirFacuraVenta(nuevaFacturaVentaDTO, 1L, 1L);
+        facturaVentaServiceImpl.construirFacturaVenta(nuevaFacturaVentaDTO, 1L, 1L);
     assertNotNull(facturaVenta);
     assertEquals(TipoDeComprobante.FACTURA_A, facturaVenta.getTipoComprobante());
     assertEquals(1L, facturaVenta.getPedido().getIdPedido());

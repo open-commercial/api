@@ -559,16 +559,30 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStockNotaCredito(
-      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion) {
+      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento) {
     idsYCantidades.forEach(
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
           if (producto.isPresent() && !producto.get().isIlimitado()) {
-            if (operacion == TipoDeOperacion.ALTA) {
-              this.agregarStock(producto.get(), idSucursal, cantidad);
-            }
-            if (operacion == TipoDeOperacion.ELIMINACION) {
-              this.quitarStock(producto.get(), idSucursal, cantidad);
+            switch (operacion) {
+              case ALTA -> {
+                switch (movimiento) {
+                  case VENTA -> this.agregarStock(producto.get(), idSucursal, cantidad);
+                  case COMPRA -> this.quitarStock(producto.get(), idSucursal, cantidad);
+                  default -> throw new BusinessServiceException(
+                          messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+                }
+              }
+              case ELIMINACION -> {
+                switch (movimiento) {
+                  case VENTA -> this.quitarStock(producto.get(), idSucursal, cantidad);
+                  case COMPRA -> this.agregarStock(producto.get(), idSucursal, cantidad);
+                  default -> throw new BusinessServiceException(
+                          messageSource.getMessage("mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+                }
+              }
+              default -> throw new BusinessServiceException(
+                      messageSource.getMessage("mensaje_operacion_no_soportada", null, Locale.getDefault()));
             }
           } else {
             logger.warn(
@@ -594,7 +608,10 @@ public class ProductoServiceImpl implements IProductoService {
           indice++;
         }
         ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-                ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+                ProductosParaVerificarStockDTO.builder()
+                        .idProducto(idProducto)
+                        .cantidad(cantidad)
+                        .idSucursal(traspaso.getSucursalOrigen().getIdSucursal()).build();
         if (!this.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
           throw new BusinessServiceException(
                   messageSource.getMessage("mensaje_traspaso_sin_stock", null, Locale.getDefault()));
@@ -632,7 +649,7 @@ public class ProductoServiceImpl implements IProductoService {
                       });
       default -> throw new BusinessServiceException(
               messageSource.getMessage(
-                      "mensaje_traspaso_operacion_no_soportada", null, Locale.getDefault()));
+                      "mensaje_operacion_no_soportada", null, Locale.getDefault()));
     }
   }
 

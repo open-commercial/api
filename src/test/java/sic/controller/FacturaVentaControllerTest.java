@@ -97,14 +97,14 @@ class FacturaVentaControllerTest {
     facturaVenta.setCliente(cliente);
     facturaVenta.setUsuario(usuario);
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-    when(facturaVentaService.construirFacuraVenta(any(), any(), any())).thenReturn(facturaVenta);
+    when(facturaVentaService.construirFacturaVenta(any(), any(), any())).thenReturn(facturaVenta);
     facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, 1L, "headers");
     List<FacturaVenta> facturaVentas = new ArrayList<>();
     facturaVentas.add(facturaVenta);
     verify(facturaVentaService, times(1))
             .guardar(facturaVentas, 1L, Collections.emptyList());
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_X);
-    when(facturaVentaService.construirFacuraVenta(any(), any(), any())).thenReturn(facturaVenta);
+    when(facturaVentaService.construirFacturaVenta(any(), any(), any())).thenReturn(facturaVenta);
     verify(facturaVentaService, times(1))
             .guardar(facturaVentas, 1L, Collections.emptyList());
   }

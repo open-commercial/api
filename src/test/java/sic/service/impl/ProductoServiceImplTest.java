@@ -331,14 +331,13 @@ class ProductoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.ONE);
     renglonesPedido.add(renglonPedido);
     when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
-    productosParaVerificarStockDTO =
-            ProductosParaVerificarStockDTO.builder().build();
+    productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder().build();
     productosParaVerificarStockDTO.setIdSucursal(1L);
     productosParaVerificarStockDTO.setCantidad(cantidad);
     productosParaVerificarStockDTO.setIdProducto(idProducto);
     productosParaVerificarStockDTO.setIdPedido(1L);
     resultadoObtenido =
-            productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
     Assertions.assertFalse(resultadoObtenido.isEmpty());
     assertEquals(new BigDecimal("10"), resultadoObtenido.get(0).getCantidadSolicitada());
     assertEquals(new BigDecimal("9"), resultadoObtenido.get(0).getCantidadDisponible());
@@ -401,60 +400,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldDevolverStockPedido() {
-    Pedido pedido = new Pedido();
-    pedido.setEstado(EstadoPedido.ABIERTO);
-    List<RenglonPedido> renglones = new ArrayList<>();
-    RenglonPedido renglonPedido = new RenglonPedido();
-    renglonPedido.setIdProductoItem(1L);
-    renglones.add(renglonPedido);
-    pedido.setRenglones(renglones);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    pedido.setSucursal(sucursal);
-    List<RenglonPedido> renglonesAnteriores = new ArrayList<>();
-    RenglonPedido renglonPedidoAnterior = new RenglonPedido();
-    renglonPedidoAnterior.setIdProductoItem(1L);
-    renglonesAnteriores.add(renglonPedido);
-    productoService.devolverStockPedido(pedido,TipoDeOperacion.ACTUALIZACION,  renglonesAnteriores, 1L);
-    verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
-    Producto producto = this.construirProducto();
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    when(productoRepository.save(producto)).thenReturn(producto);
-    productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
-    verify(messageSource).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
-    verify(productoRepository).save(producto);
-  }
-
-  @Test
-  void shouldActualizarStockPedido() {
-    Pedido pedido = new Pedido();
-    pedido.setEstado(EstadoPedido.ABIERTO);
-    List<RenglonPedido> renglones = new ArrayList<>();
-    RenglonPedido renglonPedido = new RenglonPedido();
-    renglonPedido.setIdProductoItem(1L);
-    renglones.add(renglonPedido);
-    pedido.setRenglones(renglones);
-    Sucursal sucursal = new Sucursal();
-    sucursal.setIdSucursal(1L);
-    pedido.setSucursal(sucursal);
-    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
-    verify(messageSource).getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
-    Producto producto = this.construirProducto();
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    when(productoRepository.save(producto)).thenReturn(producto);
-    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
-    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
-    verify(messageSource, times(2)).getMessage(eq("mensaje_producto_quita_stock"), any(), any());
-    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
-    pedido.setEstado(EstadoPedido.CANCELADO);
-    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
-    verify(messageSource, times(2)).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
-    verify(traspasoService, times(3)).guardarTraspasosPorPedido(pedido);
-    verify(traspasoService, times(3)).eliminarTraspasoDePedido(pedido);
-  }
-
-  @Test
   void shouldValidarReglasDeNegocio() {
     Producto producto = this.construirProducto();
     producto.setIdProducto(1L);
@@ -498,18 +443,70 @@ class ProductoServiceImplTest {
   }
 
   @Test
+  void shouldTestReporteListaDePrecios() {
+    List<Producto> productos = new ArrayList<>();
+    Producto productoParaReporte = new Producto();
+    productos.add(productoParaReporte);
+    when(productoRepository.findAll(
+            productoService.getBuilder(BusquedaProductoCriteria.builder().build()),
+            productoService.getPageable(null, null, null, Integer.MAX_VALUE)))
+        .thenReturn(new PageImpl<>(productos));
+    Sucursal sucursal = new Sucursal();
+    sucursal.setLogo("noTieneImagen");
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
+    assertThrows(
+        ServiceException.class,
+        () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build()));
+    assertThrows(
+        ServiceException.class,
+        () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
+    verify(messageSource, times(2)).getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
+    sucursal.setLogo(null);
+    BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
+    assertNotNull(productoService.getListaDePreciosEnPdf(criteria));
+    assertNotNull(productoService.getListaDePreciosEnXls(criteria));
+  }
+
+  @Test
+  void shouldGetPageableProducto() {
+    Pageable pageable = productoService.getPageable(0, null, null, Integer.MAX_VALUE);
+    assertEquals("descripcion: ASC", pageable.getSort().toString());
+    assertEquals(0, pageable.getPageNumber());
+    pageable = productoService.getPageable(1, "rubro.nombre", "ASC", Integer.MAX_VALUE);
+    assertEquals("rubro.nombre: ASC", pageable.getSort().toString());
+    assertEquals(1, pageable.getPageNumber());
+    pageable = productoService.getPageable(3, "rubro.nombre", "DESC", Integer.MAX_VALUE);
+    assertEquals("rubro.nombre: DESC", pageable.getSort().toString());
+    assertEquals(3, pageable.getPageNumber());
+    pageable = productoService.getPageable(3, "codigo", "NO", Integer.MAX_VALUE);
+    assertEquals("descripcion: DESC", pageable.getSort().toString());
+    assertEquals(3, pageable.getPageNumber());
+    pageable = productoService.getPageable(null, "codigo", "NO", Integer.MAX_VALUE);
+    assertEquals("descripcion: DESC", pageable.getSort().toString());
+    assertEquals(0, pageable.getPageNumber());
+  }
+
+  @Test
   void shouldActualizarStockTraspaso() {
     Producto producto1 = new Producto();
     producto1.setIdProducto(1L);
-    producto1.setCantidadTotalEnSucursales(new BigDecimal("1"));
+    producto1.setCantidadTotalEnSucursales(new BigDecimal("5"));
     producto1.setDescripcion("Ventilador de pie");
     Sucursal sucursalOrigen = new Sucursal();
     sucursalOrigen.setIdSucursal(1L);
+    sucursalOrigen.setNombre("Sucursal Uno");
+    Sucursal sucursalDestino = new Sucursal();
+    sucursalDestino.setIdSucursal(2L);
+    sucursalDestino.setNombre("Sucursal dos");
     CantidadEnSucursal cantidadEnSucursalProducto1 = new CantidadEnSucursal();
     cantidadEnSucursalProducto1.setSucursal(sucursalOrigen);
-    cantidadEnSucursalProducto1.setCantidad(new BigDecimal("1"));
+    cantidadEnSucursalProducto1.setCantidad(new BigDecimal("3"));
+    CantidadEnSucursal cantidadEnSucursal2Producto1 = new CantidadEnSucursal();
+    cantidadEnSucursal2Producto1.setSucursal(sucursalDestino);
+    cantidadEnSucursal2Producto1.setCantidad(new BigDecimal("2"));
     Set<CantidadEnSucursal> cantidadEnSucursalesProducto1 = new HashSet<>();
     cantidadEnSucursalesProducto1.add(cantidadEnSucursalProducto1);
+    cantidadEnSucursalesProducto1.add(cantidadEnSucursal2Producto1);
     producto1.setCantidadEnSucursales(cantidadEnSucursalesProducto1);
     producto1.setIlimitado(false);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
@@ -539,13 +536,12 @@ class ProductoServiceImplTest {
     renglones.add(renglonTraspaso2);
     traspaso.setRenglones(renglones);
     traspaso.setSucursalOrigen(sucursalOrigen);
-    Sucursal sucursalDestino = new Sucursal();
-    sucursalDestino.setIdSucursal(2L);
     traspaso.setSucursalDestino(sucursalDestino);
     assertThrows(
-            BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
+        BusinessServiceException.class,
+        () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
     verify(messageSource).getMessage(eq("mensaje_traspaso_sin_stock"), any(), any());
-    producto1.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto1.setCantidadTotalEnSucursales(new BigDecimal("20"));
     producto1
         .getCantidadEnSucursales()
         .forEach(cantidadEnSucursal -> cantidadEnSucursal.setCantidad(BigDecimal.TEN));
@@ -553,49 +549,139 @@ class ProductoServiceImplTest {
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ELIMINACION);
     verify(productoRepository, times(8)).save(any());
     assertThrows(
-            BusinessServiceException.class, () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ACTUALIZACION));
-    verify(messageSource).getMessage(eq("mensaje_traspaso_operacion_no_soportada"), any(), any());
+        BusinessServiceException.class,
+        () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ACTUALIZACION));
+    verify(messageSource).getMessage(eq("mensaje_operacion_no_soportada"), any(), any());
   }
 
   @Test
-  void shouldTestReporteListaDePrecios() {
-    List<Producto> productos = new ArrayList<>();
-    Producto productoParaReporte = new Producto();
-    productos.add(productoParaReporte);
-    when(productoRepository.findAll(
-            productoService.getBuilder(BusquedaProductoCriteria.builder().build()),
-            productoService.getPageable(null, null, null, Integer.MAX_VALUE)))
-            .thenReturn(new PageImpl<>(productos));
+  void shouldDevolverStockPedido() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglones.add(renglonPedido);
+    pedido.setRenglones(renglones);
     Sucursal sucursal = new Sucursal();
-    sucursal.setLogo("noTieneImagen");
-    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
-    assertThrows(
-            ServiceException.class, () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build()));
-    assertThrows(
-            ServiceException.class, () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
-    verify(messageSource, times(2)).getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
-    sucursal.setLogo(null);
-    BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
-    assertNotNull(productoService.getListaDePreciosEnPdf(criteria));
-    assertNotNull(productoService.getListaDePreciosEnXls(criteria));
+    sucursal.setIdSucursal(1L);
+    pedido.setSucursal(sucursal);
+    List<RenglonPedido> renglonesAnteriores = new ArrayList<>();
+    RenglonPedido renglonPedidoAnterior = new RenglonPedido();
+    renglonPedidoAnterior.setIdProductoItem(1L);
+    renglonesAnteriores.add(renglonPedido);
+    productoService.devolverStockPedido(
+        pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
+    verify(messageSource)
+        .getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
+    Producto producto = this.construirProducto();
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    when(productoRepository.save(producto)).thenReturn(producto);
+    productoService.devolverStockPedido(
+        pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
+    verify(messageSource).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
+    verify(productoRepository).save(producto);
   }
 
   @Test
-  void shouldGetPageableProducto() {
-    Pageable pageable = productoService.getPageable(0, null, null, Integer.MAX_VALUE);
-    assertEquals("descripcion: ASC", pageable.getSort().toString());
-    assertEquals(0, pageable.getPageNumber());
-    pageable = productoService.getPageable(1, "rubro.nombre", "ASC", Integer.MAX_VALUE);
-    assertEquals("rubro.nombre: ASC", pageable.getSort().toString());
-    assertEquals(1, pageable.getPageNumber());
-    pageable = productoService.getPageable(3, "rubro.nombre", "DESC", Integer.MAX_VALUE);
-    assertEquals("rubro.nombre: DESC", pageable.getSort().toString());
-    assertEquals(3, pageable.getPageNumber());
-    pageable = productoService.getPageable(3, "codigo", "NO", Integer.MAX_VALUE);
-    assertEquals("descripcion: DESC", pageable.getSort().toString());
-    assertEquals(3, pageable.getPageNumber());
-    pageable = productoService.getPageable(null, "codigo", "NO", Integer.MAX_VALUE);
-    assertEquals("descripcion: DESC", pageable.getSort().toString());
-    assertEquals(0, pageable.getPageNumber());
+  void shouldActualizarStockPedido() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglones.add(renglonPedido);
+    pedido.setRenglones(renglones);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    pedido.setSucursal(sucursal);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
+    verify(messageSource)
+        .getMessage(eq("mensaje_error_actualizar_stock_producto_eliminado"), any(), any());
+    Producto producto = this.construirProducto();
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    when(productoRepository.save(producto)).thenReturn(producto);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+    verify(messageSource, times(2)).getMessage(eq("mensaje_producto_quita_stock"), any(), any());
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
+    pedido.setEstado(EstadoPedido.CANCELADO);
+    productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
+    verify(messageSource, times(2)).getMessage(eq("mensaje_producto_agrega_stock"), any(), any());
+    verify(traspasoService, times(3)).guardarTraspasosPorPedido(pedido);
+    verify(traspasoService, times(3)).eliminarTraspasoDePedido(pedido);
+  }
+
+  @Test
+  void shouldActualizarStockNotaCredito() {
+    Map<Long, BigDecimal> idsYCantidades = new HashMap<>();
+    idsYCantidades.put(1L, new BigDecimal("10"));
+    idsYCantidades.put(2L, new BigDecimal("20"));
+    Sucursal sucursal = new Sucursal();
+    sucursal.setNombre("primera sucursal");
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    Set<CantidadEnSucursal> cantidadesEnSucursalProducto1 = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursalProducto1 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto1.setSucursal(sucursal);
+    cantidadEnSucursalProducto1.setCantidad(BigDecimal.ONE);
+    cantidadesEnSucursalProducto1.add(cantidadEnSucursalProducto1);
+    producto1.setCantidadEnSucursales(cantidadesEnSucursalProducto1);
+    producto1.setCantidadTotalEnSucursales(BigDecimal.ONE);
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    Set<CantidadEnSucursal> cantidadesEnSucursalProducto2 = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursalProducto2 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto2.setSucursal(sucursal);
+    cantidadEnSucursalProducto2.setCantidad(BigDecimal.ONE);
+    cantidadesEnSucursalProducto2.add(cantidadEnSucursalProducto2);
+    producto2.setCantidadEnSucursales(cantidadesEnSucursalProducto2);
+    producto2.setCantidadTotalEnSucursales(BigDecimal.ONE);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
+    when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
+    productoService.actualizarStockNotaCredito(
+        idsYCantidades, 1L, TipoDeOperacion.ALTA, Movimiento.VENTA);
+    productoService.actualizarStockNotaCredito(
+        idsYCantidades, 1L, TipoDeOperacion.ALTA, Movimiento.COMPRA);
+    productoService.actualizarStockNotaCredito(
+        idsYCantidades, 1L, TipoDeOperacion.ELIMINACION, Movimiento.VENTA);
+    productoService.actualizarStockNotaCredito(
+        idsYCantidades, 1L, TipoDeOperacion.ELIMINACION, Movimiento.COMPRA);
+    verify(messageSource, times(4))
+        .getMessage(eq("mensaje_producto_agrega_stock"), any(), eq(Locale.getDefault()));
+    verify(messageSource, times(4))
+        .getMessage(eq("mensaje_producto_quita_stock"), any(), eq(Locale.getDefault()));
+    verify(productoRepository, times(8)).save(any());
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.actualizarStockNotaCredito(
+                idsYCantidades, 1L, TipoDeOperacion.ACTUALIZACION, Movimiento.VENTA));
+    verify(messageSource)
+        .getMessage(eq("mensaje_operacion_no_soportada"), any(), eq(Locale.getDefault()));
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.actualizarStockNotaCredito(
+                idsYCantidades, 1L, TipoDeOperacion.ALTA, Movimiento.PEDIDO));
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.actualizarStockNotaCredito(
+                idsYCantidades, 1L, TipoDeOperacion.ELIMINACION, Movimiento.PEDIDO));
+    verify(messageSource, times(2))
+        .getMessage(
+            eq("mensaje_preference_tipo_de_movimiento_no_soportado"),
+            any(),
+            eq(Locale.getDefault()));
+    idsYCantidades.clear();
+    idsYCantidades.put(3L, BigDecimal.ONE);
+    productoService.actualizarStockNotaCredito(
+        idsYCantidades, 1L, TipoDeOperacion.ALTA, Movimiento.VENTA);
+    verify(messageSource)
+        .getMessage(
+            eq("mensaje_error_actualizar_stock_producto_eliminado"),
+            any(),
+            eq(Locale.getDefault()));
   }
 }

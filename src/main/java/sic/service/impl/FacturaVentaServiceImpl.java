@@ -93,7 +93,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public FacturaVenta construirFacuraVenta(
+  public FacturaVenta construirFacturaVenta(
       NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario) {
     FacturaVenta fv = new FacturaVenta();
     Sucursal sucursal;
@@ -591,8 +591,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     facturaConIVA.setDescuentoPorcentaje(facturaADividir.getDescuentoPorcentaje());
     facturaConIVA.setRecargoPorcentaje(facturaADividir.getRecargoPorcentaje());
     List<FacturaVenta> facturas = new ArrayList<>();
-    this.agregarRenglonesAFacturaSinIVA(facturaSinIVA, indices, facturaADividir.getRenglones());
-    this.agregarRenglonesAFacturaConIVA(facturaConIVA, indices, facturaADividir.getRenglones());
+    this.agregarRenglonesEnFacturaSinIVA(facturaSinIVA, indices, facturaADividir.getRenglones());
+    this.agregarRenglonesEnFacturaConIVA(facturaConIVA, indices, facturaADividir.getRenglones());
     if (!facturaSinIVA.getRenglones().isEmpty()) {
       this.procesarFacturaSinIVA(facturaADividir, facturaSinIVA);
       facturas.add(facturaSinIVA);
@@ -731,7 +731,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public void agregarRenglonesAFacturaSinIVA(
+  public void agregarRenglonesEnFacturaSinIVA(
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones) {
     List<RenglonFactura> renglonesSinIVA = new ArrayList<>();
     BigDecimal cantidadProductosRenglonFacturaSinIVA = BigDecimal.ZERO;
@@ -782,7 +782,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public void agregarRenglonesAFacturaConIVA(
+  public void agregarRenglonesEnFacturaConIVA(
       FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones) {
     List<RenglonFactura> renglonesConIVA = new ArrayList<>();
     BigDecimal cantidadProductosRenglonFacturaConIVA = BigDecimal.ZERO;

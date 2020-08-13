@@ -1,7 +1,5 @@
 package sic.repository;
 
-import java.util.List;
-
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -13,9 +11,6 @@ public interface FacturaVentaRepository
         FacturaVentaRepositoryCustom,
         QuerydslPredicateExecutor<FacturaVenta> {
 
-  @Override
-  List<Factura> findAllByPedidoAndEliminada(Pedido pedido, boolean eliminada);
-
   @Modifying
   @Query(
           "UPDATE FacturaVenta fv SET fv.remito = :remito WHERE fv.idFactura = :idFactura")
@@ -25,8 +20,8 @@ public interface FacturaVentaRepository
   FacturaVenta buscarFacturaPorRemito(@Param("remito") Remito remito);
 
   @Query(
-      "SELECT max(fv.numFactura) FROM FacturaVenta fv " +
-        "WHERE fv.tipoComprobante = :tipoComprobante AND fv.numSerie = :numSerie AND fv.sucursal.idSucursal = :idSucursal")
+      "SELECT max(fv.numFactura) FROM FacturaVenta fv "
+          + "WHERE fv.tipoComprobante = :tipoComprobante AND fv.numSerie = :numSerie AND fv.sucursal.idSucursal = :idSucursal")
   Long buscarMayorNumFacturaSegunTipo(
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("numSerie") long numSerie,

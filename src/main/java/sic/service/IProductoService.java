@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import sic.modelo.*;
 
@@ -33,7 +32,7 @@ public interface IProductoService {
       Movimiento movimiento);
 
   void actualizarStockNotaCredito(
-      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion);
+          Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento);
 
   void actualizarStockTraspaso(Traspaso traspaso, TipoDeOperacion tipoDeOperacion);
 
