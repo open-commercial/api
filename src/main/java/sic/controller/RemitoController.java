@@ -12,6 +12,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Remito;
 import sic.modelo.RenglonRemito;
 import sic.modelo.Rol;
+import sic.modelo.TipoDeComprobante;
 import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.service.IAuthService;
@@ -72,5 +73,10 @@ public class RemitoController {
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF = remitoService.getReporteRemito(idRemito);
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
+
+  @GetMapping("/remitos/tipos/sucursales/{idSucursal}")
+  public TipoDeComprobante[] getTiposRemitoSegunSucursal(@PathVariable long idSucursal) {
+    return remitoService.getTiposDeComprobanteSegunSucursal(idSucursal);
   }
 }

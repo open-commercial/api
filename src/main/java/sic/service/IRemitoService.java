@@ -30,4 +30,6 @@ public interface IRemitoService {
   BooleanBuilder getBuilder(BusquedaRemitoCriteria criteria);
 
   byte[] getReporteRemito(long idRemito);
+
+  TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(long idSucursal);
 }

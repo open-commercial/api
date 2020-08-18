@@ -45,6 +45,7 @@ class RemitoServiceImplTest {
   @MockBean ITransportistaService transportistaService;
   @MockBean IConfiguracionSucursalService configuracionSucursalService;
   @MockBean ICuentaCorrienteService cuentaCorrienteService;
+  @MockBean ISucursalService sucursalService;
   @MockBean MessageSource messageSource;
 
   @Autowired RemitoServiceImpl remitoService;
@@ -72,10 +73,10 @@ class RemitoServiceImplTest {
     nuevoRemitoDTO.setObservaciones("Envio Nuevo");
     nuevoRemitoDTO.setIdFacturaVenta(1L);
     assertThrows(
-            BusinessServiceException.class,
-            () -> remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, 1L));
+        BusinessServiceException.class,
+        () -> remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, 1L));
     verify(messageSource).getMessage(eq("mensaje_remito_sin_costo_de_envio"), any(), any());
-    nuevoRemitoDTO.setCostoDeEnvio(new BigDecimal("100"));
+    nuevoRemitoDTO.setCostoDeEnvio(new BigDecimal("50"));
     assertThrows(
         BusinessServiceException.class,
         () -> remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, 1L));
@@ -105,7 +106,6 @@ class RemitoServiceImplTest {
         () -> remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, 1L));
     verify(messageSource).getMessage(eq("mensaje_remito_tipo_no_valido"), any(), any());
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-    nuevoRemitoDTO.setDividir(true);
     BigDecimal[] cantidadesDeBultos = new BigDecimal[] {new BigDecimal("6"), BigDecimal.TEN};
     TipoBulto[] tipoBulto = new TipoBulto[] {TipoBulto.CAJA};
     nuevoRemitoDTO.setCantidadPorBulto(cantidadesDeBultos);
@@ -260,5 +260,25 @@ class RemitoServiceImplTest {
     assertEquals("fecha: DESC", pageable.getSort().toString());
     remitoService.buscarRemito(criteria);
     verify(remitoRepository).findAll(eq(builder), eq(pageable));
+  }
+
+  @Test
+  void shouldTestGetTipoDeRemitos() {
+    Sucursal sucursal = new Sucursal();
+    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    TipoDeComprobante[] tipoDeComprobantes = remitoService.getTiposDeComprobanteSegunSucursal(1L);
+    assertEquals(4, tipoDeComprobantes.length);
+    assertEquals(TipoDeComprobante.REMITO_A, tipoDeComprobantes[0]);
+    assertEquals(TipoDeComprobante.REMITO_B, tipoDeComprobantes[1]);
+    assertEquals(TipoDeComprobante.REMITO_X, tipoDeComprobantes[2]);
+    assertEquals(TipoDeComprobante.REMITO_PRESUPUESTO, tipoDeComprobantes[3]);
+    sucursal.setCategoriaIVA(CategoriaIVA.MONOTRIBUTO);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    tipoDeComprobantes = remitoService.getTiposDeComprobanteSegunSucursal(1L);
+    assertEquals(3, tipoDeComprobantes.length);
+    assertEquals(TipoDeComprobante.REMITO_C, tipoDeComprobantes[0]);
+    assertEquals(TipoDeComprobante.REMITO_X, tipoDeComprobantes[1]);
+    assertEquals(TipoDeComprobante.REMITO_PRESUPUESTO, tipoDeComprobantes[2]);
   }
 }

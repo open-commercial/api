@@ -47,6 +47,7 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
+    private final ISucursalService sucursalService;
     private final IConfiguracionSucursalService configuracionSucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
@@ -62,6 +63,7 @@ public class RemitoServiceImpl implements IRemitoService {
                               IClienteService clienteService,
                               IUsuarioService usuarioService,
                               ITransportistaService transportistaService,
+                              ISucursalService sucursalService,
                               IConfiguracionSucursalService configuracionSucursalService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               MessageSource messageSource,
@@ -73,6 +75,7 @@ public class RemitoServiceImpl implements IRemitoService {
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.transportistaService = transportistaService;
+        this.sucursalService = sucursalService;
         this.configuracionSucursalService = configuracionSucursalService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.messageSource = messageSource;
@@ -103,6 +106,11 @@ public class RemitoServiceImpl implements IRemitoService {
                    messageSource.getMessage(
                            "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
        } else {
+       if (((FacturaVenta)factura).getRemito() != null) {
+           throw new BusinessServiceException(
+                   messageSource.getMessage(
+                           "mensaje_remito_con_factura", null, Locale.getDefault()));
+       }
        Remito remito = new Remito();
        FacturaVenta facturaVenta = (FacturaVenta) factura;
        remito.setFecha(LocalDateTime.now());
@@ -121,13 +129,7 @@ public class RemitoServiceImpl implements IRemitoService {
                            "mensaje_remito_tipo_no_valido", null, Locale.getDefault()));
        }
        remito.setTotalFactura(factura.getTotal());
-       if (nuevoRemitoDTO.isDividir()) {
-         remito.setCostoDeEnvio(
-             nuevoRemitoDTO.getCostoDeEnvio()
-                 .divide(new BigDecimal("2"), RoundingMode.HALF_UP));
-        } else {
-         remito.setCostoDeEnvio(nuevoRemitoDTO.getCostoDeEnvio());
-       }
+       remito.setCostoDeEnvio(nuevoRemitoDTO.getCostoDeEnvio());
        remito.setTotal(factura.getTotal().add(remito.getCostoDeEnvio()));
        remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
        remito.setCantidadDeBultos(remito.getRenglones().stream()
@@ -283,5 +285,24 @@ public class RemitoServiceImpl implements IRemitoService {
             throw new ServiceException(
                     messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
+    }
+
+    @Override
+    public TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(long idSucursal) {
+        Sucursal sucursal = this.sucursalService.getSucursalPorId(idSucursal);
+        TipoDeComprobante[] tiposPermitidos;
+        if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
+            tiposPermitidos = new TipoDeComprobante[4];
+            tiposPermitidos[0] = TipoDeComprobante.REMITO_A;
+            tiposPermitidos[1] = TipoDeComprobante.REMITO_B;
+            tiposPermitidos[2] = TipoDeComprobante.REMITO_X;
+            tiposPermitidos[3] = TipoDeComprobante.REMITO_PRESUPUESTO;
+        } else {
+            tiposPermitidos = new TipoDeComprobante[3];
+            tiposPermitidos[0] = TipoDeComprobante.REMITO_C;
+            tiposPermitidos[1] = TipoDeComprobante.REMITO_X;
+            tiposPermitidos[2] = TipoDeComprobante.REMITO_PRESUPUESTO;
+        }
+        return tiposPermitidos;
     }
 }

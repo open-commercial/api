@@ -1241,10 +1241,9 @@ class AppIntegrationTest {
             apiPrefix + "/remitos",
             NuevoRemitoDTO.builder()
                 .idFacturaVenta(facturasVenta.get(1).getIdFactura())
-                .dividir(true)
                 .cantidadPorBulto(cantidadesDeBultos)
                 .tiposDeBulto(tipoBulto)
-                .costoDeEnvio(new BigDecimal("50"))
+                .costoDeEnvio(new BigDecimal("25"))
                 .idTransportista(1L)
                 .pesoTotalEnKg(new BigDecimal("72"))
                 .volumenTotalEnM3(new BigDecimal("118"))
@@ -1280,10 +1279,9 @@ class AppIntegrationTest {
                     apiPrefix + "/remitos",
                     NuevoRemitoDTO.builder()
                             .idFacturaVenta(facturasVenta.get(0).getIdFactura())
-                            .dividir(true)
                             .tiposDeBulto(tipoBulto)
                             .cantidadPorBulto(cantidadesDeBultos)
-                            .costoDeEnvio(new BigDecimal("50"))
+                            .costoDeEnvio(new BigDecimal("25"))
                             .idTransportista(1L)
                             .build(), Remito.class);
     assertNotNull(remitoResultanteFacturaA);

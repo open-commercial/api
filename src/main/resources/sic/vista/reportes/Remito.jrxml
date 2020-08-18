@@ -500,7 +500,7 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{remito}.getPesoTotalEnKg().doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{remito}.getPesoTotalEnKg() != null ? $P{remito}.getPesoTotalEnKg().doubleValue() : ""]]></textFieldExpression>
 			</textField>
 			<staticText>
 				<reportElement x="0" y="17" width="104" height="15" uuid="5908b42e-4e3f-473f-a395-59323df2f018">
@@ -516,7 +516,7 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 				<textElement textAlignment="Left" verticalAlignment="Top">
 					<font size="8"/>
 				</textElement>
-				<textFieldExpression><![CDATA[$P{remito}.getVolumenTotalEnM3().doubleValue()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$P{remito}.getVolumenTotalEnM3() != null ? $P{remito}.getVolumenTotalEnM3().doubleValue() : ""]]></textFieldExpression>
 			</textField>
 		</band>
 	</lastPageFooter>

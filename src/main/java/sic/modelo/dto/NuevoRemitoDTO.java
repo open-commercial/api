@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 public class NuevoRemitoDTO {
 
   private long idFacturaVenta;
-  private boolean dividir;
   private long idTransportista;
   private TipoBulto[] tiposDeBulto;
   private BigDecimal[] cantidadPorBulto;
