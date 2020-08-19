@@ -297,6 +297,10 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
           .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
+    if (criteria.getSerieRemito() != null && criteria.getNroRemito() != null)
+      builder
+          .and(qFacturaVenta.remito.serie.eq(criteria.getSerieRemito()))
+          .and(qFacturaVenta.remito.nroRemito.eq(criteria.getNroRemito()));
     if (criteria.getNroPedido() != null)
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getIdProducto() != null)

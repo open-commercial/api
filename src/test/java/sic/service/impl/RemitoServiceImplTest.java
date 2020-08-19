@@ -210,13 +210,14 @@ class RemitoServiceImplTest {
             .idCliente(1L)
             .idSucursal(1L)
             .idUsuario(1L)
+            .idTransportista(5L)
             .build();
     BooleanBuilder builder = remitoService.getBuilder(criteria);
     assertEquals(
         "remito.fecha between -999999999-01-01T00:00 and +999999999-12-31T23:59:59.999999999 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
             + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
-            + "&& remito.eliminado = false",
+            + "&& remito.transportista.idTransportista = 5 && remito.eliminado = false",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()

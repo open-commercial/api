@@ -256,6 +256,9 @@ public class RemitoServiceImpl implements IRemitoService {
         if (criteria.getIdUsuario() != null) {
             builder.and(qRemito.usuario.idUsuario.eq(criteria.getIdUsuario()));
         }
+        if (criteria.getIdTransportista() != null) {
+            builder.and(qRemito.transportista.idTransportista.eq(criteria.getIdTransportista()));
+        }
         builder.and(qRemito.eliminado.eq(false));
         return builder;
     }

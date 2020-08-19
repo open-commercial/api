@@ -1262,7 +1262,7 @@ class AppIntegrationTest {
     assertEquals(1L, remitoResultanteFacturaX.getIdSucursal());
     assertEquals("FirstOfAll", remitoResultanteFacturaX.getNombreSucursal());
     assertEquals(2L, remitoResultanteFacturaX.getIdUsuario());
-    assertEquals("dueño", remitoResultanteFacturaX.getNombreUsuario());
+    assertEquals("Max Power (dueño)", remitoResultanteFacturaX.getNombreUsuario());
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaX.getDetalleEnvio());
     assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getCostoDeEnvio());
     assertEquals(new BigDecimal("1360.000000000000000"), remitoResultanteFacturaX.getTotalFactura());
@@ -1297,7 +1297,7 @@ class AppIntegrationTest {
     assertEquals(1L, remitoResultanteFacturaA.getIdSucursal());
     assertEquals("FirstOfAll", remitoResultanteFacturaA.getNombreSucursal());
     assertEquals(2L, remitoResultanteFacturaA.getIdUsuario());
-    assertEquals("dueño", remitoResultanteFacturaA.getNombreUsuario());
+    assertEquals("Max Power (dueño)", remitoResultanteFacturaA.getNombreUsuario());
     assertEquals("Corrientes Corrientes", remitoResultanteFacturaA.getDetalleEnvio());
     assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getCostoDeEnvio());
     assertEquals(new BigDecimal("106960.271513250000000"), remitoResultanteFacturaA.getTotalFactura());

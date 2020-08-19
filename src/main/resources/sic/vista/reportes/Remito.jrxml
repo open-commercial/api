@@ -50,6 +50,9 @@
 				<reportElement x="0" y="100" width="555" height="15" uuid="48165e8f-802d-48ab-b527-f040ad65579a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[($P{remito}.getTipoComprobante().toString().equals("REMITO_A") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_B") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="true"/>
@@ -59,6 +62,9 @@
 			<textField>
 				<reportElement x="0" y="115" width="555" height="15" uuid="6fb6fe21-b26a-4f5f-8847-da585e165dae">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[($P{remito}.getTipoComprobante().toString().equals("REMITO_A") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_B") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -69,6 +75,9 @@ $P{remito}.getSucursal().getUbicacion()  : ""]]></textFieldExpression>
 			<textField>
 				<reportElement x="0" y="130" width="555" height="15" uuid="3c596225-a4e6-4283-92e6-74a5552f2211">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[($P{remito}.getTipoComprobante().toString().equals("REMITO_A") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_B") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -82,7 +91,11 @@ $P{remito}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "M
 				<reportElement x="0" y="160" width="555" height="1" uuid="bbd9e748-9b14-42c1-b03e-08e8289d6627"/>
 			</line>
 			<image hAlign="Center" vAlign="Middle">
-				<reportElement x="40" y="0" width="140" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47"/>
+				<reportElement x="40" y="0" width="140" height="100" uuid="a3439a7b-148b-4af2-8d4b-612d8d0beb47">
+					<printWhenExpression><![CDATA[($P{remito}.getTipoComprobante().toString().equals("REMITO_A") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_B") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_C"))]]></printWhenExpression>
+				</reportElement>
 				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
 			</image>
 			<textField>
@@ -115,6 +128,9 @@ $P{remito}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "M
 			<textField>
 				<reportElement x="0" y="145" width="279" height="15" uuid="0ac9e3dd-2252-49da-8d4a-ae5da578c748">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[($P{remito}.getTipoComprobante().toString().equals("REMITO_A") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_B") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -124,6 +140,9 @@ $P{remito}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "M
 			<textField>
 				<reportElement x="279" y="145" width="276" height="15" uuid="ecc2a8ba-e539-458c-93ed-17ae5e7a70df">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+					<printWhenExpression><![CDATA[($P{remito}.getTipoComprobante().toString().equals("REMITO_A") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_B") ||
+$P{remito}.getTipoComprobante().toString().equals("REMITO_C"))]]></printWhenExpression>
 				</reportElement>
 				<textElement>
 					<font size="8" isBold="false"/>
@@ -313,9 +332,9 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 		</band>
 	</columnHeader>
 	<detail>
-		<band height="15" splitType="Stretch">
+		<band height="18" splitType="Stretch">
 			<textField pattern="">
-				<reportElement x="0" y="0" width="466" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
+				<reportElement x="0" y="2" width="466" height="15" uuid="f2bfc27d-700e-40b7-a73b-6303c546d09a">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 					<property name="local_mesure_unitwidth" value="pixel"/>
@@ -327,7 +346,7 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 				<textFieldExpression><![CDATA[$F{tipoBulto}]]></textFieldExpression>
 			</textField>
 			<textField pattern="###0.##">
-				<reportElement x="467" y="0" width="88" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
+				<reportElement x="467" y="2" width="88" height="15" uuid="5dc407ad-61c0-4c06-bc77-1ab3136f8e40">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center">
@@ -338,7 +357,7 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 		</band>
 	</detail>
 	<pageFooter>
-		<band height="12">
+		<band height="15">
 			<textField>
 				<reportElement x="0" y="0" width="40" height="12" uuid="8cd92a9d-e50f-4b30-bc78-ea4c13b7f84d">
 					<property name="com.jaspersoft.studio.unit.width" value="pixel"/>
@@ -458,7 +477,7 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 				<textFieldExpression><![CDATA[$P{remito}.getCantidadDeBultos().doubleValue()]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="0" y="1" width="555" height="1" uuid="2c7c571e-b7b8-4767-aed6-23a052dca578"/>
+				<reportElement x="0" y="0" width="555" height="1" uuid="2c7c571e-b7b8-4767-aed6-23a052dca578"/>
 			</line>
 			<staticText>
 				<reportElement x="0" y="47" width="104" height="15" uuid="8c498fca-025c-46e4-b87c-d643c30be200">
