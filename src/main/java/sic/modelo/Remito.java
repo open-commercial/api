@@ -33,6 +33,8 @@ public class Remito implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long idRemito;
 
+  private boolean eliminado;
+
   private LocalDateTime fecha;
 
   @Column(nullable = false)

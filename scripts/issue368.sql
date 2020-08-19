@@ -6,6 +6,7 @@ ADD idRemito bigint(20);
 
 CREATE TABLE `remito` (
   `idRemito` bigint(20) NOT NULL AUTO_INCREMENT,
+  `eliminado` bit(1) NOT NULL,
   `cantidadDeBultos` decimal(19,2) DEFAULT NULL,
   `calleUbicacionCliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   `categoriaIVACliente` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,

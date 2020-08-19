@@ -178,7 +178,7 @@ class RemitoServiceImplTest {
     remitoService.eliminar(1L);
     verify(cuentaCorrienteService).asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
     verify(facturaVentaService).asignarRemitoConFactura(eq(null), eq(1L));
-    verify(remitoRepository).delete(remito);
+    verify(remitoRepository).save(remito);
     verify(messageSource).getMessage(eq("mensaje_remito_eliminado_correctamente"), any(), any());
   }
 
@@ -215,7 +215,8 @@ class RemitoServiceImplTest {
     assertEquals(
         "remito.fecha between -999999999-01-01T00:00 and +999999999-12-31T23:59:59.999999999 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1",
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
+            + "&& remito.eliminado = false",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()
@@ -231,7 +232,8 @@ class RemitoServiceImplTest {
     assertEquals(
         "remito.fecha > -999999999-01-01T00:00 && remito.fecha < +999999999-12-31T23:59:59.999999999 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1",
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
+            + "&& remito.eliminado = false",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()
@@ -247,7 +249,8 @@ class RemitoServiceImplTest {
     assertEquals(
         "remito.fecha < +999999999-12-31T23:59:59.999999999 && remito.fecha > -999999999-01-01T00:00 "
             + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1",
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
+            + "&& remito.eliminado = false",
         builder.toString());
     Pageable pageable = remitoService.getPageable(3, "cliente.razonSocial", "ASC");
     assertEquals(3, pageable.getPageNumber());

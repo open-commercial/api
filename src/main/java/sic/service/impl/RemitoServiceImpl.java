@@ -85,7 +85,7 @@ public class RemitoServiceImpl implements IRemitoService {
     @Override
     public Remito getRemitoPorId(long idRemito) {
         Optional<Remito> remito = remitoRepository.findById(idRemito);
-        if (remito.isPresent()) {
+        if (remito.isPresent() && !remito.get().isEliminado()) {
             return remito.get();
         } else {
             throw new EntityNotFoundException(messageSource.getMessage(
@@ -122,7 +122,7 @@ public class RemitoServiceImpl implements IRemitoService {
            case FACTURA_B -> remito.setTipoComprobante(TipoDeComprobante.REMITO_B);
            case FACTURA_C -> remito.setTipoComprobante(TipoDeComprobante.REMITO_C);
            case FACTURA_X -> remito.setTipoComprobante(TipoDeComprobante.REMITO_X);
-           case PRESUPUESTO -> remito.setTipoComprobante(TipoDeComprobante.PRESUPUESTO);
+           case PRESUPUESTO -> remito.setTipoComprobante(TipoDeComprobante.REMITO_PRESUPUESTO);
            default ->
                    throw new BusinessServiceException(
                    messageSource.getMessage(
@@ -180,7 +180,8 @@ public class RemitoServiceImpl implements IRemitoService {
         Remito remito = this.getRemitoPorId(idRemito);
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
         facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
-        remitoRepository.delete(remito);
+        remito.setEliminado(true);
+        remito = remitoRepository.save(remito);
         logger.warn(
                 messageSource.getMessage(
                         "mensaje_remito_eliminado_correctamente",
@@ -255,6 +256,7 @@ public class RemitoServiceImpl implements IRemitoService {
         if (criteria.getIdUsuario() != null) {
             builder.and(qRemito.usuario.idUsuario.eq(criteria.getIdUsuario()));
         }
+        builder.and(qRemito.eliminado.eq(false));
         return builder;
     }
 
