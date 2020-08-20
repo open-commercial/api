@@ -37,4 +37,6 @@ public class Rubro implements Serializable {
   private String nombre;
 
   private boolean eliminado;
+
+  private String imagenHtml;
 }
