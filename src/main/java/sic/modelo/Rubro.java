@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 import sic.controller.Views;
 
 import javax.validation.constraints.NotEmpty;
@@ -38,5 +39,7 @@ public class Rubro implements Serializable {
 
   private boolean eliminado;
 
+  @Column(length = 10000)
+  @Length(max = 10000, message = "{mensaje_rubro_imagen_html_error}")
   private String imagenHtml;
 }
