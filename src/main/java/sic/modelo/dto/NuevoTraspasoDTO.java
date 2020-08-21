@@ -6,15 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class NuevoTraspasoDTO {
-
-    private Map<Long, BigDecimal> idProductoConCantidad;
+    
+    private Long[] idProducto;
+    private BigDecimal[] cantidad;
     private Long idSucursalOrigen;
     private Long idSucursalDestino;
 }
