@@ -104,19 +104,20 @@ class ReciboServiceImplTest {
             .idSucursal(7L)
             .build();
     String builder =
-        "(recibo.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
-            + "&& recibo.numSerie = 2 && recibo.numRecibo = 3 || containsIc(recibo.concepto,Recibo) "
-            + "&& containsIc(recibo.concepto,por) && containsIc(recibo.concepto,deposito)) "
-            + "&& recibo.cliente.idCliente = 4 && recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 "
-            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.proveedor is null && recibo.sucursal.idSucursal = 7 "
-            + "&& recibo.eliminado = false";
+        "containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) "
+            + "&& containsIc(recibo.concepto,deposito) && recibo.numSerie = 2 "
+            + "&& recibo.numRecibo = 3 && recibo.cliente.idCliente = 4 "
+            + "&& recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 "
+            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.proveedor is null "
+            + "&& recibo.sucursal.idSucursal = 7 && recibo.eliminado = false "
+            + "&& recibo.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999";
     assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
     builder =
-        "(recibo.fecha > -999999999-01-01T00:00 && recibo.numSerie = 2 && recibo.numRecibo = 3 "
-            + "|| containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) "
-            + "&& containsIc(recibo.concepto,deposito)) && recibo.cliente.idCliente = 4 "
-            + "&& recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 && recibo.cliente.viajante.idUsuario = 6 "
-            + "&& recibo.cliente is null && recibo.sucursal.idSucursal = 7 && recibo.eliminado = false";
+        "containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) && containsIc(recibo.concepto,deposito) "
+            + "&& recibo.numSerie = 2 && recibo.numRecibo = 3 && recibo.cliente.idCliente = 4 "
+            + "&& recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 "
+            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.cliente is null "
+            + "&& recibo.sucursal.idSucursal = 7 && recibo.eliminado = false && recibo.fecha > -999999999-01-01T00:00";
     busquedaReciboCriteria =
         BusquedaReciboCriteria.builder()
             .fechaDesde(LocalDateTime.MIN)
@@ -132,12 +133,13 @@ class ReciboServiceImplTest {
             .build();
     assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
     builder =
-        "(recibo.fecha < -999999999-01-01T23:59:59.999999999 && recibo.numSerie = 2 && recibo.numRecibo = 3 "
-            + "|| containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) "
-            + "&& containsIc(recibo.concepto,deposito)) && recibo.cliente.idCliente = 4 "
+        "containsIc(recibo.concepto,Recibo) && containsIc(recibo.concepto,por) "
+            + "&& containsIc(recibo.concepto,deposito) && recibo.numSerie = 2 "
+            + "&& recibo.numRecibo = 3 && recibo.cliente.idCliente = 4 "
             + "&& recibo.proveedor.idProveedor = 4 && recibo.usuario.idUsuario = 5 "
-            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.cliente is null "
-            + "&& recibo.sucursal.idSucursal = 7 && recibo.eliminado = false";
+            + "&& recibo.cliente.viajante.idUsuario = 6 && recibo.formaDePago.idFormaDePago = 3 "
+            + "&& recibo.cliente is null && recibo.sucursal.idSucursal = 7 && recibo.eliminado = false "
+            + "&& recibo.fecha < -999999999-01-01T23:59:59.999999999";
     busquedaReciboCriteria =
         BusquedaReciboCriteria.builder()
             .fechaHasta(LocalDateTime.MIN)
@@ -150,6 +152,7 @@ class ReciboServiceImplTest {
             .idViajante(6L)
             .movimiento(Movimiento.COMPRA)
             .idSucursal(7L)
+            .idFormaDePago(3L)
             .build();
     assertEquals(builder, reciboServiceImpl.getBuilder(busquedaReciboCriteria).toString());
   }
