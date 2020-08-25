@@ -24,6 +24,7 @@ public class BusquedaReciboCriteria {
   private Long idProveedor;
   private Long idUsuario;
   private Long idViajante;
+  private Long idFormaDePago;
   private Movimiento movimiento;
   private Integer pagina;
   private String ordenarPor;

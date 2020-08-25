@@ -12,4 +12,5 @@ public class Rubro {
   private long idRubro;
   private String nombre;
   private boolean eliminado;
+  private String imagenHtml;
 }

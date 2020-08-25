@@ -120,6 +120,13 @@ public class TraspasoServiceImpl implements ITraspasoService {
 
   @Override
   public Traspaso guardarTraspaso(NuevoTraspasoDTO nuevoTraspasoDTO, long idUsuario) {
+    if (nuevoTraspasoDTO.getCantidad().length != nuevoTraspasoDTO.getIdProducto().length) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_traspaso_renglones_parametros_no_validos",
+                      null,
+                      Locale.getDefault()));
+    }
     Traspaso traspaso = new Traspaso();
     traspaso.setFechaDeAlta(LocalDateTime.now());
     traspaso.setNroTraspaso(this.generarNroDeTraspaso());
@@ -131,19 +138,16 @@ public class TraspasoServiceImpl implements ITraspasoService {
     traspaso.setSucursalDestino(sucursalDestino);
     traspaso.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     List<RenglonTraspaso> renglonesTraspaso = new ArrayList<>();
-    nuevoTraspasoDTO
-            .getIdProductoConCantidad()
-            .forEach(
-                    (idProducto, cantidad) -> {
-                      Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-                      RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
-                      renglonTraspaso.setIdProducto(producto.getIdProducto());
-                      renglonTraspaso.setCodigoProducto(producto.getCodigo());
-                      renglonTraspaso.setCantidadProducto(cantidad);
-                      renglonTraspaso.setDescripcionProducto(producto.getDescripcion());
-                      renglonTraspaso.setNombreMedidaProducto(producto.getNombreMedida());
-                      renglonesTraspaso.add(renglonTraspaso);
-                    });
+    for (int i = 0; i < nuevoTraspasoDTO.getIdProducto().length; i++) {
+      Producto producto = productoService.getProductoNoEliminadoPorId(nuevoTraspasoDTO.getIdProducto()[i]);
+      RenglonTraspaso renglonTraspaso = new RenglonTraspaso();
+      renglonTraspaso.setIdProducto(producto.getIdProducto());
+      renglonTraspaso.setCodigoProducto(producto.getCodigo());
+      renglonTraspaso.setCantidadProducto(nuevoTraspasoDTO.getCantidad()[i]);
+      renglonTraspaso.setDescripcionProducto(producto.getDescripcion());
+      renglonTraspaso.setNombreMedidaProducto(producto.getNombreMedida());
+      renglonesTraspaso.add(renglonTraspaso);
+    }
     traspaso.setRenglones(renglonesTraspaso);
     traspaso = traspasoRepository.save(traspaso);
     logger.warn(

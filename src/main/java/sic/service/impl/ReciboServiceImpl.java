@@ -92,6 +92,33 @@ public class ReciboServiceImpl implements IReciboService {
   public BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
     QRecibo qRecibo = QRecibo.recibo;
     BooleanBuilder builder = new BooleanBuilder();
+    if (criteria.getConcepto() != null) {
+      String[] terminos = criteria.getConcepto().split(" ");
+      BooleanBuilder rsPredicate = new BooleanBuilder();
+      for (String termino : terminos) {
+        rsPredicate.and(qRecibo.concepto.containsIgnoreCase(termino));
+      }
+      builder.or(rsPredicate);
+    }
+    if (criteria.getNumSerie() != null && criteria.getNumRecibo() != null)
+      builder
+          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
+          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
+    if (criteria.getIdCliente() != null)
+      builder.and(qRecibo.cliente.idCliente.eq(criteria.getIdCliente()));
+    if (criteria.getIdProveedor() != null)
+      builder.and(qRecibo.proveedor.idProveedor.eq(criteria.getIdProveedor()));
+    if (criteria.getIdUsuario() != null)
+      builder.and(qRecibo.usuario.idUsuario.eq(criteria.getIdUsuario()));
+    if (criteria.getIdViajante() != null)
+      builder.and(qRecibo.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
+    if (criteria.getIdFormaDePago() != null)
+      builder.and(qRecibo.formaDePago.idFormaDePago.eq(criteria.getIdFormaDePago()));
+    if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
+    else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
+    if (criteria.getIdSucursal() != null)
+      builder.and(qRecibo.sucursal.idSucursal.eq(criteria.getIdSucursal()));
+    builder.and(qRecibo.eliminado.eq(false));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
@@ -105,31 +132,6 @@ public class ReciboServiceImpl implements IReciboService {
         builder.and(qRecibo.fecha.before(criteria.getFechaHasta()));
       }
     }
-    if (criteria.getNumSerie() != null && criteria.getNumRecibo() != null)
-      builder
-          .and(qRecibo.numSerie.eq(criteria.getNumSerie()))
-          .and(qRecibo.numRecibo.eq(criteria.getNumRecibo()));
-    if (criteria.getConcepto() != null) {
-      String[] terminos = criteria.getConcepto().split(" ");
-      BooleanBuilder rsPredicate = new BooleanBuilder();
-      for (String termino : terminos) {
-        rsPredicate.and(qRecibo.concepto.containsIgnoreCase(termino));
-      }
-      builder.or(rsPredicate);
-    }
-    if (criteria.getIdCliente() != null)
-      builder.and(qRecibo.cliente.idCliente.eq(criteria.getIdCliente()));
-    if (criteria.getIdProveedor() != null)
-      builder.and(qRecibo.proveedor.idProveedor.eq(criteria.getIdProveedor()));
-    if (criteria.getIdUsuario() != null)
-      builder.and(qRecibo.usuario.idUsuario.eq(criteria.getIdUsuario()));
-    if (criteria.getIdViajante() != null)
-      builder.and(qRecibo.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
-    if (criteria.getMovimiento() == Movimiento.VENTA) builder.and(qRecibo.proveedor.isNull());
-    else if (criteria.getMovimiento() == Movimiento.COMPRA) builder.and(qRecibo.cliente.isNull());
-    if (criteria.getIdSucursal() != null)
-      builder.and(qRecibo.sucursal.idSucursal.eq(criteria.getIdSucursal()));
-    builder.and(qRecibo.eliminado.eq(false));
     return builder;
   }
 

@@ -330,13 +330,13 @@ class TraspasoServiceImplTest {
     when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(producto2);
     when(productoService.getProductoNoEliminadoPorId(3L)).thenReturn(producto3);
     when(productoService.getProductoNoEliminadoPorId(4L)).thenReturn(producto4);
-    Map<Long, BigDecimal> idsAndCantidades = new HashMap<>();
-    idsAndCantidades.put(1L, new BigDecimal("91"));
-    idsAndCantidades.put(2L, new BigDecimal("20"));
-    idsAndCantidades.put(3L, new BigDecimal("20"));
+    Long[] idProducto = new Long[] {1L, 2L, 3L};
+    BigDecimal[] cantidad =
+        new BigDecimal[] {new BigDecimal("91"), new BigDecimal("20"), new BigDecimal("20")};
     traspasoService.guardarTraspaso(
         NuevoTraspasoDTO.builder()
-            .idProductoConCantidad(idsAndCantidades)
+            .idProducto(idProducto)
+            .cantidad(cantidad)
             .idSucursalOrigen(2L)
             .idSucursalDestino(3L)
             .build(),
