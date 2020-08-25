@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Builder
 public class RenglonReporteTraspasoDTO {
 
-    private LocalDateTime fecha;
+    //private LocalDateTime fecha;
     private String codigoAndDescripcion;
     private String sucursalOrigen;
     private String sucursalDestino;

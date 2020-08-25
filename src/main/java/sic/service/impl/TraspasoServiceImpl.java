@@ -387,44 +387,29 @@ public class TraspasoServiceImpl implements ITraspasoService {
                     criteria.getOrdenarPor(),
                     criteria.getSentido()))
             .getContent();
-    List<RenglonReporteTraspasoDTO> renglonesReporte = new ArrayList<>();
-    traspasosParaReporte.forEach(
-        traspaso -> {
-          RenglonReporteTraspasoDTO renglonReporteCabecera =
-              RenglonReporteTraspasoDTO.builder()
-                  .fecha(traspaso.getFechaDeAlta())
-                  .codigoAndDescripcion("Traspaso #" + traspaso.getNroTraspaso())
-                  .sucursalOrigen(traspaso.getNombreSucursalOrigen())
-                  .sucursalDestino(traspaso.getNombreSucursalDestino())
-                  .build();
-          if (traspaso.getNroPedido() != null) {
-            renglonReporteCabecera.setCodigoAndDescripcion(
-                renglonReporteCabecera
-                    .getCodigoAndDescripcion()
-                    .concat(" del Pedido #" + traspaso.getNroPedido()));
-          }
-          renglonesReporte.add(renglonReporteCabecera);
-          traspaso
-              .getRenglones()
-              .forEach(
-                  renglonTraspaso -> {
-                    RenglonReporteTraspasoDTO renglonReporte =
-                        RenglonReporteTraspasoDTO.builder()
-                            .codigoAndDescripcion(
-                                "     "
-                                    + renglonTraspaso.getCodigoProducto()
-                                    + " "
-                                    + renglonTraspaso.getDescripcionProducto())
-                            .cantidad(renglonTraspaso.getCantidadProducto())
-                            .medida(renglonTraspaso.getNombreMedidaProducto())
-                            .build();
-                    renglonesReporte.add(renglonReporte);
-                  });
-        });
+    Map<Long, RenglonReporteTraspasoDTO> renglones = new HashMap<>();
+    traspasosParaReporte.forEach(traspaso -> {
+      traspaso.getRenglones().forEach(renglonTraspaso -> {
+        if (renglones.get(renglonTraspaso.getIdProducto()) != null) {
+          renglones.get(renglonTraspaso.getIdProducto())
+                  .setCantidad(renglones.get(renglonTraspaso.getIdProducto()).getCantidad().add(renglonTraspaso.getCantidadProducto()));
+        } else {
+          RenglonReporteTraspasoDTO renglonReporteTraspasoDTO =
+                  RenglonReporteTraspasoDTO.builder()
+                          .sucursalOrigen(traspaso.getNombreSucursalOrigen())
+                          .sucursalDestino(traspaso.getNombreSucursalDestino())
+                          .cantidad(renglonTraspaso.getCantidadProducto())
+                          .codigoAndDescripcion(renglonTraspaso.getCodigoProducto() + " " + renglonTraspaso.getDescripcionProducto())
+                          .medida(renglonTraspaso.getNombreMedidaProducto())
+                          .build();
+          renglones.put(renglonTraspaso.getIdProducto(), renglonReporteTraspasoDTO);
+        }
+      });
+    });
     ClassLoader classLoader = TraspasoServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
-    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglonesReporte);
+    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones.values());
     Map<String, Object> params = new HashMap<>();
     Sucursal sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {

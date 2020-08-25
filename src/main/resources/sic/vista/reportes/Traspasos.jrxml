@@ -24,7 +24,6 @@
 	<field name="sucursalOrigen" class="java.lang.String">
 		<fieldDescription><![CDATA[sucursalOrigen]]></fieldDescription>
 	</field>
-	<field name="fecha" class="java.time.LocalDateTime"/>
 	<field name="sucursalDestino" class="java.lang.String">
 		<fieldDescription><![CDATA[sucursalDestino]]></fieldDescription>
 	</field>
@@ -93,16 +92,7 @@
 				<text><![CDATA[Cantidad]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="0" y="106" width="110" height="13" uuid="69eb01e9-e248-4f5b-ba0b-ec77e754e3cb">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Center" verticalAlignment="Middle">
-					<font isBold="true"/>
-				</textElement>
-				<text><![CDATA[Fecha]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="110" y="105" width="360" height="16" uuid="35d9eb18-9b69-4909-8eb8-3fc70c38af8d">
+				<reportElement x="1" y="105" width="468" height="16" uuid="35d9eb18-9b69-4909-8eb8-3fc70c38af8d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -124,7 +114,7 @@
 	<detail>
 		<band height="23" splitType="Stretch">
 			<textField>
-				<reportElement x="110" y="0" width="360" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
+				<reportElement x="1" y="0" width="468" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{codigoAndDescripcion}]]></textFieldExpression>
 			</textField>
@@ -142,11 +132,6 @@
 				<reportElement x="690" y="0" width="60" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{cantidad} != null ? $F{cantidad}.doubleValue() : ""]]></textFieldExpression>
-			</textField>
-			<textField pattern="dd/MM/yyyy HH:mm:ss">
-				<reportElement x="0" y="0" width="110" height="20" uuid="dfe3da15-6014-4416-a380-45472bcca1b8"/>
-				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{fecha} != null ? java.util.Date.from($F{fecha}.atZone(java.time.ZoneId.systemDefault()).toInstant())  : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.##">
 				<reportElement x="750" y="0" width="50" height="20" uuid="1f0d2264-1c8c-4557-a0e5-2e205d095b0d"/>
