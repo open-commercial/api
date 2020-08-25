@@ -257,7 +257,7 @@ class ProductoServiceImplTest {
     BusquedaProductoCriteria criteria =
         BusquedaProductoCriteria.builder()
             .codigo("213")
-            .descripcion("testDescripcion")
+            .descripcion("testDescripcion uno")
             .idRubro(1L)
             .idProveedor(2L)
             .listarSoloEnStock(true)
@@ -266,10 +266,11 @@ class ProductoServiceImplTest {
             .oferta(true)
             .build();
     String stringBuilder =
-        "producto.eliminado = false && (containsIc(producto.codigo,213) || containsIc(producto.descripcion,testDescripcion)) "
-            + "&& producto.rubro.idRubro = 1 && producto.proveedor.idProveedor = 2 "
-            + "&& any(producto.cantidadEnSucursales).cantidad > 0 && producto.ilimitado = false && producto.publico = true "
-            + "&& producto.oferta = true";
+        "producto.eliminado = false "
+            + "&& (containsIc(producto.codigo,213) || containsIc(producto.descripcion,testDescripcion) "
+            + "&& containsIc(producto.descripcion,uno)) && producto.rubro.idRubro = 1 "
+            + "&& producto.proveedor.idProveedor = 2 && any(producto.cantidadEnSucursales).cantidad > 0 "
+            + "&& producto.ilimitado = false && producto.publico = true && producto.oferta = true";
     assertEquals(stringBuilder, productoService.getBuilder(criteria).toString());
   }
 
