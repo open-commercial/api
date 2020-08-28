@@ -67,6 +67,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ISucursalService sucursalService;
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
+  private final IClienteService clienteService;
   private static final int TAMANIO_PAGINA_DEFAULT = 24;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -83,6 +84,7 @@ public class ProductoServiceImpl implements IProductoService {
     ISucursalService sucursalService,
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
+    IClienteService clienteService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -94,6 +96,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.sucursalService = sucursalService;
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
+    this.clienteService = clienteService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -876,7 +879,7 @@ public class ProductoServiceImpl implements IProductoService {
     productos.stream()
         .filter(
             producto ->
-                !producto.isOferta()
+                !producto.isOferta() // si el producto no es oferta y si el porcentaje de bonifica
                     && producto.getPorcentajeBonificacionPrecio() != null
                     && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0)
         .forEach(
