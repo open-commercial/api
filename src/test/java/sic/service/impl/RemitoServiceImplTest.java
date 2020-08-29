@@ -204,7 +204,7 @@ class RemitoServiceImplTest {
         BusquedaRemitoCriteria.builder()
             .fechaDesde(LocalDateTime.MIN)
             .fechaHasta(LocalDateTime.MAX)
-            .serie(1L)
+            .serieRemito(1L)
             .nroRemito(2L)
             .tipoDeRemito(TipoDeComprobante.REMITO_A)
             .idCliente(1L)
@@ -222,7 +222,7 @@ class RemitoServiceImplTest {
     criteria =
         BusquedaRemitoCriteria.builder()
             .fechaDesde(LocalDateTime.MIN)
-            .serie(1L)
+            .serieRemito(1L)
             .nroRemito(2L)
             .tipoDeRemito(TipoDeComprobante.REMITO_A)
             .idCliente(1L)
@@ -231,27 +231,31 @@ class RemitoServiceImplTest {
             .build();
     builder = remitoService.getBuilder(criteria);
     assertEquals(
-        "remito.fecha > -999999999-01-01T00:00 && remito.fecha < +999999999-12-31T23:59:59.999999999 "
-            + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
-            + "&& remito.eliminado = false",
+        "remito.fecha > -999999999-01-01T00:00 && remito.serie = 1 " +
+                "&& remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A " +
+                "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 " +
+                "&& remito.usuario.idUsuario = 1 && remito.eliminado = false",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()
             .fechaHasta(LocalDateTime.MAX)
-            .serie(1L)
+            .serieRemito(1L)
             .nroRemito(2L)
             .tipoDeRemito(TipoDeComprobante.REMITO_A)
             .idCliente(1L)
             .idSucursal(1L)
             .idUsuario(1L)
+            .serieFacturaVenta(2L)
+            .nroFacturaVenta(123L)
             .build();
     builder = remitoService.getBuilder(criteria);
     assertEquals(
-        "remito.fecha < +999999999-12-31T23:59:59.999999999 && remito.fecha > -999999999-01-01T00:00 "
-            + "&& remito.serie = 1 && remito.nroRemito = 2 && remito.tipoComprobante = REMITO_A "
-            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 "
-            + "&& remito.eliminado = false",
+        "remito.fecha < +999999999-12-31T23:59:59.999999999 " +
+                "&& remito.serie = 1 && remito.nroRemito = 2 " +
+                "&& remito.tipoComprobante = REMITO_A && remito.cliente.idCliente = 1 " +
+                "&& remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 " +
+                "&& remito.facturaVenta.numSerie = 2 && remito.facturaVenta.numFactura = 123 " +
+                "&& remito.eliminado = false",
         builder.toString());
     Pageable pageable = remitoService.getPageable(3, "cliente.razonSocial", "ASC");
     assertEquals(3, pageable.getPageNumber());

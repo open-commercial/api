@@ -31,7 +31,6 @@ import javax.swing.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -113,6 +112,7 @@ public class RemitoServiceImpl implements IRemitoService {
        }
        Remito remito = new Remito();
        FacturaVenta facturaVenta = (FacturaVenta) factura;
+       remito.setFacturaVenta(facturaVenta);
        remito.setFecha(LocalDateTime.now());
        remito.setDetalleEnvio(facturaVenta.getPedido().getDetalleEnvio());
        remito.setCliente(facturaVenta.getCliente());
@@ -145,6 +145,7 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
        remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));
+       facturaVenta.setRemito(remito);
        customValidator.validar(remito);
        remitoRepository.save(remito);
        logger.warn(
@@ -181,6 +182,7 @@ public class RemitoServiceImpl implements IRemitoService {
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
         facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
         remito.setEliminado(true);
+        remito.setFacturaVenta(null);
         remito = remitoRepository.save(remito);
         logger.warn(
                 messageSource.getMessage(
@@ -231,18 +233,32 @@ public class RemitoServiceImpl implements IRemitoService {
         BooleanBuilder builder = new BooleanBuilder();
         if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
             if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+                criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+                criteria.setFechaHasta(
+                        criteria
+                                .getFechaHasta()
+                                .withHour(23)
+                                .withMinute(59)
+                                .withSecond(59)
+                                .withNano(999999999));
                 builder.and(
                         qRemito.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
-            } else if (criteria.getFechaDesde() != null && criteria.getFechaHasta() == null) {
+            } else if (criteria.getFechaDesde() != null) {
+                criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
                 builder.and(qRemito.fecha.after(criteria.getFechaDesde()));
-                builder.and(qRemito.fecha.before(LocalDateTime.MAX));
-            } else if (criteria.getFechaHasta() != null && criteria.getFechaDesde() == null) {
+            } else if (criteria.getFechaHasta() != null) {
+                criteria.setFechaHasta(
+                        criteria
+                                .getFechaHasta()
+                                .withHour(23)
+                                .withMinute(59)
+                                .withSecond(59)
+                                .withNano(999999999));
                 builder.and(qRemito.fecha.before(criteria.getFechaHasta()));
-                builder.and(qRemito.fecha.after(LocalDateTime.MIN));
             }
         }
-        if (criteria.getSerie() != null && criteria.getNroRemito() != null) {
-            builder.and(qRemito.serie.eq(criteria.getSerie()).and(qRemito.nroRemito.eq(criteria.getNroRemito())));
+        if (criteria.getSerieRemito() != null && criteria.getNroRemito() != null) {
+            builder.and(qRemito.serie.eq(criteria.getSerieRemito()).and(qRemito.nroRemito.eq(criteria.getNroRemito())));
         }
         if (criteria.getTipoDeRemito() != null) {
             builder.and(qRemito.tipoComprobante.eq(criteria.getTipoDeRemito()));
@@ -258,6 +274,10 @@ public class RemitoServiceImpl implements IRemitoService {
         }
         if (criteria.getIdTransportista() != null) {
             builder.and(qRemito.transportista.idTransportista.eq(criteria.getIdTransportista()));
+        }
+        if (criteria.getSerieFacturaVenta() != null && criteria.getNroFacturaVenta() != null) {
+            builder.and(qRemito.facturaVenta.numSerie.eq(criteria.getSerieFacturaVenta())
+                    .and(qRemito.facturaVenta.numFactura.eq(criteria.getNroFacturaVenta())));
         }
         builder.and(qRemito.eliminado.eq(false));
         return builder;

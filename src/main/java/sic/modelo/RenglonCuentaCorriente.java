@@ -84,6 +84,7 @@ public class RenglonCuentaCorriente implements Serializable {
         if (factura != null) idSucursal = factura.getIdSucursal();
         if (nota != null) idSucursal = nota.getIdSucursal();
         if (recibo != null) idSucursal = recibo.getIdSucursal();
+        if (remito != null) idSucursal = remito.getIdSucursal();
         return idSucursal;
     }
 
@@ -93,6 +94,7 @@ public class RenglonCuentaCorriente implements Serializable {
         if (factura != null) nombreSucursal = factura.getNombreSucursal();
         if (nota != null) nombreSucursal = nota.getNombreSucursal();
         if (recibo != null) nombreSucursal = recibo.getNombreSucursal();
+        if (remito != null) nombreSucursal = remito.getNombreSucursal();
         return nombreSucursal;
     }
 

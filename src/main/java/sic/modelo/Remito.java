@@ -37,6 +37,10 @@ public class Remito implements Serializable {
 
   private LocalDateTime fecha;
 
+  @OneToOne(mappedBy="remito")
+  @JoinColumn(name="idFactura")
+  private FacturaVenta facturaVenta;
+
   @Column(nullable = false)
   private long serie;
 
