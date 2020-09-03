@@ -35,6 +35,7 @@ public class FacturaVenta extends Factura {
   private Long idViajanteCliente;
   private String nombreViajanteCliente;
   private String ubicacionCliente;
+  private Remito remito;
 
   @Builder(builderMethodName = "facturaVentaBuilder")
   public FacturaVenta(

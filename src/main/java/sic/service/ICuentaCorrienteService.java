@@ -45,6 +45,8 @@ public interface ICuentaCorrienteService {
 
   void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo);
 
+  void asentarEnCuentaCorriente(Remito remito, TipoDeOperacion tipo);
+
   byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, String formato);
 
@@ -57,4 +59,6 @@ public interface ICuentaCorrienteService {
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeNota(Nota nota, boolean eliminado);
 
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
+
+  RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(Remito remito, boolean eliminado);
 }

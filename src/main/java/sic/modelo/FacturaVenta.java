@@ -21,7 +21,7 @@ import sic.controller.Views;
 @Table(name = "facturaventa")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true)
+@ToString(callSuper = true, exclude = {"remito"})
 @JsonIgnoreProperties({
   "cliente",
   "usuario",
@@ -39,6 +39,10 @@ public class FacturaVenta extends Factura implements Serializable {
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
   @NotNull(message = "{mensaje_factura_cliente_vacio}")
   private Cliente cliente;
+
+  @OneToOne
+  @JoinColumn(name = "idRemito", referencedColumnName = "idRemito")
+  private Remito remito;
 
   public FacturaVenta() {}
 

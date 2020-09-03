@@ -299,13 +299,16 @@ class FacturaVentaServiceImplTest {
             .idUsuario(7L)
             .idViajante(9L)
             .nroPedido(33L)
+            .serieRemito(3L)
+            .nroRemito(4L)
             .build();
     String resultadoBuilder =
         "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
             + "&& facturaVenta.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
             + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
-            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
+            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.remito.serie = 3 "
+            + "&& facturaVenta.remito.nroRemito = 4 && facturaVenta.pedido.nroPedido = 33 "
             + "&& any(facturaVenta.renglones).idProductoItem = 3";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
