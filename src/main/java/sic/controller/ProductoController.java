@@ -64,14 +64,6 @@ public class ProductoController {
       throw new EntityNotFoundException(
           messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (!producto.isOferta()
-        && authorizationHeader != null
-        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      Page<Producto> productos =
-          productoService.getProductosConPrecioBonificado(
-              new PageImpl<>(Collections.singletonList(producto)));
-      producto = productos.getContent().get(0);
-    }
     return producto;
   }
 

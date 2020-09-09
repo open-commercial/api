@@ -859,26 +859,6 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos) {
-    productos.stream()
-        .filter(
-            producto ->
-                !producto.isOferta() // si el producto no es oferta y si el porcentaje de bonifica
-                    && producto.getPorcentajeBonificacionPrecio() != null
-                    && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0)
-        .forEach(
-            p ->
-                p.setPrecioBonificado(
-                    p.getPrecioLista()
-                        .subtract(
-                            p.getPrecioLista()
-                                .multiply(
-                                    p.getPorcentajeBonificacionPrecio()
-                                        .divide(new BigDecimal("100"), RoundingMode.HALF_UP)))));
-    return productos;
-  }
-
-  @Override
   public Producto getProductoPorCodigo(String codigo) {
     if (codigo.isEmpty()) {
       return null;
