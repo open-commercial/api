@@ -126,6 +126,9 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_vacio_rubro}")
   private Rubro rubro;
 
+  @Transient
+  private boolean favorito;
+
   private boolean ilimitado;
 
   private boolean publico;

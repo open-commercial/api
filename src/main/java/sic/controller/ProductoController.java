@@ -2,6 +2,8 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -30,6 +32,7 @@ public class ProductoController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
   public ProductoController(
@@ -81,13 +84,15 @@ public class ProductoController {
   public Page<Producto> buscarProductos(
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos = productoService.buscarProductos(criteria);
-    if (authorizationHeader != null
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    return productoService.buscarProductos(criteria, idUsuarioLoggedIn);
+    /*if (authorizationHeader != null
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       return productoService.getProductosConPrecioBonificado(productos);
     } else {
       return productos;
-    }
+    }*/
   }
 
   @PostMapping("/productos/valor-stock/criteria")
@@ -197,5 +202,32 @@ public class ProductoController {
   public List<ProductoFaltanteDTO> verificarDisponibilidadStock(
       @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+  }
+
+  @PostMapping("/productos/favorito/{idProducto}")
+  public Producto marcarComoFavorito(
+          @PathVariable long idProducto,
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return productoService.guardarProductoFavorito(idProducto, idUsuarioLoggedIn);
+  }
+
+  @GetMapping("/productos/favorito")
+  public Page<Producto> getProductosFavoritosDelCliente(
+          @RequestParam int pagina,
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, pagina);
+  }
+
+  @DeleteMapping("/productos/favorito/{idProducto}")
+  public void quitarProductoDeFavoritos(
+          @PathVariable long idProducto,
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    productoService.quitarProductoDeFavoritos(idUsuarioLoggedIn, idProducto);
   }
 }

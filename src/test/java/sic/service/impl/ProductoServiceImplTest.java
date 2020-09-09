@@ -16,8 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
@@ -28,6 +27,7 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
 import sic.util.CustomValidator;
 
@@ -44,7 +44,9 @@ class ProductoServiceImplTest {
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean TraspasoServiceImpl traspasoService;
   @MockBean PedidoServiceImpl pedidoService;
+  @MockBean ClienteServiceImpl clienteService;
   @MockBean ProductoRepository productoRepository;
+  @MockBean ProductoFavoritoRepository productoFavoritoRepository;
   @MockBean MessageSource messageSource;
 
   @Autowired ProductoServiceImpl productoService;
@@ -684,5 +686,124 @@ class ProductoServiceImplTest {
             eq("mensaje_error_actualizar_stock_producto_eliminado"),
             any(),
             eq(Locale.getDefault()));
+  }
+
+  @Test
+  void shouldTestGuardarProductoFavorito() {
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setDescripcion("producto uno");
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(producto);
+    when(productoFavoritoRepository.save(productoFavorito)).thenReturn(productoFavorito);
+    productoService.guardarProductoFavorito(1L, 1L);
+    verify(productoFavoritoRepository).save(productoFavorito);
+    verify(messageSource).getMessage(eq("mensaje_producto_favorito_agregado"), eq(null), any());
+  }
+
+  @Test
+  void shouldTestGetPaginaProductosFavoritosDelCliente() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    Producto producto = new Producto();
+    producto.setDescripcion("Producto Test");
+    producto.setIdProducto(1L);
+    List<ProductoFavorito> productosFavoritos = new ArrayList<>();
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(producto);
+    productosFavoritos.add(productoFavorito);
+    Page<ProductoFavorito> pageable = new PageImpl<>(productosFavoritos);
+    when(productoFavoritoRepository.findAll(
+            any(), eq(PageRequest.of(1, 24, Sort.by(Sort.Direction.DESC, "idProductoFavorito")))))
+        .thenReturn(pageable);
+    Page<Producto> paginaProductos = productoService.getPaginaProductosFavoritosDelCliente(1L, 1);
+    assertNotNull(paginaProductos);
+    assertTrue(paginaProductos.getContent().get(0).isFavorito());
+  }
+
+  @Test
+  void shouldTestGetProductosFavoritosDelCliente() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    List<ProductoFavorito> paginaProductosFavoritos = new ArrayList<>();
+    Producto productoUno = new Producto();
+    productoUno.setDescripcion("Producto Test");
+    productoUno.setIdProducto(1L);
+    Producto productoDos = new Producto();
+    productoDos.setDescripcion("Producto Test");
+    productoDos.setIdProducto(1L);
+    ProductoFavorito productoFavoritoUno = new ProductoFavorito();
+    productoFavoritoUno.setCliente(cliente);
+    productoFavoritoUno.setProducto(productoUno);
+    paginaProductosFavoritos.add(productoFavoritoUno);
+    ProductoFavorito productoFavoritoDos = new ProductoFavorito();
+    productoFavoritoDos.setCliente(cliente);
+    productoFavoritoDos.setProducto(productoDos);
+    paginaProductosFavoritos.add(productoFavoritoDos);
+    when(productoFavoritoRepository.findAllByCliente(cliente)).thenReturn(paginaProductosFavoritos);
+    List<Producto> productosFavoritos = productoService.getProductosFavoritosDelCliente(1L);
+    assertNotNull(productosFavoritos);
+    assertTrue(productosFavoritos.get(0).isFavorito());
+    assertTrue(productosFavoritos.get(1).isFavorito());
+  }
+
+  @Test
+  void shouldTestQuitarProductoDeFavoritos() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    Producto producto = new Producto();
+    producto.setDescripcion("Producto Test");
+    producto.setIdProducto(1L);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    productoService.quitarProductoDeFavoritos(1L, 1L);
+    verify(productoFavoritoRepository).deleteByClienteAndProducto(cliente, producto);
+    verify(messageSource)
+        .getMessage(eq("mensaje_producto_favorito_quitado"), eq(null), eq(Locale.getDefault()));
+  }
+
+  @Test
+  void shouldTestBuscarProductos() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    List<Producto> productos = new ArrayList<>();
+    Producto productoUno = new Producto();
+    productoUno.setIdProducto(1L);
+    productoUno.setDescripcion("Producto Uno");
+    Producto productoDos = new Producto();
+    productoDos.setIdProducto(2L);
+    productoDos.setDescripcion("Producto Dos");
+    productos.add(productoUno);
+    productos.add(productoDos);
+    Page<Producto> paginaProductos = new PageImpl<>(productos);
+    when(productoRepository.findAll(
+            any(), eq(PageRequest.of(0, 24, Sort.by(Sort.Order.asc("descripcion"))))))
+        .thenReturn(paginaProductos);
+    List<ProductoFavorito> productoFavoritosDelCliente = new ArrayList<>();
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(productoUno);
+    productoFavoritosDelCliente.add(productoFavorito);
+    when(productoFavoritoRepository.findAllByCliente(cliente))
+        .thenReturn(productoFavoritosDelCliente);
+    BusquedaProductoCriteria criteriaProductos = BusquedaProductoCriteria.builder().build();
+    paginaProductos = productoService.buscarProductos(criteriaProductos, 1L);
+    assertNotNull(paginaProductos);
+    assertTrue(paginaProductos.getContent().get(0).isFavorito());
+    assertFalse(paginaProductos.getContent().get(1).isFavorito());
   }
 }

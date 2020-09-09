@@ -40,7 +40,7 @@ public interface IProductoService {
 
   void validarCalculos(Producto producto);
 
-  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
+  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, long idUsuario);
 
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);
 
@@ -93,4 +93,12 @@ public interface IProductoService {
   String subirImagenProducto(long idProducto, byte[] imagen);
 
   Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina);
+
+  Producto guardarProductoFavorito(long idUsuario, long idProducto);
+
+  Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina);
+
+  List<Producto> getProductosFavoritosDelCliente(long idUsuario);
+
+  void quitarProductoDeFavoritos(long idUsuario, long idProducto);
 }

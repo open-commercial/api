@@ -6,9 +6,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -33,7 +31,6 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
@@ -43,6 +40,7 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
@@ -56,6 +54,7 @@ import java.io.InputStream;
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
+  private final ProductoFavoritoRepository productoFavoritoRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
@@ -76,6 +75,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Lazy
   public ProductoServiceImpl(
     ProductoRepository productoRepository,
+    ProductoFavoritoRepository productoFavoritoRepository,
     IRubroService rubroService,
     IProveedorService proveedorService,
     IMedidaService medidaService,
@@ -88,6 +88,7 @@ public class ProductoServiceImpl implements IProductoService {
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
+    this.productoFavoritoRepository = productoFavoritoRepository;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
@@ -210,7 +211,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
+  public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, long idUsuario) {
     Page<Producto> productos =
         productoRepository.findAll(
             this.getBuilder(criteria),
@@ -219,17 +220,12 @@ public class ProductoServiceImpl implements IProductoService {
                 criteria.getOrdenarPor(),
                 criteria.getSentido(),
                 TAMANIO_PAGINA_DEFAULT));
-    productos.stream()
-        .filter(Producto::isOferta)
-        .forEach(
-            producto ->
-                producto.setPrecioBonificado(
-                    producto
-                        .getPrecioLista()
-                        .multiply(
-                            (new BigDecimal("100"))
-                                .subtract(producto.getPorcentajeBonificacionOferta())
-                                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP))));
+    List<Producto> productosFavoritos = this.getProductosFavoritosDelCliente(idUsuario);
+    productos.forEach(producto -> {
+      if (productosFavoritos.contains(producto)) {
+        producto.setFavorito(true);
+      }
+    });
     return productos;
   }
 
@@ -855,18 +851,6 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      if (producto.get().isOferta()) {
-        producto
-            .get()
-            .setPrecioBonificado(
-                producto
-                    .get()
-                    .getPrecioLista()
-                    .multiply(
-                        (new BigDecimal("100"))
-                            .subtract(producto.get().getPorcentajeBonificacionOferta())
-                            .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
-      }
       return producto.get();
     } else {
       throw new EntityNotFoundException(
@@ -1129,5 +1113,66 @@ public class ProductoServiceImpl implements IProductoService {
       }
       return false;
     }
+
+  @Override
+  public Producto guardarProductoFavorito(long idUsuario, long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(producto);
+    customValidator.validar(productoFavorito);
+    producto = productoFavoritoRepository.save(productoFavorito).getProducto();
+    producto.setFavorito(true);
+    logger.warn(messageSource.getMessage(
+            "mensaje_producto_favorito_agregado", null, Locale.getDefault()), producto);
+    return producto;
+  }
+
+  @Override
+  public Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    QProductoFavorito qProductoFavorito = QProductoFavorito.productoFavorito;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(qProductoFavorito.cliente.idCliente.eq(cliente.getIdCliente()));
+    Page<ProductoFavorito> pageable =
+            productoFavoritoRepository.findAll(
+                    builder,
+                    PageRequest.of(
+                            pagina,
+                            TAMANIO_PAGINA_DEFAULT,
+                            Sort.by(Sort.Direction.DESC, "idProductoFavorito")));
+    List<Producto> productos = new ArrayList<>();
+    pageable.stream()
+            .forEach(
+                    productoFavorito -> {
+                      Producto producto = productoFavorito.getProducto();
+                      producto.setFavorito(true);
+                      productos.add(producto);
+                    });
+    return new PageImpl<>(productos);
+  }
+
+  @Override
+  public List<Producto> getProductosFavoritosDelCliente(long idUsuario) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    List<ProductoFavorito> productoFavoritos = productoFavoritoRepository.findAllByCliente(cliente);
+    List<Producto> productos = new ArrayList<>();
+    productoFavoritos.forEach(productoFavorito -> {
+      productoFavorito.getProducto().setFavorito(true);
+      productos.add(productoFavorito.getProducto());
+    });
+    return productos;
+  }
+
+  @Override
+  public void quitarProductoDeFavoritos(long idUsuario, long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    productoFavoritoRepository.deleteByClienteAndProducto(cliente, producto);
+    logger.warn(
+            messageSource.getMessage("mensaje_producto_favorito_quitado", null, Locale.getDefault()),
+            producto);
+  }
 
 }
