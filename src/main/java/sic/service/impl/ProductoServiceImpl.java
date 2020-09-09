@@ -851,6 +851,18 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
+//      if (producto.get().isOferta()) {
+//        producto
+//                .get()
+//                .setPrecioBonificado(
+//                        producto
+//                                .get()
+//                                .getPrecioLista()
+//                                .multiply(
+//                                        (new BigDecimal("100"))
+//                                                .subtract(producto.get().getPorcentajeBonificacionOferta())
+//                                                .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
+//      }
       return producto.get();
     } else {
       throw new EntityNotFoundException(

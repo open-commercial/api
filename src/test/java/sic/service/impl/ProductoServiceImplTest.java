@@ -282,6 +282,7 @@ class ProductoServiceImplTest {
     producto.setPrecioLista(new BigDecimal("100"));
     producto.setPorcentajeBonificacionOferta(new BigDecimal("10"));
     producto.setOferta(true);
+    producto.setPrecioBonificado(new BigDecimal("90.00"));
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     Producto productoRecuperado = productoService.getProductoNoEliminadoPorId(1L);
     assertEquals(new BigDecimal("100"), productoRecuperado.getPrecioLista());
@@ -693,7 +694,7 @@ class ProductoServiceImplTest {
     Producto producto = new Producto();
     producto.setIdProducto(1L);
     producto.setDescripcion("producto uno");
-    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     Cliente cliente = new Cliente();
     cliente.setIdCliente(1L);
     cliente.setNombreFiscal("San Wuchito");
