@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "favorito")
+@Table(name = "productoFavorito")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,8 +18,7 @@ public class ProductoFavorito implements Serializable {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @Column(name = "idFavorito")
-  private long idFavorito;
+  private long idProductoFavorito;
 
   @OneToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")

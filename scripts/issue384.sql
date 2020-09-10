@@ -1,5 +1,5 @@
-CREATE TABLE `favorito` (
-  `idFavorito` bigint(20) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `productoFavorito` (
+  `idProductoFavorito` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_Cliente` bigint(20) NOT NULL,
   `idProducto` bigint(20) NOT NULL,
   PRIMARY KEY (`idFavorito`),
