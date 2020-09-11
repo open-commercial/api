@@ -436,6 +436,13 @@ public class ProductoServiceImpl implements IProductoService {
     if (producto.isOferta()
         && producto.getPorcentajeBonificacionOferta() != null
         && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) > 0) {
+      if (producto.getUrlImagen() == null
+              || producto.getUrlImagen().isEmpty())
+        throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_producto_oferta_sin_imagen",
+                        new Object[] {producto.getDescripcion()},
+                        Locale.getDefault()));
       producto.setPrecioBonificado(
           producto
               .getPrecioLista()
@@ -816,6 +823,12 @@ public class ProductoServiceImpl implements IProductoService {
               >= 0) {
         p.setPorcentajeBonificacionPrecio(
             productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
+      }
+      if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
+              && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
+              >= 0) {
+        p.setPorcentajeBonificacionOferta(
+                productosParaActualizarDTO.getPorcentajeBonificacionOferta());
       }
       this.calcularPrecioBonificado(p);
       this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
