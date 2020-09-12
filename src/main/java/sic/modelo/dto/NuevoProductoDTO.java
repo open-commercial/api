@@ -54,8 +54,6 @@ public class NuevoProductoDTO {
   private BigDecimal precioLista;
   private boolean publico;
   private LocalDateTime fechaUltimaModificacion;
-  private String estanteria;
-  private String estante;
   private String nota;
   private LocalDate fechaVencimiento;
 }
