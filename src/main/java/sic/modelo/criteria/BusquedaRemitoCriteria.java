@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.Movimiento;
+import sic.modelo.TipoDeComprobante;
 
 import java.time.LocalDateTime;
 
@@ -12,20 +12,19 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BusquedaReciboCriteria {
+public class BusquedaRemitoCriteria {
 
   private LocalDateTime fechaDesde;
   private LocalDateTime fechaHasta;
-  private Long idSucursal;
-  private Long numSerie;
-  private Long numRecibo;
-  private String concepto;
+  private Long serieRemito;
+  private Long nroRemito;
+  private TipoDeComprobante tipoDeRemito;
   private Long idCliente;
-  private Long idProveedor;
+  private Long idSucursal;
   private Long idUsuario;
-  private Long idViajante;
-  private Long idFormaDePago;
-  private Movimiento movimiento;
+  private Long idTransportista;
+  private Long serieFacturaVenta;
+  private Long nroFacturaVenta;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;

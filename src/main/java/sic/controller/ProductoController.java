@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
@@ -98,8 +100,8 @@ public class ProductoController {
 
   @PostMapping("/productos/reporte/criteria")
   public ResponseEntity<byte[]> getListaDePrecios(
-    @RequestBody BusquedaProductoCriteria criteria,
-    @RequestParam(required = false) String formato) {
+          @RequestBody BusquedaProductoCriteria criteria,
+          @RequestParam(required = false) String formato) {
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     if (formato == null || formato.isEmpty()) {
@@ -107,10 +109,14 @@ public class ProductoController {
     }
     switch (formato) {
       case "xlsx" -> {
-        return productoService.getListaDePreciosEnXls(criteria);
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+        return new ResponseEntity<>(productoService.getListaDePreciosEnXls(criteria), headers, HttpStatus.OK);
       }
       case "pdf" -> {
-        return productoService.getListaDePreciosEnPdf(criteria);
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+        return new ResponseEntity<>(productoService.getListaDePreciosEnPdf(criteria), headers, HttpStatus.OK);
       }
       default -> throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_formato_no_valido", null, Locale.getDefault()));

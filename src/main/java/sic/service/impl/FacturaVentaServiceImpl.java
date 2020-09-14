@@ -215,20 +215,22 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public List<RenglonFactura> getRenglonesPedidoParaFacturar(
       long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesParaFacturar = new ArrayList<>();
-    pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido).forEach(
-        r -> {
-          NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
-              NuevoRenglonFacturaDTO.builder()
-                  .cantidad(r.getCantidad())
-                  .idProducto(r.getIdProductoItem())
-                  .renglonMarcado(
-                      facturaService.marcarRenglonParaAplicarBonificacion(
-                          r.getIdProductoItem(), r.getCantidad()))
-                  .build();
-          renglonesParaFacturar.add(
-              facturaService.calcularRenglon(
-                  tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
-        });
+    pedidoService
+        .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
+        .forEach(
+            r -> {
+              NuevoRenglonFacturaDTO nuevoRenglonFacturaDTO =
+                  NuevoRenglonFacturaDTO.builder()
+                      .cantidad(r.getCantidad())
+                      .idProducto(r.getIdProductoItem())
+                      .renglonMarcado(
+                          facturaService.marcarRenglonParaAplicarBonificacion(
+                              r.getIdProductoItem(), r.getCantidad()))
+                      .build();
+              renglonesParaFacturar.add(
+                  facturaService.calcularRenglon(
+                      tipoDeComprobante, Movimiento.VENTA, nuevoRenglonFacturaDTO));
+            });
     return renglonesParaFacturar;
   }
 
@@ -295,6 +297,10 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       builder
           .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
           .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
+    if (criteria.getSerieRemito() != null && criteria.getNroRemito() != null)
+      builder
+          .and(qFacturaVenta.remito.serie.eq(criteria.getSerieRemito()))
+          .and(qFacturaVenta.remito.nroRemito.eq(criteria.getNroRemito()));
     if (criteria.getNroPedido() != null)
       builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
     if (criteria.getIdProducto() != null)
@@ -394,6 +400,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());
     fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
     return fv;
+  }
+
+  @Override
+  public void asignarRemitoConFactura(Remito remito, long idFactura) {
+    facturaVentaRepository.modificarFacturaParaAgregarRemito(remito, idFactura);
+  }
+
+  @Override
+  public FacturaVenta getFacturaVentaDelRemito(Remito remito) {
+    return facturaVentaRepository.buscarFacturaPorRemito(remito);
   }
 
   @Override

@@ -4,9 +4,18 @@ import lombok.*;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
-@EqualsAndHashCode(exclude = {"idUbicacion", "idLocalidad", "nombreLocalidad", "codigoPostal", "idProvincia", "nombreProvincia"})
+@EqualsAndHashCode(
+    exclude = {
+      "idUbicacion",
+      "idLocalidad",
+      "nombreLocalidad",
+      "codigoPostal",
+      "idProvincia",
+      "nombreProvincia"
+    })
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder

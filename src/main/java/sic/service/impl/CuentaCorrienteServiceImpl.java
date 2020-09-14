@@ -363,6 +363,38 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   @Transactional
+  public void asentarEnCuentaCorriente(Remito remito, TipoDeOperacion tipo) {
+    CuentaCorriente cc = this.getCuentaCorrientePorCliente(remito.getCliente());
+    if (tipo == TipoDeOperacion.ALTA) {
+      RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
+      rcc.setTipoComprobante(remito.getTipoComprobante());
+      rcc.setSerie(remito.getSerie());
+      rcc.setNumero(remito.getNroRemito());
+      rcc.setMonto(remito.getCostoDeEnvio().negate());
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(rcc.getMonto()));
+      cc.setFechaUltimoMovimiento(remito.getFecha());
+      rcc.setRemito(remito);
+      rcc.setFecha(remito.getFecha());
+      rcc.setIdMovimiento(remito.getIdRemito());
+      cc.getRenglones().add(rcc);
+      rcc.setCuentaCorriente(cc);
+      this.renglonCuentaCorrienteRepository.save(rcc);
+      logger.warn(messageSource.getMessage(
+              "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
+    }
+    if (tipo == TipoDeOperacion.ELIMINACION) {
+      RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeRemito(remito, false);
+      this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(rcc.getMonto()));
+      this.cambiarFechaUltimoComprobante(cc, rcc);
+      rcc.setEliminado(true);
+      this.renglonCuentaCorrienteRepository.save(rcc);
+      logger.warn(messageSource.getMessage(
+              "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+    }
+  }
+
+  @Override
+  @Transactional
   public void asentarEnCuentaCorriente(Recibo recibo, TipoDeOperacion tipo) {
     RenglonCuentaCorriente rcc;
     if (tipo == TipoDeOperacion.ALTA) {
@@ -520,6 +552,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(
       Recibo recibo, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByReciboAndEliminado(recibo, eliminado);
+  }
+
+  @Override
+  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(
+      Remito remito, boolean eliminado) {
+    return renglonCuentaCorrienteRepository.findByRemitoAndEliminado(remito, eliminado);
   }
 
   @Override

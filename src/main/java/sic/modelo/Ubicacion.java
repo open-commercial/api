@@ -13,6 +13,7 @@ import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "ubicacion")
@@ -62,6 +63,19 @@ public class Ubicacion implements Serializable {
   @JsonGetter("nombreLocalidad")
   public String getNombreLocalidad() {
     return (localidad != null) ? localidad.getNombre() : null;
+  }
+
+  @JsonGetter("costoDeEnvio")
+  public BigDecimal getCostoDeEnvio() {
+    if (localidad != null) {
+      if (localidad.isEnvioGratuito()) {
+        return BigDecimal.ZERO;
+      } else {
+        return localidad.getCostoEnvio();
+      }
+    } else {
+      return null;
+    }
   }
 
   @JsonGetter("idProvincia")

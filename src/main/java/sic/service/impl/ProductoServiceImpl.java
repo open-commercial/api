@@ -1074,27 +1074,15 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public ResponseEntity<byte[]> getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-    headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-    headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
+  public byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    byte[] reporteXls =
-            this.getListaDePrecios(productos, "xlsx");
-    headers.setContentLength(reporteXls.length);
-    return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+    return this.getListaDePrecios(productos, "xlsx");
   }
 
   @Override
-  public ResponseEntity<byte[]> getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_PDF);
-    headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+  public byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    byte[] reportePDF =
-            this.getListaDePrecios(productos, "pdf");
-    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+    return this.getListaDePrecios(productos, "pdf");
   }
 
   private byte[] xlsReportToArray(JasperPrint jasperPrint) {

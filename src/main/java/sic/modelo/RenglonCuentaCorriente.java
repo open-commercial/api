@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -74,12 +73,18 @@ public class RenglonCuentaCorriente implements Serializable {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
 
+    @OneToOne
+    @JoinColumn(name = "idRemito", referencedColumnName = "idRemito")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Remito remito;
+
     @JsonGetter("idSucursal")
     public Long getIdSucursal() {
         Long idSucursal = null;
         if (factura != null) idSucursal = factura.getIdSucursal();
         if (nota != null) idSucursal = nota.getIdSucursal();
         if (recibo != null) idSucursal = recibo.getIdSucursal();
+        if (remito != null) idSucursal = remito.getIdSucursal();
         return idSucursal;
     }
 
@@ -89,6 +94,7 @@ public class RenglonCuentaCorriente implements Serializable {
         if (factura != null) nombreSucursal = factura.getNombreSucursal();
         if (nota != null) nombreSucursal = nota.getNombreSucursal();
         if (recibo != null) nombreSucursal = recibo.getNombreSucursal();
+        if (remito != null) nombreSucursal = remito.getNombreSucursal();
         return nombreSucursal;
     }
 

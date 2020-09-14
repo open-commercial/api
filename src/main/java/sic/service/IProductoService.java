@@ -80,9 +80,9 @@ public interface IProductoService {
 
   byte[] getListaDePrecios(List<Producto> productos, String formato);
 
-  ResponseEntity<byte[]> getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
+  byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
 
-  ResponseEntity<byte[]> getListaDePreciosEnPdf(BusquedaProductoCriteria criteria);
+  byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria);
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
