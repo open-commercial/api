@@ -1,6 +1,4 @@
 on:
-  # Trigger analysis when pushing in master or pull requests, and when creating
-  # a pull request. 
   push:
     branches:
       - master
@@ -15,7 +13,7 @@ jobs:
       with:        
         fetch-depth: 0
     - name: Build with Maven
-      run: mvn -B package    
+      run: mvn package
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
