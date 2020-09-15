@@ -18,6 +18,8 @@ jobs:
     - name: Build with Maven
       run: mvn clean verify sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=globo-technology -Dsonar.projectKey=sic-api:sic-api
       env: 
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SIC_AFIP_ENV: "testing"
         SIC_MAIL_ENV: "testing"
         SIC_MAIL_USERNAME: ""
@@ -27,8 +29,3 @@ jobs:
         CLOUDINARY_URL: "cloudinary://*:*-*@*"
         SIC_CLOUDINARY_ENV: "testing"
         SIC_MERCADOPAGO_ACCESS_TOKEN: ""
-    - name: SonarCloud Scan
-      uses: sonarsource/sonarcloud-github-action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
