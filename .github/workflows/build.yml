@@ -16,7 +16,7 @@ jobs:
       with:        
         fetch-depth: 0
     - name: Build with Maven
-      run: mvn package
+      run: mvn clean verify sonar:sonar -Dsonar.projectKey=sic-api:sic-api
       env: 
         SIC_AFIP_ENV: "testing"
         SIC_MAIL_ENV: "testing"
