@@ -17,6 +17,16 @@ jobs:
         fetch-depth: 0
     - name: Build with Maven
       run: mvn package
+      env: 
+        SIC_AFIP_ENV: "testing"
+        SIC_MAIL_ENV: "testing"
+        SIC_MAIL_USERNAME: ""
+        SIC_MAIL_PASSWORD: ""
+        RECAPTCHA_SECRET_KEY: ""
+        RECAPTCHA_TEST_KEY: "111111"
+        CLOUDINARY_URL: "cloudinary://*:*-*@*"
+        SIC_CLOUDINARY_ENV: "testing"
+        SIC_MERCADOPAGO_ACCESS_TOKEN: ""
     - name: SonarCloud Scan
       uses: sonarsource/sonarcloud-github-action@master
       env:
