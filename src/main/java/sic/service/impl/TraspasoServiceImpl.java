@@ -411,6 +411,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
         classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones.values());
     Map<String, Object> params = new HashMap<>();
+    params.put("FechaDesde", criteria.getFechaDesde());
+    params.put("FechaHasta", criteria.getFechaHasta());
     Sucursal sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {

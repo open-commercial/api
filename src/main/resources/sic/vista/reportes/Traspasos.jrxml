@@ -14,6 +14,8 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<parameter name="sucursal" class="sic.modelo.Sucursal"/>
+	<parameter name="FechaDesde" class="java.time.LocalDateTime"/>
+	<parameter name="FechaHasta" class="java.time.LocalDateTime"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<queryString language="hql">
 		<![CDATA[]]>
@@ -38,7 +40,7 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="126" splitType="Stretch">
+		<band height="169" splitType="Stretch">
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="0" y="0" width="90" height="80" uuid="33e8c96a-1306-4242-b063-7ea538992edc"/>
 				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
@@ -51,7 +53,7 @@
 				<text><![CDATA[Traspasos]]></text>
 			</staticText>
 			<line>
-				<reportElement x="1" y="105" width="800" height="1" uuid="0043f1bd-ce8f-4adc-a4a8-f2375e75254c"/>
+				<reportElement x="1" y="130" width="800" height="1" uuid="0043f1bd-ce8f-4adc-a4a8-f2375e75254c"/>
 			</line>
 			<staticText>
 				<reportElement x="170" y="20" width="610" height="30" uuid="a1bf3069-06d3-419f-8ee7-7cc2721b4608"/>
@@ -62,7 +64,7 @@
 ]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="470" y="105" width="110" height="16" uuid="14a1a091-819a-4e35-905d-2828a2e2e35c">
+				<reportElement x="470" y="130" width="110" height="16" uuid="14a1a091-819a-4e35-905d-2828a2e2e35c">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -71,7 +73,7 @@
 				<text><![CDATA[Sucursal Origen]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="580" y="105" width="109" height="16" uuid="6c1675cf-0b06-4a07-a199-a046ee6461fe">
+				<reportElement x="580" y="130" width="109" height="16" uuid="6c1675cf-0b06-4a07-a199-a046ee6461fe">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -80,10 +82,10 @@
 				<text><![CDATA[Sucursal Destino]]></text>
 			</staticText>
 			<line>
-				<reportElement x="1" y="119" width="800" height="3" uuid="71d8a141-a47c-4311-b9dd-1c3a2e1d0ebb"/>
+				<reportElement x="1" y="144" width="800" height="3" uuid="71d8a141-a47c-4311-b9dd-1c3a2e1d0ebb"/>
 			</line>
 			<staticText>
-				<reportElement x="690" y="106" width="60" height="15" uuid="7cf0aec6-71fa-42b9-af76-f6b59bcb7690">
+				<reportElement x="690" y="131" width="60" height="15" uuid="7cf0aec6-71fa-42b9-af76-f6b59bcb7690">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -92,7 +94,7 @@
 				<text><![CDATA[Cantidad]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="1" y="105" width="468" height="16" uuid="35d9eb18-9b69-4909-8eb8-3fc70c38af8d">
+				<reportElement x="1" y="130" width="468" height="16" uuid="35d9eb18-9b69-4909-8eb8-3fc70c38af8d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -101,7 +103,7 @@
 				<text><![CDATA[Detalle]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="750" y="106" width="50" height="15" uuid="5ce7e530-ebb4-4f75-a250-b80bad98b798">
+				<reportElement x="750" y="131" width="50" height="15" uuid="5ce7e530-ebb4-4f75-a250-b80bad98b798">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
@@ -109,6 +111,27 @@
 				</textElement>
 				<text><![CDATA[Medida]]></text>
 			</staticText>
+			<textField pattern="dd/MM/yyyy ">
+				<reportElement x="135" y="114" width="110" height="18" uuid="d7ba81bc-e8b6-48ba-8a30-e1831b749aae"/>
+				<textFieldExpression><![CDATA[java.util.Date.from($P{FechaDesde}.atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="65" y="114" width="70" height="18" uuid="5a018975-6fb9-4bcf-99e3-0deb37cf7075"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Desde:]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="245" y="114" width="70" height="18" uuid="f381cc35-354c-4318-ad61-c07ec9d18b94"/>
+				<textElement textAlignment="Right"/>
+				<text><![CDATA[Hasta:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy ">
+				<reportElement x="315" y="114" width="110" height="18" uuid="d4afede0-e349-4108-99b3-ebaf2aca75b2"/>
+				<textFieldExpression><![CDATA[java.util.Date.from($P{FechaHasta}.atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
+			</textField>
+			<line>
+				<reportElement x="1" y="110" width="800" height="1" uuid="63fb0753-de01-4fdb-8018-74afdb443bab"/>
+			</line>
 		</band>
 	</title>
 	<detail>
