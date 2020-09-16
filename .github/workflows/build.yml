@@ -47,4 +47,4 @@ jobs:
           CLOUDINARY_URL: "cloudinary://*:*-*@*"
           SIC_CLOUDINARY_ENV: "testing"
           SIC_MERCADOPAGO_ACCESS_TOKEN: ""
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=sic-api:sic-api
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.projectKey=sic-api:sic-api
