@@ -314,12 +314,6 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto guardar(
       NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
     customValidator.validar(nuevoProductoDTO);
-    if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_sin_imagen",
-              new Object[] {nuevoProductoDTO.getDescripcion()},
-              Locale.getDefault()));
     if (nuevoProductoDTO.getCodigo() == null) nuevoProductoDTO.setCodigo("");
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
@@ -398,15 +392,6 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     customValidator.validar(productoPorActualizar);
-    if (productoPorActualizar.isOferta()
-        && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())
-        && imagen == null)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_sin_imagen",
-              new Object[] {productoPorActualizar.getDescripcion()},
-              Locale.getDefault()));
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
         && (productoPorActualizar.getUrlImagen() == null
@@ -436,13 +421,6 @@ public class ProductoServiceImpl implements IProductoService {
     if (producto.isOferta()
         && producto.getPorcentajeBonificacionOferta() != null
         && producto.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) > 0) {
-      if (producto.getUrlImagen() == null
-              || producto.getUrlImagen().isEmpty())
-        throw new BusinessServiceException(
-                messageSource.getMessage(
-                        "mensaje_producto_oferta_sin_imagen",
-                        new Object[] {producto.getDescripcion()},
-                        Locale.getDefault()));
       producto.setPrecioBonificado(
           producto
               .getPrecioLista()
@@ -827,8 +805,11 @@ public class ProductoServiceImpl implements IProductoService {
       if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
               && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
               >= 0) {
+        p.setOferta(true);
         p.setPorcentajeBonificacionOferta(
                 productosParaActualizarDTO.getPorcentajeBonificacionOferta());
+      } else {
+        p.setOferta(false);
       }
       this.calcularPrecioBonificado(p);
       this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);

@@ -230,15 +230,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
-    Producto producto = this.construirProducto();
-    producto.setOferta(true);
-    assertThrows(
-        BusinessServiceException.class, () -> productoService.actualizar(producto, producto, null));
-    verify(messageSource).getMessage(eq("mensaje_producto_oferta_sin_imagen"), any(), any());
-  }
-
-  @Test
   void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
     Producto productoParaActualizar = this.construirProducto();
     productoParaActualizar.setIdProducto(1L);
