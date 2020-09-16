@@ -18,10 +18,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 14
-      - name: Set timezone
-        uses: zcong1993/setup-timezone@master
-        with:
-          timezone: America/Argentina/Buenos_Aires
+#      - name: Set timezone
+#        uses: zcong1993/setup-timezone@master
+#        with:
+#          timezone: America/Argentina/Buenos_Aires
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
