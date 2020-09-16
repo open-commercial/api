@@ -9,10 +9,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -22,7 +18,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
-import javax.swing.*;
+import javax.swing.ImageIcon;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -455,7 +451,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Pedido devolverStockPedido(
+  public void devolverStockPedido(
       Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen) {
     if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
         && pedido.getEstado() == EstadoPedido.ABIERTO
@@ -479,11 +475,10 @@ public class ProductoServiceImpl implements IProductoService {
             }
           });
     }
-    return pedido;
   }
 
   @Override
-  public Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
+  public void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
     switch (tipoDeOperacion) {
       case ALTA -> traspasoService.guardarTraspasosPorPedido(pedido);
       case ELIMINACION -> traspasoService.eliminarTraspasoDePedido(pedido);
@@ -528,7 +523,6 @@ public class ProductoServiceImpl implements IProductoService {
                         Locale.getDefault()));
               }
             });
-    return pedido;
   }
 
   @Override
@@ -1035,10 +1029,21 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public byte[] getListaDePrecios(List<Producto> productos, String formato) {
+  public byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
+    List<Producto> productos = this.buscarProductosParaReporte(criteria);
+    return this.getListaDePrecios(productos, "xlsx");
+  }
+
+  @Override
+  public byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
+    List<Producto> productos = this.buscarProductosParaReporte(criteria);
+    return this.getListaDePrecios(productos, "pdf");
+  }
+
+  private byte[] getListaDePrecios(List<Producto> productos, String formato) {
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
+            classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
     Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
@@ -1057,32 +1062,20 @@ public class ProductoServiceImpl implements IProductoService {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(messageSource.getMessage(
-            "mensaje_error_reporte", null, Locale.getDefault()), ex);
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       case "pdf":
         try {
           return JasperExportManager.exportReportToPdf(
-              JasperFillManager.fillReport(isFileReport, params, ds));
+                  JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(messageSource.getMessage(
-            "mensaje_error_reporte", null, Locale.getDefault()), ex);
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       default:
         throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_formato_no_valido", null, Locale.getDefault()));
+                "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
-  }
-
-  @Override
-  public byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
-    List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    return this.getListaDePrecios(productos, "xlsx");
-  }
-
-  @Override
-  public byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
-    List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    return this.getListaDePrecios(productos, "pdf");
   }
 
   private byte[] xlsReportToArray(JasperPrint jasperPrint) {

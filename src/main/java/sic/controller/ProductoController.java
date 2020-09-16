@@ -115,7 +115,7 @@ public class ProductoController {
       }
       case "pdf" -> {
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
+        headers.add("Content-Disposition", "inline; filename=ListaPrecios.pdf");
         return new ResponseEntity<>(productoService.getListaDePreciosEnPdf(criteria), headers, HttpStatus.OK);
       }
       default -> throw new BusinessServiceException(messageSource.getMessage(
