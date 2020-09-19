@@ -14,7 +14,6 @@ public interface SucursalRepository extends PagingAndSortingRepository<Sucursal,
   List<Sucursal> findAllByAndEliminadaOrderByNombreAsc(boolean eliminada);
 
   @Query(
-      "SELECT s FROM Sucursal s INNER JOIN ConfiguracionSucursal cs on s.idSucursal = cs.sucursal.idSucursal"
-          + " WHERE cs.predeterminada = true and s.eliminada = false")
+      "SELECT s FROM Sucursal s WHERE s.configuracionSucursal.predeterminada = true and s.eliminada = false")
   Sucursal getSucursalPredeterminada();
 }

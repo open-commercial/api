@@ -237,7 +237,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void cambiarFechaDeVencimiento(long idPedido) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
-    pedido.setFechaVencimiento(pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    pedido.setFechaVencimiento(pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoLargo()));
     pedidoRepository.save(pedido);
   }
 
@@ -261,9 +261,7 @@ public class PedidoServiceImpl implements IPedidoService {
         "mensaje_ubicacion_envio_vacia", null, Locale.getDefault()));
     }
     if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL
-        && !configuracionSucursal
-            .getConfiguracionSucursal(pedido.getSucursal())
-            .isPuntoDeRetiro()) {
+        && !pedido.getSucursal().getConfiguracionSucursal().isPuntoDeRetiro()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
@@ -439,7 +437,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private void validarPedidoContraPagos(Pedido pedido, List<Recibo> recibos) {
     if (pedido.getCliente().isPuedeComprarAPlazo()) {
       pedido.setFechaVencimiento(
-              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+              pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoLargo()));
       if (recibos != null && !recibos.isEmpty()) {
         recibos.forEach(reciboService::guardar);
       }
@@ -454,13 +452,13 @@ public class PedidoServiceImpl implements IPedidoService {
                           "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
         } else {
           pedido.setFechaVencimiento(
-                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+                  pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoLargo()));
         }
         recibos.forEach(reciboService::guardar);
       } else {
         if (saldoCC.setScale(2, RoundingMode.DOWN).compareTo(BigDecimal.ZERO) >= 0) {
           pedido.setFechaVencimiento(
-                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
+                  pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoCorto()));
         } else {
           throw new BusinessServiceException(
                   messageSource.getMessage(

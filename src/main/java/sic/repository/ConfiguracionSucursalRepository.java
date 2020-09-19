@@ -10,17 +10,17 @@ import sic.modelo.Sucursal;
 public interface ConfiguracionSucursalRepository
     extends PagingAndSortingRepository<ConfiguracionSucursal, Long> {
 
-  ConfiguracionSucursal findBySucursal(Sucursal sucursal);
+//  ConfiguracionSucursal findBySucursal(Sucursal sucursal);
 
-  @Query(
-      "SELECT configuracionSucursal.cantidadMaximaDeRenglonesEnFactura "
-          + "FROM ConfiguracionSucursal configuracionSucursal WHERE configuracionSucursal.sucursal.idSucursal = :idSucursal")
-  int getCantidadMaximaDeRenglones(@Param("idSucursal") long idSucursal);
+//  @Query(
+//      "SELECT configuracionSucursal.cantidadMaximaDeRenglonesEnFactura "
+//          + "FROM ConfiguracionSucursal configuracionSucursal WHERE configuracionSucursal.sucursal.idSucursal = :idSucursal")
+//  int getCantidadMaximaDeRenglones(@Param("idSucursal") long idSucursal);
 
-  @Query(
-      "SELECT configuracionSucursal.facturaElectronicaHabilitada "
-          + "FROM ConfiguracionSucursal configuracionSucursal WHERE configuracionSucursal.sucursal.idSucursal = :idSucursal")
-  boolean isFacturaElectronicaHabilitada(@Param("idSucursal") long idSucursal);
+//  @Query(
+//      "SELECT configuracionSucursal.facturaElectronicaHabilitada "
+//          + "FROM ConfiguracionSucursal configuracionSucursal WHERE configuracionSucursal.sucursal.idSucursal = :idSucursal")
+//  boolean isFacturaElectronicaHabilitada(@Param("idSucursal") long idSucursal);
 
   @Modifying
   @Query("UPDATE ConfiguracionSucursal cs SET cs.predeterminada = false WHERE cs.predeterminada = true")

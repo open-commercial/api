@@ -88,8 +88,7 @@ class RemitoServiceImplTest {
     sucursal.setNombre("primera sucursal");
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setNroPuntoDeVentaAfip(1);
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     facturaVenta.setSucursal(sucursal);
     facturaVenta.setTotal(new BigDecimal("100"));
     Pedido pedido = new Pedido();

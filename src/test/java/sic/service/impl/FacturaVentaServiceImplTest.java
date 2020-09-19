@@ -605,8 +605,9 @@ class FacturaVentaServiceImplTest {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setUsarFacturaVentaPreImpresa(true);
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+//    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
+//        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
     Pedido pedido = new Pedido();
     pedido.setTipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL);

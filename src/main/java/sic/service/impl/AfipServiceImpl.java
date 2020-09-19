@@ -66,8 +66,7 @@ public class AfipServiceImpl implements IAfipService {
   @Override
   public FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
     FEAuthRequest feAuthRequest = new FEAuthRequest();
-    ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursalService.getConfiguracionSucursal(sucursal);
+    ConfiguracionSucursal configuracionSucursal = sucursal.getConfiguracionSucursal();
     LocalDateTime fechaVencimientoToken = configuracionSucursal.getFechaVencimientoTokenWSAA();
     if (fechaVencimientoToken != null && fechaVencimientoToken.isAfter(LocalDateTime.now())) {
       feAuthRequest.setToken(configuracionSucursal.getTokenWSAA());
@@ -107,10 +106,7 @@ public class AfipServiceImpl implements IAfipService {
               LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
           configuracionSucursal.setFechaVencimientoTokenWSAA(
               LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-          ConfiguracionSucursal estadoAnteriorConfiguracionSucursal =
-              this.configuracionSucursalService.getConfiguracionSucursal(sucursal);
-          configuracionSucursalService.actualizar(
-              estadoAnteriorConfiguracionSucursal, configuracionSucursal);
+          configuracionSucursalService.actualizar(configuracionSucursal);
           return feAuthRequest;
         } catch (DocumentException | IOException ex) {
           logger.error(
@@ -128,9 +124,7 @@ public class AfipServiceImpl implements IAfipService {
 
   @Override
   public void autorizar(ComprobanteAFIP comprobante) {
-    if (!configuracionSucursalService
-        .getConfiguracionSucursal(comprobante.getSucursal())
-        .isFacturaElectronicaHabilitada()) {
+    if (!comprobante.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada()) {
       logger.warn(
           messageSource.getMessage("mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
     }
@@ -182,9 +176,7 @@ public class AfipServiceImpl implements IAfipService {
     if (feAuthRequest != null) {
       fecaeSolicitud.setAuth(feAuthRequest);
       int nroPuntoDeVentaAfip =
-          configuracionSucursalService
-              .getConfiguracionSucursal(comprobante.getSucursal())
-              .getNroPuntoDeVentaAfip();
+          comprobante.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip();
       int siguienteNroComprobante =
           this.getSiguienteNroComprobante(
               feAuthRequest, comprobante.getTipoComprobante(), nroPuntoDeVentaAfip);

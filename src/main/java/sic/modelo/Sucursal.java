@@ -65,6 +65,10 @@ public class Sucursal implements Serializable {
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacion;
 
+  @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+  @JoinColumn(name = "idConfiguracionSucursal", referencedColumnName = "idConfiguracionSucursal")
+  private ConfiguracionSucursal configuracionSucursal;
+
   private String logo;
 
   private boolean eliminada;

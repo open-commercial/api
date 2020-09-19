@@ -38,8 +38,9 @@ class ReciboServiceImplTest {
     sucursal.setNombre("Sucursal Test");
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
-    when(configuracionSucursalServiceInterface.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+//    when(configuracionSucursalServiceInterface.getConfiguracionSucursal(sucursal))
+//        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     FormaDePago formaDePago = new FormaDePago();
     formaDePago.setNombre("Efectivo");
@@ -66,8 +67,9 @@ class ReciboServiceImplTest {
     sucursal.setNombre("Sucursal Test");
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
-    when(configuracionSucursalServiceInterface.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+//    when(configuracionSucursalServiceInterface.getConfiguracionSucursal(sucursal))
+//        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     FormaDePago formaDePago = new FormaDePago();
     formaDePago.setNombre("Efectivo");

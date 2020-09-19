@@ -477,9 +477,7 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionSucursalService
-                .getConfiguracionSucursal(sucursal)
-                .getNroPuntoDeVentaAfip(),
+            sucursal.getConfiguracionSucursal().getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
   }
@@ -491,9 +489,7 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaCreditoRepository.buscarMayorNumNotaCreditoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionSucursalService
-                .getConfiguracionSucursal(sucursal)
-                .getNroPuntoDeVentaAfip(),
+            sucursal.getConfiguracionSucursal().getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
   }
@@ -791,9 +787,7 @@ public class NotaServiceImpl implements INotaService {
         }
       }
       notaCredito.setSerie(
-          configuracionSucursalService
-              .getConfiguracionSucursal(notaCredito.getSucursal())
-              .getNroPuntoDeVentaAfip());
+          notaCredito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
       notaCredito.setNroNota(
           this.getSiguienteNumeroNotaCreditoCliente(
               notaCredito.getIdSucursal(), notaCredito.getTipoComprobante()));
@@ -1133,9 +1127,7 @@ public class NotaServiceImpl implements INotaService {
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
       notaDebito.setSerie(
-          configuracionSucursalService
-              .getConfiguracionSucursal(notaDebito.getSucursal())
-              .getNroPuntoDeVentaAfip());
+          notaDebito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
       notaDebito.setNroNota(
           this.getSiguienteNumeroNotaDebitoCliente(
               notaDebito.getIdSucursal(), notaDebito.getTipoComprobante()));
@@ -1253,8 +1245,7 @@ public class NotaServiceImpl implements INotaService {
       ds = new JRBeanCollectionDataSource(renglones);
       params.put("notaDebito", nota);
     }
-    ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursalService.getConfiguracionSucursal(nota.getSucursal());
+    ConfiguracionSucursal configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)

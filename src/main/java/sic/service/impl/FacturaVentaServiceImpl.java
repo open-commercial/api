@@ -351,10 +351,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public Factura procesarFacturaVenta(FacturaVenta factura) {
     factura.setEliminada(false);
     factura.setFecha(LocalDateTime.now());
-    factura.setNumSerie(
-        configuracionSucursalService
-            .getConfiguracionSucursal(factura.getSucursal())
-            .getNroPuntoDeVentaAfip());
+    factura.setNumSerie(factura.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
     factura.setNumFactura(
         this.calcularNumeroFacturaVenta(
             factura.getTipoComprobante(),
@@ -455,8 +452,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
     Map<String, Object> params = new HashMap<>();
-    ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursalService.getConfiguracionSucursal(factura.getSucursal());
+    ConfiguracionSucursal configuracionSucursal = factura.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B)
         || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {

@@ -139,9 +139,7 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenTotalEnM3());
        remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
        remito.setSucursal(facturaVenta.getSucursal());
-       remito.setSerie(configuracionSucursalService
-            .getConfiguracionSucursal(remito.getSucursal())
-            .getNroPuntoDeVentaAfip());
+       remito.setSerie(remito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
        remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
        remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));

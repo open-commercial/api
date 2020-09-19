@@ -13,6 +13,8 @@ import sic.repository.SucursalRepository;
 import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -57,7 +59,6 @@ public class SucursalServiceImplTest {
     sucursalService.guardar(sucursal);
     verify(sucursalRepository).save(sucursal);
     verify(productoService).guardarCantidadesDeSucursalNueva(sucursal);
-    verify(configuracionSucursalService).guardar(any());
   }
 
   @Test
@@ -107,14 +108,16 @@ public class SucursalServiceImplTest {
     assertThrows(EntityNotFoundException.class, () -> sucursalService.eliminar(1L));
     verify(messageSource).getMessage(eq("mensaje_sucursal_no_existente"), any(), any());
     when(sucursalRepository.findById(1L)).thenReturn(Optional.of(sucursal));
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+//    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
+//        .thenReturn(configuracionSucursal);
     assertThrows(BusinessServiceException.class, () -> sucursalService.eliminar(1L));
     verify(messageSource)
         .getMessage(eq("mensaje_sucursal_no_se_puede_eliminar_predeterminada"), any(), any());
     configuracionSucursal.setPredeterminada(false);
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+//    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
+//        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     sucursalService.eliminar(1L);
     verify(configuracionSucursalService).eliminar(configuracionSucursal);
     verify(sucursalRepository).save(sucursal);

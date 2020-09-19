@@ -43,10 +43,10 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
                   "mensaje_sucursal_no_existente", null, Locale.getDefault())));
   }
 
-  @Override
-  public ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal) {
-    return configuracionRepository.findBySucursal(sucursal);
-  }
+//  @Override
+//  public ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal) {
+//    return configuracionRepository.findBySucursal(sucursal);
+//  }
 
   @Override
   @Transactional
@@ -63,17 +63,16 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public void actualizar(
-      ConfiguracionSucursal configuracionSucursalPersistida,
-      ConfiguracionSucursal configuracionDeSucursalParaActualizar) {
+  public void actualizar(ConfiguracionSucursal configuracionDeSucursalParaActualizar) {
+    ConfiguracionSucursal configuracionSucursalPersistida =
+        this.getConfiguracionSucursalPorId(
+            configuracionDeSucursalParaActualizar.getIdConfiguracionSucursal());
     if (!configuracionDeSucursalParaActualizar.isPredeterminada()
         && configuracionSucursalPersistida.isPredeterminada()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_sucursal_quitar_predeterminada", null, Locale.getDefault()));
     }
-    configuracionDeSucursalParaActualizar.setSucursal(
-        configuracionSucursalPersistida.getSucursal());
     if (configuracionDeSucursalParaActualizar.isFacturaElectronicaHabilitada()) {
       if (configuracionDeSucursalParaActualizar.getPasswordCertificadoAfip().equals("")) {
         configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip(
@@ -149,13 +148,13 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
     }
   }
 
-  @Override
-  public int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal) {
-    return configuracionRepository.getCantidadMaximaDeRenglones(idSucursal);
-  }
-
-  @Override
-  public boolean isFacturaElectronicaHabilitada(long idSucursal) {
-    return configuracionRepository.isFacturaElectronicaHabilitada(idSucursal);
-  }
+//  @Override
+//  public int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal) {
+//    return configuracionRepository.getCantidadMaximaDeRenglones(idSucursal);
+//  }
+//
+//  @Override
+//  public boolean isFacturaElectronicaHabilitada(long idSucursal) {
+//    return configuracionRepository.isFacturaElectronicaHabilitada(idSucursal);
+//  }
 }

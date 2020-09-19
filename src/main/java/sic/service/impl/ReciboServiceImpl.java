@@ -172,16 +172,11 @@ public class ReciboServiceImpl implements IReciboService {
   @Transactional
   public Recibo guardar(Recibo recibo) {
     customValidator.validar(recibo);
-    recibo.setNumSerie(
-        configuracionSucursalService
-            .getConfiguracionSucursal(recibo.getSucursal())
-            .getNroPuntoDeVentaAfip());
+    recibo.setNumSerie(recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
     recibo.setNumRecibo(
         this.getSiguienteNumeroRecibo(
             recibo.getSucursal().getIdSucursal(),
-            configuracionSucursalService
-                .getConfiguracionSucursal(recibo.getSucursal())
-                .getNroPuntoDeVentaAfip()));
+            recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip()));
     this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
@@ -246,9 +241,7 @@ public class ReciboServiceImpl implements IReciboService {
             recibo.setFormaDePago(fdp);
             recibo.setMonto(v);
             recibo.setNumSerie(
-                configuracionSucursalService
-                    .getConfiguracionSucursal(recibo.getSucursal())
-                    .getNroPuntoDeVentaAfip());
+                recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
             recibo.setNumRecibo(
                 this.getSiguienteNumeroRecibo(sucursal.getIdSucursal(), recibo.getNumSerie()));
             recibo.setConcepto("SALDO.");
