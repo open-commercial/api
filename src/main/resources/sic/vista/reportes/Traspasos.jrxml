@@ -20,8 +20,11 @@
 	<queryString language="hql">
 		<![CDATA[]]>
 	</queryString>
-	<field name="codigoAndDescripcion" class="java.lang.String">
-		<fieldDescription><![CDATA[codigoAndDescripcion]]></fieldDescription>
+	<field name="codigo" class="java.lang.String">
+		<fieldDescription><![CDATA[codigo]]></fieldDescription>
+	</field>
+	<field name="descripcion" class="java.lang.String">
+		<fieldDescription><![CDATA[descripcion]]></fieldDescription>
 	</field>
 	<field name="sucursalOrigen" class="java.lang.String">
 		<fieldDescription><![CDATA[sucursalOrigen]]></fieldDescription>
@@ -40,7 +43,7 @@
 		<band splitType="Stretch"/>
 	</background>
 	<title>
-		<band height="169" splitType="Stretch">
+		<band height="149" splitType="Stretch">
 			<image hAlign="Center" vAlign="Middle">
 				<reportElement x="0" y="0" width="90" height="80" uuid="33e8c96a-1306-4242-b063-7ea538992edc"/>
 				<imageExpression><![CDATA[$P{logo}]]></imageExpression>
@@ -94,13 +97,13 @@
 				<text><![CDATA[Cantidad]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="1" y="130" width="468" height="16" uuid="35d9eb18-9b69-4909-8eb8-3fc70c38af8d">
+				<reportElement x="1" y="130" width="134" height="16" uuid="35d9eb18-9b69-4909-8eb8-3fc70c38af8d">
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Detalle]]></text>
+				<text><![CDATA[Codigo]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="750" y="131" width="50" height="15" uuid="5ce7e530-ebb4-4f75-a250-b80bad98b798">
@@ -112,34 +115,51 @@
 				<text><![CDATA[Medida]]></text>
 			</staticText>
 			<textField pattern="dd/MM/yyyy ">
-				<reportElement x="135" y="114" width="110" height="18" uuid="d7ba81bc-e8b6-48ba-8a30-e1831b749aae"/>
+				<reportElement x="135" y="119" width="110" height="18" uuid="d7ba81bc-e8b6-48ba-8a30-e1831b749aae">
+					<printWhenExpression><![CDATA[$P{FechaDesde} != null]]></printWhenExpression>
+				</reportElement>
 				<textFieldExpression><![CDATA[java.util.Date.from($P{FechaDesde}.atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<staticText>
-				<reportElement x="65" y="114" width="70" height="18" uuid="5a018975-6fb9-4bcf-99e3-0deb37cf7075"/>
+				<reportElement x="65" y="119" width="70" height="18" uuid="5a018975-6fb9-4bcf-99e3-0deb37cf7075">
+					<printWhenExpression><![CDATA[$P{FechaDesde} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right"/>
 				<text><![CDATA[Desde:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="245" y="114" width="70" height="18" uuid="f381cc35-354c-4318-ad61-c07ec9d18b94"/>
+				<reportElement x="245" y="119" width="70" height="18" uuid="f381cc35-354c-4318-ad61-c07ec9d18b94">
+					<printWhenExpression><![CDATA[$P{FechaHasta} != null]]></printWhenExpression>
+				</reportElement>
 				<textElement textAlignment="Right"/>
 				<text><![CDATA[Hasta:]]></text>
 			</staticText>
 			<textField pattern="dd/MM/yyyy ">
-				<reportElement x="315" y="114" width="110" height="18" uuid="d4afede0-e349-4108-99b3-ebaf2aca75b2"/>
+				<reportElement x="315" y="119" width="110" height="18" uuid="d4afede0-e349-4108-99b3-ebaf2aca75b2">
+					<printWhenExpression><![CDATA[$P{FechaHasta} != null]]></printWhenExpression>
+				</reportElement>
 				<textFieldExpression><![CDATA[java.util.Date.from($P{FechaHasta}.atZone(java.time.ZoneId.systemDefault()).toInstant())]]></textFieldExpression>
 			</textField>
 			<line>
-				<reportElement x="1" y="110" width="800" height="1" uuid="63fb0753-de01-4fdb-8018-74afdb443bab"/>
+				<reportElement x="1" y="115" width="800" height="1" uuid="63fb0753-de01-4fdb-8018-74afdb443bab"/>
 			</line>
+			<staticText>
+				<reportElement x="135" y="131" width="335" height="16" uuid="157d348d-b61e-49c1-9c21-fafb6517d40d">
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font isBold="true"/>
+				</textElement>
+				<text><![CDATA[Descripcion]]></text>
+			</staticText>
 		</band>
 	</title>
 	<detail>
 		<band height="23" splitType="Stretch">
 			<textField>
-				<reportElement x="1" y="0" width="468" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
+				<reportElement x="1" y="0" width="134" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
 				<textElement verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{codigoAndDescripcion}]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="580" y="0" width="109" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
@@ -160,6 +180,11 @@
 				<reportElement x="750" y="0" width="50" height="20" uuid="1f0d2264-1c8c-4557-a0e5-2e205d095b0d"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{medida} != null ? $F{medida} : ""]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="135" y="0" width="335" height="20" uuid="005671e6-447d-423b-a1d2-09283c6d9c80"/>
+				<textElement verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
 		</band>
 	</detail>
