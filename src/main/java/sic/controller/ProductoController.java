@@ -77,14 +77,8 @@ public class ProductoController {
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return productoService.buscarProductos(criteria, idUsuarioLoggedIn);
-    /*if (authorizationHeader != null
-        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      return productoService.getProductosConPrecioBonificado(productos);
-    } else {
-      return productos;
-    }*/
   }
 
   @PostMapping("/productos/valor-stock/criteria")
