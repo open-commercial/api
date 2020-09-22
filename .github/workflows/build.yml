@@ -1,0 +1,50 @@
+name: Build
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 14
+#      - name: Set timezone
+#        uses: zcong1993/setup-timezone@master
+#        with:
+#          timezone: America/Argentina/Buenos_Aires
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SIC_AFIP_ENV: "testing"
+          SIC_MAIL_ENV: "testing"
+          SIC_MAIL_USERNAME: ""
+          SIC_MAIL_PASSWORD: ""
+          RECAPTCHA_SECRET_KEY: ""
+          RECAPTCHA_TEST_KEY: "111111"
+          CLOUDINARY_URL: "cloudinary://*:*-*@*"
+          SIC_CLOUDINARY_ENV: "testing"
+          SIC_MERCADOPAGO_ACCESS_TOKEN: ""
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=globo-technology -Dsonar.projectKey=sic-api:sic-api

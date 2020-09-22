@@ -7,10 +7,9 @@ import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -20,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
-import javax.swing.*;
+import javax.swing.ImageIcon;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -344,12 +343,10 @@ public class ProductoServiceImpl implements IProductoService {
                 nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
                     .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
                     .forEach(
-                        idSucursal -> {
+                        idSucursal ->
                           cantidadEnSucursal.setCantidad(
-                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
-                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
-                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
-                        }));
+                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal))
+                        ));
     producto.setCantidadTotalEnSucursales(
         producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
@@ -454,7 +451,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Pedido devolverStockPedido(
+  public void devolverStockPedido(
       Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen) {
     if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
         && pedido.getEstado() == EstadoPedido.ABIERTO
@@ -478,11 +475,10 @@ public class ProductoServiceImpl implements IProductoService {
             }
           });
     }
-    return pedido;
   }
 
   @Override
-  public Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
+  public void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion) {
     switch (tipoDeOperacion) {
       case ALTA -> traspasoService.guardarTraspasosPorPedido(pedido);
       case ELIMINACION -> traspasoService.eliminarTraspasoDePedido(pedido);
@@ -527,7 +523,6 @@ public class ProductoServiceImpl implements IProductoService {
                         Locale.getDefault()));
               }
             });
-    return pedido;
   }
 
   @Override
@@ -1002,10 +997,21 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public byte[] getListaDePrecios(List<Producto> productos, String formato) {
+  public byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
+    List<Producto> productos = this.buscarProductosParaReporte(criteria);
+    return this.getListaDePrecios(productos, "xlsx");
+  }
+
+  @Override
+  public byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
+    List<Producto> productos = this.buscarProductosParaReporte(criteria);
+    return this.getListaDePrecios(productos, "pdf");
+  }
+
+  private byte[] getListaDePrecios(List<Producto> productos, String formato) {
     ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
     InputStream isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
+            classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jasper");
     Map<String, Object> params = new HashMap<>();
     Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
@@ -1024,44 +1030,20 @@ public class ProductoServiceImpl implements IProductoService {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(messageSource.getMessage(
-            "mensaje_error_reporte", null, Locale.getDefault()), ex);
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       case "pdf":
         try {
           return JasperExportManager.exportReportToPdf(
-              JasperFillManager.fillReport(isFileReport, params, ds));
+                  JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(messageSource.getMessage(
-            "mensaje_error_reporte", null, Locale.getDefault()), ex);
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
       default:
         throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_formato_no_valido", null, Locale.getDefault()));
+                "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
-  }
-
-  @Override
-  public ResponseEntity<byte[]> getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-    headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-    headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-    List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    byte[] reporteXls =
-            this.getListaDePrecios(productos, "xlsx");
-    headers.setContentLength(reporteXls.length);
-    return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-  }
-
-  @Override
-  public ResponseEntity<byte[]> getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_PDF);
-    headers.add("content-disposition", "inline; filename=ListaPrecios.pdf");
-    List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    byte[] reportePDF =
-            this.getListaDePrecios(productos, "pdf");
-    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
   private byte[] xlsReportToArray(JasperPrint jasperPrint) {

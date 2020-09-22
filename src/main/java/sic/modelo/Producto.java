@@ -170,13 +170,21 @@ public class Producto implements Serializable {
   }
 
   @JsonGetter("idRubro")
+  @JsonView(Views.Comprador.class)
   public Long getIdRubro() {
     return rubro.getIdRubro();
   }
 
   @JsonGetter("nombreRubro")
+  @JsonView(Views.Comprador.class)
   public String getNombreRubro() {
     return rubro.getNombre();
+  }
+
+  @JsonGetter("imagenHtmlRubro")
+  @JsonView(Views.Comprador.class)
+  public String getImagenHtmlRubro() {
+    return rubro.getImagenHtml();
   }
 
   @JsonGetter("idProveedor")

@@ -17,6 +17,8 @@ public interface RenglonCuentaCorrienteRepository extends PagingAndSortingReposi
     
     RenglonCuentaCorriente findByReciboAndEliminado(Recibo recibo, boolean eliminado);
 
+    RenglonCuentaCorriente findByRemitoAndEliminado(Remito remito, boolean eliminado);
+
     @Query("SELECT r FROM CuentaCorriente cc INNER JOIN cc.renglones r"
             + " WHERE cc.idCuentaCorriente = :idCuentaCorriente AND cc.eliminada = false AND r.eliminado = false"
             + " ORDER BY r.idRenglonCuentaCorriente DESC")

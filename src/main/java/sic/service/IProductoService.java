@@ -4,9 +4,7 @@ import java.math.BigDecimal;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import sic.modelo.*;
-
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
@@ -20,10 +18,10 @@ public interface IProductoService {
 
   void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
-  Pedido devolverStockPedido(
+  void devolverStockPedido(
       Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen);
 
-  Pedido actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
+  void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 
   void actualizarStockFacturaCompra(
       Map<Long, BigDecimal> idsYCantidades,
@@ -76,11 +74,9 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePrecios(List<Producto> productos, String formato);
+  byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
 
-  ResponseEntity<byte[]> getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
-
-  ResponseEntity<byte[]> getListaDePreciosEnPdf(BusquedaProductoCriteria criteria);
+  byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria);
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
