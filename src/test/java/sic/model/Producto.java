@@ -39,8 +39,6 @@ public class Producto {
   private BigDecimal porcentajeBonificacionPrecio;
   private BigDecimal precioBonificado;
   private LocalDateTime fechaUltimaModificacion;
-  private String estanteria;
-  private String estante;
   private Long idProveedor;
   private String razonSocialProveedor;
   private String nota;

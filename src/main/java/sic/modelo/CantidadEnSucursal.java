@@ -37,10 +37,6 @@ public class CantidadEnSucursal implements Serializable {
   @NotNull(message = "{mensaje_producto_cantidad_invalida}")
   private BigDecimal cantidad;
 
-  private String estanteria;
-
-  private String estante;
-
   @JsonGetter("idSucursal")
   public Long getIdSucursal() {
     return sucursal.getIdSucursal();

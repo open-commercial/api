@@ -341,12 +341,10 @@ public class ProductoServiceImpl implements IProductoService {
                 nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
                     .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
                     .forEach(
-                        idSucursal -> {
+                        idSucursal ->
                           cantidadEnSucursal.setCantidad(
-                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
-                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
-                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
-                        }));
+                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal))
+                        ));
     producto.setCantidadTotalEnSucursales(
         producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
