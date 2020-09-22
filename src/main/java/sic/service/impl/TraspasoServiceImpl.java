@@ -388,7 +388,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
                     criteria.getSentido(), true))
             .getContent();
     Map<Long, RenglonReporteTraspasoDTO> renglones = new HashMap<>();
-    traspasosParaReporte.forEach(traspaso -> {
+    traspasosParaReporte.forEach(traspaso ->
       traspaso.getRenglones().forEach(renglonTraspaso -> {
         if (renglones.get(renglonTraspaso.getIdProducto()) != null)
           renglones.get(renglonTraspaso.getIdProducto())
@@ -405,8 +405,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
                           .build();
           renglones.put(renglonTraspaso.getIdProducto(), renglonReporteTraspasoDTO);
         }
-      });
-    });
+      }));
     ClassLoader classLoader = TraspasoServiceImpl.class.getClassLoader();
     InputStream isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
