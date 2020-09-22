@@ -392,7 +392,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
       traspaso.getRenglones().forEach(renglonTraspaso -> {
         if (renglones.get(renglonTraspaso.getIdProducto()) != null)
           renglones.get(renglonTraspaso.getIdProducto())
-                  .setCantidad(renglones.get(renglonTraspaso.getIdProducto()).getCantidad().add(renglonTraspaso.getCantidadProducto()));else {
+                  .setCantidad(renglones.get(renglonTraspaso.getIdProducto()).getCantidad().add(renglonTraspaso.getCantidadProducto()));
+        else {
           RenglonReporteTraspasoDTO renglonReporteTraspasoDTO =
                   RenglonReporteTraspasoDTO.builder()
                           .sucursalOrigen(traspaso.getNombreSucursalOrigen())
