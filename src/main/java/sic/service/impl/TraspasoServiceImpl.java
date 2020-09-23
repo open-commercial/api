@@ -307,7 +307,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
         this.getPageable(
             (criteria.getPagina() == null || criteria.getPagina() < 0) ? 0 : criteria.getPagina(),
             criteria.getOrdenarPor(),
-            criteria.getSentido(), false));
+            criteria.getSentido(), TAMANIO_PAGINA_DEFAULT));
   }
 
   @Override
@@ -356,20 +356,20 @@ public class TraspasoServiceImpl implements ITraspasoService {
   }
 
   @Override
-  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, boolean resultadosParaReporte) {
+  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina) {
     if (pagina == null) pagina = 0;
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, resultadosParaReporte ? Integer.MAX_VALUE : TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+          pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
       return switch (sentido) {
         case "ASC" -> PageRequest.of(
-                pagina, resultadosParaReporte ? Integer.MAX_VALUE : TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+                pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC" -> PageRequest.of(
-                pagina, resultadosParaReporte ? Integer.MAX_VALUE : TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+                pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
         default -> PageRequest.of(
-                pagina, resultadosParaReporte ? Integer.MAX_VALUE : TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+                pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
       };
     }
   }
@@ -385,8 +385,15 @@ public class TraspasoServiceImpl implements ITraspasoService {
                         ? 0
                         : criteria.getPagina(),
                     criteria.getOrdenarPor(),
-                    criteria.getSentido(), true))
+                    criteria.getSentido(), Integer.MAX_VALUE))
             .getContent();
+    if (traspasosParaReporte.isEmpty()) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_traspaso_reporte_sin_traspasos",
+                      null,
+                      Locale.getDefault()));
+    }
     Map<Long, RenglonReporteTraspasoDTO> renglones = new HashMap<>();
     traspasosParaReporte.forEach(traspaso ->
       traspaso.getRenglones().forEach(renglonTraspaso -> {
