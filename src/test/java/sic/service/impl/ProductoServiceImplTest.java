@@ -410,7 +410,21 @@ class ProductoServiceImplTest {
                     .porcentajeBonificacionOferta(BigDecimal.TEN)
                     .publico(true)
                     .build());
-    verify(productoRepository).saveAll(any());
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(null)
+                    .publico(true)
+                    .build());
+    verify(productoRepository, times(2)).saveAll(any());
   }
 
   @Test
