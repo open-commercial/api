@@ -774,6 +774,15 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioLista(
                 this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
+        if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
+                && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
+                >= 0) {
+          p.setOferta(true);
+          p.setPorcentajeBonificacionOferta(
+                  productosParaActualizarDTO.getPorcentajeBonificacionOferta());
+        } else {
+          p.setOferta(false);
+        }
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
@@ -801,15 +810,6 @@ public class ProductoServiceImpl implements IProductoService {
               >= 0) {
         p.setPorcentajeBonificacionPrecio(
             productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
-      }
-      if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
-              && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
-              >= 0) {
-        p.setOferta(true);
-        p.setPorcentajeBonificacionOferta(
-                productosParaActualizarDTO.getPorcentajeBonificacionOferta());
-      } else {
-        p.setOferta(false);
       }
       this.calcularPrecioBonificado(p);
       this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
