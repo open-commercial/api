@@ -62,6 +62,10 @@ public class ProductoController {
       @RequestParam(required = false) Boolean publicos,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    List<Producto> productos = productoService.getProductosFavoritosDelClientePorIdUsuario(idUsuarioLoggedIn);
+    if (productos.contains(producto)) producto.setOferta(true);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
           messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
@@ -202,7 +206,7 @@ public class ProductoController {
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return productoService.guardarProductoFavorito(idProducto, idUsuarioLoggedIn);
+    return productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
 
   @GetMapping("/productos/favorito")

@@ -219,7 +219,7 @@ public class ProductoServiceImpl implements IProductoService {
                 criteria.getOrdenarPor(),
                 criteria.getSentido(),
                 TAMANIO_PAGINA_DEFAULT));
-    List<Producto> productosFavoritos = this.getProductosFavoritosDelCliente(idUsuario);
+    List<Producto> productosFavoritos = this.getProductosFavoritosDelClientePorIdUsuario(idUsuario);
     productos.forEach(producto -> {
       if (productosFavoritos.contains(producto)) {
         producto.setFavorito(true);
@@ -1116,7 +1116,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public List<Producto> getProductosFavoritosDelCliente(long idUsuario) {
+  public List<Producto> getProductosFavoritosDelClientePorIdUsuario(long idUsuario) {
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     List<ProductoFavorito> productoFavoritos = productoFavoritoRepository.findAllByCliente(cliente);
     List<Producto> productos = new ArrayList<>();
@@ -1128,6 +1128,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
+  @Transactional
   public void quitarProductoDeFavoritos(long idUsuario, long idProducto) {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);

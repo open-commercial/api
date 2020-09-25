@@ -753,7 +753,7 @@ class ProductoServiceImplTest {
     productoFavoritoDos.setProducto(productoDos);
     paginaProductosFavoritos.add(productoFavoritoDos);
     when(productoFavoritoRepository.findAllByCliente(cliente)).thenReturn(paginaProductosFavoritos);
-    List<Producto> productosFavoritos = productoService.getProductosFavoritosDelCliente(1L);
+    List<Producto> productosFavoritos = productoService.getProductosFavoritosDelClientePorIdUsuario(1L);
     assertNotNull(productosFavoritos);
     assertTrue(productosFavoritos.get(0).isFavorito());
     assertTrue(productosFavoritos.get(1).isFavorito());
