@@ -230,15 +230,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
-    Producto producto = this.construirProducto();
-    producto.setOferta(true);
-    assertThrows(
-        BusinessServiceException.class, () -> productoService.actualizar(producto, producto, null));
-    verify(messageSource).getMessage(eq("mensaje_producto_oferta_sin_imagen"), any(), any());
-  }
-
-  @Test
   void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
     Producto productoParaActualizar = this.construirProducto();
     productoParaActualizar.setIdProducto(1L);
@@ -362,7 +353,6 @@ class ProductoServiceImplTest {
     Producto producto = this.construirProducto();
     producto.setIdProducto(1L);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    productoService.actualizarMultiples(productosParaActualizarDTO);
     assertThrows(
         BusinessServiceException.class,
         () ->
@@ -398,6 +388,43 @@ class ProductoServiceImplTest {
                     .publico(true)
                     .build()));
     verify(messageSource).getMessage(eq("mensaje_error_ids_duplicados"), any(), any());
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    producto1.setCodigo("1a");
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    producto2.setCodigo("2b");
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
+    when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(BigDecimal.TEN)
+                    .publico(true)
+                    .build());
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(null)
+                    .publico(true)
+                    .build());
+    verify(productoRepository, times(2)).saveAll(any());
   }
 
   @Test
