@@ -457,23 +457,23 @@ class TraspasoServiceImplTest {
     traspasos.add(traspaso);
     when(traspasoRepository.findAll(
             traspasoService.getBuilderTraspaso(criteria),
-            traspasoService.getPageable(null, null, null)))
+            traspasoService.getPageable(null, null, null, 25)))
             .thenReturn(new PageImpl<>(traspasos));
     assertNotNull(traspasoService.buscarTraspasos(criteria));
   }
 
   @Test
   void shouldGetPageableTraspaso() {
-    Pageable pageable = traspasoService.getPageable(0, null, null);
+    Pageable pageable = traspasoService.getPageable(0, null, null, 25);
     assertEquals("fecha: DESC", pageable.getSort().toString());
     assertEquals(0, pageable.getPageNumber());
-    pageable = traspasoService.getPageable(1, "sucursalOrigen.nombre", "ASC");
+    pageable = traspasoService.getPageable(1, "sucursalOrigen.nombre", "ASC", 25);
     assertEquals("sucursalOrigen.nombre: ASC", pageable.getSort().toString());
     assertEquals(1, pageable.getPageNumber());
-    pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "DESC");
+    pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "DESC", 25);
     assertEquals("sucursalDestino.nombre: DESC", pageable.getSort().toString());
     assertEquals(3, pageable.getPageNumber());
-    pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "NO");
+    pageable = traspasoService.getPageable(3, "sucursalDestino.nombre", "NO",25);
     assertEquals("sucursalDestino.nombre: DESC", pageable.getSort().toString());
     assertEquals(3, pageable.getPageNumber());
   }
@@ -503,7 +503,14 @@ class TraspasoServiceImplTest {
     BusquedaTraspasoCriteria criteria = BusquedaTraspasoCriteria.builder().build();
     when(traspasoRepository.findAll(
             traspasoService.getBuilderTraspaso(criteria),
-            traspasoService.getPageable(null, null, null)))
+            traspasoService.getPageable(null, null, null, Integer.MAX_VALUE)))
+            .thenReturn(new PageImpl<>(Collections.emptyList()));
+    assertThrows(ServiceException.class, () -> traspasoService.getReporteTraspaso(criteria));
+    verify(messageSource)
+            .getMessage(eq("mensaje_traspaso_reporte_sin_traspasos"), any(), any());
+    when(traspasoRepository.findAll(
+            traspasoService.getBuilderTraspaso(criteria),
+            traspasoService.getPageable(null, null, null, Integer.MAX_VALUE)))
         .thenReturn(new PageImpl<>(traspasos));
     Sucursal sucursal = new Sucursal();
     sucursal.setLogo("errorLogo");
