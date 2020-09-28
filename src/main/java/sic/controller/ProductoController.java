@@ -202,12 +202,12 @@ public class ProductoController {
   }
 
   @PostMapping("/productos/favoritos/{idProducto}")
-  public Producto marcarComoFavorito(
+  public void marcarComoFavorito(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
+    productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
 
   @GetMapping("/productos/favoritos")
