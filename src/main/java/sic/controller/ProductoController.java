@@ -64,11 +64,12 @@ public class ProductoController {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    List<Producto> productos = productoService.getProductosFavoritosDelClientePorIdUsuario(idUsuarioLoggedIn);
-    if (productos.contains(producto)) producto.setOferta(true);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
           messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
+    }
+    if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) {
+      producto.setFavorito(true);
     }
     return producto;
   }
@@ -200,7 +201,7 @@ public class ProductoController {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 
-  @PostMapping("/productos/favorito/{idProducto}")
+  @PostMapping("/productos/favoritos/{idProducto}")
   public Producto marcarComoFavorito(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
@@ -209,7 +210,7 @@ public class ProductoController {
     return productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
 
-  @GetMapping("/productos/favorito")
+  @GetMapping("/productos/favoritos")
   public Page<Producto> getProductosFavoritosDelCliente(
           @RequestParam int pagina,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
@@ -218,12 +219,19 @@ public class ProductoController {
     return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, pagina);
   }
 
-  @DeleteMapping("/productos/favorito/{idProducto}")
+  @DeleteMapping("/productos/favoritos/{idProducto}")
   public void quitarProductoDeFavoritos(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     productoService.quitarProductoDeFavoritos(idUsuarioLoggedIn, idProducto);
+  }
+
+  @DeleteMapping("/productos/favoritos")
+  public void quitarProductosDeFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    productoService.quitarProductosDeFavoritos(idUsuarioLoggedIn);
   }
 }

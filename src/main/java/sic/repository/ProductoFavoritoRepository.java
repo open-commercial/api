@@ -14,5 +14,9 @@ public interface ProductoFavoritoRepository
 
   List<ProductoFavorito> findAllByCliente(Cliente cliente);
 
+  boolean existsByClienteAndProducto(Cliente cliente, Producto producto);
+
   void deleteByClienteAndProducto(Cliente cliente, Producto producto);
+
+  void deleteAllByCliente(Cliente cliente);
 }

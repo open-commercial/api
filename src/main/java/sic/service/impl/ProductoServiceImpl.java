@@ -854,6 +854,13 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
+  public boolean isFavorito(long idUsuario, long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    return productoFavoritoRepository.existsByClienteAndProducto(cliente, producto);
+  }
+
+  @Override
   public Producto getProductoPorCodigo(String codigo) {
     if (codigo.isEmpty()) {
       return null;
@@ -1079,6 +1086,9 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public Producto guardarProductoFavorito(long idUsuario, long idProducto) {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    if (this.isFavorito(idUsuario, idProducto)) {
+        producto.setFavorito(true);
+    } else {
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     ProductoFavorito productoFavorito = new ProductoFavorito();
     productoFavorito.setCliente(cliente);
@@ -1088,6 +1098,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setFavorito(true);
     logger.warn(messageSource.getMessage(
             "mensaje_producto_favorito_agregado", null, Locale.getDefault()), producto);
+    }
     return producto;
   }
 
@@ -1138,4 +1149,12 @@ public class ProductoServiceImpl implements IProductoService {
             producto);
   }
 
+  @Override
+  @Transactional
+  public void quitarProductosDeFavoritos(long idUsuario) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    productoFavoritoRepository.deleteAllByCliente(cliente);
+    logger.warn(
+            messageSource.getMessage("mensaje_producto_favoritos_quitados", null, Locale.getDefault()));
+  }
 }

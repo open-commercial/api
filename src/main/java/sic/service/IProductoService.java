@@ -94,5 +94,9 @@ public interface IProductoService {
 
   List<Producto> getProductosFavoritosDelClientePorIdUsuario(long idUsuario);
 
+  boolean isFavorito(long idUsuario, long idProducto);
+
   void quitarProductoDeFavoritos(long idUsuario, long idProducto);
+
+  void quitarProductosDeFavoritos(long idUsuario);
 }
