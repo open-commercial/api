@@ -807,4 +807,32 @@ class ProductoServiceImplTest {
     assertTrue(paginaProductos.getContent().get(0).isFavorito());
     assertFalse(paginaProductos.getContent().get(1).isFavorito());
   }
+
+  @Test
+  void shouldTestQuitarTodosLosProductosDeFavoritosDelCliente() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    productoService.quitarProductosDeFavoritos(1L);
+    verify(productoFavoritoRepository).deleteAllByCliente(cliente);
+    verify(messageSource)
+            .getMessage(eq("mensaje_producto_favoritos_quitados"), eq(null), eq(Locale.getDefault()));
+  }
+
+  @Test
+  void shouldTestIsFavorito() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    Producto productoUno = new Producto();
+    productoUno.setIdProducto(1L);
+    productoUno.setDescripcion("Producto Uno");
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(productoUno));
+    when(productoFavoritoRepository.existsByClienteAndProducto(cliente, productoUno))
+        .thenReturn(true);
+    assertTrue(productoService.isFavorito(1L, 1L));
+    verify(productoFavoritoRepository).existsByClienteAndProducto(cliente, productoUno);
+  }
 }
