@@ -705,7 +705,7 @@ class ProductoServiceImplTest {
     when(productoFavoritoRepository.save(productoFavorito)).thenReturn(productoFavorito);
     productoService.guardarProductoFavorito(1L, 1L);
     verify(productoFavoritoRepository).save(productoFavorito);
-    verify(messageSource).getMessage(eq("mensaje_producto_favorito_agregado"), eq(null), any());
+    verify(messageSource).getMessage(eq("mensaje_producto_favorito_agregado"), eq(new Object[] {producto}), any());
   }
 
   @Test
@@ -772,7 +772,7 @@ class ProductoServiceImplTest {
     productoService.quitarProductoDeFavoritos(1L, 1L);
     verify(productoFavoritoRepository).deleteByClienteAndProducto(cliente, producto);
     verify(messageSource)
-        .getMessage(eq("mensaje_producto_favorito_quitado"), eq(null), eq(Locale.getDefault()));
+        .getMessage(eq("mensaje_producto_favorito_quitado"), eq(new Object[] {producto}), eq(Locale.getDefault()));
   }
 
   @Test
