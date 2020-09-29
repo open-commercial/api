@@ -1097,7 +1097,9 @@ public class ProductoServiceImpl implements IProductoService {
     producto = productoFavoritoRepository.save(productoFavorito).getProducto();
     producto.setFavorito(true);
     logger.warn(messageSource.getMessage(
-            "mensaje_producto_favorito_agregado", null, Locale.getDefault()), producto);
+            "mensaje_producto_favorito_agregado",
+            new Object[] {producto},
+            Locale.getDefault()));
     }
     return producto;
   }
@@ -1144,9 +1146,10 @@ public class ProductoServiceImpl implements IProductoService {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     productoFavoritoRepository.deleteByClienteAndProducto(cliente, producto);
-    logger.warn(
-            messageSource.getMessage("mensaje_producto_favorito_quitado", null, Locale.getDefault()),
-            producto);
+    logger.warn(messageSource.getMessage(
+            "mensaje_producto_favorito_quitado",
+            new Object[] {producto},
+            Locale.getDefault()));
   }
 
   @Override

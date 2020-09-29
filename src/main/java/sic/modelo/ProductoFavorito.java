@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "productoFavorito")
+@Table(name = "productofavorito")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

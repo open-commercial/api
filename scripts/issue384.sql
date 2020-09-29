@@ -1,4 +1,4 @@
-CREATE TABLE `productoFavorito` (
+CREATE TABLE `productofavorito` (
   `idProductoFavorito` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_Cliente` bigint(20) NOT NULL,
   `idProducto` bigint(20) NOT NULL,
