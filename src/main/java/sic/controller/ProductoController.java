@@ -201,7 +201,7 @@ public class ProductoController {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 
-  @PostMapping("/productos/favoritos/{idProducto}")
+  @PostMapping("/productos/{idProducto}/favoritos")
   public void marcarComoFavorito(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
@@ -219,7 +219,7 @@ public class ProductoController {
     return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, pagina);
   }
 
-  @DeleteMapping("/productos/favoritos/{idProducto}")
+  @DeleteMapping("/productos/{idProducto}/favoritos")
   public void quitarProductoDeFavoritos(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
