@@ -1125,7 +1125,7 @@ public class ProductoServiceImpl implements IProductoService {
                       producto.setFavorito(true);
                       productos.add(producto);
                     });
-    return new PageImpl<>(productos);
+    return new PageImpl<>(productos, pageable.getPageable(), pageable.getTotalElements());
   }
 
   @Override
