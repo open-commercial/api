@@ -722,12 +722,15 @@ class ProductoServiceImplTest {
     productoFavorito.setCliente(cliente);
     productoFavorito.setProducto(producto);
     productosFavoritos.add(productoFavorito);
-    Page<ProductoFavorito> pageable = new PageImpl<>(productosFavoritos);
+    Page<ProductoFavorito> pageable = new PageImpl<>(productosFavoritos, PageRequest.of(0, 1, Sort.by("idProductoFavorito")), 0);
     when(productoFavoritoRepository.findAll(
             any(), eq(PageRequest.of(1, 24, Sort.by(Sort.Direction.DESC, "idProductoFavorito")))))
         .thenReturn(pageable);
     Page<Producto> paginaProductos = productoService.getPaginaProductosFavoritosDelCliente(1L, 1);
     assertNotNull(paginaProductos);
+    assertEquals(paginaProductos.getTotalElements(), pageable.getTotalElements());
+    assertEquals(paginaProductos.getTotalPages(), pageable.getTotalElements());
+    assertEquals(paginaProductos.getNumber(), pageable.getNumber());
     assertTrue(paginaProductos.getContent().get(0).isFavorito());
   }
 
