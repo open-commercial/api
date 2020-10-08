@@ -352,6 +352,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
       builder.and(qTraspaso.nroTraspaso.eq(criteria.getNroTraspaso()));
     if (criteria.getNroPedido() != null)
       builder.and(qTraspaso.nroPedido.eq(criteria.getNroPedido()));
+    if (criteria.getIdProducto() != null)
+      builder.and(qTraspaso.renglones.any().idProducto.eq(criteria.getIdProducto()));
     return builder;
   }
 

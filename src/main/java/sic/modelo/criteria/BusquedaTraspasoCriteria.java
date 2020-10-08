@@ -20,6 +20,7 @@ public class BusquedaTraspasoCriteria {
   private Long idSucursalOrigen;
   private Long idSucursalDestino;
   private Long idUsuario;
+  private Long idProducto;
   private Integer pagina;
   private String ordenarPor;
   private String sentido;
