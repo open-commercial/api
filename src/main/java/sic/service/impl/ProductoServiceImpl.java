@@ -1106,6 +1106,18 @@ public class ProductoServiceImpl implements IProductoService {
         set.add(i);
       }
       return false;
-    }
+  }
 
+  @Override
+  public Producto calcularCantidadEnSucursalesDisponibleAndReservada(Producto producto, long idSucursalSeleccionada) {
+    Set<CantidadEnSucursal> cantidadesEnSucursales = new HashSet<>();
+    producto.getCantidadEnSucursales()
+            .stream()
+            .filter(cantidadEnSucursal -> (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
+                    || cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursalSeleccionada))
+            .forEach(cantidadesEnSucursales::add);
+    producto.setCantidadEnSucursalesDisponible(cantidadesEnSucursales);
+    producto.setCantidadReservada(pedidoService.getCantidadReservadaDeProducto(producto.getIdProducto()));
+    return producto;
+  }
 }

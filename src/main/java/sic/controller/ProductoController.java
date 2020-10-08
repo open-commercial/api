@@ -53,7 +53,7 @@ public class ProductoController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/productos/{idProducto}")
+  @GetMapping("/productos/{idProducto}") // /sucursales/{idSucursal}
   public Producto getProductoPorId(
       @PathVariable long idProducto,
       @RequestParam(required = false) Boolean publicos,
@@ -79,7 +79,7 @@ public class ProductoController {
       return productoService.getProductoPorCodigo(codigo);
     }
 
-  @PostMapping("/productos/busqueda/criteria")
+  @PostMapping("/productos/busqueda/criteria") // sucursales/{idSucursal}
   public Page<Producto> buscarProductos(
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {

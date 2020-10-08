@@ -23,7 +23,10 @@ ALTER TABLE sucursal
 ADD CONSTRAINT `Fkelflp79kg0kw83fiwybcwcvku` FOREIGN KEY (idConfiguracionSucursal)
 REFERENCES configuracionsucursal(idConfiguracionSucursal);
 
-alter table sucursal
+alter table configuracionsucursal
 add column comparteStock bit(1) default false;
+
+ALTER TABLE producto
+drop column cantidadTotalEnSucursales;
 
 

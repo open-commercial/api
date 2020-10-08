@@ -17,7 +17,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.hibernate.annotations.Formula;
 import sic.controller.Views;
 
 @Entity
@@ -51,17 +50,17 @@ public class Producto implements Serializable {
   @NotEmpty(message = "{mensaje_producto_cantidad_en_sucursales_vacia}")
   private Set<CantidadEnSucursal> cantidadEnSucursales;
 
+  @JsonView(Views.Comprador.class)
+  @Transient
+  private Set<CantidadEnSucursal> cantidadEnSucursalesDisponible;
+
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
   @JsonView(Views.Comprador.class)
-//  @Formula(value = "(SELECT SUM(p.monto) "
-//          + "FROM rengloncuentacorriente r "
-//          + "WHERE r.id_cuenta_corriente = id_cuenta_corriente AND r.eliminado = false "
-//          + "AND r.id_renglon_cuenta_corriente <= id_renglon_cuenta_corriente)")
-//  SELECT SUM(cantidadensucursal.cantidad) as cantidad FROM producto inner join cantidadensucursal on producto.idProducto = cantidadensucursal.idProducto
-//  inner join sucursal on cantidadensucursal.idSucursal = sucursal.idSucursal
-//  where sucursal.comparteStock = false;
   private BigDecimal cantidadTotalEnSucursales;
+
+  @Transient
+  private BigDecimal cantidadReservada;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")

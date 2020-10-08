@@ -5,6 +5,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.RenglonPedido;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface RenglonPedidoRepository extends PagingAndSortingRepository<RenglonPedido, Long> {
@@ -24,4 +25,9 @@ public interface RenglonPedidoRepository extends PagingAndSortingRepository<Reng
       "SELECT rp FROM Pedido p INNER JOIN p.renglones rp"
           + " WHERE p.idPedido = :idPedido AND p.eliminado = false order by rp.idRenglonPedido asc")
   List<RenglonPedido> findByIdPedidoOrderByIdRenglonPedido(@Param("idPedido") long idPedido);
+
+  @Query(
+          "SELECT count(rp.cantidad) FROM Pedido p INNER JOIN p.renglones rp"
+                  + " WHERE rp.idProductoItem = :idProducto AND p.estado = 'ABIERTO' AND p.eliminado = false")
+  BigDecimal getCantidadReservadaDeProducto(@Param("idProducto") long idProducto);
 }

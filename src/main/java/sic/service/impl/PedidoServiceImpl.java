@@ -692,4 +692,9 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     return cantidades;
   }
+
+  @Override
+  public BigDecimal getCantidadReservadaDeProducto(Long idProducto) {
+    return renglonPedidoRepository.getCantidadReservadaDeProducto(idProducto);
+  }
 }

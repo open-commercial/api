@@ -685,4 +685,53 @@ class ProductoServiceImplTest {
             any(),
             eq(Locale.getDefault()));
   }
+
+  @Test
+  void shouldCalcularCantidadEnSucursalesDisponibleAndReservada() {
+    Sucursal sucursalUno = new Sucursal();
+    sucursalUno.setNombre("primera sucursal");
+    sucursalUno.setIdSucursal(1L);
+    Sucursal sucursalDos = new Sucursal();
+    sucursalDos.setNombre("segunda sucursal");
+    sucursalDos.setIdSucursal(2L);
+    Sucursal sucursalTres = new Sucursal();
+    sucursalTres.setNombre("segunda tres");
+    sucursalTres.setIdSucursal(3L);
+    ConfiguracionSucursal configuracionSucursalUno = new ConfiguracionSucursal();
+    configuracionSucursalUno.setIdConfiguracionSucursal(1L);
+    ConfiguracionSucursal configuracionSucursalDos = new ConfiguracionSucursal();
+    configuracionSucursalDos.setIdConfiguracionSucursal(2L);
+    ConfiguracionSucursal configuracionSucursalTres = new ConfiguracionSucursal();
+    configuracionSucursalTres.setComparteStock(true);
+    configuracionSucursalTres.setIdConfiguracionSucursal(3L);
+    sucursalUno.setConfiguracionSucursal(configuracionSucursalUno);
+    sucursalDos.setConfiguracionSucursal(configuracionSucursalDos);
+    sucursalTres.setConfiguracionSucursal(configuracionSucursalTres);
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    Set<CantidadEnSucursal> cantidadesEnSucursalProducto = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursalProducto1 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto1.setSucursal(sucursalUno);
+    cantidadEnSucursalProducto1.setCantidad(BigDecimal.ONE);
+    cantidadesEnSucursalProducto.add(cantidadEnSucursalProducto1);
+    CantidadEnSucursal cantidadEnSucursalProducto2 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto2.setSucursal(sucursalDos);
+    cantidadEnSucursalProducto2.setCantidad(new BigDecimal("20"));
+    cantidadesEnSucursalProducto.add(cantidadEnSucursalProducto2);
+    CantidadEnSucursal cantidadEnSucursalProducto3 = new CantidadEnSucursal();
+    cantidadEnSucursalProducto3.setSucursal(sucursalTres);
+    cantidadEnSucursalProducto3.setCantidad(BigDecimal.TEN);
+    cantidadesEnSucursalProducto.add(cantidadEnSucursalProducto3);
+    producto1.setCantidadEnSucursales(cantidadesEnSucursalProducto);
+    when(pedidoService.getCantidadReservadaDeProducto(1L)).thenReturn(BigDecimal.TEN);
+    Producto productoConCantidadDisponibleCalculada =
+        productoService.calcularCantidadEnSucursalesDisponibleAndReservada(producto1, 1L);
+    assertNotNull(productoConCantidadDisponibleCalculada);
+    List<CantidadEnSucursal> listaCantidadEnSucursales =
+        new ArrayList<>(productoConCantidadDisponibleCalculada.getCantidadEnSucursalesDisponible());
+    assertEquals(2, listaCantidadEnSucursales.size());
+    assertEquals(BigDecimal.ONE, listaCantidadEnSucursales.get(0).getCantidad());
+    assertEquals(BigDecimal.TEN, listaCantidadEnSucursales.get(1).getCantidad());
+    assertEquals(BigDecimal.TEN, productoConCantidadDisponibleCalculada.getCantidadReservada());
+  }
 }

@@ -73,8 +73,6 @@ public class Sucursal implements Serializable {
 
   private boolean eliminada;
 
-  private boolean comparteStock;
-
   @JsonGetter("detalleUbicacion")
   public String getDetalleUbicacion() {
     String detalleUbicacion = "";
