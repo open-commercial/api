@@ -107,6 +107,32 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
             .idSucursal
             .eq(criteria.getIdSucursal())
             .and(qFacturaCompra.eliminada.eq(false)));
+    if (criteria.getFechaDesdeAlta() != null || criteria.getFechaHastaAlta() != null) {
+      if (criteria.getFechaDesdeAlta() != null && criteria.getFechaHastaAlta() != null) {
+        criteria.setFechaDesdeAlta(criteria.getFechaDesdeAlta().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaHastaAlta(
+                criteria
+                        .getFechaHastaAlta()
+                        .withHour(23)
+                        .withMinute(59)
+                        .withSecond(59)
+                        .withNano(999999999));
+        builder.and(
+                qFacturaCompra.fechaAlta.between(criteria.getFechaDesdeAlta(), criteria.getFechaHastaAlta()));
+      } else if (criteria.getFechaDesdeAlta() != null) {
+        criteria.setFechaDesdeAlta(criteria.getFechaDesdeAlta().withHour(0).withMinute(0).withSecond(0));
+        builder.and(qFacturaCompra.fechaAlta.after(criteria.getFechaDesdeAlta()));
+      } else if (criteria.getFechaHastaAlta() != null) {
+        criteria.setFechaHastaAlta(
+                criteria
+                        .getFechaHastaAlta()
+                        .withHour(23)
+                        .withMinute(59)
+                        .withSecond(59)
+                        .withNano(999999999));
+        builder.and(qFacturaCompra.fechaAlta.before(criteria.getFechaHastaAlta()));
+      }
+    }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
