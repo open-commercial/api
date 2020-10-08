@@ -33,7 +33,7 @@ public class FacturaCompra extends Factura implements Serializable {
   @NotNull(message = "{mensaje_factura_proveedor_vacio}")
   private Proveedor proveedor;
 
-  @NotNull(message = "{mensaje_factura_compra_fecha_vacia}")
+  @NotNull(message = "{mensaje_factura_compra_fecha_alta_vacia}")
   private LocalDateTime fechaAlta;
 
   public FacturaCompra() {}
