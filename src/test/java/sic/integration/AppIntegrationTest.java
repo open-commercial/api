@@ -520,6 +520,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("21.42"), facturasRecuperadas.get(0).getIva105Neto());
     assertEquals(new BigDecimal("57.12"), facturasRecuperadas.get(0).getIva21Neto());
     assertEquals(new BigDecimal("554.54"), facturasRecuperadas.get(0).getTotal());
+    assertNotNull(facturasRecuperadas.get(0).getFechaAlta());
     assertEquals(
         proveedorRecuperado.getRazonSocial(), facturasRecuperadas.get(0).getRazonSocialProveedor());
     assertEquals(sucursal.getNombre(), facturasRecuperadas.get(0).getNombreSucursal());

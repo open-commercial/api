@@ -21,11 +21,13 @@ public class FacturaCompra extends Factura {
 
   private Long idProveedor;
   private String razonSocialProveedor;
+  private LocalDateTime fechaAlta;
 
   @Builder(builderMethodName = "facturaCompraBuilder")
   public FacturaCompra(
       long idFactura,
       LocalDateTime fecha,
+      LocalDateTime fechaAlta,
       TipoDeComprobante tipoDeComprobante,
       long numSerie,
       long numFactura,
@@ -87,5 +89,6 @@ public class FacturaCompra extends Factura {
         vencimientoCae);
     this.idProveedor = idProveedor;
     this.razonSocialProveedor = razonSocialProveedor;
+    this.fechaAlta = fechaAlta;
   }
 }
