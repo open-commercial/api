@@ -133,30 +133,30 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
         builder.and(qFacturaCompra.fechaAlta.before(criteria.getFechaAltaHasta()));
       }
     }
-    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-        criteria.setFechaHasta(
+    if (criteria.getFechaFacturaDesde() != null || criteria.getFechaFacturaHasta() != null) {
+      if (criteria.getFechaFacturaDesde() != null && criteria.getFechaFacturaHasta() != null) {
+        criteria.setFechaFacturaDesde(criteria.getFechaFacturaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaFacturaHasta(
             criteria
-                .getFechaHasta()
+                .getFechaFacturaHasta()
                 .withHour(23)
                 .withMinute(59)
                 .withSecond(59)
                 .withNano(999999999));
         builder.and(
-            qFacturaCompra.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
-      } else if (criteria.getFechaDesde() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
-        builder.and(qFacturaCompra.fecha.after(criteria.getFechaDesde()));
-      } else if (criteria.getFechaHasta() != null) {
-        criteria.setFechaHasta(
+            qFacturaCompra.fecha.between(criteria.getFechaFacturaDesde(), criteria.getFechaFacturaHasta()));
+      } else if (criteria.getFechaFacturaDesde() != null) {
+        criteria.setFechaFacturaDesde(criteria.getFechaFacturaDesde().withHour(0).withMinute(0).withSecond(0));
+        builder.and(qFacturaCompra.fecha.after(criteria.getFechaFacturaDesde()));
+      } else if (criteria.getFechaFacturaHasta() != null) {
+        criteria.setFechaFacturaHasta(
             criteria
-                .getFechaHasta()
+                .getFechaFacturaHasta()
                 .withHour(23)
                 .withMinute(59)
                 .withSecond(59)
                 .withNano(999999999));
-        builder.and(qFacturaCompra.fecha.before(criteria.getFechaHasta()));
+        builder.and(qFacturaCompra.fecha.before(criteria.getFechaFacturaHasta()));
       }
     }
     if (criteria.getIdProveedor() != null)
