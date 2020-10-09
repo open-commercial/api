@@ -109,7 +109,7 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
             .and(qFacturaCompra.eliminada.eq(false)));
     if (criteria.getFechaAltaDesde() != null || criteria.getFechaAltaHasta() != null) {
       if (criteria.getFechaAltaDesde() != null && criteria.getFechaAltaHasta() != null) {
-        criteria.setFechaAltaDesde(criteria.getFechaAltaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaAltaDesde(criteria.getFechaAltaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         criteria.setFechaAltaHasta(
                 criteria
                         .getFechaAltaHasta()
@@ -120,7 +120,7 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
         builder.and(
                 qFacturaCompra.fechaAlta.between(criteria.getFechaAltaDesde(), criteria.getFechaAltaHasta()));
       } else if (criteria.getFechaAltaDesde() != null) {
-        criteria.setFechaAltaDesde(criteria.getFechaAltaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaAltaDesde(criteria.getFechaAltaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         builder.and(qFacturaCompra.fechaAlta.after(criteria.getFechaAltaDesde()));
       } else if (criteria.getFechaAltaHasta() != null) {
         criteria.setFechaAltaHasta(
@@ -135,7 +135,12 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
     }
     if (criteria.getFechaFacturaDesde() != null || criteria.getFechaFacturaHasta() != null) {
       if (criteria.getFechaFacturaDesde() != null && criteria.getFechaFacturaHasta() != null) {
-        criteria.setFechaFacturaDesde(criteria.getFechaFacturaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaFacturaDesde(
+            criteria.getFechaFacturaDesde()
+                    .withHour(0)
+                    .withMinute(0)
+                    .withSecond(0)
+                    .withNano(0));
         criteria.setFechaFacturaHasta(
             criteria
                 .getFechaFacturaHasta()
@@ -144,9 +149,11 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
                 .withSecond(59)
                 .withNano(999999999));
         builder.and(
-            qFacturaCompra.fecha.between(criteria.getFechaFacturaDesde(), criteria.getFechaFacturaHasta()));
+            qFacturaCompra.fecha.between(
+                criteria.getFechaFacturaDesde(), criteria.getFechaFacturaHasta()));
       } else if (criteria.getFechaFacturaDesde() != null) {
-        criteria.setFechaFacturaDesde(criteria.getFechaFacturaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaFacturaDesde(
+            criteria.getFechaFacturaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         builder.and(qFacturaCompra.fecha.after(criteria.getFechaFacturaDesde()));
       } else if (criteria.getFechaFacturaHasta() != null) {
         criteria.setFechaFacturaHasta(

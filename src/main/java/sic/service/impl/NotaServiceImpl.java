@@ -1681,7 +1681,7 @@ public class NotaServiceImpl implements INotaService {
 
   private void establecerLimitesDeFechasDeCriteria(BusquedaNotaCriteria criteria) {
     if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
       criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
     }
   }
