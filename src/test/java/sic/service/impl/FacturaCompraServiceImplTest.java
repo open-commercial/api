@@ -128,8 +128,8 @@ class FacturaCompraServiceImplTest {
     BusquedaFacturaCompraCriteria criteria =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
-            .fechaDesdeAlta(LocalDateTime.MIN)
-            .fechaHastaAlta(LocalDateTime.MIN)
+            .fechaAltaDesde(LocalDateTime.MIN)
+            .fechaAltaHasta(LocalDateTime.MIN)
             .fechaDesde(LocalDateTime.MIN)
             .fechaHasta(LocalDateTime.MIN)
             .idProveedor(2L)
@@ -152,7 +152,7 @@ class FacturaCompraServiceImplTest {
     criteria =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
-            .fechaDesdeAlta(LocalDateTime.MIN)
+            .fechaAltaDesde(LocalDateTime.MIN)
             .fechaDesde(LocalDateTime.MIN)
             .idProveedor(2L)
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
@@ -172,7 +172,7 @@ class FacturaCompraServiceImplTest {
     criteria =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
-            .fechaHastaAlta(LocalDateTime.MIN)
+            .fechaAltaHasta(LocalDateTime.MIN)
             .fechaHasta(LocalDateTime.MIN)
             .idProveedor(2L)
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
