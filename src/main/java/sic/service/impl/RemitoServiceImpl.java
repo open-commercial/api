@@ -233,7 +233,7 @@ public class RemitoServiceImpl implements IRemitoService {
         BooleanBuilder builder = new BooleanBuilder();
         if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
             if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-                criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+                criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
                 criteria.setFechaHasta(
                         criteria
                                 .getFechaHasta()
@@ -244,7 +244,7 @@ public class RemitoServiceImpl implements IRemitoService {
                 builder.and(
                         qRemito.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
             } else if (criteria.getFechaDesde() != null) {
-                criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+                criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
                 builder.and(qRemito.fecha.after(criteria.getFechaDesde()));
             } else if (criteria.getFechaHasta() != null) {
                 criteria.setFechaHasta(
