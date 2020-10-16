@@ -210,22 +210,22 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, long idUsuario) {
-    Page<Producto> productos =
-        productoRepository.findAll(
+  public Page<Producto> buscarProductos(BusquedaProductoCriteria criteria) {
+    return productoRepository.findAll(
             this.getBuilder(criteria),
             this.getPageable(
                 criteria.getPagina(),
                 criteria.getOrdenarPor(),
                 criteria.getSentido(),
                 TAMANIO_PAGINA_DEFAULT));
+  }
+
+  @Override
+  public void marcarFavoritos(Page<Producto> productos, long idUsuario) {
     List<Producto> productosFavoritos = this.getProductosFavoritosDelClientePorIdUsuario(idUsuario);
-    productos.forEach(producto -> {
-      if (productosFavoritos.contains(producto)) {
-        producto.setFavorito(true);
-      }
+    productos.forEach(p -> {
+      if (productosFavoritos.contains(p)) p.setFavorito(true);
     });
-    return productos;
   }
 
   @Override
