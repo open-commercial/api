@@ -702,7 +702,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
+  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO, Usuario usuarioLogueado) {
     boolean actualizaPrecios =
         productosParaActualizarDTO.getGananciaPorcentaje() != null
             && productosParaActualizarDTO.getIvaPorcentaje() != null
@@ -752,9 +752,9 @@ public class ProductoServiceImpl implements IProductoService {
             proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
-      if (productosParaActualizarDTO.getCantidadVentaMinima() != null
-          && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
-        p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
+      if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getCantidadVentaMinima() != null
+                && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
+          p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
       }
       if (actualizaPrecios) {
         p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());

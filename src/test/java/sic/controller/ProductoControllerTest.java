@@ -1,5 +1,9 @@
 package sic.controller;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.impl.crypto.MacProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -12,18 +16,20 @@ import sic.modelo.dto.CantidadEnSucursalDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.service.impl.*;
 
+import javax.crypto.SecretKey;
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ProductoController.class})
-public class ProductoControllerTest {
+class ProductoControllerTest {
 
   @MockBean ProductoServiceImpl productoService;
   @MockBean MedidaServiceImpl medidaService;
@@ -31,6 +37,7 @@ public class ProductoControllerTest {
   @MockBean ProveedorServiceImpl proveedorService;
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean AuthServiceImpl authService;
+  @MockBean UsuarioServiceImpl usuarioService;
   @MockBean ModelMapper modelMapper;
 
   @Autowired ProductoController productoController;
@@ -64,7 +71,27 @@ public class ProductoControllerTest {
     when(modelMapper.map(productoDTO, Producto.class)).thenReturn(productoPorActualizar);
     when(modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class))
         .thenReturn(cantidadEnSucursal);
-    productoController.actualizar(productoDTO, 1L, 1L, 1L);
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
+    SecretKey secretKey = MacProvider.generateKey();
+    String token =
+            Jwts.builder()
+                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                    .claim("idUsuario", 1L)
+                    .claim("roles", roles)
+                    .claim("app", Aplicacion.SIC_COM)
+                    .compact();
+    Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    Usuario usuario = new Usuario();
+    usuario.setUsername("usuario");
+    usuario.setRoles(Collections.emptyList());
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
+    productoController.actualizar(productoDTO, 1L, 1L, 1L, "headers");
     verify(productoService).actualizar(any(), any(), any());
   }
 }

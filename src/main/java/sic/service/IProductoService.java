@@ -82,7 +82,7 @@ public interface IProductoService {
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
-  void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO);
+  void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO, Usuario usuarioLogueado);
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 

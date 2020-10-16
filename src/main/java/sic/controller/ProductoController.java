@@ -2,6 +2,8 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.*;
+
+import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -29,6 +31,7 @@ public class ProductoController {
   private final IRubroService rubroService;
   private final IProveedorService proveedorService;
   private final ISucursalService sucursalService;
+  private final IUsuarioService usuarioService;
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
@@ -40,6 +43,7 @@ public class ProductoController {
     IRubroService rubroService,
     IProveedorService proveedorService,
     ISucursalService sucursalService,
+    IUsuarioService usuarioService,
     IAuthService authService,
     ModelMapper modelMapper,
     MessageSource messageSource) {
@@ -48,6 +52,7 @@ public class ProductoController {
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.sucursalService = sucursalService;
+    this.usuarioService = usuarioService;
     this.authService = authService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
@@ -135,7 +140,8 @@ public class ProductoController {
       @RequestBody ProductoDTO productoDTO,
       @RequestParam(required = false) Long idMedida,
       @RequestParam(required = false) Long idRubro,
-      @RequestParam(required = false) Long idProveedor) {
+      @RequestParam(required = false) Long idProveedor,
+      @RequestHeader("Authorization") String authorizationHeader) {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
     Producto productoPersistido =
         productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
@@ -147,34 +153,41 @@ public class ProductoController {
       productoPorActualizar.setProveedor(
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
-    productoDTO
-        .getCantidadEnSucursales()
-        .forEach(
-            cantidadEnSucursalDTO -> {
-              CantidadEnSucursal cantidadEnSucursal =
-                  modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class);
-              cantidadEnSucursal.setSucursal(
-                  sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
-              cantidadEnSucursales.add(cantidadEnSucursal);
-            });
-    productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
-    productoPorActualizar.getCantidadEnSucursales().addAll(productoPersistido.getCantidadEnSucursales());
-    productoPorActualizar.setCantidadTotalEnSucursales(
-        cantidadEnSucursales
-            .stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
-    productoPorActualizar.setHayStock(
-        productoPorActualizar.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get("idUsuario").toString()));
+    if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)) {
+      Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+      productoDTO
+              .getCantidadEnSucursales()
+              .forEach(
+                      cantidadEnSucursalDTO -> {
+                        CantidadEnSucursal cantidadEnSucursal =
+                                modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class);
+                        cantidadEnSucursal.setSucursal(
+                                sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
+                        cantidadEnSucursales.add(cantidadEnSucursal);
+                      });
+      productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
+      productoPorActualizar.getCantidadEnSucursales().addAll(productoPersistido.getCantidadEnSucursales());
+      productoPorActualizar.setCantidadTotalEnSucursales(
+              cantidadEnSucursales
+                      .stream()
+                      .map(CantidadEnSucursal::getCantidad)
+                      .reduce(BigDecimal.ZERO, BigDecimal::add));
+      productoPorActualizar.setHayStock(
+              productoPorActualizar.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+      if (productoPorActualizar.getBulto() == null)
+        productoPorActualizar.setBulto(productoPersistido.getBulto());
+    } else {
+        productoPorActualizar.setCantidadEnSucursales(productoPersistido.getCantidadEnSucursales());
+        productoPorActualizar.setBulto(productoPersistido.getBulto());
+    }
     if (productoPorActualizar.getPorcentajeBonificacionOferta() == null)
       productoPorActualizar.setPorcentajeBonificacionOferta(
           productoPersistido.getPorcentajeBonificacionOferta());
     if (productoPorActualizar.getPorcentajeBonificacionPrecio() == null)
       productoPorActualizar.setPorcentajeBonificacionPrecio(
           productoPersistido.getPorcentajeBonificacionPrecio());
-    if (productoPorActualizar.getBulto() == null)
-      productoPorActualizar.setBulto(productoPersistido.getBulto());
     if (productoPorActualizar.getDescripcion() == null)
       productoPorActualizar.setDescripcion(productoPersistido.getDescripcion());
     if (productoPorActualizar.getCodigo() == null)
@@ -195,8 +208,11 @@ public class ProductoController {
   @PutMapping("/productos/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
-    @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO) {
-    productoService.actualizarMultiples(productosParaActualizarDTO);
+    @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO,
+    @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue());
+    productoService.actualizarMultiples(productosParaActualizarDTO, usuarioLogueado);
   }
 
   @PostMapping("/productos/disponibilidad-stock")

@@ -353,6 +353,8 @@ class ProductoServiceImplTest {
     Producto producto = this.construirProducto();
     producto.setIdProducto(1L);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Collections.emptyList());
     assertThrows(
         BusinessServiceException.class,
         () ->
@@ -369,7 +371,7 @@ class ProductoServiceImplTest {
                     .precioCosto(BigDecimal.TEN)
                     .porcentajeBonificacionPrecio(BigDecimal.TEN)
                     .publico(true)
-                    .build()));
+                    .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_modificar_producto_no_permitido"), any(), any());
     assertThrows(
         BusinessServiceException.class,
@@ -386,7 +388,7 @@ class ProductoServiceImplTest {
                     .precioCosto(BigDecimal.TEN)
                     .porcentajeBonificacionPrecio(BigDecimal.TEN)
                     .publico(true)
-                    .build()));
+                    .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_error_ids_duplicados"), any(), any());
     Producto producto1 = new Producto();
     producto1.setIdProducto(1L);
@@ -409,7 +411,7 @@ class ProductoServiceImplTest {
                     .porcentajeBonificacionPrecio(new BigDecimal("5"))
                     .porcentajeBonificacionOferta(BigDecimal.TEN)
                     .publico(true)
-                    .build());
+                    .build(), usuario);
     productoService.actualizarMultiples(
             ProductosParaActualizarDTO.builder()
                     .idProducto(new long[] {1L, 2L})
@@ -423,7 +425,7 @@ class ProductoServiceImplTest {
                     .porcentajeBonificacionPrecio(new BigDecimal("5"))
                     .porcentajeBonificacionOferta(null)
                     .publico(true)
-                    .build());
+                    .build(), usuario);
     verify(productoRepository, times(2)).saveAll(any());
   }
 
