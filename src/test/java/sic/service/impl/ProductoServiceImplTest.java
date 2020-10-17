@@ -865,4 +865,13 @@ class ProductoServiceImplTest {
     assertTrue(productoService.isFavorito(1L, 1L));
     verify(productoFavoritoRepository).existsByClienteAndProducto(cliente, productoUno);
   }
+
+  @Test
+  void shouldTestGetCantidadDeProductoFavorito() {
+    Cliente cliente = new Cliente();
+    cliente.setNombreFiscal("Cliente test");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    productoService.getCantidadDeProductosFavoritos(1L);
+    verify(productoFavoritoRepository).getCantidadDeArticulosEnFavoritos(cliente);
+  }
 }
