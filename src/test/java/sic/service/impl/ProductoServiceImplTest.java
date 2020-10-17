@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 
+import com.querydsl.core.BooleanBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -232,15 +233,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
-    Producto producto = this.construirProducto();
-    producto.setOferta(true);
-    assertThrows(
-        BusinessServiceException.class, () -> productoService.actualizar(producto, producto, null));
-    verify(messageSource).getMessage(eq("mensaje_producto_oferta_sin_imagen"), any(), any());
-  }
-
-  @Test
   void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
     Producto productoParaActualizar = this.construirProducto();
     productoParaActualizar.setIdProducto(1L);
@@ -365,7 +357,8 @@ class ProductoServiceImplTest {
     Producto producto = this.construirProducto();
     producto.setIdProducto(1L);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    productoService.actualizarMultiples(productosParaActualizarDTO);
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Collections.emptyList());
     assertThrows(
         BusinessServiceException.class,
         () ->
@@ -382,7 +375,7 @@ class ProductoServiceImplTest {
                     .precioCosto(BigDecimal.TEN)
                     .porcentajeBonificacionPrecio(BigDecimal.TEN)
                     .publico(true)
-                    .build()));
+                    .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_modificar_producto_no_permitido"), any(), any());
     assertThrows(
         BusinessServiceException.class,
@@ -399,8 +392,45 @@ class ProductoServiceImplTest {
                     .precioCosto(BigDecimal.TEN)
                     .porcentajeBonificacionPrecio(BigDecimal.TEN)
                     .publico(true)
-                    .build()));
+                    .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_error_ids_duplicados"), any(), any());
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    producto1.setCodigo("1a");
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    producto2.setCodigo("2b");
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
+    when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(BigDecimal.TEN)
+                    .publico(true)
+                    .build(), usuario);
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(null)
+                    .publico(true)
+                    .build(), usuario);
+    verify(productoRepository, times(2)).saveAll(any());
   }
 
   @Test
@@ -794,22 +824,18 @@ class ProductoServiceImplTest {
     productos.add(productoUno);
     productos.add(productoDos);
     Page<Producto> paginaProductos = new PageImpl<>(productos);
-    when(productoRepository.findAll(
-            any(), eq(PageRequest.of(0, 24, Sort.by(Sort.Order.asc("descripcion"))))))
-        .thenReturn(paginaProductos);
-    List<ProductoFavorito> productoFavoritosDelCliente = new ArrayList<>();
-    ProductoFavorito productoFavorito = new ProductoFavorito();
-    productoFavorito.setCliente(cliente);
-    productoFavorito.setProducto(productoUno);
-    productoFavoritosDelCliente.add(productoFavorito);
-    when(productoFavoritoRepository.findAllByCliente(cliente))
-        .thenReturn(productoFavoritosDelCliente);
-    BusquedaProductoCriteria criteriaProductos = BusquedaProductoCriteria.builder().build();
-      // paginaProductos = productoService.buscarProductos(criteriaProductos, 1L);
-      fail(); // Corregir test
-    assertNotNull(paginaProductos);
-    assertTrue(paginaProductos.getContent().get(0).isFavorito());
-    assertFalse(paginaProductos.getContent().get(1).isFavorito());
+    BusquedaProductoCriteria criteriaProductos =
+        BusquedaProductoCriteria.builder().pagina(0).ordenarPor("descripcion").sentido("ASC").build();
+    BooleanBuilder builder = productoService.getBuilder(criteriaProductos);
+    Pageable pageable =
+        productoService.getPageable(
+            criteriaProductos.getPagina(),
+            criteriaProductos.getOrdenarPor(),
+            criteriaProductos.getSentido(),
+            24);
+    when(productoRepository.findAll(builder, pageable)).thenReturn(paginaProductos);
+    productoService.buscarProductos(criteriaProductos);
+    verify(productoRepository).findAll(eq(builder), eq(pageable));
   }
 
   @Test

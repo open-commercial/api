@@ -261,7 +261,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             .and(qFacturaVenta.eliminada.eq(false)));
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         criteria.setFechaHasta(
             criteria
                 .getFechaHasta()
@@ -272,7 +272,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         builder.and(
             qFacturaVenta.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         builder.and(qFacturaVenta.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
         criteria.setFechaHasta(
@@ -345,6 +345,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         }
       }
     }
+    List<TipoDeComprobante> tiposAutorizables =
+        Arrays.asList(
+            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    facturasProcesadas.stream()
+        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+        .forEach(this::autorizarFacturaVenta);
     return facturasProcesadas;
   }
 

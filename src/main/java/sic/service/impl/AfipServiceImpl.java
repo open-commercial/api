@@ -77,10 +77,8 @@ public class AfipServiceImpl implements IAfipService {
     } else {
       byte[] p12file = configuracionSucursal.getCertificadoAfip();
       if (p12file.length == 0) {
-        logger.warn(
-            messageSource.getMessage(
+        throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_sucursal_certificado_vacio", null, Locale.getDefault()));
-        return null;
       } else {
         String p12signer = configuracionSucursal.getFirmanteCertificadoAfip();
         String p12pass = configuracionSucursal.getPasswordCertificadoAfip();
@@ -113,14 +111,12 @@ public class AfipServiceImpl implements IAfipService {
               estadoAnteriorConfiguracionSucursal, configuracionSucursal);
           return feAuthRequest;
         } catch (DocumentException | IOException ex) {
-          logger.error(
-              messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()),
-              ex);
-          return null;
+          logger.error(messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
+          throw new ServiceException(
+                  messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()));
         } catch (WebServiceClientException ex) {
-          logger.error(
-              messageSource.getMessage("mensaje_token_wsaa_error", null, Locale.getDefault()), ex);
-          return null;
+          logger.error(messageSource.getMessage("mensaje_token_wsaa_error", null, Locale.getDefault()), ex);
+          throw new ServiceException(messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()));
         }
       }
     }
@@ -131,8 +127,7 @@ public class AfipServiceImpl implements IAfipService {
     if (!configuracionSucursalService
         .getConfiguracionSucursal(comprobante.getSucursal())
         .isFacturaElectronicaHabilitada()) {
-      logger.warn(
-          messageSource.getMessage("mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
+      throw new BusinessServiceException(messageSource.getMessage("mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
     }
     if (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_A
         && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_B
@@ -143,37 +138,33 @@ public class AfipServiceImpl implements IAfipService {
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_B
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
         && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
-      logger.warn(
-          messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
+      throw new BusinessServiceException(messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     } else {
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_A
               || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_B
               || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
           && facturaVentaService.existeFacturaVentaAnteriorSinAutorizar(comprobante)) {
-        logger.warn(
-            messageSource.getMessage(
+        throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
               || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
               || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C)
           && notaService.existeNotaCreditoAnteriorSinAutorizar(comprobante)) {
-        logger.warn(
-            messageSource.getMessage(
+        throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }
       if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
               || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B
               || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C)
           && notaService.existeNotaDebitoAnteriorSinAutorizar(comprobante)) {
-        logger.warn(
-            messageSource.getMessage(
+        throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
       }
     }
-    if (comprobante.getCae() != 0) {
-      logger.warn(
-          messageSource.getMessage(
+    boolean sinCae = comprobante.getCae() != 0;
+    if (sinCae) {
+      throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_comprobanteAFIP_autorizado", null, Locale.getDefault()));
     }
     FECAESolicitar fecaeSolicitud = new FECAESolicitar();
@@ -227,11 +218,15 @@ public class AfipServiceImpl implements IAfipService {
         comprobante.setNumFacturaAfip(siguienteNroComprobante);
       } catch (WebServiceClientException ex) {
         logger.error(
-            messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
+            messageSource.getMessage("mensaje_error_wsfe", null, Locale.getDefault()), ex);
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_autorizacion_error", null, Locale.getDefault()));
       } catch (IOException ex) {
         logger.error(
             messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()),
             ex);
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_autorizacion_error", null, Locale.getDefault()));
       }
     }
   }
@@ -279,13 +274,15 @@ public class AfipServiceImpl implements IAfipService {
           afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException ex) {
-      logger.error(ex.getMessage());
+      logger.error(messageSource.getMessage(
+              "mensaje_siguiente_nro_comprobante_error", null, Locale.getDefault()), ex);
       throw new ServiceException(messageSource.getMessage(
-        "mensaje_siguiente_nro_comprobante_error", null, Locale.getDefault()));
+        "mensaje_autorizacion_error", null, Locale.getDefault()));
     } catch (IOException ex) {
-      logger.error(ex.getMessage());
+      logger.error(messageSource.getMessage(
+              "mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
       throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_procesando_xml", null, Locale.getDefault()));
+        "mensaje_autorizacion_error", null, Locale.getDefault()));
     }
   }
 

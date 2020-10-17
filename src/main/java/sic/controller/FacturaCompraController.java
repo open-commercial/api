@@ -12,6 +12,7 @@ import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public class FacturaCompraController {
     fc.setNumFactura(
         nuevaCompraCompraDTO.getNumFactura() != null ? nuevaCompraCompraDTO.getNumFactura() : 0L);
     fc.setFechaVencimiento(nuevaCompraCompraDTO.getFechaVencimiento());
+    fc.setFechaAlta(LocalDateTime.now());
     fc.setRenglones(
         facturaService.calcularRenglones(
             nuevaCompraCompraDTO.getTipoDeComprobante(),

@@ -110,16 +110,6 @@ class FacturaVentaControllerTest {
   }
 
   @Test
-  void shouldAutorizarFactura() {
-    FacturaVenta facturaVenta = new FacturaVenta();
-    facturaVenta.setNumSerie(1L);
-    facturaVenta.setNumFactura(123L);
-    when(facturaService.getFacturaNoEliminadaPorId(5L)).thenReturn(facturaVenta);
-    when(facturaVentaService.autorizarFacturaVenta(facturaVenta)).thenReturn(facturaVenta);
-    assertEquals(facturaVenta, facturaVentaController.autorizarFactura(5L));
-  }
-
-  @Test
   void shouldBuscarFacturaVenta() {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());

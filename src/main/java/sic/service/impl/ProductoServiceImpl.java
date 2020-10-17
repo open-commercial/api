@@ -312,12 +312,6 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto guardar(
       NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
     customValidator.validar(nuevoProductoDTO);
-    if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_sin_imagen",
-              new Object[] {nuevoProductoDTO.getDescripcion()},
-              Locale.getDefault()));
     if (nuevoProductoDTO.getCodigo() == null) nuevoProductoDTO.setCodigo("");
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
@@ -394,15 +388,6 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     customValidator.validar(productoPorActualizar);
-    if (productoPorActualizar.isOferta()
-        && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())
-        && imagen == null)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_sin_imagen",
-              new Object[] {productoPorActualizar.getDescripcion()},
-              Locale.getDefault()));
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
         && (productoPorActualizar.getUrlImagen() == null
@@ -719,7 +704,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
+  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO, Usuario usuarioLogueado) {
     boolean actualizaPrecios =
         productosParaActualizarDTO.getGananciaPorcentaje() != null
             && productosParaActualizarDTO.getIvaPorcentaje() != null
@@ -769,9 +754,9 @@ public class ProductoServiceImpl implements IProductoService {
             proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
-      if (productosParaActualizarDTO.getCantidadVentaMinima() != null
-          && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
-        p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
+      if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getCantidadVentaMinima() != null
+                && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
+          p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
       }
       if (actualizaPrecios) {
         p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
@@ -783,6 +768,15 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioLista(
                 this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
+        if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
+                && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
+                >= 0) {
+          p.setOferta(true);
+          p.setPorcentajeBonificacionOferta(
+                  productosParaActualizarDTO.getPorcentajeBonificacionOferta());
+        } else {
+          p.setOferta(false);
+        }
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));

@@ -128,8 +128,10 @@ class FacturaCompraServiceImplTest {
     BusquedaFacturaCompraCriteria criteria =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
-            .fechaDesde(LocalDateTime.MIN)
-            .fechaHasta(LocalDateTime.MIN)
+            .fechaAltaDesde(LocalDateTime.MIN)
+            .fechaAltaHasta(LocalDateTime.MIN)
+            .fechaFacturaDesde(LocalDateTime.MIN)
+            .fechaFacturaHasta(LocalDateTime.MIN)
             .idProveedor(2L)
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
             .idProducto(3L)
@@ -137,8 +139,31 @@ class FacturaCompraServiceImplTest {
             .numFactura(5L)
             .build();
     String resultadoBuilder =
-        "facturaCompra.sucursal.idSucursal = 1 && facturaCompra.eliminada = false && facturaCompra.fecha "
-            + "between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+        "facturaCompra.sucursal.idSucursal = 1 "
+            + "&& facturaCompra.eliminada = false "
+            + "&& facturaCompra.fechaAlta between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+            + "&& facturaCompra.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+            + "&& facturaCompra.proveedor.idProveedor = 2 "
+            + "&& facturaCompra.tipoComprobante = FACTURA_A "
+            + "&& any(facturaCompra.renglones).idProductoItem = 3 "
+            + "&& facturaCompra.numSerie = 4 "
+            + "&& facturaCompra.numFactura = 5";
+    assertEquals(resultadoBuilder, facturaCompraServiceImpl.getBuilderCompra(criteria).toString());
+    criteria =
+        BusquedaFacturaCompraCriteria.builder()
+            .idSucursal(1L)
+            .fechaAltaDesde(LocalDateTime.MIN)
+            .fechaFacturaDesde(LocalDateTime.MIN)
+            .idProveedor(2L)
+            .tipoComprobante(TipoDeComprobante.FACTURA_A)
+            .idProducto(3L)
+            .numSerie(4L)
+            .numFactura(5L)
+            .build();
+    resultadoBuilder =
+        "facturaCompra.sucursal.idSucursal = 1 "
+            + "&& facturaCompra.eliminada = false "
+            + "&& facturaCompra.fechaAlta > -999999999-01-01T00:00 && facturaCompra.fecha > -999999999-01-01T00:00 "
             + "&& facturaCompra.proveedor.idProveedor = 2 "
             + "&& facturaCompra.tipoComprobante = FACTURA_A "
             + "&& any(facturaCompra.renglones).idProductoItem = 3 "
@@ -147,7 +172,8 @@ class FacturaCompraServiceImplTest {
     criteria =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
-            .fechaDesde(LocalDateTime.MIN)
+            .fechaAltaHasta(LocalDateTime.MIN)
+            .fechaFacturaHasta(LocalDateTime.MIN)
             .idProveedor(2L)
             .tipoComprobante(TipoDeComprobante.FACTURA_A)
             .idProducto(3L)
@@ -155,27 +181,15 @@ class FacturaCompraServiceImplTest {
             .numFactura(5L)
             .build();
     resultadoBuilder =
-        "facturaCompra.sucursal.idSucursal = 1 && facturaCompra.eliminada = false "
-            + "&& facturaCompra.fecha > -999999999-01-01T00:00 && facturaCompra.proveedor.idProveedor = 2 "
-            + "&& facturaCompra.tipoComprobante = FACTURA_A && any(facturaCompra.renglones).idProductoItem = 3 "
-            + "&& facturaCompra.numSerie = 4 && facturaCompra.numFactura = 5";
-    assertEquals(resultadoBuilder, facturaCompraServiceImpl.getBuilderCompra(criteria).toString());
-    criteria =
-        BusquedaFacturaCompraCriteria.builder()
-            .idSucursal(1L)
-            .fechaHasta(LocalDateTime.MIN)
-            .idProveedor(2L)
-            .tipoComprobante(TipoDeComprobante.FACTURA_A)
-            .idProducto(3L)
-            .numSerie(4L)
-            .numFactura(5L)
-            .build();
-    resultadoBuilder =
-        "facturaCompra.sucursal.idSucursal = 1 && facturaCompra.eliminada = false "
-            + "&& facturaCompra.fecha < -999999999-01-01T23:59:59.999999999 "
-            + "&& facturaCompra.proveedor.idProveedor = 2 && facturaCompra.tipoComprobante = FACTURA_A "
-            + "&& any(facturaCompra.renglones).idProductoItem = 3 && facturaCompra.numSerie = 4 "
-            + "&& facturaCompra.numFactura = 5";
+        "facturaCompra.sucursal.idSucursal = 1 " +
+                "&& facturaCompra.eliminada = false " +
+                "&& facturaCompra.fechaAlta < -999999999-01-01T23:59:59.999999999 " +
+                "&& facturaCompra.fecha < -999999999-01-01T23:59:59.999999999 " +
+                "&& facturaCompra.proveedor.idProveedor = 2 " +
+                "&& facturaCompra.tipoComprobante = FACTURA_A " +
+                "&& any(facturaCompra.renglones).idProductoItem = 3 " +
+                "&& facturaCompra.numSerie = 4 " +
+                "&& facturaCompra.numFactura = 5";
     assertEquals(resultadoBuilder, facturaCompraServiceImpl.getBuilderCompra(criteria).toString());
   }
 
