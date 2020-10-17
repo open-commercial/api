@@ -345,6 +345,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         }
       }
     }
+    List<TipoDeComprobante> tiposAutorizables =
+        Arrays.asList(
+            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    facturasProcesadas.stream()
+        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+        .forEach(this::autorizarFacturaVenta);
     return facturasProcesadas;
   }
 

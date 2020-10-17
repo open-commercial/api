@@ -99,20 +99,7 @@ public class FacturaVentaController {
                   nuevaFacturaVentaDTO.getMontos(),
                   fv.getFecha()));
     }
-    List<TipoDeComprobante> tiposAutorizables =
-        Arrays.asList(
-            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    facturasGuardadas.stream()
-        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
-        .forEach(facturaVentaService::autorizarFacturaVenta);
     return facturasGuardadas;
-  }
-
-  @PostMapping("/facturas/ventas/{idFactura}/autorizacion")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public FacturaVenta autorizarFactura(@PathVariable long idFactura) {
-    return facturaVentaService.autorizarFacturaVenta(
-        (FacturaVenta) facturaService.getFacturaNoEliminadaPorId(idFactura));
   }
 
   @PostMapping("/facturas/ventas/busqueda/criteria")
