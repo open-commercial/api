@@ -154,7 +154,7 @@ public class ProductoController {
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get("idUsuario").toString()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get(CLAIM_ID_USUARIO).toString()));
     if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)) {
       Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
       productoDTO
@@ -211,7 +211,7 @@ public class ProductoController {
     @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO,
     @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue());
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
     productoService.actualizarMultiples(productosParaActualizarDTO, usuarioLogueado);
   }
 
