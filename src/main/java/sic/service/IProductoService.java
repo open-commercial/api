@@ -99,4 +99,6 @@ public interface IProductoService {
   void quitarProductoDeFavoritos(long idUsuario, long idProducto);
 
   void quitarProductosDeFavoritos(long idUsuario);
+
+  Long getCantidadDeProductosFavoritos(long idUsuario);
 }

@@ -1160,4 +1160,10 @@ public class ProductoServiceImpl implements IProductoService {
     logger.warn(
             messageSource.getMessage("mensaje_producto_favoritos_quitados", null, Locale.getDefault()));
   }
+
+  @Override
+  public Long getCantidadDeProductosFavoritos(long idUsuario) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    return productoFavoritoRepository.getCantidadDeArticulosEnFavoritos(cliente);
+  }
 }

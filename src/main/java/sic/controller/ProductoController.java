@@ -234,4 +234,11 @@ public class ProductoController {
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     productoService.quitarProductosDeFavoritos(idUsuarioLoggedIn);
   }
+
+  @GetMapping("/productos/favoritos/cantidad")
+  public Long getCantidadDeProductosFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
+  }
 }
