@@ -805,7 +805,8 @@ class ProductoServiceImplTest {
     when(productoFavoritoRepository.findAllByCliente(cliente))
         .thenReturn(productoFavoritosDelCliente);
     BusquedaProductoCriteria criteriaProductos = BusquedaProductoCriteria.builder().build();
-    paginaProductos = productoService.buscarProductos(criteriaProductos, 1L);
+      // paginaProductos = productoService.buscarProductos(criteriaProductos, 1L);
+      fail(); // Corregir test
     assertNotNull(paginaProductos);
     assertTrue(paginaProductos.getContent().get(0).isFavorito());
     assertFalse(paginaProductos.getContent().get(1).isFavorito());

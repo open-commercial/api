@@ -1,7 +1,6 @@
 package sic.service;
 
 import java.math.BigDecimal;
-
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
@@ -38,7 +37,9 @@ public interface IProductoService {
 
   void validarCalculos(Producto producto);
 
-  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, long idUsuario);
+  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
+
+  void marcarFavoritos(Page<Producto> productos, long idUsuario);
 
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);
 

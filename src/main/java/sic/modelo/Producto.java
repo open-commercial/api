@@ -130,6 +130,9 @@ public class Producto implements Serializable {
   @Transient
   private boolean favorito;
 
+  // agregar reglas: >= 0
+  // private long contadorFavoritos;
+
   private boolean ilimitado;
 
   private boolean publico;

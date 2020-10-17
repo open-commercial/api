@@ -62,30 +62,36 @@ public class ProductoController {
       @RequestParam(required = false) Boolean publicos,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
-          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
+              messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) {
-      producto.setFavorito(true);
+    if (authorizationHeader != null
+            && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) producto.setFavorito(true);
     }
     return producto;
   }
 
   @GetMapping("/productos/busqueda")
-    public Producto getProductoPorCodigo(@RequestParam String codigo) {
-      return productoService.getProductoPorCodigo(codigo);
-    }
+  public Producto getProductoPorCodigo(@RequestParam String codigo) {
+    return productoService.getProductoPorCodigo(codigo);
+  }
 
   @PostMapping("/productos/busqueda/criteria")
   public Page<Producto> buscarProductos(
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return productoService.buscarProductos(criteria, idUsuarioLoggedIn);
+    Page<Producto> productos = productoService.buscarProductos(criteria);
+    if (authorizationHeader != null
+            && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
+    }
+    return productos;
   }
 
   @PostMapping("/productos/valor-stock/criteria")
