@@ -1,7 +1,6 @@
 package sic.service;
 
 import java.math.BigDecimal;
-
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
@@ -40,6 +39,8 @@ public interface IProductoService {
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
 
+  void marcarFavoritos(Page<Producto> productos, long idUsuario);
+
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);
 
   List<Producto> buscarProductosParaReporte(BusquedaProductoCriteria criteria);
@@ -72,8 +73,6 @@ public interface IProductoService {
 
   Producto getProductoNoEliminadoPorId(long idProducto);
 
-  Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos);
-
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
   byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
@@ -89,4 +88,18 @@ public interface IProductoService {
   String subirImagenProducto(long idProducto, byte[] imagen);
 
   Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina);
+
+  Producto guardarProductoFavorito(long idUsuario, long idProducto);
+
+  Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina);
+
+  List<Producto> getProductosFavoritosDelClientePorIdUsuario(long idUsuario);
+
+  boolean isFavorito(long idUsuario, long idProducto);
+
+  void quitarProductoDeFavoritos(long idUsuario, long idProducto);
+
+  void quitarProductosDeFavoritos(long idUsuario);
+
+  Long getCantidadDeProductosFavoritos(long idUsuario);
 }

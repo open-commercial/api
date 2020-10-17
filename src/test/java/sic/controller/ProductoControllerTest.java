@@ -94,4 +94,124 @@ class ProductoControllerTest {
     productoController.actualizar(productoDTO, 1L, 1L, 1L, "headers");
     verify(productoService).actualizar(any(), any(), any());
   }
+
+  @Test
+  void shouldMarcarComoFavorito() {
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    SecretKey secretKey = MacProvider.generateKey();
+    Claims claims =
+        Jwts.parser()
+            .setSigningKey(secretKey)
+            .parseClaimsJws(
+                Jwts.builder()
+                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                    .claim("idUsuario", 1L)
+                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
+                    .claim("app", Aplicacion.SIC_COM)
+                    .compact())
+            .getBody();
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    productoController.marcarComoFavorito(1L, "headers");
+    verify(productoService).guardarProductoFavorito(1L, 1L);
+  }
+
+  @Test
+  void shouldGetProductoFavoritosDelCliente() {
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    SecretKey secretKey = MacProvider.generateKey();
+    Claims claims =
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(
+                            Jwts.builder()
+                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                                    .claim("idUsuario", 1L)
+                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
+                                    .claim("app", Aplicacion.SIC_COM)
+                                    .compact())
+                    .getBody();
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    productoController.getProductosFavoritosDelCliente(0, "headers");
+    verify(productoService).getPaginaProductosFavoritosDelCliente(1L, 0);
+  }
+
+  @Test
+  void shouldQuitarProductoDeFavoritos() {
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    SecretKey secretKey = MacProvider.generateKey();
+    Claims claims =
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(
+                            Jwts.builder()
+                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                                    .claim("idUsuario", 1L)
+                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
+                                    .claim("app", Aplicacion.SIC_COM)
+                                    .compact())
+                    .getBody();
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    productoController.quitarProductoDeFavoritos(4L, "headers");
+    verify(productoService).quitarProductoDeFavoritos(1L, 4L);
+  }
+
+  @Test
+  void shouldQuitarProductosDeFavoritos() {
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    SecretKey secretKey = MacProvider.generateKey();
+    Claims claims =
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(
+                            Jwts.builder()
+                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                                    .claim("idUsuario", 1L)
+                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
+                                    .claim("app", Aplicacion.SIC_COM)
+                                    .compact())
+                    .getBody();
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    productoController.quitarProductosDeFavoritos("headers");
+    verify(productoService).quitarProductosDeFavoritos(1L);
+  }
+
+  @Test
+  void shouldGetCantidadDeProductosFavoritos() {
+    LocalDateTime today = LocalDateTime.now();
+    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    SecretKey secretKey = MacProvider.generateKey();
+    Claims claims =
+            Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(
+                            Jwts.builder()
+                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
+                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
+                                    .signWith(SignatureAlgorithm.HS512, secretKey)
+                                    .claim("idUsuario", 1L)
+                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
+                                    .claim("app", Aplicacion.SIC_COM)
+                                    .compact())
+                    .getBody();
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    productoController.getCantidadDeProductosFavoritos("headers");
+    verify(productoService).getCantidadDeProductosFavoritos(1L);
+  }
 }

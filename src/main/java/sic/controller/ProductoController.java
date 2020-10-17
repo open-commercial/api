@@ -35,6 +35,7 @@ public class ProductoController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
   public ProductoController(
@@ -66,23 +67,21 @@ public class ProductoController {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
-          messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
+              messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (!producto.isOferta()
-        && authorizationHeader != null
-        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      Page<Producto> productos =
-          productoService.getProductosConPrecioBonificado(
-              new PageImpl<>(Collections.singletonList(producto)));
-      producto = productos.getContent().get(0);
+    if (authorizationHeader != null
+            && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) producto.setFavorito(true);
     }
     return producto;
   }
 
   @GetMapping("/productos/busqueda")
-    public Producto getProductoPorCodigo(@RequestParam String codigo) {
-      return productoService.getProductoPorCodigo(codigo);
-    }
+  public Producto getProductoPorCodigo(@RequestParam String codigo) {
+    return productoService.getProductoPorCodigo(codigo);
+  }
 
   @PostMapping("/productos/busqueda/criteria")
   public Page<Producto> buscarProductos(
@@ -90,11 +89,12 @@ public class ProductoController {
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos = productoService.buscarProductos(criteria);
     if (authorizationHeader != null
-        && authService.esAuthorizationHeaderValido(authorizationHeader)) {
-      return productoService.getProductosConPrecioBonificado(productos);
-    } else {
-      return productos;
+            && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
     }
+    return productos;
   }
 
   @PostMapping("/productos/valor-stock/criteria")
@@ -154,7 +154,7 @@ public class ProductoController {
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get("idUsuario").toString()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get(CLAIM_ID_USUARIO).toString()));
     if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)) {
       Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
       productoDTO
@@ -211,7 +211,7 @@ public class ProductoController {
     @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO,
     @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue());
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
     productoService.actualizarMultiples(productosParaActualizarDTO, usuarioLogueado);
   }
 
@@ -219,5 +219,46 @@ public class ProductoController {
   public List<ProductoFaltanteDTO> verificarDisponibilidadStock(
       @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+  }
+
+  @PostMapping("/productos/{idProducto}/favoritos")
+  public void marcarComoFavorito(
+          @PathVariable long idProducto,
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
+  }
+
+  @GetMapping("/productos/favoritos")
+  public Page<Producto> getProductosFavoritosDelCliente(
+          @RequestParam int pagina,
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, pagina);
+  }
+
+  @DeleteMapping("/productos/{idProducto}/favoritos")
+  public void quitarProductoDeFavoritos(
+          @PathVariable long idProducto,
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    productoService.quitarProductoDeFavoritos(idUsuarioLoggedIn, idProducto);
+  }
+
+  @DeleteMapping("/productos/favoritos")
+  public void quitarProductosDeFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    productoService.quitarProductosDeFavoritos(idUsuarioLoggedIn);
+  }
+
+  @GetMapping("/productos/favoritos/cantidad")
+  public Long getCantidadDeProductosFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
   }
 }
