@@ -754,7 +754,7 @@ class ProductoServiceImplTest {
     productosFavoritos.add(productoFavorito);
     Page<ProductoFavorito> pageable = new PageImpl<>(productosFavoritos, PageRequest.of(0, 1, Sort.by("idProductoFavorito")), 0);
     when(productoFavoritoRepository.findAll(
-            any(), eq(PageRequest.of(1, 24, Sort.by(Sort.Direction.DESC, "idProductoFavorito")))))
+            any(), eq(PageRequest.of(1, 25, Sort.by(Sort.Direction.DESC, "idProductoFavorito")))))
         .thenReturn(pageable);
     Page<Producto> paginaProductos = productoService.getPaginaProductosFavoritosDelCliente(1L, 1);
     assertNotNull(paginaProductos);
@@ -832,7 +832,7 @@ class ProductoServiceImplTest {
             criteriaProductos.getPagina(),
             criteriaProductos.getOrdenarPor(),
             criteriaProductos.getSentido(),
-            24);
+            25);
     when(productoRepository.findAll(builder, pageable)).thenReturn(paginaProductos);
     productoService.buscarProductos(criteriaProductos);
     verify(productoRepository).findAll(eq(builder), eq(pageable));
