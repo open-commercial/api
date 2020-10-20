@@ -66,7 +66,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 24;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
