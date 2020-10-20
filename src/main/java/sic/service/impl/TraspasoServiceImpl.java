@@ -183,7 +183,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
             .idSucursal(pedido.getIdSucursal())
             .build();
     List<ProductoFaltanteDTO> faltantes =
-        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+        productoService.getProductosSinStockDisponibleParaTraspaso(productosParaVerificarStockDTO);
     if (!faltantes.isEmpty()) {
       List<Sucursal> sucursales = sucursalService.getSucusales(false);
       List<NuevoTraspasoDePedidoDTO> nuevosTraspasos = new ArrayList<>();

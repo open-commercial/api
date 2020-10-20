@@ -111,14 +111,13 @@ class PedidoServiceImplTest {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CANCELADO);
     pedido.setIdPedido(1L);
-    Sucursal sucursal = new Sucursal();
-    pedido.setSucursal(sucursal);
     Producto producto = new Producto();
     producto.setIdProducto(1L);
     producto.setCodigo("123");
     producto.setDescripcion("desc producto");
     producto.setUrlImagen("url");
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
+    Sucursal sucursal = new Sucursal();
     Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
     CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
     cantidadEnSucursal.setSucursal(sucursal);
@@ -145,7 +144,8 @@ class PedidoServiceImplTest {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setVencimientoLargo(15L);
     configuracionSucursal.setVencimientoCorto(1L);
-    //when(configuracionSucursalService.getConfiguracionSucursal(sucursal)).thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+    pedido.setSucursal(sucursal);
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
@@ -240,7 +240,9 @@ class PedidoServiceImplTest {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setVencimientoLargo(1L);
     configuracionSucursal.setVencimientoCorto(1L);
-    //when(configuracionSucursalService.getConfiguracionSucursal(any())).thenReturn(configuracionSucursal);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+    pedido.setSucursal(sucursal);
     pedidoService.cambiarFechaDeVencimiento(1L);
     verify(pedidoRepository).save(pedido);
   }

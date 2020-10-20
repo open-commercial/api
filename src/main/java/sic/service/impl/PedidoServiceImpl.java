@@ -135,6 +135,7 @@ public class PedidoServiceImpl implements IPedidoService {
             .cantidad(cantidad)
             .idProducto(idProducto)
             .idPedido(pedido.getIdPedido())
+            .idSucursal(pedido.getIdSucursal())
             .build();
     if ((operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)
             && !productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {

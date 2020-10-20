@@ -53,12 +53,14 @@ public class ProductoController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/productos/{idProducto}") // /sucursales/{idSucursal}
+  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}")
   public Producto getProductoPorId(
       @PathVariable long idProducto,
+      @PathVariable long idSucursal,
       @RequestParam(required = false) Boolean publicos,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    productoService.calcularCantidadEnSucursalesDisponibleAndReservada(producto, idSucursal);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
           messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
@@ -74,16 +76,18 @@ public class ProductoController {
     return producto;
   }
 
-  @GetMapping("/productos/busqueda")
-    public Producto getProductoPorCodigo(@RequestParam String codigo) {
-      return productoService.getProductoPorCodigo(codigo);
-    }
+  @GetMapping("/productos/busqueda/sucursales/{idSucursal}")
+  public Producto getProductoPorCodigo(@PathVariable long idSucursal,
+                                       @RequestParam String codigo) {
+    return productoService.calcularCantidadEnSucursalesDisponibleAndReservada(productoService.getProductoPorCodigo(codigo), idSucursal);
+  }
 
-  @PostMapping("/productos/busqueda/criteria") // sucursales/{idSucursal}
+  @PostMapping("/productos/busqueda/criteria/sucursales/{idSucursal}")
   public Page<Producto> buscarProductos(
+      @PathVariable long idSucursal,
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos = productoService.buscarProductos(criteria);
+    Page<Producto> productos = productoService.buscarProductos(criteria, idSucursal);
     if (authorizationHeader != null
         && authService.esAuthorizationHeaderValido(authorizationHeader)) {
       return productoService.getProductosConPrecioBonificado(productos);

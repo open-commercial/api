@@ -216,7 +216,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       indice++;
     }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+        ProductosParaVerificarStockDTO.builder()
+                .idProducto(idProducto)
+                .cantidad(cantidad)
+                .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
+                .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 }

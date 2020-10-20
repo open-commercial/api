@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Builder
 public class ProductosParaVerificarStockDTO {
 
-  private Long idSucursal;
+  private long idSucursal;
   private Long idPedido;
   private long[] idProducto;
   private BigDecimal[] cantidad;

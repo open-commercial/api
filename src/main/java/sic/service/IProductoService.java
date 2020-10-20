@@ -38,7 +38,7 @@ public interface IProductoService {
 
   void validarCalculos(Producto producto);
 
-  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
+  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, Long idSucursal);
 
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);
 
@@ -48,6 +48,9 @@ public interface IProductoService {
 
   List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
+
+  List<ProductoFaltanteDTO> getProductosSinStockDisponibleParaTraspaso(
+          ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,

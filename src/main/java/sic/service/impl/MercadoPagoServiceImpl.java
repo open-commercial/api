@@ -426,7 +426,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       i++;
     }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+        ProductosParaVerificarStockDTO.builder()
+                .idProducto(idProducto)
+                .cantidad(cantidad)
+                .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
+                .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty();
   }
 
