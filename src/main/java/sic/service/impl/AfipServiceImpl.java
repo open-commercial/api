@@ -111,12 +111,10 @@ public class AfipServiceImpl implements IAfipService {
               estadoAnteriorConfiguracionSucursal, configuracionSucursal);
           return feAuthRequest;
         } catch (DocumentException | IOException ex) {
-          logger.error(messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
           throw new ServiceException(
-                  messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()));
+                  messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
         } catch (WebServiceClientException ex) {
-          logger.error(messageSource.getMessage("mensaje_token_wsaa_error", null, Locale.getDefault()), ex);
-          throw new ServiceException(messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()));
+          throw new ServiceException(messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
         }
       }
     }
@@ -217,16 +215,11 @@ public class AfipServiceImpl implements IAfipService {
         comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
         comprobante.setNumFacturaAfip(siguienteNroComprobante);
       } catch (WebServiceClientException ex) {
-        logger.error(
-            messageSource.getMessage("mensaje_error_wsfe", null, Locale.getDefault()), ex);
         throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_autorizacion_error", null, Locale.getDefault()));
+                "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
       } catch (IOException ex) {
-        logger.error(
-            messageSource.getMessage("mensaje_error_procesando_xml", null, Locale.getDefault()),
-            ex);
         throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_autorizacion_error", null, Locale.getDefault()));
+                "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
       }
     }
   }
@@ -274,15 +267,11 @@ public class AfipServiceImpl implements IAfipService {
           afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException ex) {
-      logger.error(messageSource.getMessage(
-              "mensaje_siguiente_nro_comprobante_error", null, Locale.getDefault()), ex);
       throw new ServiceException(messageSource.getMessage(
-        "mensaje_autorizacion_error", null, Locale.getDefault()));
+        "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
-      logger.error(messageSource.getMessage(
-              "mensaje_error_procesando_xml", null, Locale.getDefault()), ex);
       throw new ServiceException(messageSource.getMessage(
-        "mensaje_autorizacion_error", null, Locale.getDefault()));
+        "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
     }
   }
 
