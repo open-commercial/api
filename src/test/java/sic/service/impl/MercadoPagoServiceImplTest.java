@@ -66,6 +66,7 @@ class MercadoPagoServiceImplTest {
     Sucursal sucursal = new Sucursal();
     sucursal.setNombre("9 de Julio");
     when(sucursalService.getSucursalPorId(anyLong())).thenReturn(sucursal);
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
     when(usuarioService.getUsuarioNoEliminadoPorId(2L)).thenReturn(usuario);
     ItemCarritoCompra itemCarritoCompra1 = new ItemCarritoCompra();
     Producto producto1 = new Producto();
@@ -91,6 +92,7 @@ class MercadoPagoServiceImplTest {
             .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
             .monto(BigDecimal.TEN)
             .build();
+    //sucursalService.getSucursalPredeterminada
     MercadoPagoPreferenceDTO mercadoPagoPreferenceDTO =
         mercadoPagoService.crearNuevaPreference(1L, nuevaOrdenDePagoDTO, "localhost");
     long[] idProducto = new long[]{1L, 2L};

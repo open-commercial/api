@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Producto;
+import sic.modelo.Sucursal;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CarritoCompraDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
@@ -122,6 +123,9 @@ class CarritoCompraServiceImplTest {
     itemsCarritoCompra.add(itemCarritoCompra3);
     Usuario usuario = new Usuario();
     usuario.setIdUsuario(1L);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     when(carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario))
         .thenReturn(itemsCarritoCompra);
@@ -134,7 +138,7 @@ class CarritoCompraServiceImplTest {
       indice++;
     }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+        ProductosParaVerificarStockDTO.builder().idSucursal(1L).idProducto(idProducto).cantidad(cantidad).build();
     carritoCompraServiceImpl.getProductosDelCarritoSinStockDisponible(1L);
     verify(productoService, times(1))
         .getProductosSinStockDisponible(productosParaVerificarStockDTO);

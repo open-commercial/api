@@ -85,7 +85,7 @@ class TraspasoServiceImplTest {
     productosFaltantes.add(productoFaltanteDTO1);
     productosFaltantes.add(productoFaltanteDTO3);
     productosFaltantes.add(productoFaltanteDTO4);
-    when(productoService.getProductosSinStockDisponible(any())).thenReturn(productosFaltantes);
+    when(productoService.getProductosSinStockDisponibleParaTraspaso(any())).thenReturn(productosFaltantes);
     Pedido pedido = new Pedido();
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     RenglonPedido renglonPedido1 = new RenglonPedido();

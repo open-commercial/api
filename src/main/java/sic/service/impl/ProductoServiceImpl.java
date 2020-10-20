@@ -600,7 +600,7 @@ public class ProductoServiceImpl implements IProductoService {
                         .cantidad(cantidad)
                         .idSucursal(traspaso.getSucursalOrigen().getIdSucursal())
                         .build();
-        if (!this.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
+        if (!this.getProductosSinStockDisponibleParaTraspaso(productosParaVerificarStockDTO).isEmpty()) {
           throw new BusinessServiceException(
                   messageSource.getMessage("mensaje_traspaso_sin_stock", null, Locale.getDefault()));
         }
@@ -921,13 +921,18 @@ public class ProductoServiceImpl implements IProductoService {
             cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
         }
         BigDecimal cantidadSolicitada = cantidadParaCalcular;
+        producto.getCantidadEnSucursalesDisponible().stream().map(CantidadEnSucursal::getCantidad).reduce(BigDecimal.ZERO,BigDecimal::add);
         producto.getCantidadEnSucursalesDisponible().stream()
               .filter(cantidadEnSucursal -> (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
                       || cantidadEnSucursal.getSucursal().getIdSucursal() == productosParaVerificarStockDTO.getIdSucursal()))
               .forEach(
                   cantidadEnSucursal -> {
                     if (!producto.isIlimitado()
-                        && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0
+                        && producto.getCantidadEnSucursalesDisponible()
+                            .stream()
+                            .map(CantidadEnSucursal::getCantidad)
+                            .reduce(BigDecimal.ZERO,BigDecimal::add)
+                            .compareTo(cantidadSolicitada) < 0
                     && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
                       ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
                       productoFaltanteDTO.setIdProducto(producto.getIdProducto());
@@ -957,7 +962,7 @@ public class ProductoServiceImpl implements IProductoService {
         Producto producto =
                 this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
         BigDecimal cantidadSolicitada = productosParaVerificarStockDTO.getCantidad()[i];
-        producto.getCantidadEnSucursalesDisponible().stream()
+        producto.getCantidadEnSucursales().stream()
                 .filter(
                         cantidadEnSucursal ->
                                 cantidadEnSucursal

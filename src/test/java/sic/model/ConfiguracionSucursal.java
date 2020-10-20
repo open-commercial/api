@@ -20,6 +20,7 @@ public class ConfiguracionSucursal {
   private int nroPuntoDeVentaAfip;
   private boolean puntoDeRetiro;
   private boolean predeterminada;
+  private boolean comparteStock;
   private long idSucursal;
   private String nombreSucursal;
 }

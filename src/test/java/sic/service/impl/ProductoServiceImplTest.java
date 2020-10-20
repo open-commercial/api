@@ -306,6 +306,8 @@ class ProductoServiceImplTest {
     producto.setCantidadTotalEnSucursales(new BigDecimal("9"));
     Sucursal sucursal = new Sucursal();
     sucursal.setIdSucursal(1L);
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
     cantidadEnSucursal.setSucursal(sucursal);
     cantidadEnSucursal.setCantidad(new BigDecimal("9"));

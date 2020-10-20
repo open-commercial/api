@@ -63,6 +63,7 @@ public class SucursalServiceImplTest {
 
   @Test
   void shouldActualizarSucursal() {
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     Sucursal sucursalParaActualizar = new Sucursal();
     sucursalParaActualizar.setNombre("Sucursal para guardar");
     sucursalParaActualizar.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
@@ -73,11 +74,13 @@ public class SucursalServiceImplTest {
     Ubicacion ubicacion = new Ubicacion();
     ubicacion.setLocalidad(localidad);
     sucursalParaActualizar.setUbicacion(ubicacion);
+    sucursalParaActualizar.setConfiguracionSucursal(configuracionSucursal);
     Sucursal sucursalPersistida = new Sucursal();
     sucursalPersistida.setIdSucursal(1L);
     sucursalPersistida.setNombre("Sucursal para guardar");
     sucursalPersistida.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     sucursalPersistida.setEmail("sucursal@delaempresa.com");
+    sucursalPersistida.setConfiguracionSucursal(configuracionSucursal);
     localidad = new Localidad();
     localidad.setNombre("nombre localidad");
     localidad.setIdLocalidad(1L);
