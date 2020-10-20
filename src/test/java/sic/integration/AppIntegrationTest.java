@@ -350,7 +350,7 @@ class AppIntegrationTest {
         new BigDecimal("20.000000000000000"),
         productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
     assertEquals(
-        new BigDecimal("968.000000000000000000000000000000"),
+        new BigDecimal("968.000000000000000"),
         productosRecuperados.get(0).getPrecioBonificado());
     restTemplate.postForObject(
         apiPrefix
@@ -402,7 +402,7 @@ class AppIntegrationTest {
         new BigDecimal("20.000000000000000"),
         productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
     assertEquals(
-        new BigDecimal("884.000000000000000000000000000000"),
+        new BigDecimal("884.000000000000000"),
         productosRecuperados.get(0).getPrecioBonificado());
     restTemplate.postForObject(
         apiPrefix
@@ -454,7 +454,7 @@ class AppIntegrationTest {
         new BigDecimal("10.000000000000000"),
         productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
     assertEquals(
-        new BigDecimal("12027.961800000000000000000000000000"),
+        new BigDecimal("12027.961800000000000"),
         productosRecuperados.get(0).getPrecioBonificado());
     List<NuevoRenglonFacturaDTO> nuevosRenglones = new ArrayList<>();
     criteria = BusquedaProductoCriteria.builder().build();
@@ -520,6 +520,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("21.42"), facturasRecuperadas.get(0).getIva105Neto());
     assertEquals(new BigDecimal("57.12"), facturasRecuperadas.get(0).getIva21Neto());
     assertEquals(new BigDecimal("554.54"), facturasRecuperadas.get(0).getTotal());
+    assertNotNull(facturasRecuperadas.get(0).getFechaAlta());
     assertEquals(
         proveedorRecuperado.getRazonSocial(), facturasRecuperadas.get(0).getRazonSocialProveedor());
     assertEquals(sucursal.getNombre(), facturasRecuperadas.get(0).getNombreSucursal());

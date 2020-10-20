@@ -133,6 +133,10 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_vacio_rubro}")
   private Rubro rubro;
 
+  @JsonView(Views.Comprador.class)
+  @Transient
+  private boolean favorito;
+
   private boolean ilimitado;
 
   private boolean publico;

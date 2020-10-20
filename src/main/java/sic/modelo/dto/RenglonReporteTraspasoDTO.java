@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -14,8 +13,8 @@ import java.time.LocalDateTime;
 @Builder
 public class RenglonReporteTraspasoDTO {
 
-    private LocalDateTime fecha;
-    private String codigoAndDescripcion;
+    private String codigo;
+    private String descripcion;
     private String sucursalOrigen;
     private String sucursalDestino;
     private BigDecimal cantidad;

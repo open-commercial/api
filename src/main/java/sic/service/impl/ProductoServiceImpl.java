@@ -6,6 +6,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -29,7 +30,6 @@ import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
@@ -39,6 +39,7 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
@@ -52,6 +53,7 @@ import java.io.InputStream;
 public class ProductoServiceImpl implements IProductoService {
 
   private final ProductoRepository productoRepository;
+  private final ProductoFavoritoRepository productoFavoritoRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final BigDecimal CIEN = new BigDecimal("100");
   private static final long TAMANIO_MAXIMO_IMAGEN = 1024000L;
@@ -63,7 +65,8 @@ public class ProductoServiceImpl implements IProductoService {
   private final ISucursalService sucursalService;
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 24;
+  private final IClienteService clienteService;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -71,6 +74,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Lazy
   public ProductoServiceImpl(
     ProductoRepository productoRepository,
+    ProductoFavoritoRepository productoFavoritoRepository,
     IRubroService rubroService,
     IProveedorService proveedorService,
     IMedidaService medidaService,
@@ -79,9 +83,11 @@ public class ProductoServiceImpl implements IProductoService {
     ISucursalService sucursalService,
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
+    IClienteService clienteService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
+    this.productoFavoritoRepository = productoFavoritoRepository;
     this.rubroService = rubroService;
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
@@ -90,6 +96,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.sucursalService = sucursalService;
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
+    this.clienteService = clienteService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -220,6 +227,14 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
+  public void marcarFavoritos(Page<Producto> productos, long idUsuario) {
+    List<Producto> productosFavoritos = this.getProductosFavoritosDelClientePorIdUsuario(idUsuario);
+    productos.forEach(p -> {
+      if (productosFavoritos.contains(p)) p.setFavorito(true);
+    });
+  }
+
+  @Override
   public List<Producto> buscarProductosParaReporte(BusquedaProductoCriteria criteria) {
     criteria.setPagina(0);
     return productoRepository
@@ -303,12 +318,6 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto guardar(
       NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
     customValidator.validar(nuevoProductoDTO);
-    if (nuevoProductoDTO.isOferta() && nuevoProductoDTO.getImagen() == null)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_sin_imagen",
-              new Object[] {nuevoProductoDTO.getDescripcion()},
-              Locale.getDefault()));
     if (nuevoProductoDTO.getCodigo() == null) nuevoProductoDTO.setCodigo("");
     Producto producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
@@ -334,12 +343,10 @@ public class ProductoServiceImpl implements IProductoService {
                 nuevoProductoDTO.getCantidadEnSucursal().keySet().stream()
                     .filter(idSucursal -> idSucursal.equals(cantidadEnSucursal.getIdSucursal()))
                     .forEach(
-                        idSucursal -> {
+                        idSucursal ->
                           cantidadEnSucursal.setCantidad(
-                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal));
-                          cantidadEnSucursal.setEstante(nuevoProductoDTO.getEstante());
-                          cantidadEnSucursal.setEstanteria(nuevoProductoDTO.getEstanteria());
-                        }));
+                              nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal))
+                        ));
     producto.setCantidadTotalEnSucursales(
         producto.getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
@@ -387,15 +394,6 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     customValidator.validar(productoPorActualizar);
-    if (productoPorActualizar.isOferta()
-        && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())
-        && imagen == null)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_producto_oferta_sin_imagen",
-              new Object[] {productoPorActualizar.getDescripcion()},
-              Locale.getDefault()));
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
         && (productoPorActualizar.getUrlImagen() == null
@@ -713,7 +711,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO) {
+  public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO, Usuario usuarioLogueado) {
     boolean actualizaPrecios =
         productosParaActualizarDTO.getGananciaPorcentaje() != null
             && productosParaActualizarDTO.getIvaPorcentaje() != null
@@ -763,9 +761,9 @@ public class ProductoServiceImpl implements IProductoService {
             proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
-      if (productosParaActualizarDTO.getCantidadVentaMinima() != null
-          && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
-        p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
+      if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getCantidadVentaMinima() != null
+                && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
+          p.setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
       }
       if (actualizaPrecios) {
         p.setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
@@ -777,6 +775,15 @@ public class ProductoServiceImpl implements IProductoService {
         p.setPrecioLista(
                 this.calcularPrecioLista(p.getPrecioVentaPublico(), p.getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
+        if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
+                && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
+                >= 0) {
+          p.setOferta(true);
+          p.setPorcentajeBonificacionOferta(
+                  productosParaActualizarDTO.getPorcentajeBonificacionOferta());
+        } else {
+          p.setOferta(false);
+        }
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.setPrecioCosto(p.getPrecioCosto().multiply(multiplicador));
@@ -840,18 +847,6 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto getProductoNoEliminadoPorId(long idProducto) {
     Optional<Producto> producto = productoRepository.findById(idProducto);
     if (producto.isPresent() && !producto.get().isEliminado()) {
-      if (producto.get().isOferta()) {
-        producto
-            .get()
-            .setPrecioBonificado(
-                producto
-                    .get()
-                    .getPrecioLista()
-                    .multiply(
-                        (new BigDecimal("100"))
-                            .subtract(producto.get().getPorcentajeBonificacionOferta())
-                            .divide(new BigDecimal("100"), 2, RoundingMode.HALF_UP)));
-      }
       return producto.get();
     } else {
       throw new EntityNotFoundException(
@@ -860,23 +855,10 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> getProductosConPrecioBonificado(Page<Producto> productos) {
-    productos.stream()
-        .filter(
-            producto ->
-                !producto.isOferta()
-                    && producto.getPorcentajeBonificacionPrecio() != null
-                    && producto.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) > 0)
-        .forEach(
-            p ->
-                p.setPrecioBonificado(
-                    p.getPrecioLista()
-                        .subtract(
-                            p.getPrecioLista()
-                                .multiply(
-                                    p.getPorcentajeBonificacionPrecio()
-                                        .divide(new BigDecimal("100"), RoundingMode.HALF_UP)))));
-    return productos;
+  public boolean isFavorito(long idUsuario, long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    return productoFavoritoRepository.existsByClienteAndProducto(cliente, producto);
   }
 
   @Override
@@ -1142,5 +1124,89 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setCantidadEnSucursalesDisponible(cantidadesEnSucursales);
     producto.setCantidadReservada(pedidoService.getCantidadReservadaDeProducto(producto.getIdProducto()));
     return producto;
+  }
+
+  @Override
+  public Producto guardarProductoFavorito(long idUsuario, long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    if (this.isFavorito(idUsuario, idProducto)) {
+        producto.setFavorito(true);
+    } else {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(producto);
+    customValidator.validar(productoFavorito);
+    producto = productoFavoritoRepository.save(productoFavorito).getProducto();
+    producto.setFavorito(true);
+    logger.warn(messageSource.getMessage(
+            "mensaje_producto_favorito_agregado",
+            new Object[] {producto},
+            Locale.getDefault()));
+    }
+    return producto;
+  }
+
+  @Override
+  public Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    QProductoFavorito qProductoFavorito = QProductoFavorito.productoFavorito;
+    BooleanBuilder builder = new BooleanBuilder();
+    builder.and(qProductoFavorito.cliente.idCliente.eq(cliente.getIdCliente()));
+    Page<ProductoFavorito> pageable =
+            productoFavoritoRepository.findAll(
+                    builder,
+                    PageRequest.of(
+                            pagina,
+                            TAMANIO_PAGINA_DEFAULT,
+                            Sort.by(Sort.Direction.DESC, "idProductoFavorito")));
+    List<Producto> productos = new ArrayList<>();
+    pageable.stream()
+            .forEach(
+                    productoFavorito -> {
+                      Producto producto = productoFavorito.getProducto();
+                      producto.setFavorito(true);
+                      productos.add(producto);
+                    });
+    return new PageImpl<>(productos, pageable.getPageable(), pageable.getTotalElements());
+  }
+
+  @Override
+  public List<Producto> getProductosFavoritosDelClientePorIdUsuario(long idUsuario) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    List<ProductoFavorito> productoFavoritos = productoFavoritoRepository.findAllByCliente(cliente);
+    List<Producto> productos = new ArrayList<>();
+    productoFavoritos.forEach(productoFavorito -> {
+      productoFavorito.getProducto().setFavorito(true);
+      productos.add(productoFavorito.getProducto());
+    });
+    return productos;
+  }
+
+  @Override
+  @Transactional
+  public void quitarProductoDeFavoritos(long idUsuario, long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    productoFavoritoRepository.deleteByClienteAndProducto(cliente, producto);
+    logger.warn(messageSource.getMessage(
+            "mensaje_producto_favorito_quitado",
+            new Object[] {producto},
+            Locale.getDefault()));
+  }
+
+  @Override
+  @Transactional
+  public void quitarProductosDeFavoritos(long idUsuario) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    productoFavoritoRepository.deleteAllByCliente(cliente);
+    logger.warn(
+            messageSource.getMessage("mensaje_producto_favoritos_quitados", null, Locale.getDefault()));
+  }
+
+  @Override
+  public Long getCantidadDeProductosFavoritos(long idUsuario) {
+    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+    return productoFavoritoRepository.getCantidadDeArticulosEnFavoritos(cliente);
   }
 }

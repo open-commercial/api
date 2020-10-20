@@ -328,11 +328,11 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         builder.and(qPedido.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0));
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         builder.and(qPedido.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
         criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));

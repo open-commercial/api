@@ -10,14 +10,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
 
+import com.querydsl.core.BooleanBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
@@ -28,6 +28,7 @@ import sic.modelo.dto.NuevoProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.ProductosParaActualizarDTO;
 import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
 import sic.util.CustomValidator;
 
@@ -44,7 +45,9 @@ class ProductoServiceImplTest {
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean TraspasoServiceImpl traspasoService;
   @MockBean PedidoServiceImpl pedidoService;
+  @MockBean ClienteServiceImpl clienteService;
   @MockBean ProductoRepository productoRepository;
+  @MockBean ProductoFavoritoRepository productoFavoritoRepository;
   @MockBean MessageSource messageSource;
 
   @Autowired ProductoServiceImpl productoService;
@@ -230,15 +233,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldThrownBusinessExceptionActualizarProductoSinImagen() {
-    Producto producto = this.construirProducto();
-    producto.setOferta(true);
-    assertThrows(
-        BusinessServiceException.class, () -> productoService.actualizar(producto, producto, null));
-    verify(messageSource).getMessage(eq("mensaje_producto_oferta_sin_imagen"), any(), any());
-  }
-
-  @Test
   void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
     Producto productoParaActualizar = this.construirProducto();
     productoParaActualizar.setIdProducto(1L);
@@ -280,6 +274,7 @@ class ProductoServiceImplTest {
     producto.setPrecioLista(new BigDecimal("100"));
     producto.setPorcentajeBonificacionOferta(new BigDecimal("10"));
     producto.setOferta(true);
+    producto.setPrecioBonificado(new BigDecimal("90.00"));
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     Producto productoRecuperado = productoService.getProductoNoEliminadoPorId(1L);
     assertEquals(new BigDecimal("100"), productoRecuperado.getPrecioLista());
@@ -364,7 +359,8 @@ class ProductoServiceImplTest {
     Producto producto = this.construirProducto();
     producto.setIdProducto(1L);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    productoService.actualizarMultiples(productosParaActualizarDTO);
+    Usuario usuario = new Usuario();
+    usuario.setRoles(Collections.emptyList());
     assertThrows(
         BusinessServiceException.class,
         () ->
@@ -381,7 +377,7 @@ class ProductoServiceImplTest {
                     .precioCosto(BigDecimal.TEN)
                     .porcentajeBonificacionPrecio(BigDecimal.TEN)
                     .publico(true)
-                    .build()));
+                    .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_modificar_producto_no_permitido"), any(), any());
     assertThrows(
         BusinessServiceException.class,
@@ -398,8 +394,45 @@ class ProductoServiceImplTest {
                     .precioCosto(BigDecimal.TEN)
                     .porcentajeBonificacionPrecio(BigDecimal.TEN)
                     .publico(true)
-                    .build()));
+                    .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_error_ids_duplicados"), any(), any());
+    Producto producto1 = new Producto();
+    producto1.setIdProducto(1L);
+    producto1.setCodigo("1a");
+    Producto producto2 = new Producto();
+    producto2.setIdProducto(2L);
+    producto2.setCodigo("2b");
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
+    when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(BigDecimal.TEN)
+                    .publico(true)
+                    .build(), usuario);
+    productoService.actualizarMultiples(
+            ProductosParaActualizarDTO.builder()
+                    .idProducto(new long[] {1L, 2L})
+                    .cantidadVentaMinima(BigDecimal.TEN)
+                    .idMedida(1L)
+                    .idRubro(1L)
+                    .idProveedor(2L)
+                    .gananciaPorcentaje(BigDecimal.TEN)
+                    .ivaPorcentaje(new BigDecimal("21"))
+                    .precioCosto(BigDecimal.TEN)
+                    .porcentajeBonificacionPrecio(new BigDecimal("5"))
+                    .porcentajeBonificacionOferta(null)
+                    .publico(true)
+                    .build(), usuario);
+    verify(productoRepository, times(2)).saveAll(any());
   }
 
   @Test
@@ -735,5 +768,175 @@ class ProductoServiceImplTest {
     assertEquals(BigDecimal.ONE, listaCantidadEnSucursales.get(0).getCantidad());
     assertEquals(BigDecimal.TEN, listaCantidadEnSucursales.get(1).getCantidad());
     assertEquals(BigDecimal.TEN, productoConCantidadDisponibleCalculada.getCantidadReservada());
+  }
+
+  @Test
+  void shouldTestGuardarProductoFavorito() {
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setDescripcion("producto uno");
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(producto);
+    when(productoFavoritoRepository.save(productoFavorito)).thenReturn(productoFavorito);
+    productoService.guardarProductoFavorito(1L, 1L);
+    verify(productoFavoritoRepository).save(productoFavorito);
+    verify(messageSource).getMessage(eq("mensaje_producto_favorito_agregado"), eq(new Object[] {producto}), any());
+  }
+
+  @Test
+  void shouldTestGetPaginaProductosFavoritosDelCliente() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    Producto producto = new Producto();
+    producto.setDescripcion("Producto Test");
+    producto.setIdProducto(1L);
+    List<ProductoFavorito> productosFavoritos = new ArrayList<>();
+    ProductoFavorito productoFavorito = new ProductoFavorito();
+    productoFavorito.setCliente(cliente);
+    productoFavorito.setProducto(producto);
+    productosFavoritos.add(productoFavorito);
+    Page<ProductoFavorito> pageable = new PageImpl<>(productosFavoritos, PageRequest.of(0, 1, Sort.by("idProductoFavorito")), 0);
+    when(productoFavoritoRepository.findAll(
+            any(), eq(PageRequest.of(1, 25, Sort.by(Sort.Direction.DESC, "idProductoFavorito")))))
+        .thenReturn(pageable);
+    Page<Producto> paginaProductos = productoService.getPaginaProductosFavoritosDelCliente(1L, 1);
+    assertNotNull(paginaProductos);
+    assertEquals(paginaProductos.getTotalElements(), pageable.getTotalElements());
+    assertEquals(paginaProductos.getTotalPages(), pageable.getTotalElements());
+    assertEquals(paginaProductos.getNumber(), pageable.getNumber());
+    assertTrue(paginaProductos.getContent().get(0).isFavorito());
+  }
+
+  @Test
+  void shouldTestGetProductosFavoritosDelCliente() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    List<ProductoFavorito> paginaProductosFavoritos = new ArrayList<>();
+    Producto productoUno = new Producto();
+    productoUno.setDescripcion("Producto Test");
+    productoUno.setIdProducto(1L);
+    Producto productoDos = new Producto();
+    productoDos.setDescripcion("Producto Test");
+    productoDos.setIdProducto(1L);
+    ProductoFavorito productoFavoritoUno = new ProductoFavorito();
+    productoFavoritoUno.setCliente(cliente);
+    productoFavoritoUno.setProducto(productoUno);
+    paginaProductosFavoritos.add(productoFavoritoUno);
+    ProductoFavorito productoFavoritoDos = new ProductoFavorito();
+    productoFavoritoDos.setCliente(cliente);
+    productoFavoritoDos.setProducto(productoDos);
+    paginaProductosFavoritos.add(productoFavoritoDos);
+    when(productoFavoritoRepository.findAllByCliente(cliente)).thenReturn(paginaProductosFavoritos);
+    List<Producto> productosFavoritos = productoService.getProductosFavoritosDelClientePorIdUsuario(1L);
+    assertNotNull(productosFavoritos);
+    assertTrue(productosFavoritos.get(0).isFavorito());
+    assertTrue(productosFavoritos.get(1).isFavorito());
+  }
+
+  @Test
+  void shouldTestQuitarProductoDeFavoritos() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    Producto producto = new Producto();
+    producto.setDescripcion("Producto Test");
+    producto.setIdProducto(1L);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    productoService.quitarProductoDeFavoritos(1L, 1L);
+    verify(productoFavoritoRepository).deleteByClienteAndProducto(cliente, producto);
+    verify(messageSource)
+        .getMessage(eq("mensaje_producto_favorito_quitado"), eq(new Object[] {producto}), eq(Locale.getDefault()));
+  }
+
+  @Test
+  void shouldTestBuscarProductos() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    List<Producto> productos = new ArrayList<>();
+    Producto productoUno = new Producto();
+    productoUno.setIdProducto(1L);
+    productoUno.setDescripcion("Producto Uno");
+    Producto productoDos = new Producto();
+    productoDos.setIdProducto(2L);
+    productoDos.setDescripcion("Producto Dos");
+    productos.add(productoUno);
+    productos.add(productoDos);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    cantidadEnSucursal.setSucursal(sucursal);
+    productoUno.setCantidadEnSucursales(cantidadEnSucursales);
+    productoUno.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    productoDos.setCantidadEnSucursales(cantidadEnSucursales);
+    productoDos.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    Page<Producto> paginaProductos = new PageImpl<>(productos);
+    BusquedaProductoCriteria criteriaProductos =
+        BusquedaProductoCriteria.builder().pagina(0).ordenarPor("descripcion").sentido("ASC").build();
+    BooleanBuilder builder = productoService.getBuilder(criteriaProductos);
+    Pageable pageable =
+        productoService.getPageable(
+            criteriaProductos.getPagina(),
+            criteriaProductos.getOrdenarPor(),
+            criteriaProductos.getSentido(),
+            25);
+    when(productoRepository.findAll(builder, pageable)).thenReturn(paginaProductos);
+    productoService.buscarProductos(criteriaProductos, 1L);
+    verify(productoRepository).findAll(eq(builder), eq(pageable));
+  }
+
+  @Test
+  void shouldTestQuitarTodosLosProductosDeFavoritosDelCliente() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    productoService.quitarProductosDeFavoritos(1L);
+    verify(productoFavoritoRepository).deleteAllByCliente(cliente);
+    verify(messageSource)
+            .getMessage(eq("mensaje_producto_favoritos_quitados"), eq(null), eq(Locale.getDefault()));
+  }
+
+  @Test
+  void shouldTestIsFavorito() {
+    Cliente cliente = new Cliente();
+    cliente.setIdCliente(1L);
+    cliente.setNombreFiscal("San Wuchito");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    Producto productoUno = new Producto();
+    productoUno.setIdProducto(1L);
+    productoUno.setDescripcion("Producto Uno");
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(productoUno));
+    when(productoFavoritoRepository.existsByClienteAndProducto(cliente, productoUno))
+        .thenReturn(true);
+    assertTrue(productoService.isFavorito(1L, 1L));
+    verify(productoFavoritoRepository).existsByClienteAndProducto(cliente, productoUno);
+  }
+
+  @Test
+  void shouldTestGetCantidadDeProductoFavorito() {
+    Cliente cliente = new Cliente();
+    cliente.setNombreFiscal("Cliente test");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    productoService.getCantidadDeProductosFavoritos(1L);
+    verify(productoFavoritoRepository).getCantidadDeArticulosEnFavoritos(cliente);
   }
 }
