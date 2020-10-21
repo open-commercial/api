@@ -50,7 +50,6 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IConfiguracionSucursalService configuracionSucursal;
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
@@ -68,7 +67,6 @@ public class PedidoServiceImpl implements IPedidoService {
     IClienteService clienteService,
     IProductoService productoService,
     ICorreoElectronicoService correoElectronicoService,
-    IConfiguracionSucursalService configuracionSucursal,
     IReciboService reciboService,
     ICuentaCorrienteService cuentaCorrienteService,
     ModelMapper modelMapper,
@@ -80,7 +78,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.configuracionSucursal = configuracionSucursal;
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;

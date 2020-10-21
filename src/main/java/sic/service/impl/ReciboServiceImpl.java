@@ -40,7 +40,6 @@ public class ReciboServiceImpl implements IReciboService {
   private final ReciboRepository reciboRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ISucursalService sucursalService;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
@@ -55,7 +54,6 @@ public class ReciboServiceImpl implements IReciboService {
     ReciboRepository reciboRepository,
     ICuentaCorrienteService cuentaCorrienteService,
     ISucursalService sucursalService,
-    IConfiguracionSucursalService configuracionSucursalService,
     INotaService notaService,
     IFormaDePagoService formaDePagoService,
     ICajaService cajaService,
@@ -64,7 +62,6 @@ public class ReciboServiceImpl implements IReciboService {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.sucursalService = sucursalService;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;

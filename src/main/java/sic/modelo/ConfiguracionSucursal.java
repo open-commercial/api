@@ -78,20 +78,6 @@ public class ConfiguracionSucursal implements Serializable {
 
   private LocalDateTime fechaVencimientoTokenWSAA;
 
-//  @ManyToOne
-//  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
-//  private Sucursal sucursal;
-
-//  @JsonGetter("idSucursal")
-//  public Long getIdSucursal() {
-//    return sucursal.getIdSucursal();
-//  }
-//
-//  @JsonGetter("nombreSucursal")
-//  public String getNombreSucursal() {
-//    return sucursal.getNombre();
-//  }
-
   @JsonGetter("existeCertificado")
   public boolean isExisteCertificado() {
     return (certificadoAfip != null);

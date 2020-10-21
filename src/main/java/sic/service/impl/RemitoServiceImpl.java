@@ -47,7 +47,6 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
     private final ISucursalService sucursalService;
-    private final IConfiguracionSucursalService configuracionSucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -63,7 +62,6 @@ public class RemitoServiceImpl implements IRemitoService {
                               IUsuarioService usuarioService,
                               ITransportistaService transportistaService,
                               ISucursalService sucursalService,
-                              IConfiguracionSucursalService configuracionSucursalService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               MessageSource messageSource,
                               CustomValidator customValidator) {
@@ -75,7 +73,6 @@ public class RemitoServiceImpl implements IRemitoService {
         this.usuarioService = usuarioService;
         this.transportistaService = transportistaService;
         this.sucursalService = sucursalService;
-        this.configuracionSucursalService = configuracionSucursalService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.messageSource = messageSource;
         this.customValidator = customValidator;

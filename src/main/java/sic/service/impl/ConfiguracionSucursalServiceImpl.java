@@ -8,7 +8,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Sucursal;
 import sic.service.IConfiguracionSucursalService;
 import sic.repository.ConfiguracionSucursalRepository;
 import sic.exception.BusinessServiceException;

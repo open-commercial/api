@@ -57,7 +57,6 @@ public class NotaServiceImpl implements INotaService {
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IMercadoPagoService mercadoPagoService;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IAfipService afipService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -83,7 +82,6 @@ public class NotaServiceImpl implements INotaService {
     ISucursalService sucursalService,
     ICuentaCorrienteService cuentaCorrienteService,
     IMercadoPagoService mercadoPagoService,
-    IConfiguracionSucursalService configuracionSucursalService,
     IAfipService afipService,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -100,7 +98,6 @@ public class NotaServiceImpl implements INotaService {
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.mercadoPagoService = mercadoPagoService;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.afipService = afipService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;

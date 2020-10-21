@@ -47,7 +47,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
   private final ITransportistaService transportistaService;
   private final ISucursalService sucursalService;
@@ -70,7 +69,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       IUsuarioService usuarioService,
       IClienteService clienteService,
       ICuentaCorrienteService cuentaCorrienteService,
-      IConfiguracionSucursalService configuracionSucursalService,
       IFacturaService facturaService,
       ITransportistaService transportistaService,
       ISucursalService sucursalService,
@@ -84,7 +82,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
     this.transportistaService = transportistaService;
     this.sucursalService = sucursalService;
