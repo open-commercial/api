@@ -92,7 +92,9 @@ public interface IProductoService {
 
   Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina);
 
-  Producto calcularCantidadEnSucursalesDisponibleAndReservada(Producto producto, long idSucursalSeleccionada);
+  Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada);
+
+  Producto calcularCantidadReservada(Producto producto);
 
   Producto guardarProductoFavorito(long idUsuario, long idProducto);
 

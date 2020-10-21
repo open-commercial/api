@@ -66,7 +66,8 @@ public class ProductoController {
       @RequestParam(required = false) Boolean publicos,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    productoService.calcularCantidadEnSucursalesDisponibleAndReservada(producto, idSucursal);
+    productoService.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
+    productoService.calcularCantidadReservada(producto);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
               messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
@@ -83,7 +84,10 @@ public class ProductoController {
   @GetMapping("/productos/busqueda/sucursales/{idSucursal}")
   public Producto getProductoPorCodigo(@PathVariable long idSucursal,
                                        @RequestParam String codigo) {
-    return productoService.calcularCantidadEnSucursalesDisponibleAndReservada(productoService.getProductoPorCodigo(codigo), idSucursal);
+    Producto producto = productoService.getProductoPorCodigo(codigo);
+    productoService.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
+    productoService.calcularCantidadReservada(producto);
+    return producto;
   }
 
   @PostMapping("/productos/busqueda/criteria/sucursales/{idSucursal}")

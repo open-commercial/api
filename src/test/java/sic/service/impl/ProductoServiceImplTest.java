@@ -722,7 +722,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldCalcularCantidadEnSucursalesDisponibleAndReservada() {
+  void shouldCalcularCantidadEnSucursalesDisponible() {
     Sucursal sucursalUno = new Sucursal();
     sucursalUno.setNombre("primera sucursal");
     sucursalUno.setIdSucursal(1L);
@@ -759,15 +759,23 @@ class ProductoServiceImplTest {
     cantidadesEnSucursalProducto.add(cantidadEnSucursalProducto3);
     producto1.setCantidadEnSucursales(cantidadesEnSucursalProducto);
     when(pedidoService.getCantidadReservadaDeProducto(1L)).thenReturn(BigDecimal.TEN);
-    Producto productoConCantidadDisponibleCalculada =
-        productoService.calcularCantidadEnSucursalesDisponibleAndReservada(producto1, 1L);
-    assertNotNull(productoConCantidadDisponibleCalculada);
+    Producto productoRecuperado =
+        productoService.calcularCantidadEnSucursalesDisponible(producto1, 1L);
+    assertNotNull(productoRecuperado);
     List<CantidadEnSucursal> listaCantidadEnSucursales =
-        new ArrayList<>(productoConCantidadDisponibleCalculada.getCantidadEnSucursalesDisponible());
+        new ArrayList<>(productoRecuperado.getCantidadEnSucursalesDisponible());
     assertEquals(2, listaCantidadEnSucursales.size());
     assertEquals(BigDecimal.ONE, listaCantidadEnSucursales.get(0).getCantidad());
     assertEquals(BigDecimal.TEN, listaCantidadEnSucursales.get(1).getCantidad());
-    assertEquals(BigDecimal.TEN, productoConCantidadDisponibleCalculada.getCantidadReservada());
+  }
+
+  @Test
+  void shouldCalcularCantidadReservada() {
+    when(pedidoService.getCantidadReservadaDeProducto(1L)).thenReturn(BigDecimal.TEN);
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto = productoService.calcularCantidadReservada(producto);
+    assertEquals(BigDecimal.TEN, producto.getCantidadReservada());
   }
 
   @Test

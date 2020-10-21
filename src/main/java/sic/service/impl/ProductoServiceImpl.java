@@ -221,8 +221,10 @@ public class ProductoServiceImpl implements IProductoService {
                 TAMANIO_PAGINA_DEFAULT));
     productos.stream()
         .forEach(
-            producto ->
-            this.calcularCantidadEnSucursalesDisponibleAndReservada(producto, idSucursal));
+            producto -> {
+              this.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
+              this.calcularCantidadReservada(producto);
+            });
     return productos;
   }
 
@@ -897,7 +899,7 @@ public class ProductoServiceImpl implements IProductoService {
       for (int i = 0; i < longitudIds; i++) {
         Producto producto =
             this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        this.calcularCantidadEnSucursalesDisponibleAndReservada(producto, productosParaVerificarStockDTO.getIdSucursal());
+        this.calcularCantidadEnSucursalesDisponible(producto, productosParaVerificarStockDTO.getIdSucursal());
         BigDecimal cantidadParaCalcular = productosParaVerificarStockDTO.getCantidad()[i];
         if (!listaIdsAndCantidades.isEmpty() && listaIdsAndCantidades.get(producto.getIdProducto()) != null) {
             cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
@@ -1113,7 +1115,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Producto calcularCantidadEnSucursalesDisponibleAndReservada(Producto producto, long idSucursalSeleccionada) {
+  public Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada) {
     Set<CantidadEnSucursal> cantidadesEnSucursales = new HashSet<>();
     producto.getCantidadEnSucursales()
             .stream()
@@ -1121,6 +1123,11 @@ public class ProductoServiceImpl implements IProductoService {
                     || cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursalSeleccionada))
             .forEach(cantidadesEnSucursales::add);
     producto.setCantidadEnSucursalesDisponible(cantidadesEnSucursales);
+    return producto;
+  }
+
+  @Override
+  public Producto calcularCantidadReservada(Producto producto) {
     producto.setCantidadReservada(pedidoService.getCantidadReservadaDeProducto(producto.getIdProducto()));
     return producto;
   }
