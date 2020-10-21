@@ -43,11 +43,6 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
                   "mensaje_sucursal_no_existente", null, Locale.getDefault())));
   }
 
-//  @Override
-//  public ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal) {
-//    return configuracionRepository.findBySucursal(sucursal);
-//  }
-
   @Override
   @Transactional
   public ConfiguracionSucursal guardar(ConfiguracionSucursal configuracionSucursal) {
@@ -148,13 +143,13 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
     }
   }
 
-//  @Override
-//  public int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal) {
-//    return configuracionRepository.getCantidadMaximaDeRenglones(idSucursal);
-//  }
-//
-//  @Override
-//  public boolean isFacturaElectronicaHabilitada(long idSucursal) {
-//    return configuracionRepository.isFacturaElectronicaHabilitada(idSucursal);
-//  }
+  @Override
+  public int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal) {
+    return configuracionRepository.getCantidadMaximaDeRenglones(idSucursal);
+  }
+
+  @Override
+  public boolean isFacturaElectronicaHabilitada(long idSucursal) {
+    return configuracionRepository.isFacturaElectronicaHabilitada(idSucursal);
+  }
 }

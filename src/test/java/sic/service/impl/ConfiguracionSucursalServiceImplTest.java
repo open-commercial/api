@@ -33,7 +33,7 @@ class ConfiguracionSucursalServiceImplTest {
   @Autowired ConfiguracionSucursalServiceImpl configuracionSucursalService;
 
   @Test
-  void shouldGuardarSucursal() {
+  void shouldGuardarConfiguracionSucursal() {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setVencimientoCorto(1L);
     configuracionSucursal.setVencimientoLargo(5L);
@@ -66,7 +66,7 @@ class ConfiguracionSucursalServiceImplTest {
   }
 
   @Test
-  void shouldActualizarSucursal() {
+  void shouldActualizarConfiguracionSucursal() {
     ConfiguracionSucursal configuracionSucursalPersistida = new ConfiguracionSucursal();
     ConfiguracionSucursal configuracionDeSucursalParaActualizar = new ConfiguracionSucursal();
     configuracionSucursalPersistida.setPredeterminada(true);
@@ -95,5 +95,17 @@ class ConfiguracionSucursalServiceImplTest {
     configuracionDeSucursalParaActualizar.setPredeterminada(true);
     configuracionSucursalService.actualizar(configuracionDeSucursalParaActualizar);
     verify(configuracionSucursalRepository).save(configuracionDeSucursalParaActualizar);
+  }
+
+  @Test
+  void shouldGetCantidadMaximaDeRenglonesPorIdSucursa() {
+      configuracionSucursalService.getCantidadMaximaDeRenglonesPorIdSucursal(1L);
+      verify(configuracionSucursalRepository).getCantidadMaximaDeRenglones(1L);
+  }
+
+  @Test
+  void shouldTestIsFacturaElectronicaHabilitada() {
+    configuracionSucursalService.isFacturaElectronicaHabilitada(1L);
+    verify(configuracionSucursalRepository).isFacturaElectronicaHabilitada(1L);
   }
 }

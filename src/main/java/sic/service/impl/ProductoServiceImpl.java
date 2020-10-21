@@ -903,7 +903,6 @@ public class ProductoServiceImpl implements IProductoService {
             cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
         }
         BigDecimal cantidadSolicitada = cantidadParaCalcular;
-        producto.getCantidadEnSucursalesDisponible().stream().map(CantidadEnSucursal::getCantidad).reduce(BigDecimal.ZERO,BigDecimal::add);
         producto.getCantidadEnSucursalesDisponible().stream()
               .filter(cantidadEnSucursal -> (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
                       || cantidadEnSucursal.getSucursal().getIdSucursal() == productosParaVerificarStockDTO.getIdSucursal()))

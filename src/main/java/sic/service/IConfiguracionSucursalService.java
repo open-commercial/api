@@ -1,13 +1,10 @@
 package sic.service;
 
 import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Sucursal;
 
 public interface IConfiguracionSucursalService {
 
   void actualizar(ConfiguracionSucursal configuracionSucursalPorActualizar);
-
-  //ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal);
 
   ConfiguracionSucursal getConfiguracionSucursalPorId(long idConfiguracionSucursal);
 
@@ -17,7 +14,7 @@ public interface IConfiguracionSucursalService {
 
   void validarReglasDeNegocio(ConfiguracionSucursal configuracionSucursal);
 
-//  int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal);
-//
-//  boolean isFacturaElectronicaHabilitada(long idSucursal);
+  int getCantidadMaximaDeRenglonesPorIdSucursal(long idSucursal);
+
+  boolean isFacturaElectronicaHabilitada(long idSucursal);
 }

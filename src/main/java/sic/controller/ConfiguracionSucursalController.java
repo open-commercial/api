@@ -58,15 +58,15 @@ public class ConfiguracionSucursalController {
     return sucursalService.getSucursalPorId(idSucursal).getConfiguracionSucursal();
   }
 
-//  @GetMapping("/configuraciones-sucursal/{idSucursal}/cantidad-renglones")
-//  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-//  public int getCantidadMaximaDeRenglonesPorIdSucursal(@PathVariable long idSucursal) {
-//    return configuracionSucursal.getCantidadMaximaDeRenglonesPorIdSucursal(idSucursal);
-//  }
-//
-//  @GetMapping("/configuraciones-sucursal/{idSucursal}/factura-electronica-habilitada")
-//  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-//  public boolean isFacturaElectronicaHabilitada(@PathVariable long idSucursal) {
-//    return configuracionSucursal.isFacturaElectronicaHabilitada(idSucursal);
-//  }
+  @GetMapping("/configuraciones-sucursal/{idSucursal}/cantidad-renglones")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
+  public int getCantidadMaximaDeRenglonesPorIdSucursal(@PathVariable long idSucursal) {
+    return configuracionSucursal.getCantidadMaximaDeRenglonesPorIdSucursal(idSucursal);
+  }
+
+  @GetMapping("/configuraciones-sucursal/{idSucursal}/factura-electronica-habilitada")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
+  public boolean isFacturaElectronicaHabilitada(@PathVariable long idSucursal) {
+    return configuracionSucursal.isFacturaElectronicaHabilitada(idSucursal);
+  }
 }

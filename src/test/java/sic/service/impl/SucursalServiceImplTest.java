@@ -112,14 +112,10 @@ public class SucursalServiceImplTest {
     verify(messageSource).getMessage(eq("mensaje_sucursal_no_existente"), any(), any());
     when(sucursalRepository.findById(1L)).thenReturn(Optional.of(sucursal));
     sucursal.setConfiguracionSucursal(configuracionSucursal);
-//    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-//        .thenReturn(configuracionSucursal);
     assertThrows(BusinessServiceException.class, () -> sucursalService.eliminar(1L));
     verify(messageSource)
         .getMessage(eq("mensaje_sucursal_no_se_puede_eliminar_predeterminada"), any(), any());
     configuracionSucursal.setPredeterminada(false);
-//    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-//        .thenReturn(configuracionSucursal);
     sucursal.setConfiguracionSucursal(configuracionSucursal);
     sucursalService.eliminar(1L);
     verify(configuracionSucursalService).eliminar(configuracionSucursal);
