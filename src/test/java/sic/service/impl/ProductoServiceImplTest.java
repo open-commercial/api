@@ -758,7 +758,7 @@ class ProductoServiceImplTest {
     cantidadEnSucursalProducto3.setCantidad(BigDecimal.TEN);
     cantidadesEnSucursalProducto.add(cantidadEnSucursalProducto3);
     producto1.setCantidadEnSucursales(cantidadesEnSucursalProducto);
-    when(pedidoService.getCantidadReservadaDeProducto(1L)).thenReturn(BigDecimal.TEN);
+    when(pedidoService.getCantidadReservadaDeProducto(1L, 1L)).thenReturn(BigDecimal.TEN);
     Producto productoRecuperado =
         productoService.calcularCantidadEnSucursalesDisponible(producto1, 1L);
     assertNotNull(productoRecuperado);
@@ -771,10 +771,10 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldCalcularCantidadReservada() {
-    when(pedidoService.getCantidadReservadaDeProducto(1L)).thenReturn(BigDecimal.TEN);
+    when(pedidoService.getCantidadReservadaDeProducto(1L, 1L)).thenReturn(BigDecimal.TEN);
     Producto producto = new Producto();
     producto.setIdProducto(1L);
-    producto = productoService.calcularCantidadReservada(producto);
+    producto = productoService.calcularCantidadReservada(producto, 1L);
     assertEquals(BigDecimal.TEN, producto.getCantidadReservada());
   }
 

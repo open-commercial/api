@@ -22,7 +22,8 @@ public interface RenglonPedidoRepository extends PagingAndSortingRepository<Reng
   List<RenglonPedido> findByIdPedidoOrderByIdRenglonPedido(@Param("idPedido") long idPedido);
 
   @Query(
-          "SELECT count(rp.cantidad) FROM Pedido p INNER JOIN p.renglones rp"
-                  + " WHERE rp.idProductoItem = :idProducto AND p.estado = 'ABIERTO' AND p.eliminado = false")
-  BigDecimal getCantidadReservadaDeProducto(@Param("idProducto") long idProducto);
+      "SELECT count(rp.cantidad) FROM Pedido p INNER JOIN p.renglones rp"
+          + " WHERE rp.idProductoItem = :idProducto AND p.estado = 'ABIERTO' AND p.sucursal.idSucursal = :idSucursal AND p.eliminado = false")
+  BigDecimal getCantidadReservadaDeProducto(
+      @Param("idProducto") long idProducto, @Param("idSucursal") long idSucursal);
 }

@@ -67,7 +67,7 @@ public class ProductoController {
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
     productoService.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
-    productoService.calcularCantidadReservada(producto);
+    productoService.calcularCantidadReservada(producto, idSucursal);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
               messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
@@ -86,7 +86,7 @@ public class ProductoController {
                                        @RequestParam String codigo) {
     Producto producto = productoService.getProductoPorCodigo(codigo);
     productoService.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
-    productoService.calcularCantidadReservada(producto);
+    productoService.calcularCantidadReservada(producto, idSucursal);
     return producto;
   }
 

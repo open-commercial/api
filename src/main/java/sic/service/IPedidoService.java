@@ -53,5 +53,5 @@ public interface IPedidoService {
 
   BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
 
-  BigDecimal getCantidadReservadaDeProducto(Long idProducto);
+  BigDecimal getCantidadReservadaDeProducto(Long idProducto, Long idSucursal);
 }

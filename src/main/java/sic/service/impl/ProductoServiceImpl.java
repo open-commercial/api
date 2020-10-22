@@ -223,7 +223,7 @@ public class ProductoServiceImpl implements IProductoService {
         .forEach(
             producto -> {
               this.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
-              this.calcularCantidadReservada(producto);
+              this.calcularCantidadReservada(producto, idSucursal);
             });
     return productos;
   }
@@ -1125,8 +1125,8 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Producto calcularCantidadReservada(Producto producto) {
-    producto.setCantidadReservada(pedidoService.getCantidadReservadaDeProducto(producto.getIdProducto()));
+  public Producto calcularCantidadReservada(Producto producto, Long idSucursal) {
+    producto.setCantidadReservada(pedidoService.getCantidadReservadaDeProducto(producto.getIdProducto(), idSucursal));
     return producto;
   }
 

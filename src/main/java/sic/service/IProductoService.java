@@ -94,7 +94,7 @@ public interface IProductoService {
 
   Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada);
 
-  Producto calcularCantidadReservada(Producto producto);
+  Producto calcularCantidadReservada(Producto producto, Long idSucursal);
 
   Producto guardarProductoFavorito(long idUsuario, long idProducto);
 
