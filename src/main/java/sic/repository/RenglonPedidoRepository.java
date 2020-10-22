@@ -17,11 +17,6 @@ public interface RenglonPedidoRepository extends PagingAndSortingRepository<Reng
       @Param("idPedido") long idPedido);
 
   @Query(
-      "SELECT rp FROM Pedido pedido INNER JOIN pedido.renglones rp INNER JOIN Producto producto on rp.idProductoItem = producto.idProducto"
-          + " WHERE pedido.idPedido = :idPedido AND pedido.eliminado = false AND producto.eliminado = false order by rp.idProductoItem asc")
-  List<RenglonPedido> findByIdPedidoOrderByIdProductoItem(@Param("idPedido") long idPedido);
-
-  @Query(
       "SELECT rp FROM Pedido p INNER JOIN p.renglones rp"
           + " WHERE p.idPedido = :idPedido AND p.eliminado = false order by rp.idRenglonPedido asc")
   List<RenglonPedido> findByIdPedidoOrderByIdRenglonPedido(@Param("idPedido") long idPedido);

@@ -109,4 +109,8 @@ public interface IProductoService {
   void quitarProductosDeFavoritos(long idUsuario);
 
   Long getCantidadDeProductosFavoritos(long idUsuario);
+
+  void validarLongitudDeArrays(int longitudIds, int longitudCantidades);
+
+  ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible);
 }

@@ -2,15 +2,15 @@ package sic.model;
 
 import lombok.*;
 import sic.modelo.CategoriaIVA;
+import sic.modelo.ConfiguracionSucursal;
 
 import java.time.LocalDateTime;
-import java.time.Month;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"idSucursal", "ubicacion", "detalleUbicacion"})
+@EqualsAndHashCode(exclude = {"idSucursal", "ubicacion", "detalleUbicacion", "configuracionSucursal"})
 public class Sucursal {
 
   private long idSucursal;
@@ -23,6 +23,7 @@ public class Sucursal {
   private String email;
   private String telefono;
   private Ubicacion ubicacion;
+  private ConfiguracionSucursal configuracionSucursal;
   private String detalleUbicacion;
   private String logo;
   private boolean eliminada;

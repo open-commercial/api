@@ -940,11 +940,36 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldTestGetCantidadDeProductoFavorito() {
+  void shouldGetCantidadDeProductoFavorito() {
     Cliente cliente = new Cliente();
     cliente.setNombreFiscal("Cliente test");
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
     productoService.getCantidadDeProductosFavoritos(1L);
     verify(productoFavoritoRepository).getCantidadDeArticulosEnFavoritos(cliente);
+  }
+
+  @Test
+  void shouldValidarLongitudDeArrays() {
+    int longitudIds = 4;
+    int longitudCantidades = 3;
+    assertThrows(
+            BusinessServiceException.class,
+            () -> productoService.validarLongitudDeArrays(longitudIds, longitudCantidades));
+    verify(messageSource).getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault());
+  }
+
+  @Test
+  void shouldConstruirNuevoProductoFaltante() {
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCodigo("321");
+    producto.setDescripcion("Producto test");
+    ProductoFaltanteDTO productoFaltante =productoService.construirNuevoProductoFaltante(producto, BigDecimal.TEN, BigDecimal.ONE);
+    assertNotNull(productoFaltante);
+    assertEquals(1L, productoFaltante.getIdProducto());
+    assertEquals("321", productoFaltante.getCodigo());
+    assertEquals("Producto test", productoFaltante.getDescripcion());
+    assertEquals(BigDecimal.TEN, productoFaltante.getCantidadSolicitada());
+    assertEquals(BigDecimal.ONE, productoFaltante.getCantidadDisponible());
   }
 }

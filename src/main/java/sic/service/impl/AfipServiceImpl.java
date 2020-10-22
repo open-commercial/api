@@ -106,11 +106,9 @@ public class AfipServiceImpl implements IAfipService {
               LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
           configuracionSucursalService.actualizar(configuracionSucursal);
           return feAuthRequest;
-        } catch (DocumentException | IOException ex) {
+        } catch (DocumentException | IOException | WebServiceClientException ex) {
           throw new ServiceException(
                   messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
-        } catch (WebServiceClientException ex) {
-          throw new ServiceException(messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
         }
       }
     }
@@ -207,10 +205,7 @@ public class AfipServiceImpl implements IAfipService {
             LocalDate.parse(fechaVencimientoCaeResponse, DateTimeFormatter.BASIC_ISO_DATE));
         comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
         comprobante.setNumFacturaAfip(siguienteNroComprobante);
-      } catch (WebServiceClientException ex) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
-      } catch (IOException ex) {
+      } catch (WebServiceClientException | IOException ex) {
         throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
       }

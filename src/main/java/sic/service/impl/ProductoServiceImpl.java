@@ -889,49 +889,46 @@ public class ProductoServiceImpl implements IProductoService {
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     HashMap<Long, BigDecimal> listaIdsAndCantidades = new HashMap<>();
-    if (longitudIds == longitudCantidades) {
-      if (productosParaVerificarStockDTO.getIdPedido() != null) {
-        List<RenglonPedido> renglonesDelPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(productosParaVerificarStockDTO.getIdPedido());
-        if (!renglonesDelPedido.isEmpty()){
-        renglonesDelPedido.forEach(renglonPedido -> listaIdsAndCantidades.put(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
-        }
+    this.validarLongitudDeArrays(longitudIds, longitudCantidades);
+    if (productosParaVerificarStockDTO.getIdPedido() != null) {
+      List<RenglonPedido> renglonesDelPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(productosParaVerificarStockDTO.getIdPedido());
+      if (!renglonesDelPedido.isEmpty()){
+      renglonesDelPedido.forEach(renglonPedido -> listaIdsAndCantidades.put(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
       }
-      for (int i = 0; i < longitudIds; i++) {
-        Producto producto =
-            this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        this.calcularCantidadEnSucursalesDisponible(producto, productosParaVerificarStockDTO.getIdSucursal());
-        BigDecimal cantidadParaCalcular = productosParaVerificarStockDTO.getCantidad()[i];
-        if (!listaIdsAndCantidades.isEmpty() && listaIdsAndCantidades.get(producto.getIdProducto()) != null) {
-            cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
-        }
-        BigDecimal cantidadSolicitada = cantidadParaCalcular;
-        producto.getCantidadEnSucursalesDisponible().stream()
-              .filter(cantidadEnSucursal -> (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
-                      || cantidadEnSucursal.getSucursal().getIdSucursal() == productosParaVerificarStockDTO.getIdSucursal()))
-              .forEach(
-                  cantidadEnSucursal -> {
-                    if (!producto.isIlimitado()
-                        && producto.getCantidadEnSucursalesDisponible()
-                            .stream()
-                            .map(CantidadEnSucursal::getCantidad)
-                            .reduce(BigDecimal.ZERO,BigDecimal::add)
-                            .compareTo(cantidadSolicitada) < 0
-                    && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
-                      ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
-                      productoFaltanteDTO.setIdProducto(producto.getIdProducto());
-                      productoFaltanteDTO.setCodigo(producto.getCodigo());
-                      productoFaltanteDTO.setDescripcion(producto.getDescripcion());
-                      productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
-                      productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
-                      productosFaltantes.add(productoFaltanteDTO);
-                    }
-              });
+    }
+    for (int i = 0; i < longitudIds; i++) {
+      Producto producto =
+          this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
+      this.calcularCantidadEnSucursalesDisponible(producto, productosParaVerificarStockDTO.getIdSucursal());
+      BigDecimal cantidadParaCalcular = productosParaVerificarStockDTO.getCantidad()[i];
+      if (!listaIdsAndCantidades.isEmpty() && listaIdsAndCantidades.get(producto.getIdProducto()) != null) {
+          cantidadParaCalcular = cantidadParaCalcular.subtract(listaIdsAndCantidades.get(producto.getIdProducto()));
       }
-    } else {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
+      BigDecimal cantidadSolicitada = cantidadParaCalcular;
+      producto.getCantidadEnSucursalesDisponible().stream()
+            .filter(cantidadEnSucursal -> (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
+                    || cantidadEnSucursal.getSucursal().getIdSucursal() == productosParaVerificarStockDTO.getIdSucursal()))
+            .forEach(
+                cantidadEnSucursal -> {
+                  if (!producto.isIlimitado()
+                      && producto.getCantidadEnSucursalesDisponible()
+                          .stream()
+                          .map(CantidadEnSucursal::getCantidad)
+                          .reduce(BigDecimal.ZERO,BigDecimal::add)
+                          .compareTo(cantidadSolicitada) < 0
+                  && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
+                    productosFaltantes.add(this.construirNuevoProductoFaltante(producto, cantidadSolicitada, cantidadEnSucursal.getCantidad()));
+                  }
+            });
     }
     return productosFaltantes;
+  }
+
+  @Override
+  public void validarLongitudDeArrays(int longitudIds, int longitudCantidades) {
+    if (longitudIds != longitudCantidades)
+       throw new BusinessServiceException(
+            messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
   }
 
   @Override
@@ -940,37 +937,38 @@ public class ProductoServiceImpl implements IProductoService {
     List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
-    if (longitudIds == longitudCantidades) {
-      for (int i = 0; i < longitudIds; i++) {
-        Producto producto =
-                this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
-        BigDecimal cantidadSolicitada = productosParaVerificarStockDTO.getCantidad()[i];
-        producto.getCantidadEnSucursales().stream()
-                .filter(
-                        cantidadEnSucursal ->
-                                cantidadEnSucursal
-                                        .getIdSucursal()
-                                        .equals(productosParaVerificarStockDTO.getIdSucursal()))
-                .forEach(
-                        cantidadEnSucursal -> {
-                          if (!producto.isIlimitado()
-                                  && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0
-                                  && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
-                            ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
-                            productoFaltanteDTO.setIdProducto(producto.getIdProducto());
-                            productoFaltanteDTO.setCodigo(producto.getCodigo());
-                            productoFaltanteDTO.setDescripcion(producto.getDescripcion());
-                            productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
-                            productoFaltanteDTO.setCantidadDisponible(cantidadEnSucursal.getCantidad());
-                            productosFaltantes.add(productoFaltanteDTO);
-                          }
-                        });
-      }
-    } else {
-      throw new BusinessServiceException(
-              messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
+    this.validarLongitudDeArrays(longitudIds, longitudCantidades);
+    for (int i = 0; i < longitudIds; i++) {
+      Producto producto =
+              this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
+      BigDecimal cantidadSolicitada = productosParaVerificarStockDTO.getCantidad()[i];
+      producto.getCantidadEnSucursales().stream()
+              .filter(
+                      cantidadEnSucursal ->
+                              cantidadEnSucursal
+                                      .getIdSucursal()
+                                      .equals(productosParaVerificarStockDTO.getIdSucursal()))
+              .forEach(
+                      cantidadEnSucursal -> {
+                        if (!producto.isIlimitado()
+                                && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0
+                                && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
+                          productosFaltantes.add(this.construirNuevoProductoFaltante(producto, cantidadSolicitada, cantidadEnSucursal.getCantidad()));
+                        }
+                      });
     }
     return productosFaltantes;
+  }
+
+  @Override
+  public ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible) {
+    ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
+    productoFaltanteDTO.setIdProducto(producto.getIdProducto());
+    productoFaltanteDTO.setCodigo(producto.getCodigo());
+    productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+    productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
+    productoFaltanteDTO.setCantidadDisponible(cantidadDisponible);
+    return productoFaltanteDTO;
   }
 
   @Override
