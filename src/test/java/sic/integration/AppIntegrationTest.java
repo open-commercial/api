@@ -1817,9 +1817,9 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Actualizar stock de un producto para tener cantidades en dos sucursales, luego realizar un pedido que requiera del stock de ambas")
+  @DisplayName("Actualizar stock de un producto para tener cantidades en dos sucursales")
   @Order(16)
-  void testEscenarioPedidoConStockDeDosSucursales() {
+  void testEscenarioActualizarStockParaDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Cliente clienteParaEditar = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
     clienteParaEditar.setPuedeComprarAPlazo(true);
@@ -1894,48 +1894,53 @@ class AppIntegrationTest {
             apiPrefix + "/productos/" + resultadoBusqueda.getContent().get(0).getIdProducto() + "/sucursales/1",
             Producto.class);
     assertEquals(140, productoParaControlarStock.getCantidadTotalEnSucursales().doubleValue());
+  }
+
+  @Test
+  @DisplayName("Realizar un pedido que requiera del stock de ambas")
+  @Order(17)
+  void testEscenarioPedidoConStockDeDosSucursales() {
+    this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
     this.token =
-        restTemplate
-            .postForEntity(
-                apiPrefix + "/login",
-                new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
-                String.class)
-            .getBody();
+            restTemplate
+                    .postForEntity(
+                            apiPrefix + "/login",
+                            new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
+                            String.class)
+                    .getBody();
     assertNotNull(this.token);
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/productos/4?cantidad=50", null, ItemCarritoCompra.class);
+            apiPrefix + "/carrito-compra/productos/4?cantidad=50", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
-        restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/productos/4", ItemCarritoCompra.class);
+            restTemplate.getForObject(
+                    apiPrefix + "/carrito-compra/productos/4", ItemCarritoCompra.class);
     assertNotNull(item1);
     assertEquals(4L, item1.getProducto().getIdProducto().longValue());
     assertEquals(50, item1.getCantidad().doubleValue());
     NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO = NuevaOrdenDePagoDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
-
     RestClientResponseException thrown =
-        assertThrows(
-            RestClientResponseException.class,
-            () ->
-                restTemplate.postForObject(
-                    apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
+            assertThrows(
+                    RestClientResponseException.class,
+                    () ->
+                            restTemplate.postForObject(
+                                    apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
     assertNotNull(thrown.getMessage());
     assertTrue(
-        thrown
-            .getMessage()
-            .contains(
-                messageSource.getMessage("mensaje_pedido_sin_stock", null, Locale.getDefault())));
-
+            thrown
+                    .getMessage()
+                    .contains(
+                            messageSource.getMessage("mensaje_pedido_sin_stock", null, Locale.getDefault())));
     this.iniciarSesionComoAdministrador();
-    configuracionSucursal =
-        restTemplate.getForObject(
-            apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
-            ConfiguracionSucursal.class);
+    ConfiguracionSucursal configuracionSucursal =
+            restTemplate.getForObject(
+                    apiPrefix + "/configuraciones-sucursal/2",
+                    ConfiguracionSucursal.class);
     configuracionSucursal.setComparteStock(true);
     restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursal);
     configuracionSucursal =
             restTemplate.getForObject(
-                    apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+                    apiPrefix + "/configuraciones-sucursal/2",
                     ConfiguracionSucursal.class);
     assertTrue(configuracionSucursal.isPuntoDeRetiro());
     assertTrue(configuracionSucursal.isComparteStock());
@@ -1948,13 +1953,25 @@ class AppIntegrationTest {
                             String.class)
                     .getBody();
     assertNotNull(this.token);
-
     Pedido pedido =
             restTemplate.postForObject(
                     apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
     assertEquals(new BigDecimal("50.000000000000000") , pedido.getCantidadArticulos());
     this.iniciarSesionComoAdministrador();
-    productoParaControlarStock =
+    BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder()
+            .descripcion("Corta Papas - Vegetales").build();
+    HttpEntity<BusquedaProductoCriteria> requestEntityProductos =
+            new HttpEntity<>(productosCriteria);
+    PaginaRespuestaRest<Producto> resultadoBusqueda =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                            HttpMethod.POST,
+                            requestEntityProductos,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusqueda);
+    Producto productoParaControlarStock =
             restTemplate.getForObject(
                     apiPrefix + "/productos/" + resultadoBusqueda.getContent().get(0).getIdProducto() + "/sucursales/1",
                     Producto.class);
@@ -1968,7 +1985,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar el pedido anterior")
-  @Order(17)
+  @Order(18)
   void testEscenarioFacturarPedido() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria pedidoCriteria =
@@ -2024,7 +2041,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Verificar stock y cerrar caja")
-  @Order(18)
+  @Order(19)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();

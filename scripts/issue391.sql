@@ -26,7 +26,4 @@ REFERENCES configuracionsucursal(idConfiguracionSucursal);
 alter table configuracionsucursal
 add column comparteStock bit(1) default false;
 
-ALTER TABLE producto
-drop column cantidadTotalEnSucursales;
-
 
