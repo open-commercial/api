@@ -34,9 +34,9 @@ public class AuthAspect {
     HttpServletRequest request =
         ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
     String authorizationHeader = request.getHeader("Authorization");
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     Rol[] rolesRequeridos = AccesoRolesPermitidos.value();
-    List rolesDelUsuario = claims.get("roles", List.class);
+    var rolesDelUsuario = claims.get("roles", List.class);
     boolean accesoDenegado = true;
     for (Rol rolRequerido : rolesRequeridos) {
       if (rolesDelUsuario.contains(rolRequerido.toString())) accesoDenegado = false;

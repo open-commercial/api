@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.exception.UnauthorizedException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.service.*;
@@ -95,8 +96,15 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   public Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
       String passwordRecoveryKey, long idUsuario) {
-    return usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(
-        passwordRecoveryKey, idUsuario);
+    Usuario usuario =
+        usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(
+            passwordRecoveryKey, idUsuario);
+    if (usuario == null
+        || LocalDateTime.now().isAfter(usuario.getPasswordRecoveryKeyExpirationDate())) {
+      throw new UnauthorizedException(
+          messageSource.getMessage("mensaje_error_passwordRecoveryKey", null, Locale.getDefault()));
+    }
+    return usuario;
   }
 
   @Override
@@ -109,10 +117,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
     if (usuario == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_usuario_logInInvalido", null, Locale.getDefault()));
-    }
-    if (credencial.getAplicacion() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_usuario_logInInvalido_aplicacion", null, Locale.getDefault()));
     }
     if (!usuario.isHabilitado()) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -339,5 +343,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
     logger.warn("El Usuario {} se eliminó correctamente.", usuario);
+  }
+
+  @Override
+  public boolean esUsuarioHabilitado(long idUsuario) {
+    return this.getUsuarioNoEliminadoPorId(idUsuario).isHabilitado();
   }
 }

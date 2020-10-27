@@ -10,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
-import sic.modelo.Aplicacion;
-import sic.modelo.TokenAcceso;
 import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
@@ -57,7 +55,7 @@ public class UsuarioController {
   public Usuario guardar(
       @RequestBody UsuarioDTO usuarioDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
         && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
@@ -72,7 +70,7 @@ public class UsuarioController {
   public void actualizar(
       @RequestBody UsuarioDTO usuarioDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     boolean usuarioSeModificaASiMismo =
         usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();
@@ -83,9 +81,6 @@ public class UsuarioController {
         usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
         usuarioPorActualizar.setHabilitado(usuarioPersistido.isHabilitado());
       }
-      if (usuarioLoggedIn.getIdUsuario() == usuarioPersistido.getIdUsuario()) {
-        usuarioPorActualizar.setTokens(usuarioLoggedIn.getTokens());
-      }
       if (usuarioPorActualizar.getPassword() != null
           && !usuarioPorActualizar.getPassword().isEmpty()) {
         usuarioPorActualizar.setPassword(
@@ -93,12 +88,6 @@ public class UsuarioController {
       } else {
         usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
       }
-      if (!usuarioSeModificaASiMismo) {
-        Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
-        TokenAcceso tokenAcceso = TokenAcceso.builder().aplicacion(aplicacion).build();
-        usuarioPersistido.getTokens().remove(tokenAcceso);
-      }
-      usuarioPorActualizar.setTokens(usuarioPersistido.getTokens());
       usuarioService.actualizar(usuarioPorActualizar);
     } else {
       throw new ForbiddenException(messageSource.getMessage(

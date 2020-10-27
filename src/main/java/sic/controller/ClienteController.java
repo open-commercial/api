@@ -53,7 +53,7 @@ public class ClienteController {
   public Page<Cliente> buscarConCriteria(
       @RequestBody BusquedaClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
 
@@ -74,7 +74,7 @@ public class ClienteController {
       @RequestBody ClienteDTO nuevoCliente,
       @RequestHeader("Authorization") String authorizationHeader) {
     Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (nuevoCliente.getIdCredencial() != null) {
@@ -122,7 +122,7 @@ public class ClienteController {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
         clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (clienteDTO.getIdCredencial() != null) {

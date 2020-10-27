@@ -83,10 +83,9 @@ class ProductoControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", roles)
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact();
     Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
     usuario.setRoles(Collections.emptyList());
@@ -111,10 +110,9 @@ class ProductoControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     productoController.marcarComoFavorito(1L, "headers");
     verify(productoService).guardarProductoFavorito(1L, 1L);
   }
@@ -135,10 +133,9 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     productoController.getProductosFavoritosDelCliente(0, "headers");
     verify(productoService).getPaginaProductosFavoritosDelCliente(1L, 0);
   }
@@ -159,10 +156,9 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     productoController.quitarProductoDeFavoritos(4L, "headers");
     verify(productoService).quitarProductoDeFavoritos(1L, 4L);
   }
@@ -183,10 +179,9 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     productoController.quitarProductosDeFavoritos("headers");
     verify(productoService).quitarProductosDeFavoritos(1L);
   }
@@ -207,10 +202,9 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     productoController.getCantidadDeProductosFavoritos("headers");
     verify(productoService).getCantidadDeProductosFavoritos(1L);
   }

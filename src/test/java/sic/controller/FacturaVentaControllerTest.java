@@ -86,10 +86,9 @@ class FacturaVentaControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", roles)
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact();
     Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
@@ -122,10 +121,9 @@ class FacturaVentaControllerTest {
             .signWith(SignatureAlgorithm.HS512, secretKey)
             .claim("idUsuario", 1L)
             .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-            .claim("app", Aplicacion.SIC_COM)
             .compact();
     Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-    when(authService.getClaimsDelToken(any())).thenReturn(claims);
+    when(authService.getClaimsDelJWT(any())).thenReturn(claims);
     List<FacturaVenta> facturas = new ArrayList<>();
     FacturaVenta facturaVenta = new FacturaVenta();
     facturaVenta.setNumSerie(1L);
@@ -153,10 +151,9 @@ class FacturaVentaControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
     usuario.setRoles(Collections.singletonList(Rol.ADMINISTRADOR));
@@ -176,10 +173,9 @@ class FacturaVentaControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.VENDEDOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     when(facturaVentaService.getTiposDeComprobanteVenta(any(), any(), any()))
         .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.PEDIDO});
     assertEquals(
@@ -236,10 +232,9 @@ class FacturaVentaControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
     when(facturaVentaService.calcularTotalFacturadoVenta(busquedaFacturaVentaCriteria, 1L))
@@ -266,10 +261,9 @@ class FacturaVentaControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
     when(facturaVentaService.calcularIvaVenta(busquedaFacturaVentaCriteria, 1L))
@@ -295,10 +289,9 @@ class FacturaVentaControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
     when(facturaVentaService.calcularGananciaTotal(busquedaFacturaVentaCriteria, 1L))

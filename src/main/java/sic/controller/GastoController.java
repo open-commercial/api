@@ -72,7 +72,7 @@ public class GastoController {
     Gasto gasto = modelMapper.map(gastoDTO, Gasto.class);
     gasto.setSucursal(sucursalService.getSucursalPorId(idSucursal));
     gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
     gasto.setFecha(LocalDateTime.now());

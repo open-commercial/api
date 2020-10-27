@@ -1,15 +1,8 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.util.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.web.bind.annotation.*;
-import sic.exception.UnauthorizedException;
 import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
@@ -24,63 +17,30 @@ public class AuthController {
   private final IUsuarioService usuarioService;
   private final IRegistracionService registracionService;
   private final IAuthService authService;
-  private final MessageSource messageSource;
 
   @Autowired
   public AuthController(
       IUsuarioService usuarioService,
       IRegistracionService registracionService,
-      IAuthService authService,
-      MessageSource messageSource) {
+      IAuthService authService) {
     this.usuarioService = usuarioService;
     this.registracionService = registracionService;
     this.authService = authService;
-    this.messageSource = messageSource;
   }
 
   @PostMapping("/login")
   public String login(@RequestBody Credencial credencial) {
     Usuario usuario = usuarioService.autenticarUsuario(credencial);
-    TokenAcceso tokenAcceso = new TokenAcceso();
-    tokenAcceso.setAplicacion(credencial.getAplicacion());
-    String token = "";
-    if (!usuario.getTokens().isEmpty() && usuario.getTokens().contains(tokenAcceso)) {
-      for (TokenAcceso f : usuario.getTokens()) {
-        if (f.getAplicacion().equals(credencial.getAplicacion()))
-          token = f.getToken();
-      }
-    } else {
-      token = authService.generarToken(usuario.getIdUsuario(), credencial.getAplicacion(), usuario.getRoles());
-      tokenAcceso = new TokenAcceso();
-      tokenAcceso.setAplicacion(credencial.getAplicacion());
-      tokenAcceso.setToken(token);
-      usuario.getTokens().add(tokenAcceso);
-      usuarioService.actualizar(usuario);
-    }
-    return token;
+    return authService.generarJWT(
+        usuario.getIdUsuario(), usuario.getRoles());
   }
 
   @PutMapping("/logout")
   public void logout(
       @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuario = (int) claims.get("idUsuario");
-    Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
-    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    TokenAcceso tokenAcceso = new TokenAcceso();
-    tokenAcceso.setAplicacion(aplicacion);
-    usuario.getTokens().remove(tokenAcceso);
-    usuarioService.actualizar(usuario);
-  }
-
-  @PutMapping("/logout-all-sessions")
-  public void logoutAllSessions(
-          @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuario = (int) claims.get("idUsuario");
-    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    usuario.getTokens().clear();
-    usuarioService.actualizar(usuario);
+    if (authorizationHeader != null) {
+      authService.excluirTokenAcceso(authorizationHeader);
+    }
   }
 
   @GetMapping("/password-recovery")
@@ -92,31 +52,12 @@ public class AuthController {
   }
 
   @PostMapping("/password-recovery")
-  public String generarTokenTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
-    TokenAcceso tokenAcceso;
+  public String generarTokenJWTTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
     Usuario usuario =
         usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
             recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
-    if (usuario != null && LocalDateTime.now().isBefore(usuario.getPasswordRecoveryKeyExpirationDate())) {
-      tokenAcceso = TokenAcceso.builder().aplicacion(recoveryPasswordDTO.getAplicacion()).build();
-      usuario.getTokens().remove(tokenAcceso);
-      tokenAcceso =
-          TokenAcceso.builder()
-              .aplicacion(recoveryPasswordDTO.getAplicacion())
-              .token(
-                  authService.generarToken(
-                      usuario.getIdUsuario(),
-                      recoveryPasswordDTO.getAplicacion(),
-                      usuario.getRoles()))
-              .build();
-      usuario.getTokens().add(tokenAcceso);
-      usuarioService.actualizar(usuario);
-      usuarioService.actualizarPasswordRecoveryKey(null, recoveryPasswordDTO.getId());
-    } else {
-      throw new UnauthorizedException(messageSource.getMessage(
-        "mensaje_error_passwordRecoveryKey", null, Locale.getDefault()));
-    }
-    return tokenAcceso.getToken();
+    usuarioService.actualizarPasswordRecoveryKey(null, usuario.getIdUsuario());
+    return authService.generarJWT(usuario.getIdUsuario(), usuario.getRoles());
   }
 
   @PostMapping("/registracion")

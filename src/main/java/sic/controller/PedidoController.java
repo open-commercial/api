@@ -79,7 +79,7 @@ public class PedidoController {
   public void actualizar(
       @RequestBody PedidoDTO pedidoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
     long idUsuario = (int) claims.get(ID_USUARIO);
@@ -116,7 +116,7 @@ public class PedidoController {
   @PostMapping("/pedidos")
   public Pedido guardar(@RequestBody PedidoDTO pedidoDTO,
                         @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(pedidoDTO.getObservaciones());
     pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
@@ -158,7 +158,7 @@ public class PedidoController {
   public Page<Pedido> buscarConCriteria(
       @RequestBody BusquedaPedidoCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     return pedidoService.buscarPedidos(criteria, (int) claims.get(ID_USUARIO));
   }
 

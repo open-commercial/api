@@ -49,7 +49,7 @@ public class CajaController {
       @PathVariable long idSucursal,
       @RequestParam BigDecimal saldoApertura,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return cajaService.abrirCaja(
         sucursalService.getSucursalPorId(idSucursal),
@@ -69,7 +69,7 @@ public class CajaController {
       @PathVariable long idCaja,
       @RequestParam BigDecimal monto,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return cajaService.cerrarCaja(idCaja, monto, idUsuarioLoggedIn, false);
   }

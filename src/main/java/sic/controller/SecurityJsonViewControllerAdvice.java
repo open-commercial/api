@@ -33,7 +33,7 @@ public class SecurityJsonViewControllerAdvice extends AbstractMappingJacksonResp
 
     List<String> headers = serverHttpRequest.getHeaders().get("Authorization");
     if (headers != null && !headers.isEmpty()) {
-      Claims claims = authService.getClaimsDelToken(headers.get(0));
+      Claims claims = authService.getClaimsDelJWT(headers.get(0));
       List rolesDelUsuario = claims.get("roles", List.class);
       if (rolesDelUsuario != null && !rolesDelUsuario.isEmpty()) {
         if (rolesDelUsuario.contains(Rol.ADMINISTRADOR.name())) {

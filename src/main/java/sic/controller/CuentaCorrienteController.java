@@ -53,7 +53,7 @@ public class CuentaCorrienteController {
   public Page<CuentaCorrienteCliente> buscarCuentasCorrienteCliente(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     return cuentaCorrienteService.buscarCuentaCorrienteCliente(
         criteria, (int) claims.get("idUsuario"));
   }

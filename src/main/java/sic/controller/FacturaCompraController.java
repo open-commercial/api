@@ -85,7 +85,7 @@ public class FacturaCompraController {
           transportistaService.getTransportistaNoEliminadoPorId(
               nuevaCompraCompraDTO.getIdTransportista()));
     }
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
     fc.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     List<FacturaCompra> facturas = new ArrayList<>();

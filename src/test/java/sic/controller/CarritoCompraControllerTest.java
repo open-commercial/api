@@ -11,7 +11,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Aplicacion;
 import sic.modelo.Rol;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.ProductoFaltanteDTO;
@@ -19,7 +18,6 @@ import sic.service.impl.AuthServiceImpl;
 import sic.service.impl.CarritoCompraServiceImpl;
 
 import javax.crypto.SecretKey;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -57,10 +55,9 @@ class CarritoCompraControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
-    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
+    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
     List<ProductoFaltanteDTO> faltantes = new ArrayList<>();
