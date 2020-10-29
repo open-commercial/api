@@ -22,8 +22,8 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
       HttpServletRequest request, HttpServletResponse response, Object handler) {
     if (!request.getMethod().equals("OPTIONS")) {
       final String authorizationHeader = request.getHeader("Authorization");
-      if (authorizationHeader != null
-          && !authService.esAuthorizationHeaderValido(authorizationHeader)) {
+      if (authorizationHeader == null
+          || !authService.esAuthorizationHeaderValido(authorizationHeader)) {
         throw new UnauthorizedException(
             messageSource.getMessage("mensaje_error_token_invalido", null, Locale.getDefault()));
       }
