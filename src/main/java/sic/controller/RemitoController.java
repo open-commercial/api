@@ -43,7 +43,7 @@ public class RemitoController {
   public Remito crearRemitoDeFactura(
       @RequestBody NuevoRemitoDTO nuevoRemitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, idUsuarioLoggedIn);
   }

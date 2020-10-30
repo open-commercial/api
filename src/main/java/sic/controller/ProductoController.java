@@ -70,7 +70,7 @@ public class ProductoController {
               messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
     if (authorizationHeader != null) {
-      Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
       if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) producto.setFavorito(true);
     }
@@ -88,7 +88,7 @@ public class ProductoController {
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos = productoService.buscarProductos(criteria);
     if (authorizationHeader != null) {
-      Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
     }
@@ -151,7 +151,7 @@ public class ProductoController {
       productoPorActualizar.setProveedor(
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get(CLAIM_ID_USUARIO).toString()));
     if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)) {
       Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
@@ -208,7 +208,7 @@ public class ProductoController {
   public void actualizarMultiplesProductos(
     @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO,
     @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
     productoService.actualizarMultiples(productosParaActualizarDTO, usuarioLogueado);
   }
@@ -223,7 +223,7 @@ public class ProductoController {
   public void marcarComoFavorito(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
@@ -232,7 +232,7 @@ public class ProductoController {
   public Page<Producto> getProductosFavoritosDelCliente(
           @RequestParam int pagina,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, pagina);
   }
@@ -241,21 +241,21 @@ public class ProductoController {
   public void quitarProductoDeFavoritos(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     productoService.quitarProductoDeFavoritos(idUsuarioLoggedIn, idProducto);
   }
 
   @DeleteMapping("/productos/favoritos")
   public void quitarProductosDeFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     productoService.quitarProductosDeFavoritos(idUsuarioLoggedIn);
   }
 
   @GetMapping("/productos/favoritos/cantidad")
   public Long getCantidadDeProductosFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
   }

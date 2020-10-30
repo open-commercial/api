@@ -63,7 +63,7 @@ public class FacturaVentaController {
           messageSource.getMessage(
               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     FacturaVenta fv =
         facturaVentaService.construirFacturaVenta(
             nuevaFacturaVentaDTO, idPedido, ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
@@ -107,7 +107,7 @@ public class FacturaVentaController {
   public Page<FacturaVenta> buscarFacturaVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.buscarFacturaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
@@ -117,7 +117,7 @@ public class FacturaVentaController {
       @PathVariable long idSucursal,
       @PathVariable long idCliente,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get(CLAIM_ID_USUARIO);
     return facturaVentaService.getTiposDeComprobanteVenta(idSucursal, idCliente, idUsuario);
   }
@@ -154,7 +154,7 @@ public class FacturaVentaController {
   public BigDecimal calcularTotalFacturadoVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.calcularTotalFacturadoVenta(
         criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
@@ -164,7 +164,7 @@ public class FacturaVentaController {
   public BigDecimal calcularIvaVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.calcularIvaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
@@ -173,7 +173,7 @@ public class FacturaVentaController {
   public BigDecimal calcularGananciaTotal(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.calcularGananciaTotal(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 

@@ -133,7 +133,7 @@ public class NotaController {
   public NotaCredito calcularNotaCreditoConFactura(
       @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaCreditoConFactura(
         nuevaNotaCreditoDeFacturaDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
@@ -144,7 +144,7 @@ public class NotaController {
   public NotaCredito calcularNotaCreditoSinFactura(
       @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaCreditoSinFactura(
         nuevaNotaCreditoSinFacturaDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
@@ -155,7 +155,7 @@ public class NotaController {
   public NotaDebito calcularNotaDebitoDeRecibo(
       @RequestBody NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaDebitoConRecibo(
         nuevaNotaDebitoDeReciboDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
@@ -166,7 +166,7 @@ public class NotaController {
   public NotaDebito calcularNotaDebitoSinRecibo(
       @RequestBody NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaDebitoSinRecibo(
         nuevaNotaDebitoSinReciboDTO,
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
@@ -200,7 +200,7 @@ public class NotaController {
             (FacturaCompra) facturaService.getFacturaNoEliminadaPorId(notaCreditoDTO.getIdFacturaCompra()));
       }
     }
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     notaCredito.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     return notaService.guardarNotaCredito(notaCredito);
@@ -226,7 +226,7 @@ public class NotaController {
     if (notaDebitoDTO.getIdRecibo() != null) {
       notaDebito.setRecibo(reciboService.getReciboNoEliminadoPorId(notaDebitoDTO.getIdRecibo()));
     }
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     notaDebito.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     return notaService.guardarNotaDebito(notaDebito);
@@ -261,7 +261,7 @@ public class NotaController {
   public Page<NotaCredito> buscarNotasCredito(
     @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
     @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
@@ -269,7 +269,7 @@ public class NotaController {
   public Page<NotaDebito> buscarNotasDebito(
     @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
     @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
@@ -278,7 +278,7 @@ public class NotaController {
   public BigDecimal getTotalNotasCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
@@ -287,7 +287,7 @@ public class NotaController {
   public BigDecimal getTotalNotasDebito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
@@ -296,7 +296,7 @@ public class NotaController {
   public BigDecimal getTotalIvaCredito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVACredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
@@ -305,7 +305,7 @@ public class NotaController {
   public BigDecimal getTotalIvaDebito(
       @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVADebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 }

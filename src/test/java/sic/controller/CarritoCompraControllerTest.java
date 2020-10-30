@@ -57,7 +57,7 @@ class CarritoCompraControllerTest {
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
                     .compact())
             .getBody();
-    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
     List<ProductoFaltanteDTO> faltantes = new ArrayList<>();

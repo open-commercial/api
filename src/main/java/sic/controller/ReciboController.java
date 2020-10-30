@@ -77,7 +77,7 @@ public class ReciboController {
     recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
@@ -93,7 +93,7 @@ public class ReciboController {
     recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());

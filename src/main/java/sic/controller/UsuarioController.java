@@ -55,7 +55,7 @@ public class UsuarioController {
   public Usuario guardar(
       @RequestBody UsuarioDTO usuarioDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
         && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
@@ -70,7 +70,7 @@ public class UsuarioController {
   public void actualizar(
       @RequestBody UsuarioDTO usuarioDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     boolean usuarioSeModificaASiMismo =
         usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();

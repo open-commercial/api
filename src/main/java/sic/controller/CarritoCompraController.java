@@ -32,7 +32,7 @@ public class CarritoCompraController {
   @GetMapping("/carrito-compra/clientes/{idCliente}")
   public CarritoCompraDTO getCarritoCompraDelUsuario(
       @PathVariable long idCliente, @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.getCarritoCompra(idUsuarioLoggedIn, idCliente);
   }
@@ -41,7 +41,7 @@ public class CarritoCompraController {
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
       @RequestParam(required = false) Integer pagina,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     if (pagina == null || pagina < 0) pagina = 0;
     return carritoCompraService.getItemsDelCaritoCompra(idUsuarioLoggedIn, pagina, null);
@@ -50,7 +50,7 @@ public class CarritoCompraController {
   @GetMapping("/carrito-compra/productos/{idProducto}")
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
       @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(
         idUsuarioLoggedIn, idProducto);
@@ -59,14 +59,14 @@ public class CarritoCompraController {
   @DeleteMapping("/carrito-compra/productos/{idProducto}")
   public void eliminarItem(
       @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     carritoCompraService.eliminarItemDelUsuario(idUsuarioLoggedIn, idProducto);
   }
 
   @DeleteMapping("/carrito-compra")
   public void eliminarTodosLosItems(@RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     carritoCompraService.eliminarTodosLosItemsDelUsuario(idUsuarioLoggedIn);
   }
@@ -76,7 +76,7 @@ public class CarritoCompraController {
       @PathVariable long idProducto,
       @RequestParam BigDecimal cantidad,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     carritoCompraService.agregarOrModificarItem(idUsuarioLoggedIn, idProducto, cantidad);
   }
@@ -85,7 +85,7 @@ public class CarritoCompraController {
   public Pedido generarPedidoConItemsDelCarrito(
       @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.crearPedido(nuevaOrdenDePagoDTO, idUsuarioLoggedIn);
   }
@@ -93,7 +93,7 @@ public class CarritoCompraController {
   @GetMapping("/carrito-compra/disponibilidad-stock")
   public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.getProductosDelCarritoSinStockDisponible(idUsuarioLoggedIn);
   }

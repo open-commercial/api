@@ -64,7 +64,7 @@ class FacturaCompraControllerTest {
             .claim("roles", roles)
             .compact();
     Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     assertEquals(
         facturasCompra,
         facturaCompraController.guardarFacturaCompra(nuevaFacturaCompra, "headers"));

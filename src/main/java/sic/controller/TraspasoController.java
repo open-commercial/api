@@ -59,7 +59,7 @@ public class TraspasoController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Traspaso guardarTraspaso(@RequestBody NuevoTraspasoDTO nuevoTraspasoDTO,
                                   @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelJWT(authorizationHeader);
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return traspasoService.guardarTraspaso(nuevoTraspasoDTO, idUsuarioLoggedIn);
   }

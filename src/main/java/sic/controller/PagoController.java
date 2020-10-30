@@ -35,7 +35,7 @@ public class PagoController {
   @PostMapping("/pagos/mercado-pago/preference")
   public MercadoPagoPreferenceDTO getPreferenceSegunItemsDelUsuario(
       HttpServletRequest request, @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO) {
-    Claims claims = authService.getClaimsDelJWT(request.getHeader("Authorization"));
+    Claims claims = authService.getClaimsDelToken(request.getHeader("Authorization"));
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");

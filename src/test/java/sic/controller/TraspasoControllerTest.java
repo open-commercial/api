@@ -67,7 +67,7 @@ class TraspasoControllerTest {
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
                     .compact())
             .getBody();
-    when(authService.getClaimsDelJWT("headers")).thenReturn(claims);
+    when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     traspasoController.guardarTraspaso(NuevoTraspasoDTO.builder().build(), "headers");
     verify(traspasoService).guardarTraspaso(NuevoTraspasoDTO.builder().build(), 1L);
   }

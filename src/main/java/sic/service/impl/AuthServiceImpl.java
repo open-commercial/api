@@ -92,7 +92,7 @@ public class AuthServiceImpl implements IAuthService {
   }
 
   @Override
-  public Claims getClaimsDelJWT(String authorizationHeader) {
+  public Claims getClaimsDelToken(String authorizationHeader) {
     if (this.esAuthorizationHeaderValido(authorizationHeader)) {
       return Jwts.parser()
           .setSigningKey(jwtSecretKey)

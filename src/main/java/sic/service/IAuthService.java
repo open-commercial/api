@@ -14,7 +14,7 @@ public interface IAuthService {
 
   boolean noEsTokenExcluido(String token);
 
-  Claims getClaimsDelJWT(String authorizationHeader);
+  Claims getClaimsDelToken(String authorizationHeader);
 
   void validarRecaptcha(String recaptcha);
 
