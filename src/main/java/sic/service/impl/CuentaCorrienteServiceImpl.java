@@ -367,7 +367,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     CuentaCorriente cc = this.getCuentaCorrientePorCliente(remito.getCliente());
     if (tipo == TipoDeOperacion.ALTA) {
       RenglonCuentaCorriente rcc = new RenglonCuentaCorriente();
-      rcc.setTipoComprobante(remito.getTipoComprobante());
       rcc.setSerie(remito.getSerie());
       rcc.setNumero(remito.getNroRemito());
       rcc.setMonto(remito.getCostoDeEnvio().negate());

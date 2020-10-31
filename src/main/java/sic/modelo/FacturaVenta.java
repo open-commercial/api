@@ -40,7 +40,7 @@ public class FacturaVenta extends Factura implements Serializable {
   @NotNull(message = "{mensaje_factura_cliente_vacio}")
   private Cliente cliente;
 
-  @OneToOne
+  @ManyToOne
   @JoinColumn(name = "idRemito", referencedColumnName = "idRemito")
   private Remito remito;
 

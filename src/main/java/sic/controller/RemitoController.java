@@ -45,7 +45,7 @@ public class RemitoController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
-    return remitoService.crearRemitoDeFacturaVenta(nuevoRemitoDTO, idUsuarioLoggedIn);
+    return remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, idUsuarioLoggedIn);
   }
 
   @DeleteMapping("/remitos/{idRemito}")
@@ -73,10 +73,5 @@ public class RemitoController {
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF = remitoService.getReporteRemito(idRemito);
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-  }
-
-  @GetMapping("/remitos/tipos/sucursales/{idSucursal}")
-  public TipoDeComprobante[] getTiposRemitoSegunSucursal(@PathVariable long idSucursal) {
-    return remitoService.getTiposDeComprobanteSegunSucursal(idSucursal);
   }
 }
