@@ -116,7 +116,6 @@ public class RemitoServiceImpl implements IRemitoService {
                            messageSource.getMessage(
                                    "mensaje_remito_con_factura", null, Locale.getDefault()));
                }
-               //validar que sean del mismo cliente
                if (i == 0) {
                    cliente = ((FacturaVenta) factura).getCliente();
                    sucursal = factura.getSucursal();
@@ -124,16 +123,16 @@ public class RemitoServiceImpl implements IRemitoService {
                } else {
                    if (!cliente.equals(((FacturaVenta) factura).getCliente()))
                         throw new BusinessServiceException(
-                           messageSource.getMessage(//mismo cliente
-                                   "mensaje_remito_con_factura", null, Locale.getDefault()));
+                           messageSource.getMessage(
+                                   "mensaje_remito_facturas_diferentes_clientes", null, Locale.getDefault()));
                    if (!sucursal.equals(factura.getSucursal()))
                        throw new BusinessServiceException(
-                               messageSource.getMessage(//misma sucursal
-                                       "mensaje_remito_con_factura", null, Locale.getDefault()));
+                           messageSource.getMessage(
+                                   "mensaje_remito_facturas_diferentes_sucursales", null, Locale.getDefault()));
                    if (!factura.getPedido().getDetalleEnvio().equals(ubicacionDTO))
                        throw new BusinessServiceException(
-                               messageSource.getMessage(//mismo envio
-                                       "mensaje_remito_con_factura", null, Locale.getDefault()));
+                           messageSource.getMessage(
+                                   "mensaje_remito_facturas_diferentes_ubicacion_envio", null, Locale.getDefault()));
                }
            facturas.add((FacturaVenta) factura);
           }
