@@ -12,7 +12,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Remito;
 import sic.modelo.RenglonRemito;
 import sic.modelo.Rol;
-import sic.modelo.TipoDeComprobante;
 import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
 import sic.service.IAuthService;

@@ -47,7 +47,6 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
-    private final ISucursalService sucursalService;
     private final IConfiguracionSucursalService configuracionSucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
@@ -63,7 +62,6 @@ public class RemitoServiceImpl implements IRemitoService {
                               IClienteService clienteService,
                               IUsuarioService usuarioService,
                               ITransportistaService transportistaService,
-                              ISucursalService sucursalService,
                               IConfiguracionSucursalService configuracionSucursalService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               MessageSource messageSource,
@@ -75,7 +73,6 @@ public class RemitoServiceImpl implements IRemitoService {
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.transportistaService = transportistaService;
-        this.sucursalService = sucursalService;
         this.configuracionSucursalService = configuracionSucursalService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.messageSource = messageSource;
