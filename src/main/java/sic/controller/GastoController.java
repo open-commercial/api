@@ -9,7 +9,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.Gasto;
 import sic.modelo.Rol;
-import sic.modelo.dto.GastoDTO;
+import sic.modelo.dto.NuevoGastoDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;
@@ -65,13 +65,11 @@ public class GastoController {
   @PostMapping("/gastos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Gasto guardar(
-      @RequestBody GastoDTO gastoDTO,
-      @RequestParam Long idSucursal,
-      @RequestParam Long idFormaDePago,
+      @RequestBody NuevoGastoDTO nuevoGastoDTO,
       @RequestHeader(name = "Authorization") String authorizationHeader) {
-    Gasto gasto = modelMapper.map(gastoDTO, Gasto.class);
-    gasto.setSucursal(sucursalService.getSucursalPorId(idSucursal));
-    gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
+    Gasto gasto = modelMapper.map(nuevoGastoDTO, Gasto.class);
+    gasto.setSucursal(sucursalService.getSucursalPorId(nuevoGastoDTO.getIdSucursal()));
+    gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(nuevoGastoDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));

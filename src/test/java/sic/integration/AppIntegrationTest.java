@@ -194,15 +194,15 @@ class AppIntegrationTest {
     assertEquals(EstadoCaja.ABIERTA, cajaAbierta.getEstado());
     assertEquals(new BigDecimal("1000"), cajaAbierta.getSaldoApertura());
     Gasto nuevoGasto =
-        Gasto.builder().monto(new BigDecimal("500")).concepto("Pago de Agua").build();
+        Gasto.builder().monto(new BigDecimal("500")).concepto("Pago de Agua")
+                .idFormaDePago(1L)
+                .idSucursal(1L)
+                .build();
     List<Sucursal> sucursales =
         Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
     assertFalse(sucursales.isEmpty());
     assertEquals(1, sucursales.size());
-    restTemplate.postForObject(
-        apiPrefix + "/gastos?idFormaDePago=1&idSucursal=" + sucursales.get(0).getIdSucursal(),
-        nuevoGasto,
-        Gasto.class);
+    restTemplate.postForObject(apiPrefix + "/gastos", nuevoGasto, Gasto.class);
     BusquedaGastoCriteria criteria = BusquedaGastoCriteria.builder().idSucursal(1L).build();
     HttpEntity<BusquedaGastoCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<Gasto> resultadoBusqueda =
@@ -1643,10 +1643,13 @@ class AppIntegrationTest {
     assertEquals(EstadoCaja.ABIERTA, cajasRecuperadas.get(0).getEstado());
     assertEquals(
         new BigDecimal("1100.000000000000000"), cajasRecuperadas.get(0).getSaldoApertura());
-    Gasto gasto = Gasto.builder().concepto("Gasto olvidado").monto(new BigDecimal("750")).build();
+    Gasto gasto = Gasto.builder().concepto("Gasto olvidado").monto(new BigDecimal("750"))
+            .idSucursal(1L)
+            .idFormaDePago(1L)
+            .build();
     gasto =
         restTemplate.postForObject(
-            apiPrefix + "/gastos?idSucursal=1&idFormaDePago=1", gasto, Gasto.class);
+            apiPrefix + "/gastos", gasto, Gasto.class);
     assertNotNull(gasto);
     List<MovimientoCaja> movimientoCajas =
         Arrays.asList(
