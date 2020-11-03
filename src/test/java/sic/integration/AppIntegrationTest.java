@@ -193,11 +193,13 @@ class AppIntegrationTest {
             apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=1000", null, Caja.class);
     assertEquals(EstadoCaja.ABIERTA, cajaAbierta.getEstado());
     assertEquals(new BigDecimal("1000"), cajaAbierta.getSaldoApertura());
-    Gasto nuevoGasto =
-        Gasto.builder().monto(new BigDecimal("500")).concepto("Pago de Agua")
-                .idFormaDePago(1L)
-                .idSucursal(1L)
-                .build();
+    NuevoGastoDTO nuevoGasto =
+        NuevoGastoDTO.builder()
+            .monto(new BigDecimal("500"))
+            .concepto("Pago de Agua")
+            .idFormaDePago(1L)
+            .idSucursal(1L)
+            .build();
     List<Sucursal> sucursales =
         Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
     assertFalse(sucursales.isEmpty());
@@ -1643,14 +1645,17 @@ class AppIntegrationTest {
     assertEquals(EstadoCaja.ABIERTA, cajasRecuperadas.get(0).getEstado());
     assertEquals(
         new BigDecimal("1100.000000000000000"), cajasRecuperadas.get(0).getSaldoApertura());
-    Gasto gasto = Gasto.builder().concepto("Gasto olvidado").monto(new BigDecimal("750"))
+    NuevoGastoDTO nuevoGasto =
+        NuevoGastoDTO.builder()
+            .concepto("Gasto olvidado")
+            .monto(new BigDecimal("750"))
             .idSucursal(1L)
             .idFormaDePago(1L)
             .build();
-    gasto =
+    Gasto gasto =
         restTemplate.postForObject(
-            apiPrefix + "/gastos", gasto, Gasto.class);
-    assertNotNull(gasto);
+            apiPrefix + "/gastos", nuevoGasto, Gasto.class);
+   assertNotNull(gasto);
     List<MovimientoCaja> movimientoCajas =
         Arrays.asList(
             restTemplate.getForObject(

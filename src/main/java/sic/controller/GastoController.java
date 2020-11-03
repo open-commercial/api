@@ -1,7 +1,6 @@
 package sic.controller;
 
 import io.jsonwebtoken.Claims;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -24,18 +23,16 @@ public class GastoController {
     private final IFormaDePagoService formaDePagoService;
     private final IUsuarioService usuarioService;
     private final IAuthService authService;
-    private final ModelMapper modelMapper;
     
     @Autowired
-    public GastoController(IGastoService gastoService, ModelMapper modelMapper,
-                           ISucursalService sucursalService, IFormaDePagoService formaDePagoService,
-                           IUsuarioService usuarioService, IAuthService authService) {
+    public GastoController(IGastoService gastoService, ISucursalService sucursalService,
+                           IFormaDePagoService formaDePagoService, IUsuarioService usuarioService,
+                           IAuthService authService) {
         this.gastoService = gastoService;
         this.sucursalService = sucursalService;
         this.formaDePagoService = formaDePagoService;
         this.usuarioService = usuarioService;
         this.authService = authService;
-        this.modelMapper = modelMapper;
     }
     
     @GetMapping("/gastos/{idGasto}")
@@ -67,9 +64,11 @@ public class GastoController {
   public Gasto guardar(
       @RequestBody NuevoGastoDTO nuevoGastoDTO,
       @RequestHeader(name = "Authorization") String authorizationHeader) {
-    Gasto gasto = modelMapper.map(nuevoGastoDTO, Gasto.class);
+    Gasto gasto = new Gasto();
     gasto.setSucursal(sucursalService.getSucursalPorId(nuevoGastoDTO.getIdSucursal()));
     gasto.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(nuevoGastoDTO.getIdFormaDePago()));
+    gasto.setConcepto(nuevoGastoDTO.getConcepto());
+    gasto.setMonto(nuevoGastoDTO.getMonto());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
