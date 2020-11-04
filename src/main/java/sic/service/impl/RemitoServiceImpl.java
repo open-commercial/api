@@ -101,6 +101,7 @@ public class RemitoServiceImpl implements IRemitoService {
        Cliente cliente = null;
        Sucursal sucursal = null;
        UbicacionDTO ubicacionDTO = null;
+       long idFactura = 0L;
        for (int i = 0; i < nuevoRemitoDTO.getIdFacturaVenta().length; i++) {
            Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevoRemitoDTO.getIdFacturaVenta()[i]);
            if (!(factura instanceof FacturaVenta)) {
@@ -117,7 +118,13 @@ public class RemitoServiceImpl implements IRemitoService {
                    cliente = ((FacturaVenta) factura).getCliente();
                    sucursal = factura.getSucursal();
                    ubicacionDTO = factura.getPedido().getDetalleEnvio();
+                   idFactura = factura.getIdFactura();
                } else {
+                   if (idFactura == factura.getIdFactura()) {
+                       throw new BusinessServiceException(
+                               messageSource.getMessage(
+                                       "mensaje_remito_facturas_iguales", null, Locale.getDefault()));
+                   }
                    if (!cliente.equals(((FacturaVenta) factura).getCliente()))
                         throw new BusinessServiceException(
                            messageSource.getMessage(

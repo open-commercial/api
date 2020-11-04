@@ -100,7 +100,7 @@ class RemitoServiceImplTest {
     facturaVentaUno.setCliente(cliente);
     facturaVentaUno.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_C);
     when(facturaService.getFacturaNoEliminadaPorId(2L)).thenReturn(facturaVentaUno);
-    nuevoRemitoDTO.setIdFacturaVenta(new long[]{2L, 3L});
+    nuevoRemitoDTO.setIdFacturaVenta(new long[]{2L, 2L});
     BigDecimal[] cantidadesDeBultos = new BigDecimal[] {new BigDecimal("6"), BigDecimal.TEN};
     TipoBulto[] tipoBulto = new TipoBulto[] {TipoBulto.CAJA};
     nuevoRemitoDTO.setCantidadPorBulto(cantidadesDeBultos);
@@ -128,6 +128,11 @@ class RemitoServiceImplTest {
     facturaVentaDos.setCliente(clienteDos);
     facturaVentaDos.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_C);
     when(facturaService.getFacturaNoEliminadaPorId(3L)).thenReturn(facturaVentaDos);
+    assertThrows(
+            BusinessServiceException.class,
+            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
+    verify(messageSource).getMessage(eq("mensaje_remito_facturas_iguales"), any(), any());
+    nuevoRemitoDTO.setIdFacturaVenta(new long[]{2L, 3L});
     assertThrows(
             BusinessServiceException.class,
             () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));

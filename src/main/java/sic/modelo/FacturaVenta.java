@@ -21,7 +21,7 @@ import sic.controller.Views;
 @Table(name = "facturaventa")
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ToString(callSuper = true, exclude = {"remito"})
+@ToString(callSuper = true)
 @JsonIgnoreProperties({
   "cliente",
   "usuario",

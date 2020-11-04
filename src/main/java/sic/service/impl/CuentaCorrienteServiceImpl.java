@@ -373,6 +373,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(rcc.getMonto()));
       cc.setFechaUltimoMovimiento(remito.getFecha());
       rcc.setRemito(remito);
+      rcc.setTipoComprobante(TipoDeComprobante.REMITO);
       rcc.setFecha(remito.getFecha());
       rcc.setIdMovimiento(remito.getIdRemito());
       cc.getRenglones().add(rcc);
