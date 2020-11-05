@@ -13,8 +13,8 @@ import org.springframework.web.client.RestTemplate;
 import sic.exception.UnauthorizedException;
 import sic.modelo.*;
 import sic.exception.BusinessServiceException;
+import sic.repository.TokenAccesoExcluidoRepository;
 import sic.service.IAuthService;
-import sic.service.IUsuarioService;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,85 +26,60 @@ import java.util.Locale;
 @Service
 public class AuthServiceImpl implements IAuthService {
 
-  private final IUsuarioService usuarioService;
   private final RestTemplate restTemplate;
+  private final TokenAccesoExcluidoRepository tokenAccesoExcluidoRepository;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
+  private static final String BEARER_TOKEN_PREFIX = "Bearer";
   private final MessageSource messageSource;
 
   @Value("${RECAPTCHA_SECRET_KEY}")
-  private String recaptchaSecretkey;
+  private String recaptchaSecretKey;
 
   @Value("${RECAPTCHA_TEST_KEY}")
   private String recaptchaTestKey;
 
   @Value("${SIC_JWT_KEY}")
-  private String secretkey;
+  private String jwtSecretKey;
 
   @Autowired
   public AuthServiceImpl(
-      IUsuarioService usuarioService, RestTemplate restTemplate, MessageSource messageSource) {
-    this.usuarioService = usuarioService;
+      RestTemplate restTemplate,
+      MessageSource messageSource,
+      TokenAccesoExcluidoRepository tokenAccesoExcluidoRepository) {
     this.restTemplate = restTemplate;
     this.messageSource = messageSource;
+    this.tokenAccesoExcluidoRepository = tokenAccesoExcluidoRepository;
   }
 
   @Override
-  public String generarToken(long idUsuario, Aplicacion aplicacion, List<Rol> rolesDeUsuario) {
+  public String generarJWT(long idUsuario, List<Rol> rolesDeUsuario) {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
     ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
     return Jwts.builder()
         .setIssuedAt(Date.from(zdtNow.toInstant()))
         .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-        .signWith(SignatureAlgorithm.HS512, secretkey)
+        .signWith(SignatureAlgorithm.HS512, jwtSecretKey)
         .claim("idUsuario", idUsuario)
         .claim("roles", rolesDeUsuario)
-        .claim("app", aplicacion)
         .compact();
   }
 
   @Override
   public boolean esAuthorizationHeaderValido(String authorizationHeader) {
-    if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-      return false;
-    }
-    final long idUsuario;
-    idUsuario = (int) this.getClaimsDelToken(authorizationHeader).get("idUsuario");
-    Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    if (!usuario.isHabilitado()) {
-      logger.warn(messageSource.getMessage(
-              "mensaje_usuario_no_habilitado", null, Locale.getDefault()));
-      return false;
-    }
-    Aplicacion aplicacion = Aplicacion.valueOf(this.getClaimsDelToken(authorizationHeader).get("app").toString());
-    TokenAcceso tokenAcceso = new TokenAcceso();
-    tokenAcceso.setAplicacion(aplicacion);
-    if (!usuario.getTokens().contains(tokenAcceso)) return false;
-    final String token = authorizationHeader.substring(7); // The part after "Bearer "
-    for (TokenAcceso f : usuario.getTokens()) {
-      if (f.getToken().equals(token))
-        return true;
-    }
-    return false;
+    String token = authorizationHeader.substring(7);
+    return authorizationHeader.startsWith(BEARER_TOKEN_PREFIX)
+        && this.esJWTValido(token)
+        && this.noEsTokenExcluido(token);
   }
 
   @Override
-  public boolean esTokenValido(String token) {
+  public boolean esJWTValido(String token) {
     if (token == null || token.isEmpty()) return false;
     try {
-      Jwts.parser().setSigningKey(secretkey).parseClaimsJws(token);
+      Jwts.parser().setSigningKey(jwtSecretKey).parseClaimsJws(token);
       return true;
-    } catch (ExpiredJwtException ejwte) {
-      long idUsuario = (int) ejwte.getClaims().get("idUsuario");
-      Aplicacion aplicacion = Aplicacion.valueOf(ejwte.getClaims().get("app").toString());
-      Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-      TokenAcceso tokenAcceso = new TokenAcceso();
-      tokenAcceso.setAplicacion(aplicacion);
-      usuario.getTokens().remove(tokenAcceso);
-      usuarioService.actualizar(usuario);
-      throw new UnauthorizedException(
-          messageSource.getMessage("mensaje_error_token_sesion_expiro", null, Locale.getDefault()));
     } catch (JwtException ex) {
       logger.error(ex.getMessage());
       return false;
@@ -112,23 +87,27 @@ public class AuthServiceImpl implements IAuthService {
   }
 
   @Override
+  public boolean noEsTokenExcluido(String token) {
+    return tokenAccesoExcluidoRepository.findByToken(token) == null;
+  }
+
+  @Override
   public Claims getClaimsDelToken(String authorizationHeader) {
-    if (authorizationHeader == null
-        || !authorizationHeader.startsWith("Bearer ")
-        || !this.esTokenValido(authorizationHeader.substring(7))) { // The part after "Bearer "
-      throw new UnauthorizedException(messageSource.getMessage(
-        "mensaje_error_token_invalido", null, Locale.getDefault()));
+    if (this.esAuthorizationHeaderValido(authorizationHeader)) {
+      return Jwts.parser()
+          .setSigningKey(jwtSecretKey)
+          .parseClaimsJws(authorizationHeader.substring(7))
+          .getBody();
+    } else {
+      throw new UnauthorizedException(
+          messageSource.getMessage("mensaje_error_token_invalido", null, Locale.getDefault()));
     }
-    return Jwts.parser()
-        .setSigningKey(secretkey)
-        .parseClaimsJws(authorizationHeader.substring(7))
-        .getBody();
   }
 
   @Override
   public void validarRecaptcha(String recaptcha) {
     if (!recaptcha.equals(recaptchaTestKey)) {
-      String params = "?secret=" + recaptchaSecretkey + "&response=" + recaptcha;
+      String params = "?secret=" + recaptchaSecretKey + "&response=" + recaptcha;
       ReCaptchaResponse reCaptchaResponse = null;
       try {
         reCaptchaResponse =
@@ -142,6 +121,14 @@ public class AuthServiceImpl implements IAuthService {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_recaptcha_no_valido", null, Locale.getDefault()));
       }
+    }
+  }
+
+  @Override
+  public void excluirTokenAcceso(String authorizationHeader) {
+    String token = authorizationHeader.substring(7);
+    if (tokenAccesoExcluidoRepository.findByToken(token) == null) {
+      tokenAccesoExcluidoRepository.save(new TokenAccesoExcluido(0, token));
     }
   }
 }

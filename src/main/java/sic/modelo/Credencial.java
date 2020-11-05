@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Credencial {   
-    
-    private String username;
-    private String password;
-    private Aplicacion aplicacion;
-    
+public class Credencial {
+
+  private String username;
+  private String password;
 }

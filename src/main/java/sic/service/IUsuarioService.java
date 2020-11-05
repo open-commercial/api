@@ -33,4 +33,6 @@ public interface IUsuarioService {
   Page<Usuario> getUsuariosPorRol(Rol rol);
 
   String encriptarConMD5(String password);
+
+  boolean esUsuarioHabilitado(long idUsuario);
 }

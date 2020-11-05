@@ -83,7 +83,6 @@ class ProductoControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", roles)
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact();
     Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
@@ -111,7 +110,6 @@ class ProductoControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
@@ -135,7 +133,6 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
@@ -159,7 +156,6 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
@@ -183,7 +179,6 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
@@ -207,7 +202,6 @@ class ProductoControllerTest {
                                     .signWith(SignatureAlgorithm.HS512, secretKey)
                                     .claim("idUsuario", 1L)
                                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .claim("app", Aplicacion.SIC_COM)
                                     .compact())
                     .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);

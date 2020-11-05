@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.Aplicacion;
 
 @Data
 @AllArgsConstructor
@@ -12,8 +11,6 @@ import sic.modelo.Aplicacion;
 @Builder
 public class RecoveryPasswordDTO {
 
-    private String key;
-    private long id;
-    private Aplicacion aplicacion;
-
+  private String key;
+  private long id;
 }

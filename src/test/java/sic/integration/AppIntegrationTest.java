@@ -73,7 +73,7 @@ class AppIntegrationTest {
         restTemplate
             .postForEntity(
                 apiPrefix + "/login",
-                new Credencial("dueño", "dueño123", Aplicacion.SIC_OPS_WEB),
+                new Credencial("dueño", "dueño123"),
                 String.class)
             .getBody();
     assertNotNull(this.token);
@@ -124,7 +124,7 @@ class AppIntegrationTest {
         restTemplate
             .postForEntity(
                 apiPrefix + "/login",
-                new Credencial("test", "test", Aplicacion.SIC_OPS_WEB),
+                new Credencial("test", "test"),
                 String.class)
             .getBody();
     Usuario credencial =
@@ -1460,7 +1460,7 @@ class AppIntegrationTest {
         restTemplate
             .postForEntity(
                 apiPrefix + "/login",
-                new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
+                new Credencial(usuario.getUsername(), "caraDeMala"),
                 String.class)
             .getBody();
     assertNotNull(this.token);
@@ -1906,7 +1906,7 @@ class AppIntegrationTest {
         restTemplate
             .postForEntity(
                 apiPrefix + "/login",
-                new Credencial(usuario.getUsername(), "caraDeMala", Aplicacion.SIC_OPS_WEB),
+                new Credencial(usuario.getUsername(), "caraDeMala"),
                 String.class)
             .getBody();
     assertNotNull(this.token);
