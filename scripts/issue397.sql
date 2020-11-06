@@ -1,6 +1,6 @@
 ALTER TABLE remito CHANGE `totalFactura` `totalFacturas` decimal(25,15);
 
-ALTER TABLE remito DROP COLUMN remito.tipoComprobante;
+ALTER TABLE remito DROP COLUMN tipoComprobante;
 
 SET @row := 0;
 update remito
