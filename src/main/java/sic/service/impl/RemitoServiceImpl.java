@@ -101,8 +101,9 @@ public class RemitoServiceImpl implements IRemitoService {
        Cliente cliente = null;
        Sucursal sucursal = null;
        UbicacionDTO ubicacionDTO = null;
+       long cantidadDeIdFactura = nuevoRemitoDTO.getIdFacturaVenta().length;
        long idFactura = 0L;
-       for (int i = 0; i < nuevoRemitoDTO.getIdFacturaVenta().length; i++) {
+       for (int i = 0; i < cantidadDeIdFactura; i++) {
            Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevoRemitoDTO.getIdFacturaVenta()[i]);
            if (!(factura instanceof FacturaVenta)) {
                throw new BusinessServiceException(

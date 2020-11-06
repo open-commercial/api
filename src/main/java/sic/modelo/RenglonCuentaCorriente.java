@@ -35,7 +35,7 @@ public class RenglonCuentaCorriente implements Serializable {
     @Column(nullable = false)
     private Long idMovimiento;
     
-    @Column(name = "tipo_comprobante")
+    @Column(nullable = false, name = "tipo_comprobante")
     @Enumerated(EnumType.STRING)
     private TipoDeComprobante tipoComprobante;
 

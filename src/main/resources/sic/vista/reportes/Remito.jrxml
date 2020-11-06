@@ -384,7 +384,7 @@ $P{remito}.getClienteEmbedded().getCategoriaIVACliente().toString().equals("MONO
 				<textElement textAlignment="Left">
 					<font size="8" isBold="true"/>
 				</textElement>
-				<text><![CDATA[Total Factura]]></text>
+				<text><![CDATA[Total Facturas]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="397" y="106" width="70" height="15" uuid="e2613d7b-2fc0-411e-9364-aa970da56b3c">
