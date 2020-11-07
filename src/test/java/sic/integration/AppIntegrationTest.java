@@ -1239,11 +1239,11 @@ class AppIntegrationTest {
     assertEquals(2, facturasVenta.size());
     BigDecimal[] cantidadesDeBultos = new BigDecimal[]{new BigDecimal("6"), BigDecimal.TEN};
     TipoBulto[] tipoBulto = new TipoBulto[]{TipoBulto.CAJA, TipoBulto.ATADO};
-    Remito remitoResultanteFacturaX =
+    Remito remitoResultante =
         restTemplate.postForObject(
             apiPrefix + "/remitos",
             NuevoRemitoDTO.builder()
-                .idFacturaVenta(facturasVenta.get(1).getIdFactura())
+                .idFacturaVenta(new long[] {facturasVenta.get(0).getIdFactura(), facturasVenta.get(1).getIdFactura()})
                 .cantidadPorBulto(cantidadesDeBultos)
                 .tiposDeBulto(tipoBulto)
                 .costoDeEnvio(new BigDecimal("25"))
@@ -1252,64 +1252,28 @@ class AppIntegrationTest {
                 .volumenTotalEnM3(new BigDecimal("118"))
                 .build(),
             Remito.class);
-    assertNotNull(remitoResultanteFacturaX);
-    assertEquals(1L, remitoResultanteFacturaX.getIdRemito());
-    assertNotNull(remitoResultanteFacturaX.getFecha());
-    assertEquals(2L, remitoResultanteFacturaX.getSerie());
-    assertEquals(1L, remitoResultanteFacturaX.getNroRemito());
-    assertEquals(TipoDeComprobante.REMITO_X, remitoResultanteFacturaX.getTipoComprobante());
-    assertEquals(1L, remitoResultanteFacturaX.getIdCliente());
-    assertEquals("Juan Fernando Canete", remitoResultanteFacturaX.getNombreFiscalCliente());
-    assertNotNull(remitoResultanteFacturaX.getNroDeCliente());
-    assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, remitoResultanteFacturaX.getCategoriaIVACliente());
-    assertEquals(1L, remitoResultanteFacturaX.getIdSucursal());
-    assertEquals("FirstOfAll", remitoResultanteFacturaX.getNombreSucursal());
-    assertEquals(2L, remitoResultanteFacturaX.getIdUsuario());
-    assertEquals("Max Power (dueño)", remitoResultanteFacturaX.getNombreUsuario());
-    assertEquals("Corrientes Corrientes", remitoResultanteFacturaX.getDetalleEnvio());
-    assertEquals(new BigDecimal("25"), remitoResultanteFacturaX.getCostoDeEnvio());
-    assertEquals(new BigDecimal("1360.000000000000000"), remitoResultanteFacturaX.getTotalFactura());
-    assertEquals(new BigDecimal("1385.000000000000000"), remitoResultanteFacturaX.getTotal());
-    assertEquals(new BigDecimal("72"), remitoResultanteFacturaX.getPesoTotalEnKg());
-    assertEquals(new BigDecimal("118"), remitoResultanteFacturaX.getVolumenTotalEnM3());
-    assertEquals(new BigDecimal("16"), remitoResultanteFacturaX.getCantidadDeBultos());
-    assertEquals(remitoResultanteFacturaX.getNombreTransportista(), transportistaNuevo.getNombre());
-    assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaX.getIdRemito() + "/reporte", byte[].class));
-    cantidadesDeBultos = new BigDecimal[]{new BigDecimal("3"), BigDecimal.ONE};
-    tipoBulto = new TipoBulto[]{TipoBulto.ATADO, TipoBulto.ROLLO};
-    Remito remitoResultanteFacturaA =
-            restTemplate.postForObject(
-                    apiPrefix + "/remitos",
-                    NuevoRemitoDTO.builder()
-                            .idFacturaVenta(facturasVenta.get(0).getIdFactura())
-                            .tiposDeBulto(tipoBulto)
-                            .cantidadPorBulto(cantidadesDeBultos)
-                            .costoDeEnvio(new BigDecimal("25"))
-                            .idTransportista(1L)
-                            .build(), Remito.class);
-    assertNotNull(remitoResultanteFacturaA);
-    assertEquals(2L, remitoResultanteFacturaA.getIdRemito());
-    assertNotNull(remitoResultanteFacturaA.getFecha());
-    assertEquals(2L, remitoResultanteFacturaA.getSerie());
-    assertEquals(1L, remitoResultanteFacturaA.getNroRemito());
-    assertEquals(TipoDeComprobante.REMITO_A, remitoResultanteFacturaA.getTipoComprobante());
-    assertEquals(1L, remitoResultanteFacturaA.getIdCliente());
-    assertEquals("Juan Fernando Canete", remitoResultanteFacturaA.getNombreFiscalCliente());
-    assertNotNull(remitoResultanteFacturaX.getNroDeCliente());
-    assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, remitoResultanteFacturaA.getCategoriaIVACliente());
-    assertEquals(1L, remitoResultanteFacturaA.getIdSucursal());
-    assertEquals("FirstOfAll", remitoResultanteFacturaA.getNombreSucursal());
-    assertEquals(2L, remitoResultanteFacturaA.getIdUsuario());
-    assertEquals("Max Power (dueño)", remitoResultanteFacturaA.getNombreUsuario());
-    assertEquals("Corrientes Corrientes", remitoResultanteFacturaA.getDetalleEnvio());
-    assertEquals(new BigDecimal("25"), remitoResultanteFacturaA.getCostoDeEnvio());
-    assertEquals(new BigDecimal("106960.271513250000000"), remitoResultanteFacturaA.getTotalFactura());
-    assertEquals(new BigDecimal("106985.271513250000000"), remitoResultanteFacturaA.getTotal());
-    assertNull(remitoResultanteFacturaA.getPesoTotalEnKg());
-    assertNull(remitoResultanteFacturaA.getVolumenTotalEnM3());
-    assertEquals(new BigDecimal("4"), remitoResultanteFacturaA.getCantidadDeBultos());
-    assertEquals(remitoResultanteFacturaA.getNombreTransportista(), transportistaNuevo.getNombre());
-    assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultanteFacturaA.getIdRemito() + "/reporte", byte[].class));
+    assertNotNull(remitoResultante);
+    assertEquals(1L, remitoResultante.getIdRemito());
+    assertNotNull(remitoResultante.getFecha());
+    assertEquals(2L, remitoResultante.getSerie());
+    assertEquals(1L, remitoResultante.getNroRemito());
+    assertEquals(1L, remitoResultante.getIdCliente());
+    assertEquals("Juan Fernando Canete", remitoResultante.getNombreFiscalCliente());
+    assertNotNull(remitoResultante.getNroDeCliente());
+    assertEquals(CategoriaIVA.RESPONSABLE_INSCRIPTO, remitoResultante.getCategoriaIVACliente());
+    assertEquals(1L, remitoResultante.getIdSucursal());
+    assertEquals("FirstOfAll", remitoResultante.getNombreSucursal());
+    assertEquals(2L, remitoResultante.getIdUsuario());
+    assertEquals("Max Power (dueño)", remitoResultante.getNombreUsuario());
+    assertEquals("Corrientes Corrientes", remitoResultante.getDetalleEnvio());
+    assertEquals(new BigDecimal("25"), remitoResultante.getCostoDeEnvio());
+    assertEquals(new BigDecimal("108320.271513250000000"), remitoResultante.getTotalFacturas());
+    assertEquals(new BigDecimal("108345.271513250000000"), remitoResultante.getTotal());
+    assertEquals(new BigDecimal("72"), remitoResultante.getPesoTotalEnKg());
+    assertEquals(new BigDecimal("118"), remitoResultante.getVolumenTotalEnM3());
+    assertEquals(new BigDecimal("16"), remitoResultante.getCantidadDeBultos());
+    assertEquals(remitoResultante.getNombreTransportista(), transportistaNuevo.getNombre());
+    assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultante.getIdRemito() + "/reporte", byte[].class));
     resultadoBusquedaFactura =
             restTemplate
                     .exchange(
@@ -1324,7 +1288,7 @@ class AppIntegrationTest {
     assertNotNull(facturasVenta.get(1).getRemito());
     assertEquals(1L,facturasVenta.get(1).getRemito().getIdRemito());
     assertNotNull(facturasVenta.get(0).getRemito());
-    assertEquals( 2L,facturasVenta.get(0).getRemito().getIdRemito());
+    assertEquals( 1L,facturasVenta.get(0).getRemito().getIdRemito());
   }
 
   @Test
@@ -1417,7 +1381,7 @@ class AppIntegrationTest {
         new BigDecimal("680.000000000000000000000000000000"), notaCreditoGuardada.getTotal());
     assertNotNull(restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class));
     assertEquals(
-        630.0,
+        655.0,
         restTemplate
             .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());

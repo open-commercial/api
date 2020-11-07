@@ -5,6 +5,7 @@ public enum TipoBulto {
   BOLSA,
   ROLLO,
   BALDE,
+  TACHO,
   SOBRE,
   ATADO,
   PACK;

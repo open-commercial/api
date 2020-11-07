@@ -4,7 +4,6 @@ import lombok.*;
 
 import javax.persistence.Embeddable;
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 @Data
 @EqualsAndHashCode(

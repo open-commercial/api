@@ -13,13 +13,13 @@ public interface IRemitoService {
 
   Remito getRemitoPorId(long idRemito);
 
-  Remito crearRemitoDeFacturaVenta(NuevoRemitoDTO nuevoRemitoDTO, long idUsuario);
+  Remito crearRemitoDeFacturasVenta(NuevoRemitoDTO nuevoRemitoDTO, long idUsuario);
 
   void eliminar(long idRemito);
 
   List<RenglonRemito> construirRenglonesDeRemito(NuevoRemitoDTO nuevoRemitoDTO);
 
-  long getSiguienteNumeroRemito(TipoDeComprobante tipoDeComprobante, Long nroSerie);
+  long getSiguienteNumeroRemito(Long nroSerie);
 
   List<RenglonRemito> getRenglonesDelRemito(long idRemito);
 
@@ -30,6 +30,4 @@ public interface IRemitoService {
   BooleanBuilder getBuilder(BusquedaRemitoCriteria criteria);
 
   byte[] getReporteRemito(long idRemito);
-
-  TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(long idSucursal);
 }
