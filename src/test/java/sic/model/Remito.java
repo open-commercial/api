@@ -16,7 +16,6 @@ public class Remito {
   private LocalDateTime fecha;
   private long serie;
   private long nroRemito;
-  private TipoDeComprobante tipoComprobante;
   private Long idCliente;
   private String nombreFiscalCliente;
   private String nroDeCliente;
@@ -29,7 +28,7 @@ public class Remito {
   private String nombreTransportista;
   private String detalleEnvio;
   private BigDecimal costoDeEnvio;
-  private BigDecimal totalFactura;
+  private BigDecimal totalFacturas;
   private BigDecimal total;
   private BigDecimal pesoTotalEnKg;
   private BigDecimal volumenTotalEnM3;

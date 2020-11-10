@@ -10,8 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
-import sic.modelo.Aplicacion;
-import sic.modelo.TokenAcceso;
 import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
@@ -83,9 +81,6 @@ public class UsuarioController {
         usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
         usuarioPorActualizar.setHabilitado(usuarioPersistido.isHabilitado());
       }
-      if (usuarioLoggedIn.getIdUsuario() == usuarioPersistido.getIdUsuario()) {
-        usuarioPorActualizar.setTokens(usuarioLoggedIn.getTokens());
-      }
       if (usuarioPorActualizar.getPassword() != null
           && !usuarioPorActualizar.getPassword().isEmpty()) {
         usuarioPorActualizar.setPassword(
@@ -93,12 +88,6 @@ public class UsuarioController {
       } else {
         usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
       }
-      if (!usuarioSeModificaASiMismo) {
-        Aplicacion aplicacion = Aplicacion.valueOf(claims.get("app").toString());
-        TokenAcceso tokenAcceso = TokenAcceso.builder().aplicacion(aplicacion).build();
-        usuarioPersistido.getTokens().remove(tokenAcceso);
-      }
-      usuarioPorActualizar.setTokens(usuarioPersistido.getTokens());
       usuarioService.actualizar(usuarioPorActualizar);
     } else {
       throw new ForbiddenException(messageSource.getMessage(

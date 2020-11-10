@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Entity
@@ -14,7 +15,7 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RenglonRemito {
+public class RenglonRemito implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

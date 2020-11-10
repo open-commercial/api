@@ -72,8 +72,7 @@ public class ProductoController {
       throw new EntityNotFoundException(
               messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
-    if (authorizationHeader != null
-            && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+    if (authorizationHeader != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
       if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) producto.setFavorito(true);
@@ -96,8 +95,7 @@ public class ProductoController {
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos = productoService.buscarProductos(criteria, idSucursal);
-    if (authorizationHeader != null
-            && authService.esAuthorizationHeaderValido(authorizationHeader)) {
+    if (authorizationHeader != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);

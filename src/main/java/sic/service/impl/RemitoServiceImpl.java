@@ -20,6 +20,7 @@ import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
+import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RemitoRepository;
 import sic.repository.RenglonRemitoRepository;
 import sic.service.*;
@@ -46,7 +47,6 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
-    private final ISucursalService sucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -61,7 +61,6 @@ public class RemitoServiceImpl implements IRemitoService {
                               IClienteService clienteService,
                               IUsuarioService usuarioService,
                               ITransportistaService transportistaService,
-                              ISucursalService sucursalService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               MessageSource messageSource,
                               CustomValidator customValidator) {
@@ -72,7 +71,6 @@ public class RemitoServiceImpl implements IRemitoService {
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.transportistaService = transportistaService;
-        this.sucursalService = sucursalService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.messageSource = messageSource;
         this.customValidator = customValidator;
@@ -90,44 +88,66 @@ public class RemitoServiceImpl implements IRemitoService {
     }
 
     @Override
-    public Remito crearRemitoDeFacturaVenta(NuevoRemitoDTO nuevoRemitoDTO, long idUsuario) {
+    public Remito crearRemitoDeFacturasVenta(NuevoRemitoDTO nuevoRemitoDTO, long idUsuario) {
        if (nuevoRemitoDTO.getCostoDeEnvio() == null) {
            throw new BusinessServiceException(
                    messageSource.getMessage(
                            "mensaje_remito_sin_costo_de_envio", null, Locale.getDefault()));
        }
-       Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevoRemitoDTO.getIdFacturaVenta());
-       if (!(factura instanceof FacturaVenta)) {
-           throw new BusinessServiceException(
-                   messageSource.getMessage(
-                           "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
-       } else {
-       if (((FacturaVenta)factura).getRemito() != null) {
-           throw new BusinessServiceException(
-                   messageSource.getMessage(
-                           "mensaje_remito_con_factura", null, Locale.getDefault()));
+       List<FacturaVenta> facturas = new ArrayList<>();
+       Cliente cliente = null;
+       Sucursal sucursal = null;
+       UbicacionDTO ubicacionDTO = null;
+       long cantidadDeIdFactura = nuevoRemitoDTO.getIdFacturaVenta().length;
+       long idFactura = 0L;
+       for (int i = 0; i < cantidadDeIdFactura; i++) {
+           Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevoRemitoDTO.getIdFacturaVenta()[i]);
+           if (!(factura instanceof FacturaVenta)) {
+               throw new BusinessServiceException(
+                       messageSource.getMessage(
+                               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+           } else {
+               if (((FacturaVenta) factura).getRemito() != null) {
+                   throw new BusinessServiceException(
+                           messageSource.getMessage(
+                                   "mensaje_remito_con_factura", null, Locale.getDefault()));
+               }
+               if (i == 0) {
+                   cliente = ((FacturaVenta) factura).getCliente();
+                   sucursal = factura.getSucursal();
+                   ubicacionDTO = factura.getPedido().getDetalleEnvio();
+                   idFactura = factura.getIdFactura();
+               } else {
+                   if (idFactura == factura.getIdFactura()) {
+                       throw new BusinessServiceException(
+                               messageSource.getMessage(
+                                       "mensaje_remito_facturas_iguales", null, Locale.getDefault()));
+                   }
+                   if (!cliente.equals(((FacturaVenta) factura).getCliente()))
+                        throw new BusinessServiceException(
+                           messageSource.getMessage(
+                                   "mensaje_remito_facturas_diferentes_clientes", null, Locale.getDefault()));
+                   if (!sucursal.equals(factura.getSucursal()))
+                       throw new BusinessServiceException(
+                           messageSource.getMessage(
+                                   "mensaje_remito_facturas_diferentes_sucursales", null, Locale.getDefault()));
+                   if (!factura.getPedido().getDetalleEnvio().equals(ubicacionDTO))
+                       throw new BusinessServiceException(
+                           messageSource.getMessage(
+                                   "mensaje_remito_facturas_diferentes_ubicacion_envio", null, Locale.getDefault()));
+               }
+           facturas.add((FacturaVenta) factura);
+          }
        }
        Remito remito = new Remito();
-       FacturaVenta facturaVenta = (FacturaVenta) factura;
-       remito.setFacturaVenta(facturaVenta);
        remito.setFecha(LocalDateTime.now());
-       remito.setDetalleEnvio(facturaVenta.getPedido().getDetalleEnvio());
-       remito.setCliente(facturaVenta.getCliente());
-       remito.setClienteEmbedded(clienteService.crearClienteEmbedded(facturaVenta.getCliente()));
-       switch (facturaVenta.getTipoComprobante()) {
-           case FACTURA_A -> remito.setTipoComprobante(TipoDeComprobante.REMITO_A);
-           case FACTURA_B -> remito.setTipoComprobante(TipoDeComprobante.REMITO_B);
-           case FACTURA_C -> remito.setTipoComprobante(TipoDeComprobante.REMITO_C);
-           case FACTURA_X -> remito.setTipoComprobante(TipoDeComprobante.REMITO_X);
-           case PRESUPUESTO -> remito.setTipoComprobante(TipoDeComprobante.REMITO_PRESUPUESTO);
-           default ->
-                   throw new BusinessServiceException(
-                   messageSource.getMessage(
-                           "mensaje_remito_tipo_no_valido", null, Locale.getDefault()));
-       }
-       remito.setTotalFactura(factura.getTotal());
+       remito.setDetalleEnvio(ubicacionDTO);
+       remito.setCliente(cliente);
+       remito.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
+       BigDecimal totalFacturas = facturas.stream().map(FacturaVenta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
+       remito.setTotalFacturas(totalFacturas);
        remito.setCostoDeEnvio(nuevoRemitoDTO.getCostoDeEnvio());
-       remito.setTotal(factura.getTotal().add(remito.getCostoDeEnvio()));
+       remito.setTotal(totalFacturas.add(remito.getCostoDeEnvio()));
        remito.setRenglones(this.construirRenglonesDeRemito(nuevoRemitoDTO));
        remito.setCantidadDeBultos(remito.getRenglones().stream()
                    .map(RenglonRemito::getCantidad)
@@ -135,12 +155,11 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setPesoTotalEnKg(nuevoRemitoDTO.getPesoTotalEnKg());
        remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenTotalEnM3());
        remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
-       remito.setSucursal(facturaVenta.getSucursal());
+       remito.setSucursal(sucursal);
        remito.setSerie(remito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
-       remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getTipoComprobante(), remito.getSerie()));
+       remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
        remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));
-       facturaVenta.setRemito(remito);
        customValidator.validar(remito);
        remitoRepository.save(remito);
        logger.warn(
@@ -148,10 +167,9 @@ public class RemitoServiceImpl implements IRemitoService {
                        "mensaje_remito_guardado_correctamente",
                        new Object[] {remito},
                        Locale.getDefault()));
-       facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura());
+       facturas.forEach(facturaVenta -> facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura()));
        cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ALTA);
        return remito;
-       }
     }
 
     @Override
@@ -177,7 +195,6 @@ public class RemitoServiceImpl implements IRemitoService {
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
         facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
         remito.setEliminado(true);
-        remito.setFacturaVenta(null);
         remito = remitoRepository.save(remito);
         logger.warn(
                 messageSource.getMessage(
@@ -187,9 +204,9 @@ public class RemitoServiceImpl implements IRemitoService {
     }
 
     @Override
-    public long getSiguienteNumeroRemito(TipoDeComprobante tipoDeComprobante, Long nroSerie) {
+    public long getSiguienteNumeroRemito(Long nroSerie) {
         Long numeroNota =
-                remitoRepository.buscarMayorNumRemitoSegunTipo(tipoDeComprobante, nroSerie);
+                remitoRepository.buscarMayorNumRemitoSegunSerie(nroSerie);
         return (numeroNota == null) ? 1 : numeroNota + 1;
     }
 
@@ -255,9 +272,6 @@ public class RemitoServiceImpl implements IRemitoService {
         if (criteria.getSerieRemito() != null && criteria.getNroRemito() != null) {
             builder.and(qRemito.serie.eq(criteria.getSerieRemito()).and(qRemito.nroRemito.eq(criteria.getNroRemito())));
         }
-        if (criteria.getTipoDeRemito() != null) {
-            builder.and(qRemito.tipoComprobante.eq(criteria.getTipoDeRemito()));
-        }
         if (criteria.getIdCliente() != null) {
             builder.and(qRemito.cliente.idCliente.eq(criteria.getIdCliente()));
         }
@@ -269,10 +283,6 @@ public class RemitoServiceImpl implements IRemitoService {
         }
         if (criteria.getIdTransportista() != null) {
             builder.and(qRemito.transportista.idTransportista.eq(criteria.getIdTransportista()));
-        }
-        if (criteria.getSerieFacturaVenta() != null && criteria.getNroFacturaVenta() != null) {
-            builder.and(qRemito.facturaVenta.numSerie.eq(criteria.getSerieFacturaVenta())
-                    .and(qRemito.facturaVenta.numFactura.eq(criteria.getNroFacturaVenta())));
         }
         builder.and(qRemito.eliminado.eq(false));
         return builder;
@@ -305,24 +315,5 @@ public class RemitoServiceImpl implements IRemitoService {
             throw new ServiceException(
                     messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
-    }
-
-    @Override
-    public TipoDeComprobante[] getTiposDeComprobanteSegunSucursal(long idSucursal) {
-        Sucursal sucursal = this.sucursalService.getSucursalPorId(idSucursal);
-        TipoDeComprobante[] tiposPermitidos;
-        if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
-            tiposPermitidos = new TipoDeComprobante[4];
-            tiposPermitidos[0] = TipoDeComprobante.REMITO_A;
-            tiposPermitidos[1] = TipoDeComprobante.REMITO_B;
-            tiposPermitidos[2] = TipoDeComprobante.REMITO_X;
-            tiposPermitidos[3] = TipoDeComprobante.REMITO_PRESUPUESTO;
-        } else {
-            tiposPermitidos = new TipoDeComprobante[3];
-            tiposPermitidos[0] = TipoDeComprobante.REMITO_C;
-            tiposPermitidos[1] = TipoDeComprobante.REMITO_X;
-            tiposPermitidos[2] = TipoDeComprobante.REMITO_PRESUPUESTO;
-        }
-        return tiposPermitidos;
     }
 }

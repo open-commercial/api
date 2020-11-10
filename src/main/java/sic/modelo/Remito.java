@@ -37,19 +37,11 @@ public class Remito implements Serializable {
 
   private LocalDateTime fecha;
 
-  @OneToOne(mappedBy="remito")
-  @JoinColumn(name="idFactura")
-  private FacturaVenta facturaVenta;
-
   @Column(nullable = false)
   private long serie;
 
   @Column(nullable = false)
   private long nroRemito;
-
-  @Column(nullable = false)
-  @Enumerated(EnumType.STRING)
-  private TipoDeComprobante tipoComprobante;
 
   @Embedded private ClienteEmbeddable clienteEmbedded;
 
@@ -86,7 +78,7 @@ public class Remito implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_factura_negativo}")
-  private BigDecimal totalFactura;
+  private BigDecimal totalFacturas;
 
   @Column(precision = 25, scale = 15)
   @DecimalMin(value = "0", message = "{mensaje_remito_total_negativo}")

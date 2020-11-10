@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @Builder
 public class NuevoRemitoDTO {
 
-  private long idFacturaVenta;
+  private long[] idFacturaVenta;
   private long idTransportista;
   private TipoBulto[] tiposDeBulto;
   private BigDecimal[] cantidadPorBulto;

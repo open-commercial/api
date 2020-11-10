@@ -89,9 +89,8 @@ public class PedidoServiceImpl implements IPedidoService {
   public void validarReglasDeNegocio(TipoDeOperacion operacion, Pedido pedido) {
     // Entrada de Datos
     // Validar Estado
-    EstadoPedido estado = pedido.getEstado();
-    if ((estado != EstadoPedido.ABIERTO)
-        && (estado != EstadoPedido.CERRADO)) {
+    if (pedido.getEstado() != EstadoPedido.ABIERTO
+            && (operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaja_estado_no_valido", null, Locale.getDefault()));
     }
@@ -393,10 +392,6 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen, List<Recibo> recibos) {
-    if (pedido.getEstado() == EstadoPedido.CERRADO) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_pedido_facturado", null, Locale.getDefault()));
-    }
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;

@@ -10,12 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Aplicacion;
 import sic.modelo.Rol;
 import sic.modelo.Traspaso;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
-import sic.modelo.dto.NuevoTraspasoDePedidoDTO;
 import sic.service.impl.AuthServiceImpl;
 import sic.service.impl.TraspasoServiceImpl;
 
@@ -67,7 +65,6 @@ class TraspasoControllerTest {
                     .signWith(SignatureAlgorithm.HS512, secretKey)
                     .claim("idUsuario", 1L)
                     .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .claim("app", Aplicacion.SIC_COM)
                     .compact())
             .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
