@@ -32,13 +32,13 @@ public class RemitoController {
   }
 
   @GetMapping("/remitos/{idRemito}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Remito getRemitoPorId(@PathVariable long idRemito) {
     return remitoService.getRemitoPorId(idRemito);
   }
 
   @PostMapping("/remitos")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Remito crearRemitoDeFactura(
       @RequestBody NuevoRemitoDTO nuevoRemitoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -54,6 +54,7 @@ public class RemitoController {
   }
 
   @GetMapping("/remitos/{idRemito}/renglones")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonRemito> getRenglonesDelRemito(@PathVariable long idRemito) {
     return remitoService.getRenglonesDelRemito(idRemito);
   }
@@ -65,6 +66,7 @@ public class RemitoController {
   }
 
   @GetMapping("/remitos/{idRemito}/reporte")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public ResponseEntity<byte[]> getReporteRemito(@PathVariable long idRemito) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
