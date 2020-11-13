@@ -414,7 +414,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public FacturaVenta getFacturaVentaDelRemito(Remito remito) {
+  public List<FacturaVenta> getFacturaVentaDelRemito(Remito remito) {
     return facturaVentaRepository.buscarFacturaPorRemito(remito);
   }
 

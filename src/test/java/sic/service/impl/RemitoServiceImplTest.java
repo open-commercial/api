@@ -21,6 +21,7 @@ import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -28,8 +29,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
@@ -207,12 +207,18 @@ class RemitoServiceImplTest {
   void shouldEliminarRemito() {
     Remito remito = new Remito();
     when(remitoRepository.findById(1L)).thenReturn(Optional.of(remito));
-    FacturaVenta facturaVenta = new FacturaVenta();
-    facturaVenta.setIdFactura(1L);
-    when(facturaVentaService.getFacturaVentaDelRemito(remito)).thenReturn(facturaVenta);
+    FacturaVenta facturaVentaUno = new FacturaVenta();
+    facturaVentaUno.setIdFactura(1L);
+    FacturaVenta facturaVentaDos = new FacturaVenta();
+    facturaVentaDos.setIdFactura(2L);
+    List<FacturaVenta> facturasVenta = new ArrayList<>();
+    facturasVenta.add(facturaVentaUno);
+    facturasVenta.add(facturaVentaDos);
+    when(facturaVentaService.getFacturaVentaDelRemito(remito)).thenReturn(facturasVenta);
     remitoService.eliminar(1L);
     verify(cuentaCorrienteService).asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
     verify(facturaVentaService).asignarRemitoConFactura(eq(null), eq(1L));
+    verify(facturaVentaService).asignarRemitoConFactura(eq(null), eq(2L));
     verify(remitoRepository).save(remito);
     verify(messageSource).getMessage(eq("mensaje_remito_eliminado_correctamente"), any(), any());
   }

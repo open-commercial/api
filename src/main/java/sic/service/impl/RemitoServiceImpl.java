@@ -198,7 +198,9 @@ public class RemitoServiceImpl implements IRemitoService {
     public void eliminar(long idRemito) {
         Remito remito = this.getRemitoPorId(idRemito);
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
-        facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
+        facturaVentaService.getFacturaVentaDelRemito(remito).forEach(
+                facturaVenta -> facturaVentaService.asignarRemitoConFactura(null, facturaVenta.getIdFactura())
+        );
         remito.setEliminado(true);
         remito = remitoRepository.save(remito);
         logger.warn(
