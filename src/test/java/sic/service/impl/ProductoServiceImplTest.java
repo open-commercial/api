@@ -313,13 +313,21 @@ class ProductoServiceImplTest {
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     long[] idProducto = {1};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
-    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().build();
-    productosParaVerificarStockDTO.setIdSucursal(1L);
-    productosParaVerificarStockDTO.setCantidad(cantidad);
-    productosParaVerificarStockDTO.setIdProducto(idProducto);
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            productoService.getProductosSinStockDisponible(
+                ProductosParaVerificarStockDTO.builder()
+                    .cantidad(cantidad)
+                    .idProducto(idProducto)
+                    .build()));
+    verify(messageSource).getMessage(eq("mensaje_producto_consulta_stock_sin_sucursal"), any(), any());
     List<ProductoFaltanteDTO> resultadoObtenido =
-        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+        productoService.getProductosSinStockDisponible(ProductosParaVerificarStockDTO.builder()
+                .cantidad(cantidad)
+                .idProducto(idProducto)
+                .idSucursal(1L)
+                .build());
     Assertions.assertFalse(resultadoObtenido.isEmpty());
     assertEquals(new BigDecimal("11"), resultadoObtenido.get(0).getCantidadSolicitada());
     assertEquals(new BigDecimal("9"), resultadoObtenido.get(0).getCantidadDisponible());
@@ -329,13 +337,13 @@ class ProductoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.ONE);
     renglonesPedido.add(renglonPedido);
     when(pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(1L)).thenReturn(renglonesPedido);
-    productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder().build();
-    productosParaVerificarStockDTO.setIdSucursal(1L);
-    productosParaVerificarStockDTO.setCantidad(cantidad);
-    productosParaVerificarStockDTO.setIdProducto(idProducto);
-    productosParaVerificarStockDTO.setIdPedido(1L);
     resultadoObtenido =
-        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+        productoService.getProductosSinStockDisponible(ProductosParaVerificarStockDTO.builder()
+                .cantidad(cantidad)
+                .idProducto(idProducto)
+                .idSucursal(1L)
+                .idPedido(1L)
+                .build());
     Assertions.assertFalse(resultadoObtenido.isEmpty());
     assertEquals(new BigDecimal("10"), resultadoObtenido.get(0).getCantidadSolicitada());
     assertEquals(new BigDecimal("9"), resultadoObtenido.get(0).getCantidadDisponible());
