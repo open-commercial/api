@@ -168,6 +168,11 @@ public abstract class Factura implements Serializable {
             : this.iva105Neto;
   }
 
+  @JsonGetter("idPedido")
+  public Long getIdPedido() {
+    return (this.pedido != null ? this.pedido.getIdPedido() : null);
+  }
+
   @JsonGetter("nroPedido")
   public Long getNroPedido() {
     return (this.pedido != null ? this.pedido.getNroPedido() : null);

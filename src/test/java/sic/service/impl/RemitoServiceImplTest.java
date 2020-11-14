@@ -60,18 +60,14 @@ class RemitoServiceImplTest {
 
   @Test
   void shouldCrearRemitoDeFacturaVenta() {
-    Factura factura = new FacturaCompra();
-    when(facturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(factura);
-    Transportista transportista = new Transportista();
-    transportista.setIdTransportista(1L);
-    transportista.setNombre("Transportista Test");
-    when(transportistaService.getTransportistaNoEliminadoPorId(1L)).thenReturn(transportista);
     NuevoRemitoDTO nuevoRemitoDTO = NuevoRemitoDTO.builder().build();
     nuevoRemitoDTO.setIdTransportista(1L);
     nuevoRemitoDTO.setPesoTotalEnKg(BigDecimal.TEN);
     nuevoRemitoDTO.setVolumenTotalEnM3(BigDecimal.ONE);
     nuevoRemitoDTO.setObservaciones("Envio Nuevo");
-    nuevoRemitoDTO.setIdFacturaVenta(new long[]{1L});
+    nuevoRemitoDTO.setIdFacturaVenta(new long[] {1L});
+    Factura factura = new FacturaCompra();
+    when(facturaService.getFacturaNoEliminadaPorId(1L)).thenReturn(factura);
     assertThrows(
         BusinessServiceException.class,
         () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
@@ -81,6 +77,7 @@ class RemitoServiceImplTest {
         BusinessServiceException.class,
         () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
     verify(messageSource).getMessage(eq("mensaje_tipo_de_comprobante_no_valido"), any(), any());
+
     FacturaVenta facturaVentaUno = new FacturaVenta();
     facturaVentaUno.setIdFactura(2L);
     Sucursal sucursal = new Sucursal();
@@ -92,69 +89,59 @@ class RemitoServiceImplTest {
         .thenReturn(configuracionSucursal);
     facturaVentaUno.setSucursal(sucursal);
     facturaVentaUno.setTotal(new BigDecimal("100"));
-    Pedido pedido = new Pedido();
+    Pedido pedidoUno = new Pedido();
+    pedidoUno.setNroPedido(1);
     UbicacionDTO ubicacionDTO = UbicacionDTO.builder().build();
-    pedido.setDetalleEnvio(ubicacionDTO);
-    facturaVentaUno.setPedido(pedido);
+    pedidoUno.setDetalleEnvio(ubicacionDTO);
+    pedidoUno.setSucursal(sucursal);
+    facturaVentaUno.setPedido(pedidoUno);
     Cliente cliente = new Cliente();
     facturaVentaUno.setCliente(cliente);
-    facturaVentaUno.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_C);
+    facturaVentaUno.setTipoComprobante(TipoDeComprobante.FACTURA_A);
+    facturaVentaUno.setRemito(new Remito());
     when(facturaService.getFacturaNoEliminadaPorId(2L)).thenReturn(facturaVentaUno);
-    nuevoRemitoDTO.setIdFacturaVenta(new long[]{2L, 2L});
+    nuevoRemitoDTO.setIdFacturaVenta(new long[] {2L});
+    assertThrows(
+        BusinessServiceException.class,
+        () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 2L));
+    verify(messageSource).getMessage(eq("mensaje_factura_con_remito"), any(), any());
+    facturaVentaUno.setRemito(null);
+    nuevoRemitoDTO.setIdFacturaVenta(new long[] {2L, 2L});
+    assertThrows(
+        BusinessServiceException.class,
+        () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 2L));
+    verify(messageSource).getMessage(eq("mensaje_remito_facturas_iguales"), any(), any());
+    FacturaVenta facturaVentaDos = new FacturaVenta();
+    facturaVentaDos.setIdFactura(3L);
+    Pedido pedidoDos = new Pedido();
+    pedidoDos.setNroPedido(2);
+    pedidoUno.setDetalleEnvio(ubicacionDTO);
+    facturaVentaDos.setPedido(pedidoDos);
+    when(facturaService.getFacturaNoEliminadaPorId(3L)).thenReturn(facturaVentaDos);
+    nuevoRemitoDTO.setIdFacturaVenta(new long[] {2L, 3L});
+    assertThrows(
+            BusinessServiceException.class,
+            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 2L));
+    verify(messageSource).getMessage(eq("mensaje_remito_facturas_diferentes_pedidos"), any(), any());
+    facturaVentaDos.setPedido(pedidoUno);
+    when(facturaService.getFacturaNoEliminadaPorId(3L)).thenReturn(facturaVentaDos);
     BigDecimal[] cantidadesDeBultos = new BigDecimal[] {new BigDecimal("6"), BigDecimal.TEN};
     TipoBulto[] tipoBulto = new TipoBulto[] {TipoBulto.CAJA};
     nuevoRemitoDTO.setCantidadPorBulto(cantidadesDeBultos);
     nuevoRemitoDTO.setTiposDeBulto(tipoBulto);
+    facturaVentaUno.setTotal(new BigDecimal("150"));
+    facturaVentaDos.setTotal(new BigDecimal("50"));
     Usuario usuario = new Usuario();
-    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
-    FacturaVenta facturaVentaDos = new FacturaVenta();
-    facturaVentaDos.setIdFactura(3L);
-    Sucursal sucursalDos = new Sucursal();
-    sucursalDos.setIdSucursal(2L);
-    sucursalDos.setNombre("segunda sucursal");
-    ConfiguracionSucursal configuracionSucursalDos = new ConfiguracionSucursal();
-    configuracionSucursalDos.setNroPuntoDeVentaAfip(1);
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-            .thenReturn(configuracionSucursalDos);
-    facturaVentaDos.setSucursal(sucursalDos);
-    facturaVentaDos.setTotal(new BigDecimal("100"));
-    Pedido pedidoDos = new Pedido();
-    UbicacionDTO ubicacionDos = UbicacionDTO.builder()
-            .descripcion("Chaco").build();
-    pedidoDos.setDetalleEnvio(ubicacionDos);
-    facturaVentaDos.setPedido(pedidoDos);
-    Cliente clienteDos = new Cliente();
-    clienteDos.setNombreFiscal("segundo cliente");
-    facturaVentaDos.setCliente(clienteDos);
-    facturaVentaDos.setTipoComprobante(TipoDeComprobante.NOTA_CREDITO_C);
-    when(facturaService.getFacturaNoEliminadaPorId(3L)).thenReturn(facturaVentaDos);
+    when(usuarioService.getUsuarioNoEliminadoPorId(2L)).thenReturn(usuario);
     assertThrows(
             BusinessServiceException.class,
-            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
-    verify(messageSource).getMessage(eq("mensaje_remito_facturas_iguales"), any(), any());
-    nuevoRemitoDTO.setIdFacturaVenta(new long[]{2L, 3L});
-    assertThrows(
-            BusinessServiceException.class,
-            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
-    verify(messageSource).getMessage(eq("mensaje_remito_facturas_diferentes_clientes"), any(), any());
-    facturaVentaDos.setCliente(cliente);
-    assertThrows(
-            BusinessServiceException.class,
-            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
-    verify(messageSource).getMessage(eq("mensaje_remito_facturas_diferentes_sucursales"), any(), any());
-    facturaVentaDos.setSucursal(sucursal);
-    assertThrows(
-            BusinessServiceException.class,
-            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
-    verify(messageSource).getMessage(eq("mensaje_remito_facturas_diferentes_ubicacion_envio"), any(), any());
-    facturaVentaDos.setPedido(pedido);
-    assertThrows(
-            BusinessServiceException.class,
-            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L));
+            () -> remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 2L));
     verify(messageSource).getMessage(eq("mensaje_remito_error_renglones"), any(), any());
     tipoBulto = new TipoBulto[] {TipoBulto.CAJA, TipoBulto.ATADO};
     nuevoRemitoDTO.setTiposDeBulto(tipoBulto);
-    Remito remito = remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 1L);
+    when(usuarioService.getUsuarioNoEliminadoPorId(2L)).thenReturn(usuario);
+    pedidoUno.setCliente(cliente);
+    Remito remito = remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, 2L);
     verify(remitoRepository).save(any());
     assertEquals(1, remito.getSerie());
     assertEquals(1, remito.getNroRemito());
@@ -174,10 +161,10 @@ class RemitoServiceImplTest {
     assertEquals("Envio Nuevo", remito.getObservaciones());
     assertEquals(new BigDecimal("16"), remito.getCantidadDeBultos());
     verify(messageSource)
-        .getMessage(eq("mensaje_remito_guardado_correctamente"), any(), eq(Locale.getDefault()));
+            .getMessage(eq("mensaje_remito_guardado_correctamente"), any(), eq(Locale.getDefault()));
     verify(facturaVentaService).asignarRemitoConFactura(any(), eq(2L));
     verify(cuentaCorrienteService)
-        .asentarEnCuentaCorriente((Remito) any(), eq(TipoDeOperacion.ALTA));
+            .asentarEnCuentaCorriente((Remito) any(), eq(TipoDeOperacion.ALTA));
   }
 
   @Test
@@ -225,11 +212,9 @@ class RemitoServiceImplTest {
 
   @Test
   void shouldGetSiguienteNumeroRemito() {
-    when(remitoRepository.buscarMayorNumRemitoSegunSerie(1L))
-        .thenReturn(null);
+    when(remitoRepository.buscarMayorNumRemitoSegunSerie(1L)).thenReturn(null);
     assertEquals(1L, remitoService.getSiguienteNumeroRemito(1L));
-    when(remitoRepository.buscarMayorNumRemitoSegunSerie(1L))
-        .thenReturn(43L);
+    when(remitoRepository.buscarMayorNumRemitoSegunSerie(1L)).thenReturn(43L);
     assertEquals(44L, remitoService.getSiguienteNumeroRemito(1L));
   }
 
@@ -270,10 +255,10 @@ class RemitoServiceImplTest {
             .build();
     builder = remitoService.getBuilder(criteria);
     assertEquals(
-        "remito.fecha > -999999999-01-01T00:00 && remito.serie = 1 " +
-                "&& remito.nroRemito = 2 " +
-                "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 " +
-                "&& remito.usuario.idUsuario = 1 && remito.eliminado = false",
+        "remito.fecha > -999999999-01-01T00:00 && remito.serie = 1 "
+            + "&& remito.nroRemito = 2 "
+            + "&& remito.cliente.idCliente = 1 && remito.sucursal.idSucursal = 1 "
+            + "&& remito.usuario.idUsuario = 1 && remito.eliminado = false",
         builder.toString());
     criteria =
         BusquedaRemitoCriteria.builder()
@@ -288,9 +273,9 @@ class RemitoServiceImplTest {
             .build();
     builder = remitoService.getBuilder(criteria);
     assertEquals(
-        "remito.fecha < +999999999-12-31T23:59:59.999999999 && remito.serie = 1 " +
-                "&& remito.nroRemito = 2 && remito.cliente.idCliente = 1 " +
-                "&& remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 && remito.eliminado = false",
+        "remito.fecha < +999999999-12-31T23:59:59.999999999 && remito.serie = 1 "
+            + "&& remito.nroRemito = 2 && remito.cliente.idCliente = 1 "
+            + "&& remito.sucursal.idSucursal = 1 && remito.usuario.idUsuario = 1 && remito.eliminado = false",
         builder.toString());
     Pageable pageable = remitoService.getPageable(3, "cliente.razonSocial", "ASC");
     assertEquals(3, pageable.getPageNumber());
