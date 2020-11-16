@@ -97,33 +97,8 @@ public class RemitoServiceImpl implements IRemitoService {
                            "mensaje_remito_sin_costo_de_envio", null, Locale.getDefault()));
        }
        List<FacturaVenta> facturas = new ArrayList<>();
-       Arrays.stream(nuevoRemitoDTO.getIdFacturaVenta()).forEach(idFactura -> {
-           Factura factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
-           if (!(factura instanceof FacturaVenta)) {
-               throw new BusinessServiceException(
-                       messageSource.getMessage(
-                               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
-           }
-           FacturaVenta facturaVenta = (FacturaVenta) factura;
-           if (facturaVenta.getRemito() != null) {
-               throw new BusinessServiceException(
-                       messageSource.getMessage(
-                               "mensaje_factura_con_remito", null, Locale.getDefault()));
-           }
-           facturas.add(facturaVenta);
-       });
-       if (Collections.frequency(facturas, facturas.get(0)) > 1)
-            throw new BusinessServiceException(
-                    messageSource.getMessage(
-                            "mensaje_remito_facturas_iguales", null, Locale.getDefault()));
+       this.validarReglasDeNegocio(facturas, nuevoRemitoDTO.getIdFacturaVenta());
        Pedido pedido = facturas.get(0).getPedido();
-       facturas.stream()
-               .filter(facturaVenta -> !facturaVenta.getPedido().equals(pedido))
-               .forEach(facturaVenta -> {
-                   throw new BusinessServiceException(
-                           messageSource.getMessage(
-                                   "mensaje_remito_facturas_diferentes_pedidos", null, Locale.getDefault()));
-               });
        Remito remito = new Remito();
        remito.setFecha(LocalDateTime.now());
        remito.setDetalleEnvio(pedido.getDetalleEnvio());
@@ -157,6 +132,39 @@ public class RemitoServiceImpl implements IRemitoService {
        facturas.forEach(facturaVenta -> facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura()));
        cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ALTA);
        return remito;
+    }
+
+    @Override
+    public void validarReglasDeNegocio(List<FacturaVenta> facturas, long[] idFacturaVenta) {
+        Arrays.stream(idFacturaVenta).forEach(idFactura -> {
+            Factura factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
+            if (!(factura instanceof FacturaVenta)) {
+                throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+            }
+            FacturaVenta facturaVenta = (FacturaVenta) factura;
+            if (facturaVenta.getRemito() != null) {
+                throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_factura_con_remito", null, Locale.getDefault()));
+            }
+            facturas.add(facturaVenta);
+        });
+        facturas.forEach(facturaVenta -> {
+            if (Collections.frequency(facturas, facturaVenta) > 1)
+                throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_remito_facturas_iguales", null, Locale.getDefault()));
+        });
+        Pedido pedido = facturas.get(0).getPedido();
+        facturas.stream()
+                .filter(facturaVenta -> !facturaVenta.getPedido().equals(pedido))
+                .forEach(facturaVenta -> {
+                    throw new BusinessServiceException(
+                            messageSource.getMessage(
+                                    "mensaje_remito_facturas_diferentes_pedidos", null, Locale.getDefault()));
+                });
     }
 
     @Override
