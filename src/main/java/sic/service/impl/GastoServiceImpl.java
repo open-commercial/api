@@ -67,7 +67,7 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   public void validarReglasDeNegocio(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getSucursal().getIdSucursal());
-    if (gastoRepository.findByNroGastoAndEliminado(gasto.getNroGasto(), false) != null) {
+    if (gastoRepository.existsByNroGasto(gasto.getNroGasto())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_gasto_duplicada", null, Locale.getDefault()));
     }
