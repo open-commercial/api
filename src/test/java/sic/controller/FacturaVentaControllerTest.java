@@ -306,4 +306,18 @@ class FacturaVentaControllerTest {
     facturaVentaController.enviarFacturaVentaPorEmail(1L);
     verify(facturaVentaService).enviarFacturaVentaPorEmail(1L);
   }
+
+  @Test
+  void shouldGetFacturasVentaPorId() {
+    List<FacturaVenta> facturasVenta = new ArrayList<>();
+    FacturaVenta facturaVentaUno = new FacturaVenta();
+    facturaVentaUno.setIdFactura(2L);
+    FacturaVenta facturaVentaDos = new FacturaVenta();
+    facturaVentaDos.setIdFactura(3L);
+    facturasVenta.add(facturaVentaUno);
+    facturasVenta.add(facturaVentaDos);
+    when(facturaVentaService.getFacturasVentaPorId(new long[] {2L, 3L})).thenReturn(facturasVenta);
+    List<FacturaVenta> facturasRecuperadas = facturaVentaService.getFacturasVentaPorId(new long[] {2L, 3L});
+    assertEquals(facturasVenta, facturasRecuperadas);
+  }
 }

@@ -28,4 +28,6 @@ public interface FacturaVentaRepository
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("numSerie") long numSerie,
       @Param("idSucursal") long idSucursal);
+
+  List<FacturaVenta> findByIdFacturaIn(long[] idFactura);
 }

@@ -861,4 +861,10 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     facturaConIVA.setRenglones(renglonesConIVA);
   }
+
+
+  @Override
+  public List<FacturaVenta> getFacturasVentaPorId(long[] idFactura) {
+    return facturaVentaRepository.findByIdFacturaIn(idFactura);
+  }
 }

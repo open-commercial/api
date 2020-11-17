@@ -53,4 +53,6 @@ public interface IFacturaVentaService {
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 
   BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria);
+
+  List<FacturaVenta> getFacturasVentaPorId(long[] idFactura);
 }
