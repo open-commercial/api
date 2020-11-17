@@ -30,4 +30,6 @@ public interface IRemitoService {
   BooleanBuilder getBuilder(BusquedaRemitoCriteria criteria);
 
   byte[] getReporteRemito(long idRemito);
+
+  void validarReglasDeNegocio(List<FacturaVenta> facturas, long[] idFacturaVenta);
 }
