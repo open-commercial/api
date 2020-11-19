@@ -20,6 +20,7 @@ public class Producto {
   private Set<CantidadEnSucursal> cantidadEnSucursalesDisponible;
   private BigDecimal cantidadReservada;
   private BigDecimal cantidadTotalEnSucursales;
+  private BigDecimal cantidadTotalEnSucursalesDisponible;
   private boolean hayStock;
   private BigDecimal cantMinima;
   private BigDecimal bulto;

@@ -59,6 +59,10 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private BigDecimal cantidadTotalEnSucursales;
 
+  @JsonView(Views.Comprador.class)
+  @Transient
+  private BigDecimal cantidadTotalEnSucursalesDisponible;
+
   @Transient
   private BigDecimal cantidadReservada;
 
