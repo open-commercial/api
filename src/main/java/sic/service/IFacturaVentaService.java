@@ -27,7 +27,7 @@ public interface IFacturaVentaService {
 
   void asignarRemitoConFactura(Remito remito, long idFactura);
 
-  FacturaVenta getFacturaVentaDelRemito(Remito remito);
+  List<FacturaVenta> getFacturaVentaDelRemito(Remito remito);
 
   BigDecimal calcularTotalFacturadoVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
@@ -53,4 +53,6 @@ public interface IFacturaVentaService {
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 
   BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria);
+
+  List<FacturaVenta> getFacturasVentaPorId(long[] idFactura);
 }

@@ -698,4 +698,18 @@ class FacturaVentaServiceImplTest {
     assertEquals(new BigDecimal("1210"), facturaVenta.getRenglones().get(0).getImporteAnterior());
     assertEquals(new BigDecimal("1000"), facturaVenta.getRenglones().get(0).getImporte());
   }
+
+  @Test
+  void shouldGetFacturasVentaPorId() {
+    List<FacturaVenta> facturasVenta = new ArrayList<>();
+    FacturaVenta facturaVentaUno = new FacturaVenta();
+    facturaVentaUno.setIdFactura(2L);
+    FacturaVenta facturaVentaDos = new FacturaVenta();
+    facturaVentaDos.setIdFactura(3L);
+    facturasVenta.add(facturaVentaUno);
+    facturasVenta.add(facturaVentaDos);
+    when(facturaVentaRepository.findByIdFacturaIn(new long[] {2L, 3L})).thenReturn(facturasVenta);
+    List<FacturaVenta> facturasRecuperadas = facturaVentaServiceImpl.getFacturasVentaPorId(new long[] {2L, 3L});
+    assertEquals(facturasVenta, facturasRecuperadas);
+  }
 }

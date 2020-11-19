@@ -20,7 +20,6 @@ import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
-import sic.modelo.dto.UbicacionDTO;
 import sic.repository.RemitoRepository;
 import sic.repository.RenglonRemitoRepository;
 import sic.service.*;
@@ -95,55 +94,13 @@ public class RemitoServiceImpl implements IRemitoService {
                            "mensaje_remito_sin_costo_de_envio", null, Locale.getDefault()));
        }
        List<FacturaVenta> facturas = new ArrayList<>();
-       Cliente cliente = null;
-       Sucursal sucursal = null;
-       UbicacionDTO ubicacionDTO = null;
-       long cantidadDeIdFactura = nuevoRemitoDTO.getIdFacturaVenta().length;
-       long idFactura = 0L;
-       for (int i = 0; i < cantidadDeIdFactura; i++) {
-           Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevoRemitoDTO.getIdFacturaVenta()[i]);
-           if (!(factura instanceof FacturaVenta)) {
-               throw new BusinessServiceException(
-                       messageSource.getMessage(
-                               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
-           } else {
-               if (((FacturaVenta) factura).getRemito() != null) {
-                   throw new BusinessServiceException(
-                           messageSource.getMessage(
-                                   "mensaje_remito_con_factura", null, Locale.getDefault()));
-               }
-               if (i == 0) {
-                   cliente = ((FacturaVenta) factura).getCliente();
-                   sucursal = factura.getSucursal();
-                   ubicacionDTO = factura.getPedido().getDetalleEnvio();
-                   idFactura = factura.getIdFactura();
-               } else {
-                   if (idFactura == factura.getIdFactura()) {
-                       throw new BusinessServiceException(
-                               messageSource.getMessage(
-                                       "mensaje_remito_facturas_iguales", null, Locale.getDefault()));
-                   }
-                   if (!cliente.equals(((FacturaVenta) factura).getCliente()))
-                        throw new BusinessServiceException(
-                           messageSource.getMessage(
-                                   "mensaje_remito_facturas_diferentes_clientes", null, Locale.getDefault()));
-                   if (!sucursal.equals(factura.getSucursal()))
-                       throw new BusinessServiceException(
-                           messageSource.getMessage(
-                                   "mensaje_remito_facturas_diferentes_sucursales", null, Locale.getDefault()));
-                   if (!factura.getPedido().getDetalleEnvio().equals(ubicacionDTO))
-                       throw new BusinessServiceException(
-                           messageSource.getMessage(
-                                   "mensaje_remito_facturas_diferentes_ubicacion_envio", null, Locale.getDefault()));
-               }
-           facturas.add((FacturaVenta) factura);
-          }
-       }
+       this.validarReglasDeNegocio(facturas, nuevoRemitoDTO.getIdFacturaVenta());
+       Pedido pedido = facturas.get(0).getPedido();
        Remito remito = new Remito();
        remito.setFecha(LocalDateTime.now());
-       remito.setDetalleEnvio(ubicacionDTO);
-       remito.setCliente(cliente);
-       remito.setClienteEmbedded(clienteService.crearClienteEmbedded(cliente));
+       remito.setDetalleEnvio(pedido.getDetalleEnvio());
+       remito.setCliente(pedido.getCliente());
+       remito.setClienteEmbedded(clienteService.crearClienteEmbedded(pedido.getCliente()));
        BigDecimal totalFacturas = facturas.stream().map(FacturaVenta::getTotal).reduce(BigDecimal.ZERO, BigDecimal::add);
        remito.setTotalFacturas(totalFacturas);
        remito.setCostoDeEnvio(nuevoRemitoDTO.getCostoDeEnvio());
@@ -155,7 +112,7 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setPesoTotalEnKg(nuevoRemitoDTO.getPesoTotalEnKg());
        remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenTotalEnM3());
        remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
-       remito.setSucursal(sucursal);
+       remito.setSucursal(pedido.getSucursal());
        remito.setSerie(remito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
        remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
@@ -170,6 +127,39 @@ public class RemitoServiceImpl implements IRemitoService {
        facturas.forEach(facturaVenta -> facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura()));
        cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ALTA);
        return remito;
+    }
+
+    @Override
+    public void validarReglasDeNegocio(List<FacturaVenta> facturas, long[] idFacturaVenta) {
+        Arrays.stream(idFacturaVenta).forEach(idFactura -> {
+            Factura factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
+            if (!(factura instanceof FacturaVenta)) {
+                throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+            }
+            FacturaVenta facturaVenta = (FacturaVenta) factura;
+            if (facturaVenta.getRemito() != null) {
+                throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_factura_con_remito", null, Locale.getDefault()));
+            }
+            facturas.add(facturaVenta);
+        });
+        facturas.forEach(facturaVenta -> {
+            if (Collections.frequency(facturas, facturaVenta) > 1)
+                throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_remito_facturas_iguales", null, Locale.getDefault()));
+        });
+        Pedido pedido = facturas.get(0).getPedido();
+        facturas.stream()
+                .filter(facturaVenta -> !facturaVenta.getPedido().equals(pedido))
+                .forEach(facturaVenta -> {
+                    throw new BusinessServiceException(
+                            messageSource.getMessage(
+                                    "mensaje_remito_facturas_diferentes_pedidos", null, Locale.getDefault()));
+                });
     }
 
     @Override
@@ -193,7 +183,9 @@ public class RemitoServiceImpl implements IRemitoService {
     public void eliminar(long idRemito) {
         Remito remito = this.getRemitoPorId(idRemito);
         cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ELIMINACION);
-        facturaVentaService.asignarRemitoConFactura(null, facturaVentaService.getFacturaVentaDelRemito(remito).getIdFactura());
+        facturaVentaService.getFacturaVentaDelRemito(remito).forEach(
+                facturaVenta -> facturaVentaService.asignarRemitoConFactura(null, facturaVenta.getIdFactura())
+        );
         remito.setEliminado(true);
         remito = remitoRepository.save(remito);
         logger.warn(

@@ -149,14 +149,16 @@ public class FacturaVenta extends Factura implements Serializable {
   }
 
   @JsonGetter("ubicacionCliente")
-  public String getUbicacionFacturacion() {
+  public String getUbicacionCliente() {
     return (clienteEmbedded.getCalleUbicacionCliente() != null
             ? clienteEmbedded.getCalleUbicacionCliente() + " "
             : "")
         + (clienteEmbedded.getNumeroUbicacionCliente() != null
             ? clienteEmbedded.getNumeroUbicacionCliente() + " "
             : "")
-        + (clienteEmbedded.getPisoUbicacionCliente() != null ? clienteEmbedded.getPisoUbicacionCliente() + " " : "")
+        + (clienteEmbedded.getPisoUbicacionCliente() != null
+            ? clienteEmbedded.getPisoUbicacionCliente() + " "
+            : "")
         + (clienteEmbedded.getDepartamentoUbicacionCliente() != null
             ? clienteEmbedded.getDepartamentoUbicacionCliente() + " "
             : "")

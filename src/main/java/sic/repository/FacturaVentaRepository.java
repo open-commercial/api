@@ -6,6 +6,8 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
+import java.util.List;
+
 public interface FacturaVentaRepository
     extends FacturaRepository<FacturaVenta>,
         FacturaVentaRepositoryCustom,
@@ -17,7 +19,7 @@ public interface FacturaVentaRepository
   void modificarFacturaParaAgregarRemito(@Param("remito") Remito remito, @Param("idFactura") long idFactura);
 
   @Query("SELECT fv FROM FacturaVenta fv WHERE fv.remito = :remito")
-  FacturaVenta buscarFacturaPorRemito(@Param("remito") Remito remito);
+  List<FacturaVenta> buscarFacturaPorRemito(@Param("remito") Remito remito);
 
   @Query(
       "SELECT max(fv.numFactura) FROM FacturaVenta fv "
@@ -26,4 +28,6 @@ public interface FacturaVentaRepository
       @Param("tipoComprobante") TipoDeComprobante tipoComprobante,
       @Param("numSerie") long numSerie,
       @Param("idSucursal") long idSucursal);
+
+  List<FacturaVenta> findByIdFacturaIn(long[] idFactura);
 }

@@ -50,6 +50,7 @@ public abstract class Factura {
   private long numSerie;
   private long numFactura;
   private LocalDate fechaVencimiento;
+  private Long idPedido;
   private Long nroPedido;
   private Long idTransportista;
   private String nombreTransportista;

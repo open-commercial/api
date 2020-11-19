@@ -408,7 +408,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public FacturaVenta getFacturaVentaDelRemito(Remito remito) {
+  public List<FacturaVenta> getFacturaVentaDelRemito(Remito remito) {
     return facturaVentaRepository.buscarFacturaPorRemito(remito);
   }
 
@@ -853,5 +853,11 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       }
     }
     facturaConIVA.setRenglones(renglonesConIVA);
+  }
+
+
+  @Override
+  public List<FacturaVenta> getFacturasVentaPorId(long[] idFactura) {
+    return facturaVentaRepository.findByIdFacturaIn(idFactura);
   }
 }
