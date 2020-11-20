@@ -377,12 +377,18 @@ class TraspasoServiceImplTest {
   void shouldEliminarTraspasoDePedido() {
     Pedido pedido = new Pedido();
     pedido.setNroPedido(123L);
-    Traspaso traspaso = new Traspaso();
-    traspaso.setIdTraspaso(1L);
-    when(traspasoRepository.findByNroPedido(123L)).thenReturn(traspaso);
-    when(traspasoRepository.findById(1L)).thenReturn(Optional.of(traspaso));
+    List<Traspaso> traspasos = new ArrayList<>();
+    Traspaso traspaso1 = new Traspaso();
+    traspaso1.setIdTraspaso(1L);
+    Traspaso traspaso2 = new Traspaso();
+    traspaso2.setIdTraspaso(2L);
+    traspasos.add(traspaso1);
+    traspasos.add(traspaso2);
+    when(traspasoRepository.findByNroPedido(123L)).thenReturn(traspasos);
+    when(traspasoRepository.findById(1L)).thenReturn(Optional.of(traspaso1));
+    when(traspasoRepository.findById(2L)).thenReturn(Optional.of(traspaso2));
     traspasoService.eliminarTraspasoDePedido(pedido);
-    verify(traspasoRepository, times(1)).delete(traspaso);
+    verify(traspasoRepository, times(2)).delete(any());
   }
 
   @Test

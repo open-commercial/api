@@ -260,10 +260,10 @@ public class TraspasoServiceImpl implements ITraspasoService {
 
   @Override
   public void eliminarTraspasoDePedido(Pedido pedido) {
-    Traspaso traspaso = traspasoRepository.findByNroPedido(pedido.getNroPedido());
-    if (traspaso != null) {
-      this.eliminar(traspasoRepository.findByNroPedido(pedido.getNroPedido()).getIdTraspaso());
-    }
+    List<Traspaso> traspasos = traspasoRepository.findByNroPedido(pedido.getNroPedido());
+    traspasos.forEach(traspaso -> {
+      this.eliminar(traspaso.getIdTraspaso());
+    });
   }
 
   @Override
