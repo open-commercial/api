@@ -111,7 +111,7 @@ public interface IProductoService {
 
   void validarLongitudDeArrays(int longitudIds, int longitudCantidades);
 
-  ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible);
+  ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal);
 
   PrecioProductoEmbeddable construirPrecioProductoEmbeddable(ProductoDTO productoDTO);
 

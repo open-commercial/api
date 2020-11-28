@@ -19,6 +19,8 @@ public class ProductoFaltanteDTO {
     private long idProducto;
     private String codigo;
     private String descripcion;
+    private long idSucursal;
+    private String nombreSurcursal;
     private BigDecimal cantidadSolicitada;
     private BigDecimal cantidadDisponible;
 }

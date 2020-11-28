@@ -922,7 +922,8 @@ public class ProductoServiceImpl implements IProductoService {
                           .reduce(BigDecimal.ZERO,BigDecimal::add)
                           .compareTo(cantidadSolicitada) < 0
                   && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
-                    productosFaltantes.add(this.construirNuevoProductoFaltante(producto, cantidadSolicitada, cantidadEnSucursal.getCantidad()));
+                    productosFaltantes
+                            .add(this.construirNuevoProductoFaltante(producto, cantidadSolicitada, cantidadEnSucursal.getCantidad(), cantidadEnSucursal.getIdSucursal()));
                   }
             });
     }
@@ -958,7 +959,8 @@ public class ProductoServiceImpl implements IProductoService {
                         if (!producto.getCantidadProducto().isIlimitado()
                                 && cantidadEnSucursal.getCantidad().compareTo(cantidadSolicitada) < 0
                                 && cantidadSolicitada.compareTo(BigDecimal.ZERO) > 0) {
-                          productosFaltantes.add(this.construirNuevoProductoFaltante(producto, cantidadSolicitada, cantidadEnSucursal.getCantidad()));
+                          productosFaltantes
+                                  .add(this.construirNuevoProductoFaltante(producto, cantidadSolicitada, cantidadEnSucursal.getCantidad(), cantidadEnSucursal.getIdSucursal()));
                         }
                       });
     }
@@ -966,11 +968,14 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible) {
+  public ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal) {
     ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
     productoFaltanteDTO.setIdProducto(producto.getIdProducto());
     productoFaltanteDTO.setCodigo(producto.getCodigo());
     productoFaltanteDTO.setDescripcion(producto.getDescripcion());
+    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
+    productoFaltanteDTO.setNombreSurcursal(sucursal.getNombre());
+    productoFaltanteDTO.setIdSucursal(sucursal.getIdSucursal());
     productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
     productoFaltanteDTO.setCantidadDisponible(cantidadDisponible);
     return productoFaltanteDTO;

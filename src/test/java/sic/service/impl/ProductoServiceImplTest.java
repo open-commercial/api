@@ -317,6 +317,7 @@ class ProductoServiceImplTest {
     cantidadEnSucursales.add(cantidadEnSucursal);
     producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
     producto.getCantidadProducto().setIlimitado(false);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     long[] idProducto = {1};
     BigDecimal[] cantidad = {BigDecimal.TEN.add(BigDecimal.ONE)};
@@ -590,6 +591,8 @@ class ProductoServiceImplTest {
     traspaso.setRenglones(renglones);
     traspaso.setSucursalOrigen(sucursalOrigen);
     traspaso.setSucursalDestino(sucursalDestino);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursalOrigen);
+    when(sucursalService.getSucursalPorId(2L)).thenReturn(sucursalDestino);
     assertThrows(
         BusinessServiceException.class,
         () -> productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA));
@@ -987,11 +990,17 @@ class ProductoServiceImplTest {
     producto.setIdProducto(1L);
     producto.setCodigo("321");
     producto.setDescripcion("Producto test");
-    ProductoFaltanteDTO productoFaltante =productoService.construirNuevoProductoFaltante(producto, BigDecimal.TEN, BigDecimal.ONE);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setNombre("Sucursal Test");
+    sucursal.setIdSucursal(2L);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    ProductoFaltanteDTO productoFaltante = productoService.construirNuevoProductoFaltante(producto, BigDecimal.TEN, BigDecimal.ONE, 1L);
     assertNotNull(productoFaltante);
     assertEquals(1L, productoFaltante.getIdProducto());
     assertEquals("321", productoFaltante.getCodigo());
     assertEquals("Producto test", productoFaltante.getDescripcion());
+    assertEquals("Sucursal Test", productoFaltante.getNombreSurcursal());
+    assertEquals(2L, productoFaltante.getIdSucursal());
     assertEquals(BigDecimal.TEN, productoFaltante.getCantidadSolicitada());
     assertEquals(BigDecimal.ONE, productoFaltante.getCantidadDisponible());
   }
