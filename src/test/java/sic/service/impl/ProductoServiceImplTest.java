@@ -999,7 +999,7 @@ class ProductoServiceImplTest {
     assertEquals(1L, productoFaltante.getIdProducto());
     assertEquals("321", productoFaltante.getCodigo());
     assertEquals("Producto test", productoFaltante.getDescripcion());
-    assertEquals("Sucursal Test", productoFaltante.getNombreSurcursal());
+    assertEquals("Sucursal Test", productoFaltante.getNombreSucursal());
     assertEquals(2L, productoFaltante.getIdSucursal());
     assertEquals(BigDecimal.TEN, productoFaltante.getCantidadSolicitada());
     assertEquals(BigDecimal.ONE, productoFaltante.getCantidadDisponible());

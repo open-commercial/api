@@ -43,7 +43,6 @@ import sic.util.CustomValidator;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 @Service
 public class ProductoServiceImpl implements IProductoService {
@@ -974,7 +973,7 @@ public class ProductoServiceImpl implements IProductoService {
     productoFaltanteDTO.setCodigo(producto.getCodigo());
     productoFaltanteDTO.setDescripcion(producto.getDescripcion());
     Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
-    productoFaltanteDTO.setNombreSurcursal(sucursal.getNombre());
+    productoFaltanteDTO.setNombreSucursal(sucursal.getNombre());
     productoFaltanteDTO.setIdSucursal(sucursal.getIdSucursal());
     productoFaltanteDTO.setCantidadSolicitada(cantidadSolicitada);
     productoFaltanteDTO.setCantidadDisponible(cantidadDisponible);
