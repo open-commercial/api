@@ -217,12 +217,13 @@ public class FacturaServiceImpl implements IFacturaService {
       if (tipo == TipoDeComprobante.FACTURA_A || tipo == TipoDeComprobante.FACTURA_B) {
         resultado =
             producto
+                .getPrecioProducto()
                 .getPrecioCosto()
                 .multiply(
                     BigDecimal.ONE
                         .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                         .multiply(
-                            producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
+                            producto.getPrecioProducto().getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
       }
     } else if (movimiento == Movimiento.VENTA
         && (tipo == TipoDeComprobante.FACTURA_A
@@ -230,12 +231,13 @@ public class FacturaServiceImpl implements IFacturaService {
             || tipo == TipoDeComprobante.PRESUPUESTO)) {
       resultado =
           producto
+              .getPrecioProducto()
               .getPrecioVentaPublico()
               .multiply(
                   BigDecimal.ONE
                       .subtract(bonificacionPorcentaje.divide(CIEN, 15, RoundingMode.HALF_UP))
                       .multiply(
-                          producto.getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
+                          producto.getPrecioProducto().getIvaPorcentaje().divide(CIEN, 15, RoundingMode.HALF_UP)));
     }
     return resultado;
   }
@@ -284,24 +286,25 @@ public class FacturaServiceImpl implements IFacturaService {
     if (movimiento == Movimiento.COMPRA) {
       if (tipoDeComprobante.equals(TipoDeComprobante.FACTURA_A)
           || tipoDeComprobante.equals(TipoDeComprobante.FACTURA_X)) {
-        resultado = producto.getPrecioCosto();
+        resultado = producto.getPrecioProducto().getPrecioCosto();
       } else {
         ivaResultado =
             producto
+                .getPrecioProducto()
                 .getPrecioCosto()
-                .multiply(producto.getIvaPorcentaje())
+                .multiply(producto.getPrecioProducto().getIvaPorcentaje())
                 .divide(CIEN, 15, RoundingMode.HALF_UP);
-        resultado = producto.getPrecioCosto().add(ivaResultado);
+        resultado = producto.getPrecioProducto().getPrecioCosto().add(ivaResultado);
       }
     }
     if (movimiento == Movimiento.VENTA) {
       resultado = switch (tipoDeComprobante) {
-        case FACTURA_A, FACTURA_X -> producto.getPrecioVentaPublico();
-        default -> producto.getPrecioLista();
+        case FACTURA_A, FACTURA_X -> producto.getPrecioProducto().getPrecioVentaPublico();
+        default -> producto.getPrecioProducto().getPrecioLista();
       };
     }
     if (movimiento == Movimiento.PEDIDO) {
-      resultado = producto.getPrecioLista();
+      resultado = producto.getPrecioProducto().getPrecioLista();
     }
     return resultado;
   }
@@ -352,15 +355,15 @@ public class FacturaServiceImpl implements IFacturaService {
           CalculosComprobante.calcularProporcion(
               nuevoRenglon.getPrecioUnitario(), nuevoRenglonFacturaDTO.getBonificacion()));
     }
-    nuevoRenglon.setIvaPorcentaje(producto.getIvaPorcentaje());
+    nuevoRenglon.setIvaPorcentaje(producto.getPrecioProducto().getIvaPorcentaje());
     nuevoRenglon.setIvaNeto(
         this.calcularIVANetoRenglon(
             movimiento, tipoDeComprobante, producto, nuevoRenglon.getBonificacionPorcentaje()));
-    nuevoRenglon.setGananciaPorcentaje(producto.getGananciaPorcentaje());
-    nuevoRenglon.setGananciaNeto(producto.getGananciaNeto());
+    nuevoRenglon.setGananciaPorcentaje(producto.getPrecioProducto().getGananciaPorcentaje());
+    nuevoRenglon.setGananciaNeto(producto.getPrecioProducto().getGananciaNeto());
     nuevoRenglon.setImporteAnterior(
         CalculosComprobante.calcularImporte(
-            nuevoRenglon.getCantidad(), producto.getPrecioLista(), BigDecimal.ZERO));
+            nuevoRenglon.getCantidad(), producto.getPrecioProducto().getPrecioLista(), BigDecimal.ZERO));
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
             nuevoRenglonFacturaDTO.getCantidad(),
@@ -440,16 +443,16 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public void aplicarBonificacion(
           RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion) {
-    if (producto.isOferta() && aplicaBonificacion) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
+    if (producto.getPrecioProducto().isOferta() && aplicaBonificacion) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
               CalculosComprobante.calcularProporcion(
-                      nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (aplicaBonificacion && producto.getPorcentajeBonificacionPrecio() != null) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
+                      nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionOferta()));
+    } else if (aplicaBonificacion && producto.getPrecioProducto().getPorcentajeBonificacionPrecio() != null) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionPrecio());
       nuevoRenglon.setBonificacionNeta(
               CalculosComprobante.calcularProporcion(
-                      nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
+                      nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionPrecio()));
     } else {
       nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
       nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
@@ -459,6 +462,6 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public boolean marcarRenglonParaAplicarBonificacion(long idProducto, BigDecimal cantidad) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    return cantidad.compareTo(producto.getBulto()) >= 0;
+    return cantidad.compareTo(producto.getCantidadProducto().getBulto()) >= 0;
   }
 }

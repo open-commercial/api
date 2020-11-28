@@ -144,11 +144,14 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   private void calcularImporteBonificado(ItemCarritoCompra itemCarritoCompra) {
     if (itemCarritoCompra != null) {
-      if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
+      if (itemCarritoCompra
+              .getCantidad()
+              .compareTo(itemCarritoCompra.getProducto().getCantidadProducto().getBulto())
           >= 0) {
         itemCarritoCompra.setImporte(
             itemCarritoCompra
                 .getProducto()
+                .getPrecioProducto()
                 .getPrecioBonificado()
                 .multiply(itemCarritoCompra.getCantidad())
                 .setScale(2, RoundingMode.HALF_UP));
@@ -156,6 +159,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         itemCarritoCompra.setImporte(
             itemCarritoCompra
                 .getProducto()
+                .getPrecioProducto()
                 .getPrecioLista()
                 .multiply(itemCarritoCompra.getCantidad())
                 .setScale(2, RoundingMode.HALF_UP));

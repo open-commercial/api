@@ -1,9 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -451,9 +449,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   public byte[] getReporteFacturaVenta(Factura factura) {
-    ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
-    InputStream isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
     Map<String, Object> params = new HashMap<>();
     ConfiguracionSucursal configuracionSucursal = factura.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
@@ -490,9 +485,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     List<RenglonFactura> renglones = facturaService.getRenglonesDeLaFactura(factura.getIdFactura());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/FacturaVenta.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+          JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);

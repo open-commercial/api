@@ -15,6 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.FacturaRepository;
 import sic.util.CalculosComprobante;
 import sic.util.CustomValidator;
@@ -68,7 +70,8 @@ class FacturaServiceImplTest {
   @Test
   void shouldMarcarRenglonParaAplicarBonificacion() {
     Producto productoParaRetorno = new Producto();
-    productoParaRetorno.setBulto(new BigDecimal("5"));
+    productoParaRetorno.setCantidadProducto(new CantidadProductoEmbeddable());
+    productoParaRetorno.getCantidadProducto().setBulto(new BigDecimal("5"));
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
     assertTrue(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")));
     assertFalse(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("3")));
@@ -250,9 +253,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaA() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -263,9 +267,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaX() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -276,9 +281,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaA() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -289,9 +295,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaX() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -302,9 +309,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaB() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -315,9 +323,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaC() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -328,9 +337,10 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaCompraConFacturaY() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -341,12 +351,13 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaB() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setGananciaNeto(new BigDecimal("100"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
-    producto.setIvaNeto(new BigDecimal("42"));
-    producto.setPrecioVentaPublico(new BigDecimal("200"));
-    producto.setPrecioLista(new BigDecimal("242"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setGananciaNeto(new BigDecimal("100"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
+    producto.getPrecioProducto().setIvaNeto(new BigDecimal("42"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("200"));
+    producto.getPrecioProducto().setPrecioLista(new BigDecimal("242"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -357,12 +368,13 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularPrecioUnitarioWhenEsUnaVentaConFacturaC() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setGananciaNeto(new BigDecimal("100"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
-    producto.setIvaNeto(new BigDecimal("42"));
-    producto.setPrecioVentaPublico(new BigDecimal("200"));
-    producto.setPrecioLista(new BigDecimal("242"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setGananciaNeto(new BigDecimal("100"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
+    producto.getPrecioProducto().setIvaNeto(new BigDecimal("42"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("200"));
+    producto.getPrecioProducto().setPrecioLista(new BigDecimal("242"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -373,8 +385,9 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularIVANetoWhenVentaConFacturaA() {
     Producto producto = new Producto();
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         25.41,
         facturaServiceImpl
@@ -386,8 +399,9 @@ class FacturaServiceImplTest {
   @Test
   void shouldCalcularIVANetoWhenVentaConFacturaB() {
     Producto producto = new Producto();
-    producto.setPrecioVentaPublico(new BigDecimal("1000"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("1000"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl

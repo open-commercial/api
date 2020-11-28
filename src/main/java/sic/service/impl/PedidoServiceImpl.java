@@ -12,9 +12,7 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -537,8 +535,6 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public byte[] getReportePedido(long idPedido) {
-    ClassLoader classLoader = PedidoServiceImpl.class.getClassLoader();
-    InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
     Map<String, Object> params = new HashMap<>();
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     params.put("pedido", pedido);
@@ -561,9 +557,16 @@ public class PedidoServiceImpl implements IPedidoService {
     List<RenglonPedido> renglones =
         this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Pedido.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+          JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -584,33 +587,33 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setCodigoItem(producto.getCodigo());
     nuevoRenglon.setDescripcionItem(producto.getDescripcion());
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
-    nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
-    if (producto.isOferta()
-        && nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0
-        && producto.getPorcentajeBonificacionOferta() != null) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
+    nuevoRenglon.setPrecioUnitario(producto.getPrecioProducto().getPrecioLista());
+    if (producto.getPrecioProducto().isOferta()
+        && nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getBulto()) >= 0
+        && producto.getPrecioProducto().getPorcentajeBonificacionOferta() != null) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
+              nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionOferta()));
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getBulto()) >= 0) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionPrecio());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
+              nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionPrecio()));
     } else {
       nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
       nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
     }
     nuevoRenglon.setImporteAnterior(
         CalculosComprobante.calcularImporte(
-            nuevoRenglon.getCantidad(), producto.getPrecioLista(), BigDecimal.ZERO));
+            nuevoRenglon.getCantidad(), producto.getPrecioProducto().getPrecioLista(), BigDecimal.ZERO));
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
             nuevoRenglon.getCantidad(),
-            producto.getPrecioLista(),
+            producto.getPrecioProducto().getPrecioLista(),
             nuevoRenglon.getBonificacionNeta()));
     nuevoRenglon.setUrlImagenItem(producto.getUrlImagen());
-    nuevoRenglon.setOferta(producto.isOferta());
+    nuevoRenglon.setOferta(producto.getPrecioProducto().isOferta());
     return nuevoRenglon;
   }
 

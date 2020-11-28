@@ -14,6 +14,7 @@ import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.UbicacionDTO;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
 import sic.util.CustomValidator;
@@ -123,7 +124,8 @@ class PedidoServiceImplTest {
     cantidadEnSucursal.setSucursal(sucursal);
     cantidadEnSucursal.setCantidad(BigDecimal.ONE);
     cantidadEnSucursales.add(cantidadEnSucursal);
-    producto.setCantidadEnSucursales(cantidadEnSucursales);
+    producto.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     RenglonPedido renglonPedido = new RenglonPedido();
     renglonPedido.setCantidad(BigDecimal.TEN);

@@ -208,7 +208,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
         Producto producto =
             productoService.getProductoNoEliminadoPorId(productoFaltante.getIdProducto());
         List<CantidadEnSucursal> listaOrdenadaPorCantidad = new ArrayList<>();
-        producto.getCantidadEnSucursales().stream()
+        producto.getCantidadProducto().getCantidadEnSucursales().stream()
             .filter(
                 cantidadEnSucursal ->
                     !cantidadEnSucursal.getIdSucursal().equals(pedido.getIdSucursal()))

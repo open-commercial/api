@@ -12,9 +12,7 @@ import javax.swing.ImageIcon;
 
 import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -310,8 +308,6 @@ public class ReciboServiceImpl implements IReciboService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
     }
-    ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
-    InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("recibo", recibo);
     if (recibo.getSucursal().getLogo() != null && !recibo.getSucursal().getLogo().isEmpty()) {
@@ -323,9 +319,16 @@ public class ReciboServiceImpl implements IReciboService {
           "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params));
+          JasperFillManager.fillReport(jasperDesign, params));
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);

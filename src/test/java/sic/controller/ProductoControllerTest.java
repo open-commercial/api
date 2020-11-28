@@ -14,6 +14,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
 import sic.modelo.dto.CantidadEnSucursalDTO;
 import sic.modelo.dto.ProductoDTO;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.service.impl.*;
 
 import javax.crypto.SecretKey;
@@ -53,8 +55,12 @@ class ProductoControllerTest {
     cantidadEnSucursal.setSucursal(sucursal);
     cantidadEnSucursales.add(cantidadEnSucursal);
     cantidadEnSucursal.setSucursal(sucursal);
-    productoPersistido.setCantidadEnSucursales(cantidadEnSucursales);
-    productoPersistido.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    CantidadProductoEmbeddable cantidadProductoEmbeddable = new CantidadProductoEmbeddable();
+    cantidadProductoEmbeddable.setCantidadEnSucursales(cantidadEnSucursales);
+    cantidadProductoEmbeddable.setCantidadTotalEnSucursales(BigDecimal.TEN);
+    PrecioProductoEmbeddable precioProductoEmbeddable = new PrecioProductoEmbeddable();
+    productoPersistido.setCantidadProducto(cantidadProductoEmbeddable);
+    productoPersistido.setPrecioProducto(precioProductoEmbeddable);
     ProductoDTO productoDTO = new ProductoDTO();
     productoDTO.setIdProducto(1L);
     Set<CantidadEnSucursalDTO> cantidadesEnSucursales = new HashSet<>();
@@ -62,12 +68,16 @@ class ProductoControllerTest {
         CantidadEnSucursalDTO.builder().idSucursal(1L).cantidad(BigDecimal.TEN).build();
     cantidadesEnSucursales.add(cantidadEnSucursalDTO);
     productoDTO.setCantidadEnSucursales(cantidadesEnSucursales);
+    when(productoService.construirCantidadProductoEmbeddable(productoDTO)).thenReturn(cantidadProductoEmbeddable);
+    when(productoService.construirPrecioProductoEmbeddable(productoDTO)).thenReturn(precioProductoEmbeddable);
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoPersistido);
     when(medidaService.getMedidaNoEliminadaPorId(1L)).thenReturn(new Medida());
     when(rubroService.getRubroNoEliminadoPorId(1L)).thenReturn(new Rubro());
     when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(new Proveedor());
     Producto productoPorActualizar = new Producto();
     productoPorActualizar.setIdProducto(1L);
+    productoPorActualizar.setCantidadProducto(new CantidadProductoEmbeddable());
+    productoPorActualizar.setPrecioProducto(new PrecioProductoEmbeddable());
     when(modelMapper.map(productoDTO, Producto.class)).thenReturn(productoPorActualizar);
     when(modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class))
         .thenReturn(cantidadEnSucursal);

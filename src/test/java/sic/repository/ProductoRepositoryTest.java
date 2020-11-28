@@ -11,6 +11,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.interceptor.JwtInterceptor;
 import sic.modelo.*;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
+
 import javax.persistence.OptimisticLockException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -51,7 +54,8 @@ class ProductoRepositoryTest {
           producto.setMedida(medida);
           producto.setProveedor(proveedor);
           producto.setRubro(rubro);
-          producto.setBulto(BigDecimal.ONE);
+          producto.setCantidadProducto(new CantidadProductoEmbeddable());
+          producto.getCantidadProducto().setBulto(BigDecimal.ONE);
           producto.setFechaAlta(LocalDateTime.now());
           producto.setFechaUltimaModificacion(LocalDateTime.now());
           Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
@@ -59,11 +63,13 @@ class ProductoRepositoryTest {
           cantidadEnSucursal.setCantidad(BigDecimal.ONE);
           cantidadEnSucursal.setSucursal(sucursal);
           cantidadEnSucursales.add(cantidadEnSucursal);
-          producto.setCantidadEnSucursales(cantidadEnSucursales);
-          producto.setCantidadTotalEnSucursales(
-              producto.getCantidadEnSucursales().stream()
+          producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+          producto.getCantidadProducto().setCantidadTotalEnSucursales(
+              producto.getCantidadProducto().getCantidadEnSucursales().stream()
                   .map(CantidadEnSucursal::getCantidad)
                   .reduce(BigDecimal.ZERO, BigDecimal::add));
+          producto.setPrecioProducto(new PrecioProductoEmbeddable());
+          producto.getPrecioProducto().setOferta(false);
           Producto productoEnPrimeraInstancia = testEntityManager.persistFlushFind(producto);
           testEntityManager.detach(productoEnPrimeraInstancia);
           Producto productoEnSegundaInstancia =
