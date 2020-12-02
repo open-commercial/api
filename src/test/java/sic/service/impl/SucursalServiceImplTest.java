@@ -13,19 +13,20 @@ import sic.repository.SucursalRepository;
 import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {SucursalServiceImpl.class, CustomValidator.class, MessageSource.class})
-public class SucursalServiceImplTest {
+class SucursalServiceImplTest {
 
   @MockBean SucursalRepository sucursalRepository;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
@@ -120,5 +121,95 @@ public class SucursalServiceImplTest {
     sucursalService.eliminar(1L);
     verify(configuracionSucursalService).eliminar(configuracionSucursal);
     verify(sucursalRepository).save(sucursal);
+  }
+
+  @Test
+  void shouldGetSucursales() {
+    Sucursal sucursal1 = new Sucursal();
+    ConfiguracionSucursal configuracionSucursal1 = new ConfiguracionSucursal();
+    configuracionSucursal1.setPuntoDeRetiro(true);
+    sucursal1.setConfiguracionSucursal(configuracionSucursal1);
+    Sucursal sucursal2 = new Sucursal();
+    ConfiguracionSucursal configuracionSucursal2 = new ConfiguracionSucursal();
+    sucursal2.setConfiguracionSucursal(configuracionSucursal2);
+    Sucursal sucursal3 = new Sucursal();
+    ConfiguracionSucursal configuracionSucursal3 = new ConfiguracionSucursal();
+    configuracionSucursal3.setPuntoDeRetiro(true);
+    sucursal3.setConfiguracionSucursal(configuracionSucursal3);
+    List<Sucursal> sucursales = new ArrayList<>();
+    sucursales.add(sucursal1);
+    sucursales.add(sucursal2);
+    sucursales.add(sucursal3);
+    when(sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false)).thenReturn(sucursales);
+    assertEquals(2, sucursalService.getSucusales(true).size());
+    assertEquals(3, sucursalService.getSucusales(false).size());
+  }
+
+  @Test
+  void shouldNotValidarReglasDeNegocio() {
+    Sucursal sucursal = new Sucursal();
+    sucursal.setNombre("Sucursal Test");
+    sucursal.setIdSucursal(1L);
+    sucursal.setIdFiscal(123L);
+    Sucursal sucursalDuplicada = new Sucursal();
+    sucursalDuplicada.setIdSucursal(2L);
+    sucursalDuplicada.setNombre("Sucursal Test");
+    sucursalDuplicada.setIdFiscal(123L);
+    when(sucursalRepository.findByNombreIsAndEliminadaOrderByNombreAsc("Sucursal Test", false)).thenReturn(sucursalDuplicada);
+    assertThrows(
+            BusinessServiceException.class,
+            () ->
+                    sucursalService.validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursal));
+    assertThrows(
+            BusinessServiceException.class,
+            () ->
+                    sucursalService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursal));
+    verify(messageSource, times(2))
+            .getMessage(
+                    eq("mensaje_sucursal_duplicado_nombre"),
+                    any(),
+                    eq(Locale.getDefault()));
+    sucursalDuplicada.setNombre("Otro nombre");
+    sucursalDuplicada.setIdSucursal(2L);
+    when(sucursalRepository.findByNombreIsAndEliminadaOrderByNombreAsc("Sucursal Test", false)).thenReturn(null);
+    when(sucursalRepository.findByIdFiscalAndEliminada(123L, false)).thenReturn(sucursalDuplicada);
+    assertThrows(
+            BusinessServiceException.class,
+            () ->
+                    sucursalService.validarReglasDeNegocio(TipoDeOperacion.ALTA , sucursal));
+    sucursalDuplicada.setIdSucursal(2L);
+    when(sucursalRepository.findByIdFiscalAndEliminada(123L, false)).thenReturn(sucursalDuplicada);
+    assertThrows(
+            BusinessServiceException.class,
+            () ->
+                    sucursalService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION , sucursal));
+    verify(messageSource, times(2))
+            .getMessage(
+                    eq("mensaje_sucursal_duplicado_cuip"),
+                    any(),
+                    eq(Locale.getDefault()));
+    when(sucursalRepository.findByIdFiscalAndEliminada(123L, false)).thenReturn(null);
+    Ubicacion ubicacion = new Ubicacion();
+    sucursal.setUbicacion(ubicacion);
+    assertThrows(
+            BusinessServiceException.class,
+            () ->
+                    sucursalService.validarReglasDeNegocio(TipoDeOperacion.ALTA , sucursal));
+    verify(messageSource)
+            .getMessage(
+                    eq("mensaje_ubicacion_sin_localidad"),
+                    any(),
+                    eq(Locale.getDefault()));
+    ubicacion.setLocalidad(new Localidad());
+    sucursal.setUbicacion(ubicacion);
+    assertThrows(
+            BusinessServiceException.class,
+            () ->
+                    sucursalService.validarReglasDeNegocio(TipoDeOperacion.ALTA , sucursal));
+    verify(messageSource)
+            .getMessage(
+                    eq("mensaje_sucursal_sin_configuracion"),
+                    any(),
+                    eq(Locale.getDefault()));
   }
 }

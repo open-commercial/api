@@ -3,8 +3,6 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.*;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;

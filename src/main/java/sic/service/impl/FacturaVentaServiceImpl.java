@@ -27,7 +27,6 @@ import sic.util.CustomValidator;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;

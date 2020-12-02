@@ -11,6 +11,7 @@ import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 @Data
@@ -19,7 +20,7 @@ import java.math.BigDecimal;
 @Builder
 @Embeddable
 @JsonView(Views.Vendedor.class)
-public class PrecioProductoEmbeddable {
+public class PrecioProductoEmbeddable implements Serializable {
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")

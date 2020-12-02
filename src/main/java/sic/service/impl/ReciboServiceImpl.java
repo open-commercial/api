@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;

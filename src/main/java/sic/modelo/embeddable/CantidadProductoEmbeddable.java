@@ -13,6 +13,7 @@ import javax.persistence.*;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
 
@@ -22,7 +23,7 @@ import java.util.Set;
 @Builder
 @Embeddable
 @JsonView(Views.Vendedor.class)
-public class CantidadProductoEmbeddable {
+public class CantidadProductoEmbeddable implements Serializable  {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "idProducto")

@@ -17,7 +17,6 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.*;
-import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 
