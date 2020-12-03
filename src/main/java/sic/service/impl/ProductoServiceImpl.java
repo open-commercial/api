@@ -947,7 +947,8 @@ public class ProductoServiceImpl implements IProductoService {
       Producto producto =
               this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
       BigDecimal cantidadSolicitada = productosParaVerificarStockDTO.getCantidad()[i];
-      producto.getCantidadProducto().getCantidadEnSucursales().stream()
+      this.calcularCantidadEnSucursalesDisponible(producto, productosParaVerificarStockDTO.getIdSucursal());
+      producto.getCantidadProducto().getCantidadEnSucursalesDisponible().stream()
               .filter(
                       cantidadEnSucursal ->
                               cantidadEnSucursal
@@ -1136,7 +1137,7 @@ public class ProductoServiceImpl implements IProductoService {
     producto.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadesEnSucursales);
     producto.getCantidadProducto()
             .setCantidadTotalEnSucursalesDisponible(cantidadesEnSucursales.stream().map(CantidadEnSucursal::getCantidad)
-                    .reduce( BigDecimal.ZERO, BigDecimal::add));
+                    .reduce(BigDecimal.ZERO, BigDecimal::add));
     return producto;
   }
 

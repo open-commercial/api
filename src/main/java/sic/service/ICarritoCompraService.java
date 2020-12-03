@@ -19,7 +19,7 @@ public interface ICarritoCompraService {
 
   BigDecimal calcularTotal(long idUsuario);
 
-  ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto);
+  ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto, long idSucursal);
 
   void eliminarItemDelUsuario(long idUsuario, long idProducto);
 

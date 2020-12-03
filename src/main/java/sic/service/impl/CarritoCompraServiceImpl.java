@@ -98,10 +98,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
-      long idUsuario, long idProducto) {
+      long idUsuario, long idProducto, long idSucursal) {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     this.calcularImporteBonificado(itemCarritoCompra);
+    productoService.calcularCantidadEnSucursalesDisponible(itemCarritoCompra.getProducto(), idSucursal);
     return itemCarritoCompra;
   }
 

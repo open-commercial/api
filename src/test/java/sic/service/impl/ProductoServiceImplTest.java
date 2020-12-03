@@ -548,9 +548,15 @@ class ProductoServiceImplTest {
     Sucursal sucursalOrigen = new Sucursal();
     sucursalOrigen.setIdSucursal(1L);
     sucursalOrigen.setNombre("Sucursal Uno");
+    ConfiguracionSucursal configuracionSucursalOrigen = new ConfiguracionSucursal();
+    configuracionSucursalOrigen.setComparteStock(true);
+    sucursalOrigen.setConfiguracionSucursal(configuracionSucursalOrigen);
     Sucursal sucursalDestino = new Sucursal();
     sucursalDestino.setIdSucursal(2L);
     sucursalDestino.setNombre("Sucursal dos");
+    ConfiguracionSucursal configuracionSucursalDestino = new ConfiguracionSucursal();
+    configuracionSucursalDestino.setComparteStock(false);
+    sucursalDestino.setConfiguracionSucursal(configuracionSucursalOrigen);
     CantidadEnSucursal cantidadEnSucursalProducto1 = new CantidadEnSucursal();
     cantidadEnSucursalProducto1.setSucursal(sucursalOrigen);
     cantidadEnSucursalProducto1.setCantidad(new BigDecimal("3"));

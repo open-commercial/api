@@ -50,12 +50,21 @@ class TraspasoServiceImplTest {
     Sucursal sucursal = new Sucursal();
     sucursal.setIdSucursal(1L);
     sucursal.setNombre("sucursal uno");
+    ConfiguracionSucursal configuracionSucursal1 = new ConfiguracionSucursal();
+    configuracionSucursal1.setComparteStock(true);
+    sucursal.setConfiguracionSucursal(configuracionSucursal1);
     Sucursal sucursal2 = new Sucursal();
     sucursal2.setIdSucursal(2L);
     sucursal2.setNombre("Sucursal dos");
+    ConfiguracionSucursal configuracionSucursal2 = new ConfiguracionSucursal();
+    configuracionSucursal2.setComparteStock(true);
+    sucursal2.setConfiguracionSucursal(configuracionSucursal1);
     Sucursal sucursal3 = new Sucursal();
     sucursal3.setIdSucursal(3L);
     sucursal3.setNombre("Sucursal tres");
+    ConfiguracionSucursal configuracionSucursal3 = new ConfiguracionSucursal();
+    configuracionSucursal3.setComparteStock(true);
+    sucursal3.setConfiguracionSucursal(configuracionSucursal1);
     List<Sucursal> sucursales = new ArrayList<>();
     sucursales.add(sucursal);
     sucursales.add(sucursal2);
@@ -130,7 +139,7 @@ class TraspasoServiceImplTest {
     cantidadEnSucursalesProducto1.add(cantidadEnSucursal1Producto1);
     cantidadEnSucursalesProducto1.add(cantidadEnSucursal2Producto1);
     cantidadEnSucursalesProducto1.add(cantidadEnSucursal3Producto1);
-    producto1.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursalesProducto1);
+    producto1.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadEnSucursalesProducto1);
     Producto producto2 = new Producto();
     producto2.setIdProducto(2L);
     producto2.setMedida(medida);
@@ -149,7 +158,7 @@ class TraspasoServiceImplTest {
     cantidadEnSucursalesProducto2.add(cantidadEnSucursal1Producto2);
     cantidadEnSucursalesProducto2.add(cantidadEnSucursal2Producto2);
     cantidadEnSucursalesProducto2.add(cantidadEnSucursal3Producto2);
-    producto2.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursalesProducto2);
+    producto2.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadEnSucursalesProducto2);
     Producto producto3 = new Producto();
     producto3.setIdProducto(3L);
     producto3.setMedida(medida);
@@ -168,7 +177,7 @@ class TraspasoServiceImplTest {
     cantidadEnSucursalesProducto3.add(cantidadEnSucursal1Producto3);
     cantidadEnSucursalesProducto3.add(cantidadEnSucursal2Producto3);
     cantidadEnSucursalesProducto3.add(cantidadEnSucursal3Producto3);
-    producto3.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursalesProducto3);
+    producto3.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadEnSucursalesProducto3);
     Producto producto4 = new Producto();
     producto4.setIdProducto(4L);
     producto4.setMedida(medida);
@@ -187,7 +196,7 @@ class TraspasoServiceImplTest {
     cantidadEnSucursalesProducto4.add(cantidadEnSucursal1Producto4);
     cantidadEnSucursalesProducto4.add(cantidadEnSucursal2Producto4);
     cantidadEnSucursalesProducto4.add(cantidadEnSucursal3Producto4);
-    producto4.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursalesProducto4);
+    producto4.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadEnSucursalesProducto4);
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto1);
     when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(producto2);
     when(productoService.getProductoNoEliminadoPorId(3L)).thenReturn(producto3);
