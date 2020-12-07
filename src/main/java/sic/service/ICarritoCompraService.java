@@ -33,5 +33,5 @@ public interface ICarritoCompraService {
 
   Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario);
 
-  List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario);
+  List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario, long idSucursal);
 }

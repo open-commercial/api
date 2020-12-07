@@ -89,16 +89,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   public MercadoPagoPreferenceDTO crearNuevaPreference(
       long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
     customValidator.validar(nuevaOrdenDeCompra);
-    if (nuevaOrdenDeCompra.getIdSucursal() == null) {
-      if (nuevaOrdenDeCompra.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_preference_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-
-      } else {
-        nuevaOrdenDeCompra.setIdSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal());
-      }
-    }
+    nuevaOrdenDeCompra.setIdSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal());
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     List<ItemCarritoCompra> items = carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
     if (this.verificarStockItemsDelCarrito(items)) {

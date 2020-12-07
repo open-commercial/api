@@ -84,8 +84,7 @@ public class PedidoController {
     Long idSucursalOrigen = pedido.getIdSucursal();
     long idUsuario = (int) claims.get(ID_USUARIO);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
-    if (pedidoDTO.getIdSucursal() != null)
-      pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
+    pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
     if (pedidoDTO.getObservaciones() != null) pedido.setObservaciones(pedidoDTO.getObservaciones());
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
     if (pedidoDTO.getRecargoPorcentaje() != null)
@@ -122,19 +121,8 @@ public class PedidoController {
     pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
     pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
     Sucursal sucursalDePedido;
-    if (pedidoDTO.getIdSucursal() == null) {
-      if (!pedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        sucursalDePedido = sucursalService.getSucursalPredeterminada();
-        pedido.setSucursal(sucursalDePedido);
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-    } else {
-      sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
-      pedido.setSucursal(sucursalDePedido);
-    }
+    sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
+    pedido.setSucursal(sucursalDePedido);
     long idUsuario = (int) claims.get(ID_USUARIO);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()));

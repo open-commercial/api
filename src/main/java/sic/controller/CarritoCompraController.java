@@ -92,11 +92,12 @@ public class CarritoCompraController {
     return carritoCompraService.crearPedido(nuevaOrdenDePagoDTO, idUsuarioLoggedIn);
   }
 
-  @GetMapping("/carrito-compra/disponibilidad-stock")
+  @GetMapping("/carrito-compra/disponibilidad-stock/sucursales/{idSucursal}")
   public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(
+      @PathVariable Long idSucursal,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return carritoCompraService.getProductosDelCarritoSinStockDisponible(idUsuarioLoggedIn);
+    return carritoCompraService.getProductosDelCarritoSinStockDisponible(idUsuarioLoggedIn, idSucursal);
   }
 }

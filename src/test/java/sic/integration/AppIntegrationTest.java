@@ -1445,7 +1445,10 @@ class AppIntegrationTest {
     assertEquals(2L, item2.getProducto().getIdProducto().longValue());
     assertEquals(9, item2.getCantidad().doubleValue());
     NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
-        NuevaOrdenDePagoDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
+        NuevaOrdenDePagoDTO.builder()
+                .idSucursal(1L)
+                .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
+                .build();
     Pedido pedido =
         restTemplate.postForObject(
             apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
@@ -1890,7 +1893,10 @@ class AppIntegrationTest {
     assertNotNull(item1);
     assertEquals(4L, item1.getProducto().getIdProducto().longValue());
     assertEquals(50, item1.getCantidad().doubleValue());
-    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO = NuevaOrdenDePagoDTO.builder().tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION).build();
+    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO = NuevaOrdenDePagoDTO.builder()
+            .idSucursal(1L)
+            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_FACTURACION)
+            .build();
     RestClientResponseException thrown =
             assertThrows(
                     RestClientResponseException.class,

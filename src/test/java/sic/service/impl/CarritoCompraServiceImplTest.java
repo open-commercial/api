@@ -139,7 +139,7 @@ class CarritoCompraServiceImplTest {
     usuario.setIdUsuario(1L);
     Sucursal sucursal = new Sucursal();
     sucursal.setIdSucursal(1L);
-    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     when(carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario))
         .thenReturn(itemsCarritoCompra);
@@ -153,7 +153,7 @@ class CarritoCompraServiceImplTest {
     }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
         ProductosParaVerificarStockDTO.builder().idSucursal(1L).idProducto(idProducto).cantidad(cantidad).build();
-    carritoCompraServiceImpl.getProductosDelCarritoSinStockDisponible(1L);
+    carritoCompraServiceImpl.getProductosDelCarritoSinStockDisponible(1L, 1L);
     verify(productoService, times(1))
         .getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }

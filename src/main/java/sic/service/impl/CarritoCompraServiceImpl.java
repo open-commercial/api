@@ -183,17 +183,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
-    if (nuevaOrdenDePagoDTO.getIdSucursal() == null) {
-      if (!nuevaOrdenDePagoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPredeterminada());
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-    } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDePagoDTO.getIdSucursal()));
-    }
+    pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDePagoDTO.getIdSucursal()));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     items.forEach(
@@ -209,7 +199,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario) {
+  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario, long idSucursal) {
     List<ItemCarritoCompra> items =
         this.getItemsDelCarritoPorUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     long[] idProducto = new long[items.size()];
@@ -224,7 +214,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         ProductosParaVerificarStockDTO.builder()
                 .idProducto(idProducto)
                 .cantidad(cantidad)
-                .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
+                .idSucursal(sucursalService.getSucursalPorId(idSucursal).getIdSucursal())
                 .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
