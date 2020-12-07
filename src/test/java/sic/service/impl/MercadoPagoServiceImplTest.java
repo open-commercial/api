@@ -92,7 +92,6 @@ class MercadoPagoServiceImplTest {
             .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
             .monto(BigDecimal.TEN)
             .build();
-    //sucursalService.getSucursalPredeterminada
     MercadoPagoPreferenceDTO mercadoPagoPreferenceDTO =
         mercadoPagoService.crearNuevaPreference(1L, nuevaOrdenDePagoDTO, "localhost");
     long[] idProducto = new long[]{1L, 2L};
