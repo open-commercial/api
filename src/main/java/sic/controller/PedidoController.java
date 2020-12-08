@@ -79,11 +79,11 @@ public class PedidoController {
   public void actualizar(
       @RequestBody PedidoDTO pedidoDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    //Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
-    long idUsuario = (int) claims.get(ID_USUARIO);
-    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    //long idUsuario = (int) claims.get(ID_USUARIO);
+    //pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     if (pedidoDTO.getIdSucursal() != null)
       pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
     if (pedidoDTO.getObservaciones() != null) pedido.setObservaciones(pedidoDTO.getObservaciones());
