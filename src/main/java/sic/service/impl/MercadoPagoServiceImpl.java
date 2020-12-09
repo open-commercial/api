@@ -89,7 +89,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   public MercadoPagoPreferenceDTO crearNuevaPreference(
       long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
     customValidator.validar(nuevaOrdenDeCompra);
-    nuevaOrdenDeCompra.setIdSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal());
+    Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     List<ItemCarritoCompra> items = carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
     if (this.verificarStockItemsDelCarrito(items)) {
@@ -101,14 +101,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       }
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
       Preference preference = new Preference();
-      String json = "";
-      BackUrls backUrls = null;
-      String title = "";
+      String json;
+      BackUrls backUrls ;
+      String title;
       float monto;
       Pedido pedido = null;
       switch (nuevaOrdenDeCompra.getMovimiento()) {
         case PEDIDO -> {
-          Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
           pedido =
                   this.crearPedidoConPagoPorPreference(
                           sucursal, usuario, clienteDeUsuario, items, nuevaOrdenDeCompra.getTipoDeEnvio());
@@ -137,7 +136,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           + "\": "
                           + idUsuario
                           + " , \"idSucursal\": "
-                          + nuevaOrdenDeCompra.getIdSucursal()
+                          + sucursal.getIdSucursal()
                           + " , \"tipoDeEnvio\": "
                           + nuevaOrdenDeCompra.getTipoDeEnvio()
                           + " , \"movimiento\": "
@@ -169,7 +168,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           + "\": "
                           + idUsuario
                           + " , \"idSucursal\": "
-                          + nuevaOrdenDeCompra.getIdSucursal()
+                          + sucursal.getIdSucursal()
                           + " , \"movimiento\": "
                           + Movimiento.DEPOSITO
                           + "}";
