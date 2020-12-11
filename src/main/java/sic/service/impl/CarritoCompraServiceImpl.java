@@ -56,7 +56,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente) {
+  public CarritoCompraDTO getCarritoCompra(long idUsuario) {
     CarritoCompraDTO carritoCompraDTO = new CarritoCompraDTO();
     BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
     carritoCompraDTO.setCantRenglones(carritoCompraRepository.getCantRenglones(idUsuario));
