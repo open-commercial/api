@@ -119,7 +119,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
         case PEDIDO -> {
           Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
           pedido =
-                  this.crearPedidoConPagoPorPreference(
+                  this.crearPedidoPorPreference(
                           sucursal, usuario, clienteDeUsuario, items, nuevaOrdenDeCompra.getTipoDeEnvio());
           if (nuevaOrdenDeCompra.getTipoDeEnvio() == null) {
             throw new BusinessServiceException(
@@ -263,25 +263,22 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             if (reciboMP.isPresent()) {
               logger.warn(
                   messageSource.getMessage(
-                      "mensaje_recibo_de_pago_no_existente",
+                          "mensaje_recibo_de_pago_ya_existente",
                       new Object[] {payment.getId()},
                       Locale.getDefault()));
             } else {
               switch (movimiento) {
-                case PEDIDO:
+                case PEDIDO -> {
                   idPedido = Long.parseLong(String.valueOf(convertedObject.get("idPedido")));
                   pedidoService.cambiarFechaDeVencimiento(idPedido);
                   this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
-                  break;
-                case DEPOSITO:
-                  this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
-                  break;
-                default:
-                  throw new BusinessServiceException(
-                      messageSource.getMessage(
-                          "mensaje_preference_tipo_de_movimiento_no_soportado",
-                          null,
-                          Locale.getDefault()));
+                }
+                case DEPOSITO -> this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
+                default -> throw new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_preference_tipo_de_movimiento_no_soportado",
+                                null,
+                                Locale.getDefault()));
               }
             }
             break;
@@ -392,7 +389,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
     notaService.autorizarNota(notaGuardada);
   }
 
-  private Pedido crearPedidoConPagoPorPreference(
+  private Pedido crearPedidoPorPreference(
       Sucursal sucursal,
       Usuario usuario,
       Cliente cliente,

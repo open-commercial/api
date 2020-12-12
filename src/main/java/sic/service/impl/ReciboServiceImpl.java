@@ -201,6 +201,14 @@ public class ReciboServiceImpl implements IReciboService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_recibo_cliente_proveedor_simultaneos", null, Locale.getDefault()));
     }
+    if (recibo.getIdPagoMercadoPago() != null
+        && this.getReciboPorIdMercadoPago(recibo.getIdPagoMercadoPago()).isPresent()) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_recibo_de_pago_ya_existente",
+              new Object[] {recibo.getIdPagoMercadoPago()},
+              Locale.getDefault()));
+    }
   }
 
   @Override
