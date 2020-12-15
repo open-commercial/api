@@ -17,6 +17,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.validator.constraints.Length;
 import sic.controller.Views;
 
 @Entity
@@ -142,6 +143,7 @@ public class Producto implements Serializable {
   @NotNull(message = "{mensaje_producto_vacio_proveedor}")
   private Proveedor proveedor;
 
+  @Length(max = 250, message = "{mensaje_producto_longitud_nota}")
   private String nota;
 
   @NotNull(message = "{mensaje_producto_fecha_alta_vacia}")
