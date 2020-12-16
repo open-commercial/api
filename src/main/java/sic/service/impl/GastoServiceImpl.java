@@ -67,7 +67,7 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   public void validarReglasDeNegocio(Gasto gasto) {
     this.cajaService.validarMovimiento(gasto.getFecha(), gasto.getSucursal().getIdSucursal());
-    if (gastoRepository.existsByNroGasto(gasto.getNroGasto())) {
+    if (gastoRepository.existsByNroGastoAndSucursal(gasto.getNroGasto(), gasto.getSucursal())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_gasto_duplicada", null, Locale.getDefault()));
     }
@@ -137,7 +137,7 @@ public class GastoServiceImpl implements IGastoService {
   @Transactional
   public Gasto guardar(Gasto gasto) {
     customValidator.validar(gasto);
-    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getSucursal().getIdSucursal()) + 1);
+    gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getSucursal().getIdSucursal()));
     this.validarReglasDeNegocio(gasto);
     gasto = gastoRepository.save(gasto);
     logger.warn("El Gasto {} se guardó correctamente.", gasto);
@@ -169,8 +169,7 @@ public class GastoServiceImpl implements IGastoService {
   @Override
   public long getUltimoNumeroDeGasto(long idSucursal) {
     Gasto gasto =
-        gastoRepository.findTopBySucursalAndEliminadoOrderByNroGastoDesc(
-            sucursalService.getSucursalPorId(idSucursal), false);
+        gastoRepository.findTopBySucursalOrderByNroGastoDesc(sucursalService.getSucursalPorId(idSucursal));
     if (gasto == null) {
       return 1; // No existe ningun Gasto anterior
     } else {

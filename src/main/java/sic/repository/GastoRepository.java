@@ -20,9 +20,9 @@ public interface GastoRepository extends PagingAndSortingRepository<Gasto, Long>
                                                    @Param("idFormaDePago") long idFormaDePago,
                                                    @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
-    Gasto findTopBySucursalAndEliminadoOrderByNroGastoDesc(Sucursal sucursal, boolean eliminado);
+    Gasto findTopBySucursalOrderByNroGastoDesc(Sucursal sucursal);
 
-    boolean existsByNroGasto(Long nroGasto);
+    boolean existsByNroGastoAndSucursal(Long nroGasto, Sucursal sucursal);
 
     @Query("SELECT SUM(g.monto) FROM Gasto g " +
             "WHERE g.sucursal.idSucursal = :idSucursal " +
