@@ -189,7 +189,7 @@ public class ClienteServiceImpl implements IClienteService {
         "mensaje_cliente_vacio_credencial", null, Locale.getDefault()));
     }
     // Duplicados
-    if (clienteRepository.existsByNroCliente(cliente.getNroCliente())) {
+    if (operacion == TipoDeOperacion.ALTA && clienteRepository.existsByNroCliente(cliente.getNroCliente())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_cliente_duplicado_nro", null, Locale.getDefault()));
     }
