@@ -103,16 +103,12 @@ public class PedidoServiceImpl implements IPedidoService {
           messageSource.getMessage("mensaja_estado_no_valido", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ALTA
-        && pedidoRepository.findByNroPedidoAndSucursalAndEliminado(
-                pedido.getNroPedido(), pedido.getSucursal(), false)
-            != null) {
+        && pedidoRepository.existsByNroPedidoAndSucursal(pedido.getNroPedido(), pedido.getSucursal())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_duplicado", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
-        && pedidoRepository.findByNroPedidoAndSucursalAndEliminado(
-                pedido.getNroPedido(), pedido.getSucursal(), false)
-            == null) {
+        && !pedidoRepository.existsByNroPedidoAndSucursal(pedido.getNroPedido(), pedido.getSucursal())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_no_existente", null, Locale.getDefault()));
     }
@@ -167,8 +163,7 @@ public class PedidoServiceImpl implements IPedidoService {
     boolean esRepetido = true;
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
-      Pedido p = pedidoRepository.findByNroPedidoAndSucursalAndEliminado(randomLong, sucursal, false);
-      if (p == null) esRepetido = false;
+      esRepetido = pedidoRepository.existsByNroPedidoAndSucursal(randomLong, sucursal);
     }
     return randomLong;
   }

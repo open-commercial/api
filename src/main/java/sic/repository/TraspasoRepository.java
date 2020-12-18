@@ -7,7 +7,7 @@ import sic.modelo.Traspaso;
 public interface TraspasoRepository
     extends PagingAndSortingRepository<Traspaso, Long>, QuerydslPredicateExecutor<Traspaso> {
 
-    Traspaso findByNroTraspaso(String nroTraspaso);
+    boolean existsByNroTraspaso(String nroTraspaso);
 
     Traspaso findByNroPedido(Long nroPedido);
 }
