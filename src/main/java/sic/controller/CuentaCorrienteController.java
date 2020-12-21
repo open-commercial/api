@@ -137,4 +137,35 @@ public class CuentaCorrienteController {
           "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
+
+  @PostMapping("/cuentas-corriente/lista-clientes/reporte/criteria")
+  public ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClientePorCriteria(
+          @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
+          @RequestParam(required = false) String formato,
+          @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    HttpHeaders headers = new HttpHeaders();
+    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+    switch (formato) {
+      case "xlsx" -> {
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set("Content-Disposition", "attachment; filename=ListaClientes.xlsx");
+        byte[] reporteXls =
+                cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                        criteria, (int) claims.get("idUsuario"), formato);
+        headers.setContentLength(reporteXls.length);
+        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+      }
+      case "pdf" -> {
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.add("Content-Disposition", "attachment; filename=ListaClientes.pdf");
+        byte[] reportePDF =
+                cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                        criteria, (int) claims.get("idUsuario"), formato);
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+      }
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
+    }
+  }
 }

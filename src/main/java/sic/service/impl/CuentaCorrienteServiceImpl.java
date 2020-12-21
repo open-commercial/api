@@ -12,10 +12,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.SimpleExporterInput;
@@ -130,9 +127,37 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
-    BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    return cuentaCorrienteClienteRepository.findAll(
+        this.getBuilder(criteria, idUsuarioLoggedIn),
+        this.getPageable(
+            criteria.getPagina(),
+            criteria.getOrdenarPor(),
+            criteria.getSentido(),
+            "cliente.nombreFiscal",
+            TAMANIO_PAGINA_DEFAULT));
+  }
+
+  @Override
+  public List<CuentaCorrienteCliente> buscarCuentasCorrienteClienteParaReporte(
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+    criteria.setPagina(0);
+    return cuentaCorrienteClienteRepository
+        .findAll(
+            this.getBuilder(criteria, idUsuarioLoggedIn),
+            this.getPageable(
+                criteria.getPagina(),
+                criteria.getOrdenarPor(),
+                criteria.getSentido(),
+                "cliente.nombreFiscal",
+                Integer.MAX_VALUE))
+        .getContent();
+  }
+
+  @Override
+  public BooleanBuilder getBuilder(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
     QCuentaCorrienteCliente qCuentaCorrienteCliente =
-        QCuentaCorrienteCliente.cuentaCorrienteCliente;
+            QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getNombreFiscal() != null) {
       String[] terminos = criteria.getNombreFiscal().split(" ");
@@ -154,65 +179,57 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.getNroDeCliente() != null)
       builder.or(
-          qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
-              criteria.getNroDeCliente()));
+              qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
+                      criteria.getNroDeCliente()));
     if (criteria.getIdViajante() != null)
       builder.and(qCuentaCorrienteCliente.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdLocalidad() != null)
       builder.and(
-          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
-              criteria.getIdLocalidad()));
+              qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
+                      criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
       builder.and(
-          qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
-              criteria.getIdProvincia()));
+              qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
+                      criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
-        && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
-        && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+            && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
+            && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
-          case VIAJANTE:
-            rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLogueado));
-            break;
-          case COMPRADOR:
+          case VIAJANTE -> rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLogueado));
+          case COMPRADOR -> {
             Cliente clienteRelacionado =
-                clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
+                    clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
             }
-            break;
-          default:
-            rsPredicate.or(qCuentaCorrienteCliente.cliente.isNull());
-            break;
+          }
+          default -> rsPredicate.or(qCuentaCorrienteCliente.cliente.isNull());
         }
       }
       builder.and(rsPredicate);
     }
     builder.and(qCuentaCorrienteCliente.eliminada.eq(false));
-    return cuentaCorrienteClienteRepository.findAll(
-        builder,
-        this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "cliente.nombreFiscal"));
+    return builder;
   }
 
-  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido, String ordenDefault) {
+  @Override
+  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, String ordenDefault, int tamanioPagina) {
     if (pagina == null) pagina = 0;
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+          pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      return switch (sentido) {
+        case "ASC" -> PageRequest.of(
+                pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(
+                pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(
+                pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
+      };
     }
   }
 
@@ -249,7 +266,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     return cuentaCorrienteProveedorRepository.findAll(
         builder,
         this.getPageable(
-            criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "proveedor.razonSocial"));
+            criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "proveedor.razonSocial", TAMANIO_PAGINA_DEFAULT));
   }
 
   @Override
@@ -579,5 +596,49 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     return renglonCuentaCorrienteRepository
         .findTop2ByAndCuentaCorrienteAndEliminadoOrderByIdRenglonCuentaCorrienteDesc(
             cuentaCorriente, false);
+  }
+
+  @Override
+  public byte[] getReporteListaDeCuentasCorrienteClientePorCriteria(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn, String formato) {
+    List<CuentaCorrienteCliente> cuentaCorrienteClientes = this.buscarCuentasCorrienteClienteParaReporte(criteria, idUsuarioLoggedIn);
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/ListaClientes.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
+    Map<String, Object> params = new HashMap<>();
+    Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
+      try {
+        params.put(
+                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+      } catch (IOException ex) {
+        throw new ServiceException(messageSource.getMessage(
+                "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+      }
+    }
+    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(cuentaCorrienteClientes);
+    switch (formato) {
+      case "xlsx":
+        try {
+          return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
+        } catch (JRException ex) {
+          throw new ServiceException(messageSource.getMessage(
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
+        }
+      case "pdf":
+        try {
+          return JasperExportManager.exportReportToPdf(
+                  JasperFillManager.fillReport(jasperDesign, params, ds));
+        } catch (JRException ex) {
+          throw new ServiceException(messageSource.getMessage(
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
+        }
+      default:
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_formato_no_valido", null, Locale.getDefault()));
+    }
   }
 }
