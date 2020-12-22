@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.CarritoCompraRepository;
@@ -33,7 +30,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IPedidoService pedidoService;
-  private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
@@ -44,19 +40,17 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
           IProductoService productoService,
           ISucursalService sucursalService,
           IClienteService clienteService,
-          IPedidoService pedidoService,
-          MessageSource messageSource) {
+          IPedidoService pedidoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.productoService = productoService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.pedidoService = pedidoService;
-    this.messageSource = messageSource;
   }
 
   @Override
-  public CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente) {
+  public CarritoCompraDTO getCarritoCompra(long idUsuario) {
     CarritoCompraDTO carritoCompraDTO = new CarritoCompraDTO();
     BigDecimal cantArticulos = carritoCompraRepository.getCantArticulos(idUsuario);
     carritoCompraDTO.setCantRenglones(carritoCompraRepository.getCantRenglones(idUsuario));

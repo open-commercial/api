@@ -90,13 +90,13 @@ class CarritoCompraServiceImplTest {
             PageRequest.of(
                 0, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"))))
         .thenReturn(itemsCarritoCompras);
-    CarritoCompraDTO carritoCompra = carritoCompraServiceImpl.getCarritoCompra(1L, 1L);
+    CarritoCompraDTO carritoCompra = carritoCompraServiceImpl.getCarritoCompra(1L);
     assertNotNull(carritoCompra);
     assertEquals(
-        new BigDecimal("3"), carritoCompraServiceImpl.getCarritoCompra(1L, 1L).getCantArticulos());
-    assertEquals(3, carritoCompraServiceImpl.getCarritoCompra(1L, 1L).getCantRenglones());
+        new BigDecimal("3"), carritoCompraServiceImpl.getCarritoCompra(1L).getCantArticulos());
+    assertEquals(3, carritoCompraServiceImpl.getCarritoCompra(1L).getCantRenglones());
     assertEquals(
-        new BigDecimal("1450.00"), carritoCompraServiceImpl.getCarritoCompra(1L, 1L).getTotal());
+        new BigDecimal("1450.00"), carritoCompraServiceImpl.getCarritoCompra(1L).getTotal());
   }
 
   @Test

@@ -5,30 +5,35 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.repository.ReciboRepository;
 import sic.service.IConfiguracionSucursalService;
 import sic.service.IFormaDePagoService;
 import sic.service.ISucursalService;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {ReciboServiceImpl.class})
+@ContextConfiguration(classes = {ReciboServiceImpl.class, MessageSource.class})
 class ReciboServiceImplTest {
 
   @MockBean IConfiguracionSucursalService configuracionSucursalServiceInterface;
   @MockBean IFormaDePagoService formaDePagoService;
   @MockBean ISucursalService sucursalService;
   @MockBean ReciboRepository reciboRepository;
+  @MockBean MessageSource messageSource;
 
   @Autowired ReciboServiceImpl reciboServiceImpl;
 
@@ -177,4 +182,37 @@ class ReciboServiceImplTest {
     assertTrue(recibo.getConcepto().startsWith("Pago en MercadoPago"));
     assertEquals(new BigDecimal("100.0"), recibo.getMonto());
   }
+
+  @Test
+  void shouldValidarReglasDeNegocioWhenProveedorOrClienteVacio() {
+    Recibo recibo = new Recibo();
+    assertThrows(BusinessServiceException.class, () -> reciboServiceImpl.validarReglasDeNegocio(recibo));
+    verify(messageSource).getMessage(eq("mensaje_recibo_cliente_proveedor_vacio"), any(), any());
+  }
+
+  @Test
+  void shouldValidarReglasDeNegocioWhenClienteAndProveedorDistintoDeNull() {
+    Recibo recibo = new Recibo();
+    Cliente cliente = new Cliente();
+    Proveedor proveedor = new Proveedor();
+    recibo.setProveedor(proveedor);
+    recibo.setCliente(cliente);
+    assertThrows(BusinessServiceException.class, () -> reciboServiceImpl.validarReglasDeNegocio(recibo));
+    verify(messageSource).getMessage(eq("mensaje_recibo_cliente_proveedor_simultaneos"), any(), any());
+  }
+
+  @Test
+  void shouldValidarReglasDeNegocioWhenExisteUnPagoPorPaymentId() {
+    Recibo recibo = new Recibo();
+    Cliente cliente = new Cliente();
+    Proveedor proveedor = new Proveedor();
+    recibo.setProveedor(proveedor);
+    recibo.setCliente(cliente);
+    recibo.setCliente(null);
+    recibo.setIdPagoMercadoPago("1");
+    when(reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado("1", false)).thenReturn(Optional.of(recibo));
+    assertThrows(BusinessServiceException.class, () -> reciboServiceImpl.validarReglasDeNegocio(recibo));
+    verify(messageSource).getMessage(eq("mensaje_recibo_de_pago_ya_existente"), any(), any());
+  }
+
 }

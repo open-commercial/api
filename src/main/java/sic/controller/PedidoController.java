@@ -3,8 +3,6 @@ package sic.controller;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -15,7 +13,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
@@ -34,7 +31,6 @@ public class PedidoController {
     private final IClienteService clienteService;
     private final IReciboService reciboService;
     private final IAuthService authService;
-    private final MessageSource messageSource;
     private static final String ID_USUARIO = "idUsuario";
 
   @Autowired
@@ -44,14 +40,12 @@ public class PedidoController {
       ISucursalService sucursalService,
       IClienteService clienteService,
       IReciboService reciboService,
-      MessageSource messageSource,
       IAuthService authService) {
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.reciboService = reciboService;
-    this.messageSource = messageSource;
     this.authService = authService;
   }
 

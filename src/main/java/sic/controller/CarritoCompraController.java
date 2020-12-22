@@ -29,12 +29,12 @@ public class CarritoCompraController {
     this.authService = authService;
   }
 
-  @GetMapping("/carrito-compra/clientes/{idCliente}")
+  @GetMapping("/carrito-compra")
   public CarritoCompraDTO getCarritoCompraDelUsuario(
-      @PathVariable long idCliente, @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return carritoCompraService.getCarritoCompra(idUsuarioLoggedIn, idCliente);
+    return carritoCompraService.getCarritoCompra(idUsuarioLoggedIn);
   }
 
   @GetMapping("/carrito-compra/items")

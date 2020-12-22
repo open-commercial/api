@@ -9,7 +9,7 @@ import java.util.List;
 public interface TraspasoRepository
     extends PagingAndSortingRepository<Traspaso, Long>, QuerydslPredicateExecutor<Traspaso> {
 
-    Traspaso findByNroTraspaso(String nroTraspaso);
+    boolean existsByNroTraspaso(String nroTraspaso);
 
     List<Traspaso> findByNroPedido(Long nroPedido);
 }

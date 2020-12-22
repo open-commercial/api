@@ -1,30 +1,43 @@
 package sic.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.Cliente;
 import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.repository.ClienteRepository;
+import sic.service.ICuentaCorrienteService;
+import sic.service.IUbicacionService;
+import sic.service.IUsuarioService;
+import sic.util.CustomValidator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(
+        classes = {ClienteServiceImpl.class, CustomValidator.class, MessageSource.class})
 class ClienteServiceImplTest {
 
-  @Mock MessageSource messageSource;
-  @Mock ClienteRepository clienteRepository;
-  @InjectMocks ClienteServiceImpl clienteServiceImpl;
+  @MockBean MessageSource messageSource;
+  @MockBean ClienteRepository clienteRepository;
+  @MockBean ICuentaCorrienteService cuentaCorrienteService;
+  @MockBean IUsuarioService usuarioService;
+  @MockBean IUbicacionService ubicacionService;
+  @Autowired ClienteServiceImpl clienteService;
 
   String mensaje_cliente_duplicado_idFiscal = "Ya existe el ID fiscal ingresado.";
 
@@ -37,10 +50,10 @@ class ClienteServiceImplTest {
   @Test
   void shouldSetClientePredeterminado() {
     Cliente resultadoEsperado = new Cliente();
-    clienteServiceImpl.setClientePredeterminado(resultadoEsperado);
+    clienteService.setClientePredeterminado(resultadoEsperado);
     when(clienteRepository.findByAndPredeterminadoAndEliminado(true, false))
         .thenReturn(resultadoEsperado);
-    Cliente resultadoObtenido = clienteServiceImpl.getClientePredeterminado();
+    Cliente resultadoObtenido = clienteService.getClientePredeterminado();
     assertEquals(resultadoEsperado, resultadoObtenido);
   }
 
@@ -54,15 +67,12 @@ class ClienteServiceImplTest {
     Cliente clienteDuplicado = new Cliente();
     clienteDuplicado.setIdFiscal(1234L);
     clienteDuplicado.setCredencial(new Usuario());
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> {
-              when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
-                  .thenReturn(listaClienteNuevo);
-              clienteServiceImpl.validarReglasDeNegocio(TipoDeOperacion.ALTA, clienteDuplicado);
-            });
-    assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));
+    when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
+        .thenReturn(listaClienteNuevo);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> clienteService.validarReglasDeNegocio(TipoDeOperacion.ALTA, clienteDuplicado));
+    verify(messageSource).getMessage(eq("mensaje_cliente_duplicado_idFiscal"), any(), any());
   }
 
   @Test
@@ -77,14 +87,26 @@ class ClienteServiceImplTest {
     clienteDuplicado.setIdCliente(2L);
     clienteDuplicado.setNombreFiscal("Merceria los dos botones");
     clienteDuplicado.setIdFiscal(23111111119L);
-    BusinessServiceException thrown =
-        assertThrows(
-            BusinessServiceException.class,
-            () -> {
-              when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
-                  .thenReturn(listaClienteNuevo);
-              clienteServiceImpl.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, clienteDuplicado);
-            });
-    assertTrue(thrown.getMessage().contains(mensaje_cliente_duplicado_idFiscal));
+    when(clienteRepository.findByIdFiscalAndEliminado(clienteNuevo.getIdFiscal(), false))
+            .thenReturn(listaClienteNuevo);
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            clienteService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, clienteDuplicado));
+    verify(messageSource).getMessage(eq("mensaje_cliente_duplicado_idFiscal"), any(), any());
   }
+
+  @Test
+  void shouldThrowExceptionWhenNroClienteDuplicado() {
+    Cliente cliente = new Cliente();
+    cliente.setNroCliente("123567");
+    Usuario usuario = new Usuario();
+    cliente.setCredencial(usuario);
+    when(clienteRepository.existsByNroCliente("123567")).thenReturn(true);
+    assertThrows(
+        BusinessServiceException.class,
+        () -> clienteService.validarReglasDeNegocio(TipoDeOperacion.ALTA, cliente));
+    verify(messageSource).getMessage(eq("mensaje_cliente_duplicado_nro"), any(), any());
+  }
+
 }

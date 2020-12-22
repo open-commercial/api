@@ -13,7 +13,7 @@ import sic.modelo.dto.ProductoFaltanteDTO;
 
 public interface ICarritoCompraService {
 
-  CarritoCompraDTO getCarritoCompra(long idUsuario, long idCliente);
+  CarritoCompraDTO getCarritoCompra(long idUsuario);
 
   Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, int pagina, Integer tamanio);
 

@@ -199,13 +199,13 @@ class PedidoServiceImplTest {
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
     verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
     pedido.setEstado(EstadoPedido.ABIERTO);
-    when(pedidoRepository.findByNroPedidoAndSucursalAndEliminado(123L, sucursal, false))
-        .thenReturn(pedido);
+    when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
+        .thenReturn(true);
     assertThrows(
         BusinessServiceException.class,
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
-    when(pedidoRepository.findByNroPedidoAndSucursalAndEliminado(123L, sucursal, false))
-        .thenReturn(null);
+    when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
+        .thenReturn(false);
     assertThrows(
         BusinessServiceException.class,
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido));
