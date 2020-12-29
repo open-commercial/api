@@ -170,6 +170,7 @@ public class SucursalServiceImpl implements ISucursalService {
       photoVideoUploader.borrarImagen(
           Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
     }
+    sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
     sucursalRepository.save(sucursalParaActualizar);
   }
