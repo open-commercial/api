@@ -63,6 +63,7 @@ public class Sucursal implements Serializable {
   @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
   @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
+  @NotNull(message = "{mensaje_sucursal_sin_ubicacion}")
   private Ubicacion ubicacion;
 
   @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)

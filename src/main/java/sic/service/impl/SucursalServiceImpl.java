@@ -130,10 +130,6 @@ public class SucursalServiceImpl implements ISucursalService {
           messageSource.getMessage(
               "mensaje_sucursal_sin_configuracion", null, Locale.getDefault()));
     }
-    if (sucursal.getUbicacion() == null) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_sucursal_sin_ubicacion", null, Locale.getDefault()));
-    }
   }
 
   private void crearConfiguracionSucursal(Sucursal sucursal) {
