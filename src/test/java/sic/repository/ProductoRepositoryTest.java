@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {ProductoRepositoryImpl.class, App.class})
+@ContextConfiguration(classes = {ProductoRepositoryImpl.class, LocalidadRepository.class, App.class})
 class ProductoRepositoryTest {
 
   @MockBean JwtInterceptor jwtInterceptor;
@@ -34,6 +34,8 @@ class ProductoRepositoryTest {
   @Autowired TestEntityManager testEntityManager;
 
   @Autowired ProductoRepositoryImpl productoRepositoryImpl;
+
+  @Autowired LocalidadRepository localidadRepository;
 
   @Test
   void shouldThrowOptimisticLockExceptionWhenIntentaActualizarProductoDetached() {
@@ -55,6 +57,9 @@ class ProductoRepositoryTest {
           sucursal.setNombre("sucursal test");
           sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
           sucursal.setEmail("asd@asd.com");
+          Ubicacion ubicacionSucursal = new Ubicacion();
+          ubicacionSucursal.setLocalidad(localidadRepository.findById(1L));
+          sucursal.setUbicacion(ubicacionSucursal);
           sucursal = testEntityManager.persist(sucursal);
           Producto producto = new Producto();
           producto.setDescripcion("Producto para test");
@@ -108,6 +113,9 @@ class ProductoRepositoryTest {
     sucursal.setNombre("sucursal test");
     sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
     sucursal.setEmail("asd@asd.com");
+    Ubicacion ubicacionSucursal = new Ubicacion();
+    ubicacionSucursal.setLocalidad(localidadRepository.findById(1L));
+    sucursal.setUbicacion(ubicacionSucursal);
     sucursal = testEntityManager.persist(sucursal);
     Producto producto = new Producto();
     producto.setDescripcion("Producto para test");

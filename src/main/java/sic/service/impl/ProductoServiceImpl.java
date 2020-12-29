@@ -548,7 +548,7 @@ public class ProductoServiceImpl implements IProductoService {
     idsYCantidades.forEach(
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
-          if (producto.isPresent() && !producto.get().getCantidadProducto().isIlimitado()) {
+          if (producto.isPresent() && !producto.get().isEliminado() && !producto.get().getCantidadProducto().isIlimitado()) {
             switch (operacion) {
               case ALTA -> {
                 switch (movimiento) {
@@ -622,16 +622,18 @@ public class ProductoServiceImpl implements IProductoService {
               .getRenglones()
               .forEach(
                       renglonTraspaso -> {
-                        Producto producto =
-                                this.getProductoNoEliminadoPorId(renglonTraspaso.getIdProducto());
-                        this.quitarStock(
-                                producto,
-                                traspaso.getSucursalDestino().getIdSucursal(),
-                                renglonTraspaso.getCantidadProducto());
-                        this.agregarStock(
-                                producto,
-                                traspaso.getSucursalOrigen().getIdSucursal(),
-                                renglonTraspaso.getCantidadProducto());
+                        Optional<Producto> producto =
+                                productoRepository.findById(renglonTraspaso.getIdProducto());
+                        if (producto.isPresent()) {
+                          this.quitarStock(
+                                  producto.get(),
+                                  traspaso.getSucursalDestino().getIdSucursal(),
+                                  renglonTraspaso.getCantidadProducto());
+                          this.agregarStock(
+                                  producto.get(),
+                                  traspaso.getSucursalOrigen().getIdSucursal(),
+                                  renglonTraspaso.getCantidadProducto());
+                        }
                       });
       default -> throw new BusinessServiceException(
               messageSource.getMessage(

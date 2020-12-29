@@ -212,16 +212,4 @@ class SucursalServiceImplTest {
                     any(),
                     eq(Locale.getDefault()));
   }
-
-  @Test
-  void shouldValidarReglasDeNegocioWhenUbicacionVacia() {
-    Sucursal sucursal = new Sucursal();
-    sucursal.setNombre("Sucursal para guardar");
-    sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
-    sucursal.setEmail("sucursal@delaempresa.com");
-    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
-    sucursal.setConfiguracionSucursal(configuracionSucursal);
-    assertThrows(BusinessServiceException.class, () -> sucursalService.validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursal));
-    verify(messageSource).getMessage(eq("mensaje_sucursal_sin_ubicacion"), any(), any());
-  }
 }
