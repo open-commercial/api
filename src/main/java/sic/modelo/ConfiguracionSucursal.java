@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotNull;
 
@@ -65,6 +64,8 @@ public class ConfiguracionSucursal implements Serializable {
 
   private boolean predeterminada;
 
+  private boolean comparteStock;
+
   @NotNull(message = "{mensaje_cds_sin_vencimiento_largo}")
   @DecimalMin(value = "1", message = "{mensaje_cds_valor_no_valido}")
   private long vencimientoLargo;
@@ -76,20 +77,6 @@ public class ConfiguracionSucursal implements Serializable {
   private LocalDateTime fechaGeneracionTokenWSAA;
 
   private LocalDateTime fechaVencimientoTokenWSAA;
-
-  @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
-  private Sucursal sucursal;
-
-  @JsonGetter("idSucursal")
-  public Long getIdSucursal() {
-    return sucursal.getIdSucursal();
-  }
-
-  @JsonGetter("nombreSucursal")
-  public String getNombreSucursal() {
-    return sucursal.getNombre();
-  }
 
   @JsonGetter("existeCertificado")
   public boolean isExisteCertificado() {

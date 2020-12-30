@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.ProductoFaltanteDTO;
-import sic.modelo.dto.NuevoProductoDTO;
-import sic.modelo.dto.ProductosParaActualizarDTO;
-import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.modelo.dto.*;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 
 public interface IProductoService {
 
@@ -37,7 +36,7 @@ public interface IProductoService {
 
   void validarCalculos(Producto producto);
 
-  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria);
+  Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, Long idSucursal);
 
   void marcarFavoritos(Page<Producto> productos, long idUsuario);
 
@@ -49,6 +48,9 @@ public interface IProductoService {
 
   List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
+
+  List<ProductoFaltanteDTO> getProductosSinStockDisponibleParaTraspaso(
+          ProductosParaVerificarStockDTO productosParaVerificarStockDTO);
 
   BigDecimal calcularGananciaPorcentaje(
       BigDecimal precioDeListaNuevo,
@@ -89,6 +91,10 @@ public interface IProductoService {
 
   Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina);
 
+  Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada);
+
+  Producto calcularCantidadReservada(Producto producto, Long idSucursal);
+
   Producto guardarProductoFavorito(long idUsuario, long idProducto);
 
   Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina);
@@ -102,4 +108,12 @@ public interface IProductoService {
   void quitarProductosDeFavoritos(long idUsuario);
 
   Long getCantidadDeProductosFavoritos(long idUsuario);
+
+  void validarLongitudDeArrays(int longitudIds, int longitudCantidades);
+
+  ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal);
+
+  PrecioProductoEmbeddable construirPrecioProductoEmbeddable(ProductoDTO productoDTO);
+
+  CantidadProductoEmbeddable construirCantidadProductoEmbeddable(ProductoDTO productoDTO);
 }

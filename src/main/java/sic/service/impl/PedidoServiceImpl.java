@@ -2,7 +2,6 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -12,9 +11,7 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -50,7 +47,6 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IClienteService clienteService;
   private final IProductoService productoService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private final IConfiguracionSucursalService configuracionSucursal;
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
@@ -68,7 +64,6 @@ public class PedidoServiceImpl implements IPedidoService {
     IClienteService clienteService,
     IProductoService productoService,
     ICorreoElectronicoService correoElectronicoService,
-    IConfiguracionSucursalService configuracionSucursal,
     IReciboService reciboService,
     ICuentaCorrienteService cuentaCorrienteService,
     ModelMapper modelMapper,
@@ -80,7 +75,6 @@ public class PedidoServiceImpl implements IPedidoService {
     this.clienteService = clienteService;
     this.productoService = productoService;
     this.correoElectronicoService = correoElectronicoService;
-    this.configuracionSucursal = configuracionSucursal;
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
@@ -130,6 +124,7 @@ public class PedidoServiceImpl implements IPedidoService {
             .cantidad(cantidad)
             .idProducto(idProducto)
             .idPedido(pedido.getIdPedido())
+            .idSucursal(pedido.getIdSucursal())
             .build();
     if ((operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)
             && !productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty()) {
@@ -231,7 +226,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public void cambiarFechaDeVencimiento(long idPedido) {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
-    pedido.setFechaVencimiento(pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+    pedido.setFechaVencimiento(pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoLargo()));
     pedidoRepository.save(pedido);
   }
 
@@ -255,9 +250,7 @@ public class PedidoServiceImpl implements IPedidoService {
         "mensaje_ubicacion_envio_vacia", null, Locale.getDefault()));
     }
     if (pedido.getTipoDeEnvio() == TipoDeEnvio.RETIRO_EN_SUCURSAL
-        && !configuracionSucursal
-            .getConfiguracionSucursal(pedido.getSucursal())
-            .isPuntoDeRetiro()) {
+        && !pedido.getSucursal().getConfiguracionSucursal().isPuntoDeRetiro()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_pedido_sucursal_entrega_no_valida", null, Locale.getDefault()));
@@ -429,7 +422,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private void validarPedidoContraPagos(Pedido pedido, List<Recibo> recibos) {
     if (pedido.getCliente().isPuedeComprarAPlazo()) {
       pedido.setFechaVencimiento(
-              pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+              pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoLargo()));
       if (recibos != null && !recibos.isEmpty()) {
         recibos.forEach(reciboService::guardar);
       }
@@ -444,13 +437,13 @@ public class PedidoServiceImpl implements IPedidoService {
                           "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
         } else {
           pedido.setFechaVencimiento(
-                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoLargo()));
+                  pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoLargo()));
         }
         recibos.forEach(reciboService::guardar);
       } else {
         if (saldoCC.setScale(2, RoundingMode.DOWN).compareTo(BigDecimal.ZERO) >= 0) {
           pedido.setFechaVencimiento(
-                  pedido.getFecha().plusMinutes(configuracionSucursal.getConfiguracionSucursal(pedido.getSucursal()).getVencimientoCorto()));
+                  pedido.getFecha().plusMinutes(pedido.getSucursal().getConfiguracionSucursal().getVencimientoCorto()));
         } else {
           throw new BusinessServiceException(
                   messageSource.getMessage(
@@ -536,8 +529,6 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public byte[] getReportePedido(long idPedido) {
-    ClassLoader classLoader = PedidoServiceImpl.class.getClassLoader();
-    InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jasper");
     Map<String, Object> params = new HashMap<>();
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     params.put("pedido", pedido);
@@ -560,9 +551,16 @@ public class PedidoServiceImpl implements IPedidoService {
     List<RenglonPedido> renglones =
         this.getRenglonesDelPedidoOrdenadorPorIdRenglon(pedido.getIdPedido());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Pedido.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+          JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -583,33 +581,33 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setCodigoItem(producto.getCodigo());
     nuevoRenglon.setDescripcionItem(producto.getDescripcion());
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
-    nuevoRenglon.setPrecioUnitario(producto.getPrecioLista());
-    if (producto.isOferta()
-        && nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0
-        && producto.getPorcentajeBonificacionOferta() != null) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionOferta());
+    nuevoRenglon.setPrecioUnitario(producto.getPrecioProducto().getPrecioLista());
+    if (producto.getPrecioProducto().isOferta()
+        && nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getBulto()) >= 0
+        && producto.getPrecioProducto().getPorcentajeBonificacionOferta() != null) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionOferta()));
-    } else if (nuevoRenglon.getCantidad().compareTo(producto.getBulto()) >= 0) {
-      nuevoRenglon.setBonificacionPorcentaje(producto.getPorcentajeBonificacionPrecio());
+              nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionOferta()));
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getBulto()) >= 0) {
+      nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionPrecio());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
-              nuevoRenglon.getPrecioUnitario(), producto.getPorcentajeBonificacionPrecio()));
+              nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionPrecio()));
     } else {
       nuevoRenglon.setBonificacionPorcentaje(BigDecimal.ZERO);
       nuevoRenglon.setBonificacionNeta(BigDecimal.ZERO);
     }
     nuevoRenglon.setImporteAnterior(
         CalculosComprobante.calcularImporte(
-            nuevoRenglon.getCantidad(), producto.getPrecioLista(), BigDecimal.ZERO));
+            nuevoRenglon.getCantidad(), producto.getPrecioProducto().getPrecioLista(), BigDecimal.ZERO));
     nuevoRenglon.setImporte(
         CalculosComprobante.calcularImporte(
             nuevoRenglon.getCantidad(),
-            producto.getPrecioLista(),
+            producto.getPrecioProducto().getPrecioLista(),
             nuevoRenglon.getBonificacionNeta()));
     nuevoRenglon.setUrlImagenItem(producto.getUrlImagen());
-    nuevoRenglon.setOferta(producto.isOferta());
+    nuevoRenglon.setOferta(producto.getPrecioProducto().isOferta());
     return nuevoRenglon;
   }
 
@@ -683,5 +681,11 @@ public class PedidoServiceImpl implements IPedidoService {
       cantidades[i] = nuevosRenglones.get(i).getCantidad();
     }
     return cantidades;
+  }
+
+  @Override
+  public BigDecimal getCantidadReservadaDeProducto(Long idProducto, Long idSucursal) {
+    BigDecimal cantidadReservada = renglonPedidoRepository.getCantidadReservadaDeProducto(idProducto, idSucursal);
+    return cantidadReservada != null ? cantidadReservada : BigDecimal.ZERO;
   }
 }

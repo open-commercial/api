@@ -1,17 +1,13 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.*;
+
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Set;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +15,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
 import sic.controller.Views;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 
 @Entity
 @Table(name = "producto")
@@ -44,83 +42,18 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   private String descripcion;
 
-  @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-  @JoinColumn(name = "idProducto")
-  @JsonProperty(access = JsonProperty.Access.READ_WRITE)
-  @JsonView(Views.Viajante.class)
-  @NotEmpty(message = "{mensaje_producto_cantidad_en_sucursales_vacia}")
-  private Set<CantidadEnSucursal> cantidadEnSucursales;
+  @JsonUnwrapped
+  @Embedded
+  private PrecioProductoEmbeddable precioProducto;
 
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
-  @JsonView(Views.Comprador.class)
-  private BigDecimal cantidadTotalEnSucursales;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
-  private BigDecimal cantMinima;
-
-  @JsonView(Views.Comprador.class)
-  private boolean hayStock;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_venta_minima_invalida}")
-  @NotNull(message = "{mensaje_producto_cantidad_venta_minima_invalida}")
-  @JsonView(Views.Comprador.class)
-  private BigDecimal bulto;
+  @JsonUnwrapped
+  @Embedded
+  private CantidadProductoEmbeddable cantidadProducto;
 
   @ManyToOne
   @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
   @NotNull(message = "{mensaje_producto_vacio_medida}")
   private Medida medida;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")
-  private BigDecimal precioCosto;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_gananciaPorcentaje_negativo}")
-  private BigDecimal gananciaPorcentaje;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_gananciaNeto_negativo}")
-  private BigDecimal gananciaNeto;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_venta_publico_negativo}")
-  private BigDecimal precioVentaPublico;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_IVAPorcentaje_negativo}")
-  private BigDecimal ivaPorcentaje;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_IVANeto_negativo}")
-  private BigDecimal ivaNeto;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
-  @JsonView(Views.Comprador.class)
-  private BigDecimal precioLista;
-
-  @JsonView(Views.Comprador.class)
-  private boolean oferta;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_oferta_superior_100}")
-  @JsonView(Views.Comprador.class)
-  private BigDecimal porcentajeBonificacionOferta;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0", message = "{mensaje_producto_bonificacion_inferior_0}")
-  @DecimalMax(value = "100", inclusive = false, message = "{mensaje_producto_bonificacion_superior_100}")
-  @JsonView(Views.Comprador.class)
-  private BigDecimal porcentajeBonificacionPrecio;
-
-  @Column(precision = 25, scale = 15)
-  @DecimalMin(value = "0",message = "{mensaje_producto_precio_bonificado_igual_menor_cero}")
-  @JsonView(Views.Comprador.class)
-  private BigDecimal precioBonificado;
 
   @ManyToOne
   @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
@@ -130,8 +63,6 @@ public class Producto implements Serializable {
   @JsonView(Views.Comprador.class)
   @Transient
   private boolean favorito;
-
-  private boolean ilimitado;
 
   private boolean publico;
 

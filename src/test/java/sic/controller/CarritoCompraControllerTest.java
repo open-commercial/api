@@ -12,6 +12,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.Rol;
+import sic.modelo.Sucursal;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.service.impl.AuthServiceImpl;
@@ -64,8 +65,8 @@ class CarritoCompraControllerTest {
     ProductoFaltanteDTO productoFaltante = new ProductoFaltanteDTO();
     productoFaltante.setIdProducto(1L);
     faltantes.add(productoFaltante);
-    when(carritoCompraService.getProductosDelCarritoSinStockDisponible(1L)).thenReturn(faltantes);
+    when(carritoCompraService.getProductosDelCarritoSinStockDisponible(1L, 1L)).thenReturn(faltantes);
     assertEquals(
-        faltantes, carritoCompraController.getProductosDelCarritoSinStockDisponible("headers"));
+        faltantes, carritoCompraController.getProductosDelCarritoSinStockDisponible(1L, "headers"));
   }
 }

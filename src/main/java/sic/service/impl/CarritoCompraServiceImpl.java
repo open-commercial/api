@@ -4,19 +4,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.CarritoCompraRepository;
@@ -33,7 +29,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IPedidoService pedidoService;
-  private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
@@ -44,15 +39,13 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
           IProductoService productoService,
           ISucursalService sucursalService,
           IClienteService clienteService,
-          IPedidoService pedidoService,
-          MessageSource messageSource) {
+          IPedidoService pedidoService) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.productoService = productoService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.pedidoService = pedidoService;
-    this.messageSource = messageSource;
   }
 
   @Override
@@ -98,10 +91,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   @Override
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
-      long idUsuario, long idProducto) {
+      long idUsuario, long idProducto, long idSucursal) {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     this.calcularImporteBonificado(itemCarritoCompra);
+    productoService.calcularCantidadEnSucursalesDisponible(itemCarritoCompra.getProducto(), idSucursal);
     return itemCarritoCompra;
   }
 
@@ -144,11 +138,14 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   private void calcularImporteBonificado(ItemCarritoCompra itemCarritoCompra) {
     if (itemCarritoCompra != null) {
-      if (itemCarritoCompra.getCantidad().compareTo(itemCarritoCompra.getProducto().getBulto())
+      if (itemCarritoCompra
+              .getCantidad()
+              .compareTo(itemCarritoCompra.getProducto().getCantidadProducto().getBulto())
           >= 0) {
         itemCarritoCompra.setImporte(
             itemCarritoCompra
                 .getProducto()
+                .getPrecioProducto()
                 .getPrecioBonificado()
                 .multiply(itemCarritoCompra.getCantidad())
                 .setScale(2, RoundingMode.HALF_UP));
@@ -156,6 +153,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         itemCarritoCompra.setImporte(
             itemCarritoCompra
                 .getProducto()
+                .getPrecioProducto()
                 .getPrecioLista()
                 .multiply(itemCarritoCompra.getCantidad())
                 .setScale(2, RoundingMode.HALF_UP));
@@ -178,17 +176,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
-    if (nuevaOrdenDePagoDTO.getIdSucursal() == null) {
-      if (!nuevaOrdenDePagoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        pedido.setSucursal(sucursalService.getSucursalPredeterminada());
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-    } else {
-      pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDePagoDTO.getIdSucursal()));
-    }
+    pedido.setSucursal(sucursalService.getSucursalPorId(nuevaOrdenDePagoDTO.getIdSucursal()));
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     items.forEach(
@@ -204,7 +192,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   }
 
   @Override
-  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario) {
+  public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario, long idSucursal) {
     List<ItemCarritoCompra> items =
         this.getItemsDelCarritoPorUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     long[] idProducto = new long[items.size()];
@@ -216,7 +204,11 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       indice++;
     }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+        ProductosParaVerificarStockDTO.builder()
+                .idProducto(idProducto)
+                .cantidad(cantidad)
+                .idSucursal(sucursalService.getSucursalPorId(idSucursal).getIdSucursal())
+                .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 }

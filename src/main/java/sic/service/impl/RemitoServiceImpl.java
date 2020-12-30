@@ -1,9 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -46,7 +43,6 @@ public class RemitoServiceImpl implements IRemitoService {
     private final IClienteService clienteService;
     private final IUsuarioService usuarioService;
     private final ITransportistaService transportistaService;
-    private final IConfiguracionSucursalService configuracionSucursalService;
     private final ICuentaCorrienteService cuentaCorrienteService;
     private final MessageSource messageSource;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -61,7 +57,6 @@ public class RemitoServiceImpl implements IRemitoService {
                               IClienteService clienteService,
                               IUsuarioService usuarioService,
                               ITransportistaService transportistaService,
-                              IConfiguracionSucursalService configuracionSucursalService,
                               ICuentaCorrienteService cuentaCorrienteService,
                               MessageSource messageSource,
                               CustomValidator customValidator) {
@@ -72,7 +67,6 @@ public class RemitoServiceImpl implements IRemitoService {
         this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.transportistaService = transportistaService;
-        this.configuracionSucursalService = configuracionSucursalService;
         this.cuentaCorrienteService = cuentaCorrienteService;
         this.messageSource = messageSource;
         this.customValidator = customValidator;
@@ -116,9 +110,7 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setVolumenTotalEnM3(nuevoRemitoDTO.getVolumenTotalEnM3());
        remito.setObservaciones(nuevoRemitoDTO.getObservaciones());
        remito.setSucursal(pedido.getSucursal());
-       remito.setSerie(configuracionSucursalService
-            .getConfiguracionSucursal(remito.getSucursal())
-            .getNroPuntoDeVentaAfip());
+       remito.setSerie(remito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
        remito.setNroRemito(this.getSiguienteNumeroRemito(remito.getSerie()));
        remito.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
        remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));
@@ -288,9 +280,6 @@ public class RemitoServiceImpl implements IRemitoService {
     @Override
     public byte[] getReporteRemito(long idRemito) {
         Remito remitoParaReporte = this.getRemitoPorId(idRemito);
-        ClassLoader classLoader = RemitoServiceImpl.class.getClassLoader();
-        InputStream isFileReport =
-                classLoader.getResourceAsStream("sic/vista/reportes/Remito.jasper");
         Map<String, Object> params = new HashMap<>();
         params.put("remito", remitoParaReporte);
         if (remitoParaReporte.getSucursal().getLogo() != null && !remitoParaReporte.getSucursal().getLogo().isEmpty()) {
@@ -305,9 +294,16 @@ public class RemitoServiceImpl implements IRemitoService {
         }
         List<RenglonRemito> renglones = this.getRenglonesDelRemito(idRemito);
         JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+        JasperReport jasperDesign;
+        try {
+            jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Remito.jrxml");
+        } catch (JRException ex) {
+            throw new ServiceException(messageSource.getMessage(
+                    "mensaje_error_reporte", null, Locale.getDefault()), ex);
+        }
         try {
             return JasperExportManager.exportReportToPdf(
-                    JasperFillManager.fillReport(isFileReport, params, ds));
+                    JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
             throw new ServiceException(
                     messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);

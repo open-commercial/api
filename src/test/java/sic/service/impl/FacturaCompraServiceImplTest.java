@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.FacturaCompraRepository;
 
 import java.math.BigDecimal;
@@ -98,9 +99,10 @@ class FacturaCompraServiceImplTest {
   @Test
   void shouldCalcularIVANetoWhenCompraConFacturaA() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("100"));
-    producto.setPrecioVentaPublico(new BigDecimal("121"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("100"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("121"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         0,
         facturaServiceImpl
@@ -112,9 +114,10 @@ class FacturaCompraServiceImplTest {
   @Test
   void shouldCalcularIVANetoWhenCompraConFacturaB() {
     Producto producto = new Producto();
-    producto.setPrecioCosto(new BigDecimal("200"));
-    producto.setPrecioVentaPublico(new BigDecimal("1000"));
-    producto.setIvaPorcentaje(new BigDecimal("21"));
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("200"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("1000"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
     assertEquals(
         42,
         facturaServiceImpl

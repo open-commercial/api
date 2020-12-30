@@ -1,13 +1,10 @@
 package sic.service;
 
 import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Sucursal;
 
 public interface IConfiguracionSucursalService {
 
-  void actualizar(ConfiguracionSucursal configuracionSucursalPersistida, ConfiguracionSucursal configuracionSucursalPorActualizar);
-
-  ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal);
+  void actualizar(ConfiguracionSucursal configuracionSucursalPorActualizar);
 
   ConfiguracionSucursal getConfiguracionSucursalPorId(long idConfiguracionSucursal);
 

@@ -19,7 +19,7 @@ public class NuevaOrdenDePagoDTO {
   @NotNull(message = "{mensaje_preference_sin_movimiento}")
   private Movimiento movimiento;
 
-  private Long idSucursal;
+  private long idSucursal;
 
   private TipoDeEnvio tipoDeEnvio;
 

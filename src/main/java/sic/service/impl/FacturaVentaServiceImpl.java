@@ -1,9 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +27,6 @@ import sic.util.CustomValidator;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -47,7 +44,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IFacturaService facturaService;
   private final ITransportistaService transportistaService;
   private final ISucursalService sucursalService;
@@ -70,7 +66,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       IUsuarioService usuarioService,
       IClienteService clienteService,
       ICuentaCorrienteService cuentaCorrienteService,
-      IConfiguracionSucursalService configuracionSucursalService,
       IFacturaService facturaService,
       ITransportistaService transportistaService,
       ISucursalService sucursalService,
@@ -84,7 +79,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.facturaService = facturaService;
     this.transportistaService = transportistaService;
     this.sucursalService = sucursalService;
@@ -357,10 +351,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   public Factura procesarFacturaVenta(FacturaVenta factura) {
     factura.setEliminada(false);
     factura.setFecha(LocalDateTime.now());
-    factura.setNumSerie(
-        configuracionSucursalService
-            .getConfiguracionSucursal(factura.getSucursal())
-            .getNroPuntoDeVentaAfip());
+    factura.setNumSerie(factura.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
     factura.setNumFactura(
         this.calcularNumeroFacturaVenta(
             factura.getTipoComprobante(),
@@ -457,12 +448,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   public byte[] getReporteFacturaVenta(Factura factura) {
-    ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
-    InputStream isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jasper");
     Map<String, Object> params = new HashMap<>();
-    ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursalService.getConfiguracionSucursal(factura.getSucursal());
+    ConfiguracionSucursal configuracionSucursal = factura.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (factura.getTipoComprobante().equals(TipoDeComprobante.FACTURA_B)
         || factura.getTipoComprobante().equals(TipoDeComprobante.PRESUPUESTO)) {
@@ -497,9 +484,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     List<RenglonFactura> renglones = facturaService.getRenglonesDeLaFactura(factura.getIdFactura());
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/FacturaVenta.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+          JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);

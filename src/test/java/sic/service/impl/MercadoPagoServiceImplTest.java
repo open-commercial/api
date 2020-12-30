@@ -66,6 +66,7 @@ class MercadoPagoServiceImplTest {
     Sucursal sucursal = new Sucursal();
     sucursal.setNombre("9 de Julio");
     when(sucursalService.getSucursalPorId(anyLong())).thenReturn(sucursal);
+    when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
     when(usuarioService.getUsuarioNoEliminadoPorId(2L)).thenReturn(usuario);
     ItemCarritoCompra itemCarritoCompra1 = new ItemCarritoCompra();
     Producto producto1 = new Producto();
@@ -103,21 +104,9 @@ class MercadoPagoServiceImplTest {
     assertNotEquals("", mercadoPagoPreferenceDTO.getId());
     assertNotNull(mercadoPagoPreferenceDTO.getInitPoint());
     assertNotEquals("", mercadoPagoPreferenceDTO.getInitPoint());
-    NuevaOrdenDePagoDTO ordenDePagoSinIdSucursalConRetiroEnLaMisma =
-        NuevaOrdenDePagoDTO.builder()
-            .movimiento(Movimiento.DEPOSITO)
-            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-            .monto(BigDecimal.TEN)
-            .build();
-    assertThrows(
-        BusinessServiceException.class,
-        () ->
-            mercadoPagoService.crearNuevaPreference(
-                1L, ordenDePagoSinIdSucursalConRetiroEnLaMisma, "localhost"));
-    verify(messageSource)
-        .getMessage(eq("mensaje_preference_retiro_sucursal_no_seleccionada"), any(), any());
     NuevaOrdenDePagoDTO ordenDePagoConUbicacionEnvio =
         NuevaOrdenDePagoDTO.builder()
+            .idSucursal(1L)
             .movimiento(Movimiento.DEPOSITO)
             .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
             .monto(BigDecimal.TEN)

@@ -3,11 +3,8 @@ package sic.controller;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -15,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
@@ -34,7 +30,6 @@ public class PedidoController {
     private final IClienteService clienteService;
     private final IReciboService reciboService;
     private final IAuthService authService;
-    private final MessageSource messageSource;
     private static final String ID_USUARIO = "idUsuario";
 
   @Autowired
@@ -44,14 +39,12 @@ public class PedidoController {
       ISucursalService sucursalService,
       IClienteService clienteService,
       IReciboService reciboService,
-      MessageSource messageSource,
       IAuthService authService) {
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.reciboService = reciboService;
-    this.messageSource = messageSource;
     this.authService = authService;
   }
 
@@ -77,11 +70,14 @@ public class PedidoController {
 
   @PutMapping("/pedidos")
   public void actualizar(
-      @RequestBody PedidoDTO pedidoDTO) {
+      @RequestBody PedidoDTO pedidoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
-    if (pedidoDTO.getIdSucursal() != null)
-      pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
+    long idUsuario = (int) claims.get(ID_USUARIO);
+    pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
     if (pedidoDTO.getObservaciones() != null) pedido.setObservaciones(pedidoDTO.getObservaciones());
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
     if (pedidoDTO.getRecargoPorcentaje() != null)
@@ -118,19 +114,8 @@ public class PedidoController {
     pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
     pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
     Sucursal sucursalDePedido;
-    if (pedidoDTO.getIdSucursal() == null) {
-      if (!pedidoDTO.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        sucursalDePedido = sucursalService.getSucursalPredeterminada();
-        pedido.setSucursal(sucursalDePedido);
-      } else {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_pedido_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-      }
-    } else {
-      sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
-      pedido.setSucursal(sucursalDePedido);
-    }
+    sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
+    pedido.setSucursal(sucursalDePedido);
     long idUsuario = (int) claims.get(ID_USUARIO);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()));

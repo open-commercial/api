@@ -18,7 +18,7 @@ public class ProductoRepositoryImpl implements ProductoRepositoryCustom {
     QProducto qProducto = QProducto.producto;
     JPAQueryFactory queryFactory = new JPAQueryFactory(em);
     return queryFactory
-        .select(qProducto.cantidadTotalEnSucursales.multiply(qProducto.precioCosto).sum())
+        .select(qProducto.cantidadProducto.cantidadTotalEnSucursales.multiply(qProducto.precioProducto.precioCosto).sum())
         .from(qProducto)
         .where(builder)
         .fetch()
