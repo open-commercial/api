@@ -49,13 +49,11 @@ class CuentaCorrienteServiceImplTest {
     List<CuentaCorrienteCliente> cuentasCorriente = new ArrayList<>();
     CuentaCorrienteCliente cuentaCorrienteCliente = new CuentaCorrienteCliente();
     cuentasCorriente.add(cuentaCorrienteCliente);
-
     Usuario usuario = new Usuario();
     List<Rol> rolesDeUsuario = new ArrayList<>();
     rolesDeUsuario.add(Rol.ADMINISTRADOR);
     usuario.setRoles(rolesDeUsuario);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
-
     when(cuentaCorrienteClienteRepository.findAll(
             cuentaCorrienteService.getBuilder(
                 BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L),

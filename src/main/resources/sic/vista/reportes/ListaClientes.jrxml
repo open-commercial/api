@@ -50,7 +50,7 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Nro Cliente]]></text>
+				<text><![CDATA[Nº Cliente]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="80" y="175" width="70" height="28" uuid="ed30d880-1bf1-4eb5-b02a-7e89ca2dca0a"/>
@@ -94,7 +94,7 @@ Mínima]]></text>
 a plazo]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="630" y="175" width="80" height="28" uuid="d7cc2279-bcac-415c-99f0-4ea136bdacb0"/>
+				<reportElement x="630" y="175" width="60" height="28" uuid="d7cc2279-bcac-415c-99f0-4ea136bdacb0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -128,7 +128,7 @@ a plazo]]></text>
 				<text><![CDATA[Teléfono/WhatsApp: 379 4834638]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="710" y="175" width="90" height="28" uuid="a9b92976-0323-4079-b6cd-da1cf9659c05"/>
+				<reportElement x="690" y="175" width="110" height="28" uuid="a9b92976-0323-4079-b6cd-da1cf9659c05"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -138,7 +138,9 @@ a plazo]]></text>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Ult. Movimiento]]></text>
+				<text><![CDATA[Ultimo 
+Movimiento C/C
+]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="150" y="175" width="190" height="28" uuid="f8e64529-57a3-40d8-8907-13532f521c63"/>
@@ -151,7 +153,7 @@ a plazo]]></text>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Razón Social]]></text>
+				<text><![CDATA[R. Social o Nombre]]></text>
 			</staticText>
 			<staticText>
 				<reportElement x="340" y="175" width="153" height="28" uuid="2de9a01a-e73d-4f1a-95c3-78dd20d0bf55"/>
@@ -169,7 +171,7 @@ a plazo]]></text>
 		</band>
 	</title>
 	<detail>
-		<band height="25" splitType="Stretch">
+		<band height="20" splitType="Stretch">
 			<textField>
 				<reportElement x="0" y="0" width="80" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
 				<textElement verticalAlignment="Middle"/>
@@ -187,23 +189,23 @@ a plazo]]></text>
 			</textField>
 			<textField>
 				<reportElement x="150" y="0" width="190" height="20" uuid="009f171c-19d7-4c35-a69b-3fe1a41fe09a"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{cliente}.getNombreFiscal()]]></textFieldExpression>
 			</textField>
-			<textField pattern=" #,##0.##">
-				<reportElement x="630" y="0" width="80" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
+			<textField pattern="¤ #,##0.##">
+				<reportElement x="630" y="0" width="60" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{saldo}]]></textFieldExpression>
 			</textField>
-			<textField pattern="dd/MM/yyyy ">
-				<reportElement x="710" y="0" width="90" height="20" uuid="2a6fbe99-0489-4e59-b596-5d7003d65431"/>
+			<textField pattern="dd/MM/yyyy h:mm:ss">
+				<reportElement x="690" y="0" width="110" height="20" uuid="2a6fbe99-0489-4e59-b596-5d7003d65431"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{fechaUltimoMovimiento} != null ? 
 java.util.Date.from($F{fechaUltimoMovimiento}.atZone(java.time.ZoneId.systemDefault()).toInstant()) : ""]]></textFieldExpression>
 			</textField>
 			<textField>
 				<reportElement x="340" y="-1" width="152" height="20" uuid="14693fb2-cd6b-4ec7-9e27-95464d2f92b9"/>
-				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textElement textAlignment="Left" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{cliente}.getNombreFantasia() != null ?  $F{cliente}.getNombreFantasia() : ""]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.##">
