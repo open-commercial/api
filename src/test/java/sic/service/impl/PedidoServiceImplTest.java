@@ -14,6 +14,7 @@ import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.UbicacionDTO;
+import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
 import sic.util.CustomValidator;
@@ -111,20 +112,20 @@ class PedidoServiceImplTest {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CANCELADO);
     pedido.setIdPedido(1L);
-    Sucursal sucursal = new Sucursal();
-    pedido.setSucursal(sucursal);
     Producto producto = new Producto();
     producto.setIdProducto(1L);
     producto.setCodigo("123");
     producto.setDescripcion("desc producto");
     producto.setUrlImagen("url");
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(producto);
+    Sucursal sucursal = new Sucursal();
     Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
     CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
     cantidadEnSucursal.setSucursal(sucursal);
     cantidadEnSucursal.setCantidad(BigDecimal.ONE);
     cantidadEnSucursales.add(cantidadEnSucursal);
-    producto.setCantidadEnSucursales(cantidadEnSucursales);
+    producto.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
     RenglonPedido renglonPedido = new RenglonPedido();
     renglonPedido.setCantidad(BigDecimal.TEN);
@@ -145,7 +146,8 @@ class PedidoServiceImplTest {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setVencimientoLargo(15L);
     configuracionSucursal.setVencimientoCorto(1L);
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal)).thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+    pedido.setSucursal(sucursal);
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
@@ -197,13 +199,13 @@ class PedidoServiceImplTest {
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
     verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
     pedido.setEstado(EstadoPedido.ABIERTO);
-    when(pedidoRepository.findByNroPedidoAndSucursalAndEliminado(123L, sucursal, false))
-        .thenReturn(pedido);
+    when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
+        .thenReturn(true);
     assertThrows(
         BusinessServiceException.class,
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
-    when(pedidoRepository.findByNroPedidoAndSucursalAndEliminado(123L, sucursal, false))
-        .thenReturn(null);
+    when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
+        .thenReturn(false);
     assertThrows(
         BusinessServiceException.class,
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido));
@@ -240,7 +242,9 @@ class PedidoServiceImplTest {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setVencimientoLargo(1L);
     configuracionSucursal.setVencimientoCorto(1L);
-    when(configuracionSucursalService.getConfiguracionSucursal(any())).thenReturn(configuracionSucursal);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+    pedido.setSucursal(sucursal);
     pedidoService.cambiarFechaDeVencimiento(1L);
     verify(pedidoRepository).save(pedido);
   }

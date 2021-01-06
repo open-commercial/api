@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -12,9 +11,7 @@ import javax.swing.ImageIcon;
 
 import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +37,6 @@ public class ReciboServiceImpl implements IReciboService {
   private final ReciboRepository reciboRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ISucursalService sucursalService;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
@@ -55,7 +51,6 @@ public class ReciboServiceImpl implements IReciboService {
     ReciboRepository reciboRepository,
     ICuentaCorrienteService cuentaCorrienteService,
     ISucursalService sucursalService,
-    IConfiguracionSucursalService configuracionSucursalService,
     INotaService notaService,
     IFormaDePagoService formaDePagoService,
     ICajaService cajaService,
@@ -64,7 +59,6 @@ public class ReciboServiceImpl implements IReciboService {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.sucursalService = sucursalService;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
@@ -172,16 +166,11 @@ public class ReciboServiceImpl implements IReciboService {
   @Transactional
   public Recibo guardar(Recibo recibo) {
     customValidator.validar(recibo);
-    recibo.setNumSerie(
-        configuracionSucursalService
-            .getConfiguracionSucursal(recibo.getSucursal())
-            .getNroPuntoDeVentaAfip());
+    recibo.setNumSerie(recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
     recibo.setNumRecibo(
         this.getSiguienteNumeroRecibo(
             recibo.getSucursal().getIdSucursal(),
-            configuracionSucursalService
-                .getConfiguracionSucursal(recibo.getSucursal())
-                .getNroPuntoDeVentaAfip()));
+            recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip()));
     this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
@@ -254,9 +243,7 @@ public class ReciboServiceImpl implements IReciboService {
             recibo.setFormaDePago(fdp);
             recibo.setMonto(v);
             recibo.setNumSerie(
-                configuracionSucursalService
-                    .getConfiguracionSucursal(recibo.getSucursal())
-                    .getNroPuntoDeVentaAfip());
+                recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
             recibo.setNumRecibo(
                 this.getSiguienteNumeroRecibo(sucursal.getIdSucursal(), recibo.getNumSerie()));
             recibo.setConcepto("SALDO.");
@@ -328,8 +315,6 @@ public class ReciboServiceImpl implements IReciboService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
     }
-    ClassLoader classLoader = FacturaServiceImpl.class.getClassLoader();
-    InputStream isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jasper");
     Map<String, Object> params = new HashMap<>();
     params.put("recibo", recibo);
     if (recibo.getSucursal().getLogo() != null && !recibo.getSucursal().getLogo().isEmpty()) {
@@ -341,9 +326,16 @@ public class ReciboServiceImpl implements IReciboService {
           "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params));
+          JasperFillManager.fillReport(jasperDesign, params));
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);

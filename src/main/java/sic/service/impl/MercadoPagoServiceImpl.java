@@ -89,16 +89,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   public MercadoPagoPreferenceDTO crearNuevaPreference(
       long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
     customValidator.validar(nuevaOrdenDeCompra);
-    if (nuevaOrdenDeCompra.getIdSucursal() == null) {
-      if (nuevaOrdenDeCompra.getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_preference_retiro_sucursal_no_seleccionada", null, Locale.getDefault()));
-
-      } else {
-        nuevaOrdenDeCompra.setIdSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal());
-      }
-    }
+    Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
     List<ItemCarritoCompra> items = carritoCompraService.getItemsDelCarritoPorUsuario(usuario);
     if (this.verificarStockItemsDelCarrito(items)) {
@@ -110,14 +101,13 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       }
       MercadoPago.SDK.configure(mercadoPagoAccesToken);
       Preference preference = new Preference();
-      String json = "";
-      BackUrls backUrls = null;
-      String title = "";
+      String json;
+      BackUrls backUrls ;
+      String title;
       float monto;
       Pedido pedido = null;
       switch (nuevaOrdenDeCompra.getMovimiento()) {
         case PEDIDO -> {
-          Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
           pedido =
                   this.crearPedidoPorPreference(
                           sucursal, usuario, clienteDeUsuario, items, nuevaOrdenDeCompra.getTipoDeEnvio());
@@ -146,7 +136,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           + "\": "
                           + idUsuario
                           + " , \"idSucursal\": "
-                          + nuevaOrdenDeCompra.getIdSucursal()
+                          + sucursal.getIdSucursal()
                           + " , \"tipoDeEnvio\": "
                           + nuevaOrdenDeCompra.getTipoDeEnvio()
                           + " , \"movimiento\": "
@@ -178,7 +168,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                           + "\": "
                           + idUsuario
                           + " , \"idSucursal\": "
-                          + nuevaOrdenDeCompra.getIdSucursal()
+                          + sucursal.getIdSucursal()
                           + " , \"movimiento\": "
                           + Movimiento.DEPOSITO
                           + "}";
@@ -423,7 +413,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       i++;
     }
     ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+        ProductosParaVerificarStockDTO.builder()
+                .idProducto(idProducto)
+                .cantidad(cantidad)
+                .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
+                .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty();
   }
 

@@ -59,12 +59,15 @@ public class ProductoController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/productos/{idProducto}")
+  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}")
   public Producto getProductoPorId(
       @PathVariable long idProducto,
+      @PathVariable long idSucursal,
       @RequestParam(required = false) Boolean publicos,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    productoService.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
+    productoService.calcularCantidadReservada(producto, idSucursal);
     if (publicos != null && publicos && !producto.isPublico()) {
       throw new EntityNotFoundException(
               messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
@@ -77,16 +80,21 @@ public class ProductoController {
     return producto;
   }
 
-  @GetMapping("/productos/busqueda")
-  public Producto getProductoPorCodigo(@RequestParam String codigo) {
-    return productoService.getProductoPorCodigo(codigo);
+  @GetMapping("/productos/busqueda/sucursales/{idSucursal}")
+  public Producto getProductoPorCodigo(@PathVariable long idSucursal,
+                                       @RequestParam String codigo) {
+    Producto producto = productoService.getProductoPorCodigo(codigo);
+    productoService.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
+    productoService.calcularCantidadReservada(producto, idSucursal);
+    return producto;
   }
 
-  @PostMapping("/productos/busqueda/criteria")
+  @PostMapping("/productos/busqueda/criteria/sucursales/{idSucursal}")
   public Page<Producto> buscarProductos(
+      @PathVariable long idSucursal,
       @RequestBody BusquedaProductoCriteria criteria,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos = productoService.buscarProductos(criteria);
+    Page<Producto> productos = productoService.buscarProductos(criteria, idSucursal);
     if (authorizationHeader != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
@@ -141,6 +149,8 @@ public class ProductoController {
       @RequestParam(required = false) Long idProveedor,
       @RequestHeader("Authorization") String authorizationHeader) {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
+    productoPorActualizar.setCantidadProducto(productoService.construirCantidadProductoEmbeddable(productoDTO));
+    productoPorActualizar.setPrecioProducto(productoService.construirPrecioProductoEmbeddable(productoDTO));
     Producto productoPersistido =
         productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
       if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
@@ -165,27 +175,27 @@ public class ProductoController {
                                 sucursalService.getSucursalPorId(cantidadEnSucursalDTO.getIdSucursal()));
                         cantidadEnSucursales.add(cantidadEnSucursal);
                       });
-      productoPorActualizar.setCantidadEnSucursales(cantidadEnSucursales);
-      productoPorActualizar.getCantidadEnSucursales().addAll(productoPersistido.getCantidadEnSucursales());
-      productoPorActualizar.setCantidadTotalEnSucursales(
+      productoPorActualizar.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+      productoPorActualizar.getCantidadProducto().getCantidadEnSucursales().addAll(productoPersistido.getCantidadProducto().getCantidadEnSucursales());
+      productoPorActualizar.getCantidadProducto().setCantidadTotalEnSucursales(
               cantidadEnSucursales
                       .stream()
                       .map(CantidadEnSucursal::getCantidad)
                       .reduce(BigDecimal.ZERO, BigDecimal::add));
-      productoPorActualizar.setHayStock(
-              productoPorActualizar.getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
-      if (productoPorActualizar.getBulto() == null)
-        productoPorActualizar.setBulto(productoPersistido.getBulto());
+      productoPorActualizar.getCantidadProducto().setHayStock(
+              productoPorActualizar.getCantidadProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
+      if (productoPorActualizar.getCantidadProducto().getBulto() == null)
+        productoPorActualizar.getCantidadProducto().setBulto(productoPersistido.getCantidadProducto().getBulto());
     } else {
-        productoPorActualizar.setCantidadEnSucursales(productoPersistido.getCantidadEnSucursales());
-        productoPorActualizar.setBulto(productoPersistido.getBulto());
+        productoPorActualizar.getCantidadProducto().setCantidadEnSucursales(productoPersistido.getCantidadProducto().getCantidadEnSucursales());
+        productoPorActualizar.getCantidadProducto().setBulto(productoPersistido.getCantidadProducto().getBulto());
     }
-    if (productoPorActualizar.getPorcentajeBonificacionOferta() == null)
-      productoPorActualizar.setPorcentajeBonificacionOferta(
-          productoPersistido.getPorcentajeBonificacionOferta());
-    if (productoPorActualizar.getPorcentajeBonificacionPrecio() == null)
-      productoPorActualizar.setPorcentajeBonificacionPrecio(
-          productoPersistido.getPorcentajeBonificacionPrecio());
+    if (productoPorActualizar.getPrecioProducto().getPorcentajeBonificacionOferta() == null)
+      productoPorActualizar.getPrecioProducto().setPorcentajeBonificacionOferta(
+          productoPersistido.getPrecioProducto().getPorcentajeBonificacionOferta());
+    if (productoPorActualizar.getPrecioProducto().getPorcentajeBonificacionPrecio() == null)
+      productoPorActualizar.getPrecioProducto().setPorcentajeBonificacionPrecio(
+          productoPersistido.getPrecioProducto().getPorcentajeBonificacionPrecio());
     if (productoPorActualizar.getDescripcion() == null)
       productoPorActualizar.setDescripcion(productoPersistido.getDescripcion());
     if (productoPorActualizar.getCodigo() == null)

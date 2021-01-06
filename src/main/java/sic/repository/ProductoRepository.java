@@ -16,8 +16,6 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
 
   Producto findByDescripcionAndEliminado(String descripcion, boolean eliminado);
 
-  List<Producto> findByIdProductoInOrderByIdProductoAsc(List<Long> idsProductos);
-
   List<Producto> findAllByEliminado(boolean eliminado);
 
   @Modifying

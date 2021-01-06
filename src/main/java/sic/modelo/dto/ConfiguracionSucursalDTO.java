@@ -33,6 +33,8 @@ public class ConfiguracionSucursalDTO {
 
   private boolean predeterminada;
 
+  private boolean comparteStock;
+
   private long vencimientoLargo;
 
   private long vencimientoCorto;

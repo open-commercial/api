@@ -8,7 +8,6 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Sucursal;
 import sic.service.IConfiguracionSucursalService;
 import sic.repository.ConfiguracionSucursalRepository;
 import sic.exception.BusinessServiceException;
@@ -44,11 +43,6 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
   }
 
   @Override
-  public ConfiguracionSucursal getConfiguracionSucursal(Sucursal sucursal) {
-    return configuracionRepository.findBySucursal(sucursal);
-  }
-
-  @Override
   @Transactional
   public ConfiguracionSucursal guardar(ConfiguracionSucursal configuracionSucursal) {
     customValidator.validar(configuracionSucursal);
@@ -63,17 +57,16 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
 
   @Override
   @Transactional
-  public void actualizar(
-      ConfiguracionSucursal configuracionSucursalPersistida,
-      ConfiguracionSucursal configuracionDeSucursalParaActualizar) {
+  public void actualizar(ConfiguracionSucursal configuracionDeSucursalParaActualizar) {
+    ConfiguracionSucursal configuracionSucursalPersistida =
+        this.getConfiguracionSucursalPorId(
+            configuracionDeSucursalParaActualizar.getIdConfiguracionSucursal());
     if (!configuracionDeSucursalParaActualizar.isPredeterminada()
         && configuracionSucursalPersistida.isPredeterminada()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_sucursal_quitar_predeterminada", null, Locale.getDefault()));
     }
-    configuracionDeSucursalParaActualizar.setSucursal(
-        configuracionSucursalPersistida.getSucursal());
     if (configuracionDeSucursalParaActualizar.isFacturaElectronicaHabilitada()) {
       if (configuracionDeSucursalParaActualizar.getPasswordCertificadoAfip().equals("")) {
         configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip(

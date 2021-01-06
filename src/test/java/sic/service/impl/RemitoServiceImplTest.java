@@ -85,8 +85,7 @@ class RemitoServiceImplTest {
     sucursal.setNombre("primera sucursal");
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setNroPuntoDeVentaAfip(1);
-    when(configuracionSucursalService.getConfiguracionSucursal(sucursal))
-        .thenReturn(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
     facturaVentaUno.setSucursal(sucursal);
     facturaVentaUno.setTotal(new BigDecimal("100"));
     Pedido pedidoUno = new Pedido();
@@ -113,6 +112,14 @@ class RemitoServiceImplTest {
     verify(messageSource).getMessage(eq("mensaje_remito_facturas_iguales"), any(), any());
     FacturaVenta facturaVentaDos = new FacturaVenta();
     facturaVentaDos.setIdFactura(3L);
+    Sucursal sucursalDos = new Sucursal();
+    sucursalDos.setIdSucursal(2L);
+    sucursalDos.setNombre("segunda sucursal");
+    ConfiguracionSucursal configuracionSucursalDos = new ConfiguracionSucursal();
+    configuracionSucursalDos.setNroPuntoDeVentaAfip(1);
+    sucursalDos.setConfiguracionSucursal(configuracionSucursalDos);
+    facturaVentaDos.setSucursal(sucursalDos);
+    facturaVentaDos.setTotal(new BigDecimal("100"));
     Pedido pedidoDos = new Pedido();
     pedidoDos.setNroPedido(2);
     pedidoUno.setDetalleEnvio(ubicacionDTO);

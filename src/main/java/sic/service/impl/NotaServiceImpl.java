@@ -57,7 +57,6 @@ public class NotaServiceImpl implements INotaService {
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IMercadoPagoService mercadoPagoService;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IAfipService afipService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -83,7 +82,6 @@ public class NotaServiceImpl implements INotaService {
     ISucursalService sucursalService,
     ICuentaCorrienteService cuentaCorrienteService,
     IMercadoPagoService mercadoPagoService,
-    IConfiguracionSucursalService configuracionSucursalService,
     IAfipService afipService,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -100,7 +98,6 @@ public class NotaServiceImpl implements INotaService {
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.mercadoPagoService = mercadoPagoService;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.afipService = afipService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -477,9 +474,7 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionSucursalService
-                .getConfiguracionSucursal(sucursal)
-                .getNroPuntoDeVentaAfip(),
+            sucursal.getConfiguracionSucursal().getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
   }
@@ -491,9 +486,7 @@ public class NotaServiceImpl implements INotaService {
     Long numeroNota =
         notaCreditoRepository.buscarMayorNumNotaCreditoClienteSegunTipo(
             tipoDeComprobante,
-            configuracionSucursalService
-                .getConfiguracionSucursal(sucursal)
-                .getNroPuntoDeVentaAfip(),
+            sucursal.getConfiguracionSucursal().getNroPuntoDeVentaAfip(),
             idSucursal);
     return (numeroNota == null) ? 1 : numeroNota + 1;
   }
@@ -791,9 +784,7 @@ public class NotaServiceImpl implements INotaService {
         }
       }
       notaCredito.setSerie(
-          configuracionSucursalService
-              .getConfiguracionSucursal(notaCredito.getSucursal())
-              .getNroPuntoDeVentaAfip());
+          notaCredito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
       notaCredito.setNroNota(
           this.getSiguienteNumeroNotaCreditoCliente(
               notaCredito.getIdSucursal(), notaCredito.getTipoComprobante()));
@@ -1133,9 +1124,7 @@ public class NotaServiceImpl implements INotaService {
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
       notaDebito.setSerie(
-          configuracionSucursalService
-              .getConfiguracionSucursal(notaDebito.getSucursal())
-              .getNroPuntoDeVentaAfip());
+          notaDebito.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip());
       notaDebito.setNroNota(
           this.getSiguienteNumeroNotaDebitoCliente(
               notaDebito.getIdSucursal(), notaDebito.getTipoComprobante()));
@@ -1253,8 +1242,7 @@ public class NotaServiceImpl implements INotaService {
       ds = new JRBeanCollectionDataSource(renglones);
       params.put("notaDebito", nota);
     }
-    ConfiguracionSucursal configuracionSucursal =
-        this.configuracionSucursalService.getConfiguracionSucursal(nota.getSucursal());
+    ConfiguracionSucursal configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)

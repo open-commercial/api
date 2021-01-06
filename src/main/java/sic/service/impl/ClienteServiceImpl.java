@@ -189,6 +189,10 @@ public class ClienteServiceImpl implements IClienteService {
         "mensaje_cliente_vacio_credencial", null, Locale.getDefault()));
     }
     // Duplicados
+    if (operacion == TipoDeOperacion.ALTA && clienteRepository.existsByNroCliente(cliente.getNroCliente())) {
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_cliente_duplicado_nro", null, Locale.getDefault()));
+    }
     // ID Fiscal
     if (cliente.getIdFiscal() != null) {
       List<Cliente> clientes =
@@ -355,8 +359,7 @@ public class ClienteServiceImpl implements IClienteService {
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroCliente = Long.toString(randomLong);
-      Cliente c = clienteRepository.findByNroClienteAndEliminado(nroCliente, false);
-      if (c == null) esRepetido = false;
+      esRepetido = clienteRepository.existsByNroCliente(nroCliente);
     }
     return Long.toString(randomLong);
   }

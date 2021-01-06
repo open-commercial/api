@@ -39,10 +39,7 @@ public class ConfiguracionSucursalController {
   public void actualizar(@RequestBody ConfiguracionSucursalDTO configuracionSucursalDTO) {
     ConfiguracionSucursal configuracionDeSucursalParaActualizar =
         modelMapper.map(configuracionSucursalDTO, ConfiguracionSucursal.class);
-    ConfiguracionSucursal configuracionSucursalRecuperada =
-            this.configuracionSucursal.getConfiguracionSucursalPorId(
-                    configuracionSucursalDTO.getIdConfiguracionSucursal());
-    this.configuracionSucursal.actualizar(configuracionSucursalRecuperada, configuracionDeSucursalParaActualizar);
+    this.configuracionSucursal.actualizar(configuracionDeSucursalParaActualizar);
   }
 
   @PostMapping("/configuraciones-sucursal")
@@ -58,8 +55,7 @@ public class ConfiguracionSucursalController {
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public ConfiguracionSucursal getConfiguracionSucursal(
       @PathVariable long idSucursal) {
-    return configuracionSucursal.getConfiguracionSucursal(
-        sucursalService.getSucursalPorId(idSucursal));
+    return sucursalService.getSucursalPorId(idSucursal).getConfiguracionSucursal();
   }
 
   @GetMapping("/configuraciones-sucursal/{idSucursal}/cantidad-renglones")

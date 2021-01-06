@@ -19,7 +19,7 @@ public interface ICarritoCompraService {
 
   BigDecimal calcularTotal(long idUsuario);
 
-  ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto);
+  ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(long idUsuario, long idProducto, long idSucursal);
 
   void eliminarItemDelUsuario(long idUsuario, long idProducto);
 
@@ -33,5 +33,5 @@ public interface ICarritoCompraService {
 
   Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario);
 
-  List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario);
+  List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(Long idUsuario, long idSucursal);
 }

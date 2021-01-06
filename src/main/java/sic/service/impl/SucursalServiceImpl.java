@@ -72,8 +72,7 @@ public class SucursalServiceImpl implements ISucursalService {
       return sucursalRepository.findAllByAndEliminadaOrderByNombreAsc(false).stream()
           .filter(
               sucursal ->
-                  configuracionSucursalService
-                      .getConfiguracionSucursal(sucursal)
+                  sucursal.getConfiguracionSucursal()
                       .isPuntoDeRetiro())
           .collect(Collectors.toList());
     } else {
@@ -126,6 +125,11 @@ public class SucursalServiceImpl implements ISucursalService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_ubicacion_sin_localidad", null, Locale.getDefault()));
     }
+    if (sucursal.getConfiguracionSucursal() == null) {
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_sucursal_sin_configuracion", null, Locale.getDefault()));
+    }
   }
 
   private void crearConfiguracionSucursal(Sucursal sucursal) {
@@ -133,10 +137,9 @@ public class SucursalServiceImpl implements ISucursalService {
     configuracionSucursal.setUsarFacturaVentaPreImpresa(false);
     configuracionSucursal.setCantidadMaximaDeRenglonesEnFactura(28);
     configuracionSucursal.setFacturaElectronicaHabilitada(false);
-    configuracionSucursal.setSucursal(sucursal);
     configuracionSucursal.setVencimientoCorto(1);
     configuracionSucursal.setVencimientoLargo(1);
-    this.configuracionSucursalService.guardar(configuracionSucursal);
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
   }
 
   @Override
@@ -149,10 +152,10 @@ public class SucursalServiceImpl implements ISucursalService {
           .setLocalidad(
               ubicacionService.getLocalidadPorId(sucursal.getUbicacion().getIdLocalidad()));
     }
+    this.crearConfiguracionSucursal(sucursal);
     validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursal);
     sucursal = sucursalRepository.save(sucursal);
     this.productoService.guardarCantidadesDeSucursalNueva(sucursal);
-    crearConfiguracionSucursal(sucursal);
     logger.warn("La Sucursal {} se guardó correctamente.", sucursal);
     return sucursal;
   }
@@ -167,6 +170,7 @@ public class SucursalServiceImpl implements ISucursalService {
       photoVideoUploader.borrarImagen(
           Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
     }
+    sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
     sucursalRepository.save(sucursalParaActualizar);
   }
@@ -175,7 +179,7 @@ public class SucursalServiceImpl implements ISucursalService {
   @Transactional
   public void eliminar(Long idSucursal) {
     Sucursal sucursal = this.getSucursalPorId(idSucursal);
-    if (configuracionSucursalService.getConfiguracionSucursal(sucursal).isPredeterminada()) {
+    if (sucursal.getConfiguracionSucursal().isPredeterminada()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_sucursal_no_se_puede_eliminar_predeterminada", null, Locale.getDefault()));
@@ -185,8 +189,7 @@ public class SucursalServiceImpl implements ISucursalService {
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
-    configuracionSucursalService.eliminar(
-        configuracionSucursalService.getConfiguracionSucursal(sucursal));
+    configuracionSucursalService.eliminar(sucursal.getConfiguracionSucursal());
     sucursalRepository.save(sucursal);
   }
 

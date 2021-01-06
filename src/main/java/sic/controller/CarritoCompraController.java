@@ -47,13 +47,15 @@ public class CarritoCompraController {
     return carritoCompraService.getItemsDelCaritoCompra(idUsuarioLoggedIn, pagina, null);
   }
 
-  @GetMapping("/carrito-compra/productos/{idProducto}")
+  @GetMapping("/carrito-compra/productos/{idProducto}/sucursales/{idSucursal}")
   public ItemCarritoCompra getItemCarritoDeCompraDeUsuarioPorIdProducto(
-      @PathVariable long idProducto, @RequestHeader("Authorization") String authorizationHeader) {
+      @PathVariable long idProducto,
+      @PathVariable long idSucursal,
+      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return carritoCompraService.getItemCarritoDeCompraDeUsuarioPorIdProducto(
-        idUsuarioLoggedIn, idProducto);
+        idUsuarioLoggedIn, idProducto, idSucursal);
   }
 
   @DeleteMapping("/carrito-compra/productos/{idProducto}")
@@ -90,11 +92,12 @@ public class CarritoCompraController {
     return carritoCompraService.crearPedido(nuevaOrdenDePagoDTO, idUsuarioLoggedIn);
   }
 
-  @GetMapping("/carrito-compra/disponibilidad-stock")
+  @GetMapping("/carrito-compra/disponibilidad-stock/sucursales/{idSucursal}")
   public List<ProductoFaltanteDTO> getProductosDelCarritoSinStockDisponible(
+      @PathVariable Long idSucursal,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return carritoCompraService.getProductosDelCarritoSinStockDisponible(idUsuarioLoggedIn);
+    return carritoCompraService.getProductosDelCarritoSinStockDisponible(idUsuarioLoggedIn, idSucursal);
   }
 }

@@ -16,7 +16,7 @@ import java.util.List;
 public class PedidoDTO {
 
   private Long idPedido;
-  private Long idSucursal;
+  private long idSucursal;
   private String observaciones;
   private Long idCliente;
   private TipoDeEnvio tipoDeEnvio;

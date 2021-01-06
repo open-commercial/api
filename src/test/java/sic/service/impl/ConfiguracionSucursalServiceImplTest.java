@@ -14,6 +14,7 @@ import sic.repository.ConfiguracionSucursalRepository;
 import sic.util.CustomValidator;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {ConfiguracionSucursalServiceImpl.class, CustomValidator.class, MessageSource.class})
-public class ConfiguracionSucursalServiceImplTest {
+class ConfiguracionSucursalServiceImplTest {
 
   @MockBean ConfiguracionSucursalRepository configuracionSucursalRepository;
   @MockBean MessageSource messageSource;
@@ -32,7 +33,7 @@ public class ConfiguracionSucursalServiceImplTest {
   @Autowired ConfiguracionSucursalServiceImpl configuracionSucursalService;
 
   @Test
-  void shouldGuardarSucursal() {
+  void shouldGuardarConfiguracionSucursal() {
     ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
     configuracionSucursal.setVencimientoCorto(1L);
     configuracionSucursal.setVencimientoLargo(5L);
@@ -65,19 +66,12 @@ public class ConfiguracionSucursalServiceImplTest {
   }
 
   @Test
-  void shouldActualizarSucursal() {
+  void shouldActualizarConfiguracionSucursal() {
     ConfiguracionSucursal configuracionSucursalPersistida = new ConfiguracionSucursal();
     ConfiguracionSucursal configuracionDeSucursalParaActualizar = new ConfiguracionSucursal();
     configuracionSucursalPersistida.setPredeterminada(true);
-    assertThrows(
-        BusinessServiceException.class,
-        () ->
-            configuracionSucursalService.actualizar(
-                configuracionSucursalPersistida, configuracionDeSucursalParaActualizar));
-    verify(messageSource).getMessage(eq("mensaje_sucursal_quitar_predeterminada"), any(), any());
-    Sucursal sucursal = new Sucursal();
-    configuracionSucursalPersistida.setSucursal(sucursal);
-    configuracionSucursalPersistida.setPredeterminada(false);
+    configuracionDeSucursalParaActualizar.setPredeterminada(false);
+    configuracionDeSucursalParaActualizar.setIdConfiguracionSucursal(1L);
     configuracionDeSucursalParaActualizar.setFacturaElectronicaHabilitada(true);
     configuracionDeSucursalParaActualizar.setPasswordCertificadoAfip("");
     configuracionSucursalPersistida.setPasswordCertificadoAfip("password");
@@ -92,8 +86,26 @@ public class ConfiguracionSucursalServiceImplTest {
     configuracionSucursalPersistida.setVencimientoLargo(1L);
     configuracionDeSucursalParaActualizar.setFirmanteCertificadoAfip("firmante");
     configuracionDeSucursalParaActualizar.setNroPuntoDeVentaAfip(3);
-    configuracionSucursalService.actualizar(
-        configuracionSucursalPersistida, configuracionDeSucursalParaActualizar);
+    when(configuracionSucursalRepository.findById(1L)).thenReturn(Optional.of(configuracionSucursalPersistida));
+    assertThrows(
+        BusinessServiceException.class,
+        () ->
+            configuracionSucursalService.actualizar(configuracionDeSucursalParaActualizar));
+    verify(messageSource).getMessage(eq("mensaje_sucursal_quitar_predeterminada"), any(), any());
+    configuracionDeSucursalParaActualizar.setPredeterminada(true);
+    configuracionSucursalService.actualizar(configuracionDeSucursalParaActualizar);
     verify(configuracionSucursalRepository).save(configuracionDeSucursalParaActualizar);
+  }
+
+  @Test
+  void shouldGetCantidadMaximaDeRenglonesPorIdSucursa() {
+      configuracionSucursalService.getCantidadMaximaDeRenglonesPorIdSucursal(1L);
+      verify(configuracionSucursalRepository).getCantidadMaximaDeRenglones(1L);
+  }
+
+  @Test
+  void shouldTestIsFacturaElectronicaHabilitada() {
+    configuracionSucursalService.isFacturaElectronicaHabilitada(1L);
+    verify(configuracionSucursalRepository).isFacturaElectronicaHabilitada(1L);
   }
 }

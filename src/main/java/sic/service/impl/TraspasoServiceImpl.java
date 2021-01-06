@@ -183,7 +183,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
             .idSucursal(pedido.getIdSucursal())
             .build();
     List<ProductoFaltanteDTO> faltantes =
-        productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
+        productoService.getProductosSinStockDisponibleParaTraspaso(productosParaVerificarStockDTO);
     if (!faltantes.isEmpty()) {
       List<Sucursal> sucursales = sucursalService.getSucusales(false);
       List<NuevoTraspasoDePedidoDTO> nuevosTraspasos = new ArrayList<>();
@@ -208,7 +208,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
         Producto producto =
             productoService.getProductoNoEliminadoPorId(productoFaltante.getIdProducto());
         List<CantidadEnSucursal> listaOrdenadaPorCantidad = new ArrayList<>();
-        producto.getCantidadEnSucursales().stream()
+        productoService.calcularCantidadEnSucursalesDisponible(producto, pedido.getIdSucursal());
+        producto.getCantidadProducto().getCantidadEnSucursalesDisponible().stream()
             .filter(
                 cantidadEnSucursal ->
                     !cantidadEnSucursal.getIdSucursal().equals(pedido.getIdSucursal()))
@@ -260,10 +261,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
 
   @Override
   public void eliminarTraspasoDePedido(Pedido pedido) {
-    Traspaso traspaso = traspasoRepository.findByNroPedido(pedido.getNroPedido());
-    if (traspaso != null) {
-      this.eliminar(traspasoRepository.findByNroPedido(pedido.getNroPedido()).getIdTraspaso());
-    }
+    List<Traspaso> traspasos = traspasoRepository.findByNroPedido(pedido.getNroPedido());
+    traspasos.forEach(traspaso -> this.eliminar(traspaso.getIdTraspaso()));
   }
 
   @Override
@@ -294,8 +293,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroTraspaso = Long.toString(randomLong);
-      Traspaso t = traspasoRepository.findByNroTraspaso(nroTraspaso);
-      if (t == null) esRepetido = false;
+      esRepetido = traspasoRepository.existsByNroTraspaso(nroTraspaso);
     }
     return Long.toString(randomLong);
   }

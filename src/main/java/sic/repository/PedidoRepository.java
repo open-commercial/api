@@ -14,6 +14,8 @@ public interface PedidoRepository
   Pedido findByNroPedidoAndSucursalAndEliminado(
       long nroPedido, Sucursal sucursal, boolean eliminado);
 
+  boolean existsByNroPedidoAndSucursal(long nroPedido, Sucursal sucursal);
+
   @Query("SELECT p FROM Pedido p " + "WHERE p.estado = :estado " + "AND p.eliminado = false")
   Page<Pedido> findAllByEstadoAndEliminado(@Param("estado") EstadoPedido estado, Pageable page);
 }
