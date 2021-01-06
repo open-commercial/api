@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Created with Jaspersoft Studio version 6.13.0.final using JasperReports Library version 6.13.0-46ada4d1be8f3c5985fd0b6146f3ed44caed6f05  -->
+<!-- Created with Jaspersoft Studio version 6.16.0.final using JasperReports Library version 6.16.0-48579d909b7943b64690c65c71e07e0b80981928  -->
 <jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="ListaPreciosProductos" pageWidth="842" pageHeight="595" orientation="Landscape" columnWidth="802" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="608c624e-e655-4a3f-bb85-9c440082766b">
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
@@ -18,6 +18,7 @@
 	<queryString language="hql">
 		<![CDATA[]]>
 	</queryString>
+	<field name="urlImagen" class="java.lang.String"/>
 	<field name="codigo" class="java.lang.String">
 		<fieldDescription><![CDATA[codigo]]></fieldDescription>
 	</field>
@@ -76,7 +77,7 @@
 				<text><![CDATA[Descripción]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="555" y="175" width="75" height="16" uuid="13c3db5f-c7d4-44df-a633-2b62ed216eea"/>
+				<reportElement x="495" y="175" width="75" height="16" uuid="13c3db5f-c7d4-44df-a633-2b62ed216eea"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -89,7 +90,7 @@
 				<text><![CDATA[Precio]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="495" y="175" width="60" height="16" uuid="241e3991-3e42-4a45-91a0-232d936071ec"/>
+				<reportElement x="650" y="175" width="60" height="16" uuid="241e3991-3e42-4a45-91a0-232d936071ec"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -99,10 +100,10 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font isBold="true"/>
 				</textElement>
-				<text><![CDATA[Medida]]></text>
+				<text><![CDATA[% Bonif.]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="630" y="175" width="80" height="16" uuid="d7cc2279-bcac-415c-99f0-4ea136bdacb0"/>
+				<reportElement x="570" y="175" width="80" height="16" uuid="d7cc2279-bcac-415c-99f0-4ea136bdacb0"/>
 				<box>
 					<topPen lineWidth="1.0" lineStyle="Solid" lineColor="#000000"/>
 					<leftPen lineWidth="0.0" lineStyle="Solid" lineColor="#000000"/>
@@ -151,24 +152,24 @@
 		</band>
 	</title>
 	<detail>
-		<band height="21" splitType="Stretch">
+		<band height="60" splitType="Stretch">
 			<textField>
-				<reportElement x="0" y="0" width="80" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
+				<reportElement x="80" y="0" width="78" height="20" uuid="2262bb39-310b-4963-a571-c18185df4c80"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{codigo}]]></textFieldExpression>
 			</textField>
 			<textField>
-				<reportElement x="80" y="0" width="415" height="20" uuid="711ae2af-b035-46a2-a2e5-425295ca3e78"/>
+				<reportElement x="158" y="0" width="337" height="20" uuid="711ae2af-b035-46a2-a2e5-425295ca3e78"/>
 				<textElement verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{descripcion}]]></textFieldExpression>
 			</textField>
 			<textField pattern="¤ #,##0.##">
-				<reportElement x="555" y="0" width="75" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
+				<reportElement x="495" y="0" width="75" height="20" uuid="87b3f1e2-6d18-4fe6-b5e8-90706d7bd888"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{precioProducto}.getPrecioLista().doubleValue()]]></textFieldExpression>
 			</textField>
 			<textField pattern=" #,##0.##">
-				<reportElement x="630" y="0" width="80" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
+				<reportElement x="570" y="0" width="80" height="20" uuid="74b3a3f4-76bb-4f4d-96dd-b91848c76ba2"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{cantidadProducto}.getBulto().doubleValue()]]></textFieldExpression>
 			</textField>
@@ -177,11 +178,19 @@
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
 				<textFieldExpression><![CDATA[$F{precioProducto}.getPrecioBonificado().doubleValue()]]></textFieldExpression>
 			</textField>
-			<textField pattern="¤ #,##0.##">
-				<reportElement x="495" y="-2" width="60" height="22" uuid="09f1280c-6de7-4a38-bbd8-1c55ca886943"/>
+			<textField pattern="%#0.#">
+				<reportElement x="650" y="-2" width="60" height="22" uuid="09f1280c-6de7-4a38-bbd8-1c55ca886943"/>
 				<textElement textAlignment="Center" verticalAlignment="Middle"/>
-				<textFieldExpression><![CDATA[$F{medida}.getNombre()]]></textFieldExpression>
+				<textFieldExpression><![CDATA[$F{precioProducto}.isOferta() ? $F{precioProducto}.getPorcentajeBonificacionOferta().divide(new BigDecimal("100"), 15, RoundingMode.HALF_UP) : 
+$F{precioProducto}.getPorcentajeBonificacionPrecio().divide(new BigDecimal("100"), 15, RoundingMode.HALF_UP)]]></textFieldExpression>
 			</textField>
+			<image>
+				<reportElement x="0" y="-1" width="80" height="60" uuid="97d5605f-7c4c-409e-ab4b-d007e09fc905">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
+					<property name="com.jaspersoft.studio.unit.height" value="px"/>
+				</reportElement>
+				<imageExpression><![CDATA[$F{urlImagen}]]></imageExpression>
+			</image>
 		</band>
 	</detail>
 	<pageFooter>
