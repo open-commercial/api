@@ -512,7 +512,7 @@ class ProductoServiceImplTest {
     assertThrows(
         ServiceException.class,
         () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
-    verify(messageSource, times(2)).getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
+    verify(messageSource, times(2)).getMessage(eq("mensaje_recurso_no_encontrado"), any(), any());
     sucursal.setLogo(null);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
     assertNotNull(productoService.getListaDePreciosEnPdf(criteria));
