@@ -199,13 +199,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       for (Rol rol : usuarioLogueado.getRoles()) {
         switch (rol) {
           case VIAJANTE -> rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLogueado));
-          case COMPRADOR -> {
-            Cliente clienteRelacionado =
-                    clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
-            if (clienteRelacionado != null) {
-              rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
-            }
-          }
+          case COMPRADOR -> this.filtraPorClienteRelacionado(rsPredicate, idUsuarioLoggedIn, qCuentaCorrienteCliente);
           default -> rsPredicate.or(qCuentaCorrienteCliente.cliente.isNull());
         }
       }
@@ -213,6 +207,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     builder.and(qCuentaCorrienteCliente.eliminada.eq(false));
     return builder;
+  }
+
+  private void filtraPorClienteRelacionado(
+          BooleanBuilder rsPredicate, long idUsuarioLoggedIn, QCuentaCorrienteCliente qCuentaCorrienteCliente) {
+    Cliente clienteRelacionado =
+            clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
+    if (clienteRelacionado != null) {
+      rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
+    }
   }
 
   @Override

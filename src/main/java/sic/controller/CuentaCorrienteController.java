@@ -28,6 +28,9 @@ public class CuentaCorrienteController {
   private final IClienteService clienteService;
   private final IAuthService authService;
   private final MessageSource messageSource;
+  private static final String ID_USUARIO = "idUsuario";
+  private static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
+
 
   @Autowired
   public CuentaCorrienteController(
@@ -55,7 +58,7 @@ public class CuentaCorrienteController {
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return cuentaCorrienteService.buscarCuentaCorrienteCliente(
-        criteria, (int) claims.get("idUsuario"));
+        criteria, (int) claims.get(ID_USUARIO));
   }
 
   @PostMapping("/cuentas-corriente/proveedores/busqueda/criteria")
@@ -115,7 +118,7 @@ public class CuentaCorrienteController {
     switch (formato) {
       case "xlsx":
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.xlsx");
+        headers.set(CONTENT_DISPOSITION_HEADER, "attachment; filename=EstadoCuentaCorriente.xlsx");
         byte[] reporteXls =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
@@ -125,7 +128,7 @@ public class CuentaCorrienteController {
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       case "pdf":
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("Content-Disposition", "attachment; filename=EstadoCuentaCorriente.pdf");
+        headers.add(CONTENT_DISPOSITION_HEADER, "attachment; filename=EstadoCuentaCorriente.pdf");
         byte[] reportePDF =
             cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                 cuentaCorrienteService.getCuentaCorrientePorCliente(
@@ -146,26 +149,34 @@ public class CuentaCorrienteController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-    switch (formato) {
-      case "xlsx" -> {
-        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=ListaClientes.xlsx");
-        byte[] reporteXls =
-                cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                        criteria, (int) claims.get("idUsuario"), formato);
-        headers.setContentLength(reporteXls.length);
-        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-      }
-      case "pdf" -> {
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("Content-Disposition", "attachment; filename=ListaClientes.pdf");
-        byte[] reportePDF =
-                cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                        criteria, (int) claims.get("idUsuario"), formato);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-      }
+    return switch (formato) {
+      case "xlsx" ->
+        this.getReporteListaDeCuentasCorrienteClienteEnXlsx(headers, criteria, claims, formato);
+      case "pdf" ->
+        this.getReporteListaDeCuentasCorrienteClienteEnPdf(headers, criteria, claims, formato);
       default -> throw new BusinessServiceException(
               messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
-    }
+    };
+  }
+
+  private ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClienteEnXlsx(
+          HttpHeaders headers, BusquedaCuentaCorrienteClienteCriteria criteria, Claims claims, String formato) {
+    headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+    headers.set(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaClientes.xlsx");
+    byte[] reporteXls =
+            cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                    criteria, (int) claims.get(ID_USUARIO), formato);
+    headers.setContentLength(reporteXls.length);
+    return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+  }
+
+  private ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClienteEnPdf(
+          HttpHeaders headers, BusquedaCuentaCorrienteClienteCriteria criteria, Claims claims, String formato) {
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.add(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaClientes.pdf");
+    byte[] reportePDF =
+            cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                    criteria, (int) claims.get(ID_USUARIO), formato);
+    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 }
