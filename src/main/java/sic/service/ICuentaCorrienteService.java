@@ -1,6 +1,8 @@
 package sic.service;
 
+import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
@@ -29,9 +31,10 @@ public interface ICuentaCorrienteService {
   void eliminarCuentaCorrienteProveedor(long idProveedor);
 
   Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
-    BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
 
-  Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria);
+  Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(
+      BusquedaCuentaCorrienteProveedorCriteria criteria);
 
   Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Integer pagina);
 
@@ -61,4 +64,15 @@ public interface ICuentaCorrienteService {
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado);
 
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(Remito remito, boolean eliminado);
+
+  byte[] getReporteListaDeCuentasCorrienteClientePorCriteria(
+          BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn, String formato);
+
+  BooleanBuilder getBuilder(
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+
+  List<CuentaCorrienteCliente> buscarCuentasCorrienteClienteParaReporte(
+      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+
+  Pageable getPageable(Integer pagina, String ordenarPor, String sentido, String ordenDefault, int tamanioPagina);
 }
