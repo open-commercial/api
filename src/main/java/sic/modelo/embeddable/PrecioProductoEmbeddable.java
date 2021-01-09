@@ -48,6 +48,7 @@ public class PrecioProductoEmbeddable implements Serializable {
 
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
+    @JsonView(Views.Comprador.class)
     private BigDecimal precioLista;
 
     @JsonView(Views.Comprador.class)

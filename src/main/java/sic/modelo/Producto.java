@@ -44,10 +44,12 @@ public class Producto implements Serializable {
 
   @JsonUnwrapped
   @Embedded
+  @JsonView(Views.Comprador.class)
   private PrecioProductoEmbeddable precioProducto;
 
   @JsonUnwrapped
   @Embedded
+  @JsonView(Views.Comprador.class)
   private CantidadProductoEmbeddable cantidadProducto;
 
   @ManyToOne
