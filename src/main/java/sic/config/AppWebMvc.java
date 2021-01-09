@@ -19,8 +19,8 @@ public class AppWebMvc implements WebMvcConfigurer {
         .excludePathPatterns("/api/*/password-recovery")
         .excludePathPatterns("/api/*/registracion")
         .excludePathPatterns("/api/*/pagos/mercado-pago/notificacion")
-        .excludePathPatterns("/api/*/productos/*")
-        .excludePathPatterns("/api/*/productos/busqueda/criteria")
+        .excludePathPatterns("/api/*/productos/*/sucursales/*")
+        .excludePathPatterns("/api/*/productos/busqueda/criteria/sucursales/*")
         .excludePathPatterns("/api/*/rubros/*")
         .excludePathPatterns("/api/*/rubros");
   }
