@@ -15,7 +15,7 @@ public interface ICarritoCompraService {
 
   CarritoCompraDTO getCarritoCompra(long idUsuario);
 
-  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, int pagina, Integer tamanio);
+  Page<ItemCarritoCompra> getItemsDelCaritoCompra(long idUsuario, int pagina, boolean paginar);
 
   BigDecimal calcularTotal(long idUsuario);
 

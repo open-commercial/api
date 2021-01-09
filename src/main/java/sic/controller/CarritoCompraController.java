@@ -19,13 +19,17 @@ import sic.service.*;
 public class CarritoCompraController {
 
   private final ICarritoCompraService carritoCompraService;
+  private final IProductoService productoService;
   private final IAuthService authService;
   private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
   public CarritoCompraController(
-      ICarritoCompraService carritoCompraService, IAuthService authService) {
+      ICarritoCompraService carritoCompraService,
+      IProductoService productoService,
+      IAuthService authService) {
     this.carritoCompraService = carritoCompraService;
+    this.productoService = productoService;
     this.authService = authService;
   }
 
@@ -37,14 +41,21 @@ public class CarritoCompraController {
     return carritoCompraService.getCarritoCompra(idUsuarioLoggedIn);
   }
 
-  @GetMapping("/carrito-compra/items")
+  @GetMapping("/carrito-compra/items/sucursales/{idSucursal}")
   public Page<ItemCarritoCompra> getAllItemsDelUsuario(
       @RequestParam(required = false) Integer pagina,
+      @PathVariable long idSucursal,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     if (pagina == null || pagina < 0) pagina = 0;
-    return carritoCompraService.getItemsDelCaritoCompra(idUsuarioLoggedIn, pagina, null);
+    Page<ItemCarritoCompra> itemsCarritoCompra =
+        carritoCompraService.getItemsDelCaritoCompra(idUsuarioLoggedIn, pagina, true);
+    itemsCarritoCompra.forEach(
+        itemCarritoCompra ->
+            productoService.calcularCantidadEnSucursalesDisponible(
+                itemCarritoCompra.getProducto(), idSucursal));
+    return itemsCarritoCompra;
   }
 
   @GetMapping("/carrito-compra/productos/{idProducto}/sucursales/{idSucursal}")

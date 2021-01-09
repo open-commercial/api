@@ -17,6 +17,7 @@ import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.service.impl.AuthServiceImpl;
 import sic.service.impl.CarritoCompraServiceImpl;
+import sic.service.impl.ProductoServiceImpl;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 class CarritoCompraControllerTest {
 
   @MockBean CarritoCompraServiceImpl carritoCompraService;
+  @MockBean ProductoServiceImpl productoService;
   @MockBean AuthServiceImpl authService;
   @MockBean MessageSource messageSource;
 

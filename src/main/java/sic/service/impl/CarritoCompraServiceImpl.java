@@ -63,25 +63,25 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   public BigDecimal calcularTotal(long idUsuario) {
     BigDecimal total = BigDecimal.ZERO;
     List<ItemCarritoCompra> itemCarritoCompra =
-        this.getItemsDelCaritoCompra(idUsuario, 0, Integer.MAX_VALUE).getContent();
+        this.getItemsDelCaritoCompra(idUsuario, 0, false).getContent();
     for (ItemCarritoCompra i : itemCarritoCompra) {
-        total = total.add(i.getImporte());
+      total = total.add(i.getImporte());
     }
     return total;
   }
 
   @Override
   public Page<ItemCarritoCompra> getItemsDelCaritoCompra(
-      long idUsuario, int pagina, Integer tamanio) {
+      long idUsuario, int pagina, boolean paginar) {
     Pageable pageable;
-    if (tamanio != null) {
-      pageable =
-          PageRequest.of(pagina, tamanio, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
-    } else {
+    if (paginar)
       pageable =
           PageRequest.of(
               pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
-    }
+    else
+      pageable =
+          PageRequest.of(
+              pagina, Integer.MAX_VALUE, Sort.by(Sort.Direction.DESC, "idItemCarritoCompra"));
     Page<ItemCarritoCompra> items =
         carritoCompraRepository.findAllByUsuario(
             usuarioService.getUsuarioNoEliminadoPorId(idUsuario), pageable);
@@ -95,10 +95,9 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     this.calcularImporteBonificado(itemCarritoCompra);
-    if (itemCarritoCompra != null) {
+    if (itemCarritoCompra != null)
       productoService.calcularCantidadEnSucursalesDisponible(
           itemCarritoCompra.getProducto(), idSucursal);
-    }
     return itemCarritoCompra;
   }
 
