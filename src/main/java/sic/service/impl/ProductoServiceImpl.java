@@ -1141,7 +1141,8 @@ public class ProductoServiceImpl implements IProductoService {
             .forEach(cantidadesEnSucursales::add);
     producto.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadesEnSucursales);
     producto.getCantidadProducto()
-            .setCantidadTotalEnSucursalesDisponible(cantidadesEnSucursales.stream().map(CantidadEnSucursal::getCantidad)
+            .setCantidadTotalEnSucursalesDisponible(cantidadesEnSucursales.stream()
+                    .map(CantidadEnSucursal::getCantidad)
                     .reduce(BigDecimal.ZERO, BigDecimal::add));
     return producto;
   }

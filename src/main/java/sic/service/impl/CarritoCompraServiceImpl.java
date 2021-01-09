@@ -95,7 +95,10 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     ItemCarritoCompra itemCarritoCompra =
         this.carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     this.calcularImporteBonificado(itemCarritoCompra);
-    productoService.calcularCantidadEnSucursalesDisponible(itemCarritoCompra.getProducto(), idSucursal);
+    if (itemCarritoCompra != null) {
+      productoService.calcularCantidadEnSucursalesDisponible(
+          itemCarritoCompra.getProducto(), idSucursal);
+    }
     return itemCarritoCompra;
   }
 
