@@ -415,9 +415,13 @@ class ProductoServiceImplTest {
     Producto producto1 = new Producto();
     producto1.setIdProducto(1L);
     producto1.setCodigo("1a");
+    producto1.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto1.setPrecioProducto(new PrecioProductoEmbeddable());
     Producto producto2 = new Producto();
     producto2.setIdProducto(2L);
     producto2.setCodigo("2b");
+    producto2.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto2.setPrecioProducto(new PrecioProductoEmbeddable());
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
     when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
     productoService.actualizarMultiples(

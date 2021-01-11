@@ -768,7 +768,6 @@ public class ProductoServiceImpl implements IProductoService {
           p.getCantidadProducto().setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
       }
       if (actualizaPrecios) {
-        p.setPrecioProducto(new PrecioProductoEmbeddable());
         p.getPrecioProducto().setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
         p.getPrecioProducto().setGananciaPorcentaje(productosParaActualizarDTO.getGananciaPorcentaje());
         p.getPrecioProducto().setGananciaNeto(this.calcularGananciaNeto(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
@@ -789,7 +788,6 @@ public class ProductoServiceImpl implements IProductoService {
         }
       }
       if (aplicaDescuentoRecargoPorcentaje) {
-        p.setPrecioProducto(new PrecioProductoEmbeddable());
         p.getPrecioProducto().setPrecioCosto(p.getPrecioProducto().getPrecioCosto().multiply(multiplicador));
         p.getPrecioProducto().setGananciaNeto(this.calcularGananciaNeto(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
         p.getPrecioProducto().setPrecioVentaPublico(this.calcularPVP(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
