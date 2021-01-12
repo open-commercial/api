@@ -350,7 +350,6 @@ public class ProductoServiceImpl implements IProductoService {
         producto.getCantidadProducto().getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.getCantidadProducto().setHayStock(producto.getCantidadProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     producto.getCantidadProducto().setCantMinima(nuevoProductoDTO.getCantMinima());
     producto.getCantidadProducto().setBulto(nuevoProductoDTO.getBulto());
     producto.setPrecioProducto(new PrecioProductoEmbeddable());
@@ -654,7 +653,6 @@ public class ProductoServiceImpl implements IProductoService {
         producto.getCantidadProducto().getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.getCantidadProducto().setHayStock(producto.getCantidadProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     producto = productoRepository.save(producto);
     logger.warn(
         messageSource.getMessage(
@@ -677,7 +675,6 @@ public class ProductoServiceImpl implements IProductoService {
         producto.getCantidadProducto().getCantidadEnSucursales().stream()
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
-    producto.getCantidadProducto().setHayStock(producto.getCantidadProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
     producto = productoRepository.save(producto);
     logger.warn(
         messageSource.getMessage(
@@ -1266,7 +1263,6 @@ public class ProductoServiceImpl implements IProductoService {
             .cantidadEnSucursales(cantidadEnSucursales)
             .cantidadTotalEnSucursales(productoDTO.getCantidadTotalEnSucursales())
             .cantMinima(productoDTO.getCantMinima())
-            .hayStock(productoDTO.isHayStock())
             .bulto(productoDTO.getBulto())
             .ilimitado(productoDTO.isIlimitado())
             .build();

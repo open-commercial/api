@@ -182,8 +182,6 @@ public class ProductoController {
                       .stream()
                       .map(CantidadEnSucursal::getCantidad)
                       .reduce(BigDecimal.ZERO, BigDecimal::add));
-      productoPorActualizar.getCantidadProducto().setHayStock(
-              productoPorActualizar.getCantidadProducto().getCantidadTotalEnSucursales().compareTo(BigDecimal.ZERO) > 0);
       if (productoPorActualizar.getCantidadProducto().getBulto() == null)
         productoPorActualizar.getCantidadProducto().setBulto(productoPersistido.getCantidadProducto().getBulto());
     } else {

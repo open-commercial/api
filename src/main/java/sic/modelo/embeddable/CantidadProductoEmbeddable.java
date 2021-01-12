@@ -52,9 +52,6 @@ public class CantidadProductoEmbeddable implements Serializable  {
     @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
     private BigDecimal cantMinima;
 
-    @JsonView(Views.Comprador.class)
-    private boolean hayStock;
-
     @Column(precision = 25, scale = 15)
     @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_venta_minima_invalida}")
     @NotNull(message = "{mensaje_producto_cantidad_venta_minima_invalida}")
