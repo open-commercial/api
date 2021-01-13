@@ -10,6 +10,7 @@ import org.springframework.data.domain.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -61,7 +62,10 @@ public class ProductoServiceImpl implements IProductoService {
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
+  private final ICorreoElectronicoService correoElectronicoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 15;
+  private static final String FORMATO_XLSX = "xlsx";
+  private static final String FORMATO_PDF = "pdf";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -79,6 +83,7 @@ public class ProductoServiceImpl implements IProductoService {
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
     IClienteService clienteService,
+    ICorreoElectronicoService correoElectronicoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -92,6 +97,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
     this.clienteService = clienteService;
+    this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -1043,18 +1049,34 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
+  @Async
+  public void getListaDePreciosEnXls(BusquedaProductoCriteria criteria, long idSucursal) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    return this.getListaDePrecios(productos, "xlsx");
+    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
+            this.getListaDePrecios(productos, FORMATO_XLSX), FORMATO_XLSX);
   }
 
   @Override
-  public byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
+  @Async
+  public void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    return this.getListaDePrecios(productos, "pdf");
+    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
+            this.getListaDePrecios(productos, FORMATO_PDF), FORMATO_PDF);
   }
 
-  private byte[] getListaDePrecios(List<Producto> productos, String formato) {
+  @Override
+  public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato) {
+    correoElectronicoService.enviarEmail(
+            mailTo,
+            "",
+            "Listado de productos",
+            "",
+            listaDeProductos,
+            "ListaDeProductos." + formato);
+  }
+
+  @Async
+  public byte[] getListaDePrecios(List<Producto> productos, String formato) {
     Map<String, Object> params = new HashMap<>();
     Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
