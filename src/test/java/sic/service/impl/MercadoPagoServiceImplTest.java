@@ -94,11 +94,6 @@ class MercadoPagoServiceImplTest {
             .build();
     MercadoPagoPreferenceDTO mercadoPagoPreferenceDTO =
         mercadoPagoService.crearNuevaPreference(1L, nuevaOrdenDePagoDTO, "localhost");
-    long[] idProducto = new long[]{1L, 2L};
-    BigDecimal[] cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
-    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
-            ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
-    verify(productoService).getProductosSinStockDisponible(productosParaVerificarStockDTO);
     assertNotNull(mercadoPagoPreferenceDTO);
     assertNotNull(mercadoPagoPreferenceDTO.getId());
     assertNotEquals("", mercadoPagoPreferenceDTO.getId());
@@ -135,6 +130,11 @@ class MercadoPagoServiceImplTest {
     when(carritoCompraService.calcularTotal(1L)).thenReturn(new BigDecimal("1000.00"));
     MercadoPagoPreferenceDTO mercadoPagoPreference =
         mercadoPagoService.crearNuevaPreference(1L, ordenDePagoPedido, "localhost");
+    long[] idProducto = new long[]{1L, 2L};
+    BigDecimal[] cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
+    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+            ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
+    verify(productoService).getProductosSinStockDisponible(productosParaVerificarStockDTO);
     assertNotNull(mercadoPagoPreference.getId());
     assertNotNull(mercadoPagoPreference.getInitPoint());
     assertEquals('-', mercadoPagoPreference.getId().charAt(9));
