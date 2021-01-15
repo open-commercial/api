@@ -1065,9 +1065,6 @@ public class ProductoServiceImpl implements IProductoService {
       try {
         params.put(
                 "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
-        params.put(
-                "productoSinImagen", new ImageIcon(ImageIO.read(Objects.requireNonNull(
-                        this.getClass().getClassLoader().getResource("producto_sin_imagen.png")))).getImage());
       } catch (IOException | NullPointerException ex) {
         throw new ServiceException(messageSource.getMessage(
                 "mensaje_recurso_no_encontrado", null, Locale.getDefault()), ex);
