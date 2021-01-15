@@ -213,7 +213,7 @@ $F{precioProducto}.getPorcentajeBonificacionPrecio().divide(new BigDecimal("100"
 					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<imageExpression><![CDATA[$F{urlImagen} == null ? $P{productoSinImagen} : $F{urlImagen}.replace("/upload", "/upload/q_10");]]></imageExpression>
+				<imageExpression><![CDATA[$F{urlImagen} == null ? $P{productoSinImagen}.replace("/upload", "/upload/q_10")  : $F{urlImagen}.replace("/upload", "/upload/q_10");]]></imageExpression>
 			</image>
 		</band>
 	</detail>
