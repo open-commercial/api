@@ -62,10 +62,10 @@ public class ProductoServiceImpl implements IProductoService {
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
-  private final ICorreoElectronicoService correoElectronicoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 15;
   private static final String FORMATO_XLSX = "xlsx";
   private static final String FORMATO_PDF = "pdf";
+  private static final String URL_PRODUCTO_SIN_IMAGEN = "https://res.cloudinary.com/hf0vu1bg2/image/upload/q_10/f_jpg/v1545616229/assets/sin_imagen.png";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -83,7 +83,6 @@ public class ProductoServiceImpl implements IProductoService {
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
     IClienteService clienteService,
-    ICorreoElectronicoService correoElectronicoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -97,7 +96,6 @@ public class ProductoServiceImpl implements IProductoService {
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
     this.clienteService = clienteService;
-    this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -1065,6 +1063,8 @@ public class ProductoServiceImpl implements IProductoService {
       try {
         params.put(
                 "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+        params.put(
+                "productoSinImagen", new ImageIcon(ImageIO.read(new URL(URL_PRODUCTO_SIN_IMAGEN))).getImage());
       } catch (IOException | NullPointerException ex) {
         throw new ServiceException(messageSource.getMessage(
                 "mensaje_recurso_no_encontrado", null, Locale.getDefault()), ex);
