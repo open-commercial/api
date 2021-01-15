@@ -515,18 +515,15 @@ class ProductoServiceImplTest {
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     assertThrows(
         ServiceException.class,
-        () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build(), 1L));
+        () -> productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build()));
     assertThrows(
         ServiceException.class,
-        () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build(), 1L));
+        () -> productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build()));
     verify(messageSource, times(2)).getMessage(eq("mensaje_recurso_no_encontrado"), any(), any());
     sucursal.setLogo(null);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
-    productoService.getListaDePreciosEnPdf(criteria, 1L);
-    productoService.getListaDePreciosEnXls(criteria, 1L);
-    verify(correoElectronicoService, times(2))
-        .enviarEmail(
-            eq("correo@gmail.com"), eq(""), eq("Listado de productos"), eq(""), any(), any());
+    assertNotNull(productoService.getListaDePreciosEnPdf(criteria));
+    assertNotNull(productoService.getListaDePreciosEnXls(criteria));
   }
 
   @Test

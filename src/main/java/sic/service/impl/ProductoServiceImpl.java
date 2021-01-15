@@ -1046,30 +1046,15 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  @Async
-  public void getListaDePreciosEnXls(BusquedaProductoCriteria criteria, long idSucursal) {
+  public byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
-            this.getListaDePrecios(productos, FORMATO_XLSX), FORMATO_XLSX);
+    return this.getListaDePrecios(productos, FORMATO_XLSX);
   }
 
   @Override
-  @Async
-  public void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal) {
+  public byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
-            this.getListaDePrecios(productos, FORMATO_PDF), FORMATO_PDF);
-  }
-
-  @Override
-  public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato) {
-    correoElectronicoService.enviarEmail(
-            mailTo,
-            "",
-            "Listado de productos",
-            "",
-            listaDeProductos,
-            "ListaDeProductos." + formato);
+    return this.getListaDePrecios(productos, FORMATO_PDF);
   }
 
   @Async
