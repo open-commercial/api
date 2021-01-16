@@ -77,9 +77,11 @@ public interface IProductoService {
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  byte[] getListaDePreciosEnXls(BusquedaProductoCriteria criteria);
+  void getListaDePreciosEnXls(BusquedaProductoCriteria criteria, long idSucursal);
 
-  byte[] getListaDePreciosEnPdf(BusquedaProductoCriteria criteria);
+  void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal);
+
+  void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato);
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 

@@ -109,26 +109,19 @@ public class ProductoController {
     return productoService.calcularValorStock(criteria);
   }
 
-  @PostMapping("/productos/reporte/criteria")
-  public ResponseEntity<byte[]> getListaDePrecios(
+  @PostMapping("/productos/reporte/criteria/sucursales/{idSucursal}")
+  public void getListaDePrecios(
           @RequestBody BusquedaProductoCriteria criteria,
+          @PathVariable long idSucursal,
           @RequestParam(required = false) String formato) {
-    HttpHeaders headers = new HttpHeaders();
-    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     if (formato == null || formato.isEmpty()) {
       formato = "xlsx";
     }
     switch (formato) {
-      case "xlsx" -> {
-        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
-        headers.set("Content-Disposition", "attachment; filename=ListaPrecios.xlsx");
-        return new ResponseEntity<>(productoService.getListaDePreciosEnXls(criteria), headers, HttpStatus.OK);
-      }
-      case "pdf" -> {
-        headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.add("Content-Disposition", "inline; filename=ListaPrecios.pdf");
-        return new ResponseEntity<>(productoService.getListaDePreciosEnPdf(criteria), headers, HttpStatus.OK);
-      }
+      case "xlsx" ->
+              productoService.getListaDePreciosEnXls(criteria, idSucursal);
+      case "pdf" ->
+              productoService.getListaDePreciosEnPdf(criteria, idSucursal);
       default -> throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
