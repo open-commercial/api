@@ -164,12 +164,12 @@ public class SucursalServiceImpl implements ISucursalService {
   @Transactional
   public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida) {
     customValidator.validar(sucursalParaActualizar);
-    if (sucursalPersistida.getLogo() != null
+    /*if (sucursalPersistida.getLogo() != null
         && !sucursalPersistida.getLogo().isEmpty()
         && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
       photoVideoUploader.borrarImagen(
           Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
-    }
+    }*/
     sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
     sucursalRepository.save(sucursalParaActualizar);
@@ -186,9 +186,9 @@ public class SucursalServiceImpl implements ISucursalService {
     }
     sucursal.setEliminada(true);
     sucursal.setUbicacion(null);
-    if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
+    /*if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
-    }
+    }*/
     configuracionSucursalService.eliminar(sucursal.getConfiguracionSucursal());
     sucursalRepository.save(sucursal);
   }
