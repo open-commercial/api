@@ -12,19 +12,23 @@ import org.springframework.stereotype.Service;
 import sic.service.IPhotoVideoUploader;
 import sic.exception.ServiceException;
 
+import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
 
   @Value("${CLOUDINARY_URL}")
   private String cloudinaryUrl;
-
+  private static final String PATTERN = "^https:\\/\\/res.cloudinary.com\\/.*";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   
@@ -71,6 +75,30 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_al_borrar_imagen", null, Locale.getDefault()),
           ex);
+    }
+  }
+
+  @Override
+  public void isUrlValida(String url) {
+    if (url != null) {
+      if (url.isEmpty()) {
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_url_imagen_no_valida", null, Locale.getDefault()));
+      }
+      Pattern pattern = Pattern.compile(PATTERN);
+      Matcher matcher = pattern.matcher(url);
+      if (matcher.matches()) {
+        try {
+          ImageIO.read(new URL(url));
+        } catch (IOException | NullPointerException ex) {
+          throw new ServiceException(
+              messageSource.getMessage("mensaje_recurso_no_encontrado", null, Locale.getDefault()),
+              ex);
+        }
+      } else {
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_url_imagen_no_valida", null, Locale.getDefault()));
+      }
     }
   }
 }

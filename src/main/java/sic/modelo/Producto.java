@@ -87,6 +87,9 @@ public class Producto implements Serializable {
 
   private boolean eliminado;
 
+  @Pattern(
+      regexp = "^https:\\/\\/res.cloudinary.com\\/.*",
+      message = "{mensaje_url_imagen_no_valida}")
   @JsonView(Views.Comprador.class)
   private String urlImagen;
 

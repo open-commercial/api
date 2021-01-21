@@ -90,7 +90,6 @@ class SucursalServiceImplTest {
     sucursalPersistida.setUbicacion(ubicacion);
     sucursalPersistida.setLogo("Logo");
     sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida);
-    //verify(photoVideoUploader).borrarImagen("Sucursal1");
     verify(sucursalRepository).save(sucursalParaActualizar);
   }
 

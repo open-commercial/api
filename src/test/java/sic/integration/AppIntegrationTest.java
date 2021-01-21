@@ -698,7 +698,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un producto con imagen")
+  @DisplayName("Dar de alta un producto con imagen, luego actualizarlo quitando el enlace de su imagen")
   @Order(6)
   void testEscenarioAltaDeProductoConImagen() throws IOException {
     this.iniciarSesionComoAdministrador();
@@ -764,6 +764,11 @@ class AppIntegrationTest {
             nuevoProductoCuatro,
             Producto.class);
     assertNotNull(productoConImagen.getUrlImagen());
+    productoConImagen.setUrlImagen(null);
+    restTemplate.put(apiPrefix + "/productos", productoConImagen);
+    productoConImagen = restTemplate.getForObject(apiPrefix + "/productos/" + productoConImagen.getIdProducto()
+            + "/sucursales/1", Producto.class);
+    assertNull(productoConImagen.getUrlImagen());
   }
 
   @Test

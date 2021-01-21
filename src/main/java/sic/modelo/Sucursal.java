@@ -3,8 +3,7 @@ package sic.modelo;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.*;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -16,9 +15,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.controller.Views;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "sucursal")
@@ -70,6 +66,9 @@ public class Sucursal implements Serializable {
   @JoinColumn(name = "idConfiguracionSucursal", referencedColumnName = "idConfiguracionSucursal")
   private ConfiguracionSucursal configuracionSucursal;
 
+  @Pattern(
+      regexp = "^https:\\/\\/res.cloudinary.com\\/.*",
+      message = "{mensaje_url_imagen_no_valida}")
   private String logo;
 
   private boolean eliminada;

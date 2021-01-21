@@ -401,12 +401,6 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
     customValidator.validar(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
-    /*if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
-        && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())) {
-      photoVideoUploader.borrarImagen(
-          Producto.class.getSimpleName() + productoPersistido.getIdProducto());
-    }*/
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
@@ -415,6 +409,7 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
+    photoVideoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
         messageSource.getMessage(
@@ -707,9 +702,6 @@ public class ProductoServiceImpl implements IProductoService {
       }
       carritoCompraService.eliminarItem(i);
       producto.setEliminado(true);
-      /*if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
-        photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
-      }*/
       productos.add(producto);
     }
     productoRepository.saveAll(productos);
