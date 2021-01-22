@@ -698,7 +698,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un producto con imagen, luego actualizarlo quitando el enlace de su imagen")
+  @DisplayName("Dar de alta un producto con imagen")
   @Order(6)
   void testEscenarioAltaDeProductoConImagen() throws IOException {
     this.iniciarSesionComoAdministrador();
@@ -764,16 +764,49 @@ class AppIntegrationTest {
             nuevoProductoCuatro,
             Producto.class);
     assertNotNull(productoConImagen.getUrlImagen());
-    productoConImagen.setUrlImagen(null);
-    restTemplate.put(apiPrefix + "/productos", productoConImagen);
-    productoConImagen = restTemplate.getForObject(apiPrefix + "/productos/" + productoConImagen.getIdProducto()
+  }
+
+  @Test
+  @DisplayName("Actualizar el producto modificando la imagen, y luego eliminar el enlace")
+  @Order(7)
+  void testEscenarioModificarImagenDeProducto() throws IOException {
+    this.iniciarSesionComoAdministrador();
+    BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder()
+            .descripcion("Corta Papas - Vegetales")
+            .build();
+    HttpEntity<BusquedaProductoCriteria> requestEntityProductos =
+            new HttpEntity<>(productosCriteria);
+    PaginaRespuestaRest<Producto> resultadoBusqueda =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                            HttpMethod.POST,
+                            requestEntityProductos,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusqueda);
+    List<Producto> productosRecuperados = resultadoBusqueda.getContent();
+    assertEquals(1, productosRecuperados.size());
+    Producto productoParaActualizar = productosRecuperados.get(0);
+    BufferedImage bImage = ImageIO.read(getClass().getResource("/imagenProductoTest.jpeg"));
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ImageIO.write(bImage, "jpeg", bos);
+    productoParaActualizar.setImagen(bos.toByteArray());
+    restTemplate.put(apiPrefix + "/productos", productoParaActualizar);
+    productoParaActualizar = restTemplate.getForObject(apiPrefix + "/productos/" + productoParaActualizar.getIdProducto()
             + "/sucursales/1", Producto.class);
-    assertNull(productoConImagen.getUrlImagen());
+    assertNotNull(productoParaActualizar.getUrlImagen());
+    productoParaActualizar.setUrlImagen(null);
+    restTemplate.put(apiPrefix + "/productos", productoParaActualizar);
+    productoParaActualizar = restTemplate.getForObject(apiPrefix + "/productos/" + productoParaActualizar.getIdProducto()
+            + "/sucursales/1", Producto.class);
+    assertNull(productoParaActualizar.getUrlImagen());
+
   }
 
   @Test
   @DisplayName("Dar de alta un cliente y levantar un pedido con reserva, verificar stock")
-  @Order(7)
+  @Order(8)
   void testEscenarioAltaClienteYPedido() {
     this.iniciarSesionComoAdministrador();
     Usuario credencial =
@@ -880,7 +913,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName(
       "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando y verificando stock")
-  @Order(8)
+  @Order(9)
   void testEscenarioModificacionPedido() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
@@ -1000,7 +1033,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName(
       "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo y verificar stock")
-  @Order(9)
+  @Order(10)
   void testEscenarioVenta1() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
@@ -1214,7 +1247,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName(
           "Dar de alta un transportista, luego crear dos remitos por las facturas anteriores usando ese transportista")
-  @Order(10)
+  @Order(11)
   void testEscenarioRemito() {
     this.iniciarSesionComoAdministrador();
     TransportistaDTO transportistaNuevo = new TransportistaDTO();
@@ -1298,7 +1331,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Realizar devolucion parcial de productos y verificar saldo CC")
-  @Order(11)
+  @Order(12)
   void testEscenarioVenta2() {
     this.iniciarSesionComoAdministrador();
     BusquedaFacturaVentaCriteria criteria =
@@ -1394,7 +1427,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Registrar un cliente nuevo y enviar un pedido mediante carrito de compra")
-  @Order(12)
+  @Order(13)
   void testEscenarioRegistracionYPedidoDelNuevoCliente() {
     RegistracionClienteAndUsuarioDTO registro =
         RegistracionClienteAndUsuarioDTO.builder()
@@ -1503,7 +1536,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Cerrar caja y verificar movimientos")
-  @Order(13)
+  @Order(14)
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1578,7 +1611,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo")
-  @Order(14)
+  @Order(15)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1664,7 +1697,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar un pedido, luego intentar cancelarlo sin éxito")
-  @Order(15)
+  @Order(16)
   void testEscenarioFacturarPedidoAndIntentarEliminarlo() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
@@ -1798,7 +1831,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Actualizar stock de un producto para tener cantidades en dos sucursales")
-  @Order(16)
+  @Order(17)
   void testEscenarioActualizarStockParaDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Cliente clienteParaEditar = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
@@ -1878,7 +1911,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Realizar un pedido que requiera del stock de ambas")
-  @Order(17)
+  @Order(18)
   void testEscenarioPedidoConStockDeDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
@@ -1968,7 +2001,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar el pedido anterior")
-  @Order(18)
+  @Order(19)
   void testEscenarioFacturarPedido() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria pedidoCriteria =
@@ -2024,7 +2057,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Verificar stock y cerrar caja")
-  @Order(19)
+  @Order(20)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();

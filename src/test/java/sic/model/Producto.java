@@ -49,5 +49,6 @@ public class Producto {
   private LocalDate fechaVencimiento;
   private boolean eliminado;
   private String urlImagen;
+  private byte[] imagen;
   private Long version;
 }
