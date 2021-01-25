@@ -801,7 +801,6 @@ class AppIntegrationTest {
     productoParaActualizar = restTemplate.getForObject(apiPrefix + "/productos/" + productoParaActualizar.getIdProducto()
             + "/sucursales/1", Producto.class);
     assertNull(productoParaActualizar.getUrlImagen());
-
   }
 
   @Test
