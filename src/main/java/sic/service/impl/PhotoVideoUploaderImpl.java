@@ -28,7 +28,7 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
 
   @Value("${CLOUDINARY_URL}")
   private String cloudinaryUrl;
-  private static final String PATTERN = "^https:\\/\\/res.cloudinary.com\\/.*";
+  private static final String CLOUDINARY_PATTERN = "^https:\\/\\/res.cloudinary.com\\/.*";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   
@@ -85,7 +85,7 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
         throw new ServiceException(
             messageSource.getMessage("mensaje_url_imagen_no_valida", null, Locale.getDefault()));
       }
-      Pattern pattern = Pattern.compile(PATTERN);
+      Pattern pattern = Pattern.compile(CLOUDINARY_PATTERN);
       Matcher matcher = pattern.matcher(url);
       if (matcher.matches()) {
         try {
