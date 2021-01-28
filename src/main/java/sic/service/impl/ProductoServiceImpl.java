@@ -402,10 +402,10 @@ public class ProductoServiceImpl implements IProductoService {
     customValidator.validar(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
-        && (productoPorActualizar.getUrlImagen() == null
+            && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())) {
       photoVideoUploader.borrarImagen(
-          Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+              Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
@@ -415,6 +415,7 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
+    photoVideoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
         messageSource.getMessage(

@@ -165,13 +165,14 @@ public class SucursalServiceImpl implements ISucursalService {
   public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida) {
     customValidator.validar(sucursalParaActualizar);
     if (sucursalPersistida.getLogo() != null
-        && !sucursalPersistida.getLogo().isEmpty()
-        && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
+            && !sucursalPersistida.getLogo().isEmpty()
+            && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
       photoVideoUploader.borrarImagen(
-          Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
+              Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
     }
     sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
+    photoVideoUploader.isUrlValida(sucursalParaActualizar.getLogo());
     sucursalRepository.save(sucursalParaActualizar);
   }
 
