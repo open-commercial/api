@@ -799,7 +799,6 @@ class ProductoServiceImplTest {
     cantidadesEnSucursalProducto.add(cantidadEnSucursalProducto3);
     producto1.setCantidadProducto(new CantidadProductoEmbeddable());
     producto1.getCantidadProducto().setCantidadEnSucursales(cantidadesEnSucursalProducto);
-    when(pedidoService.getCantidadReservadaDeProducto(1L, 1L)).thenReturn(BigDecimal.TEN);
     Producto productoRecuperado =
         productoService.calcularCantidadEnSucursalesDisponible(producto1, 1L);
     assertNotNull(productoRecuperado);
@@ -808,16 +807,6 @@ class ProductoServiceImplTest {
     assertEquals(2, listaCantidadEnSucursales.size());
     assertEquals(BigDecimal.ONE, listaCantidadEnSucursales.get(0).getCantidad());
     assertEquals(BigDecimal.TEN, listaCantidadEnSucursales.get(1).getCantidad());
-  }
-
-  @Test
-  void shouldCalcularCantidadReservada() {
-    when(pedidoService.getCantidadReservadaDeProducto(1L, 1L)).thenReturn(BigDecimal.TEN);
-    Producto producto = new Producto();
-    producto.setIdProducto(1L);
-    producto.setCantidadProducto(new CantidadProductoEmbeddable());
-    producto = productoService.calcularCantidadReservada(producto, 1L);
-    assertEquals(BigDecimal.TEN, producto.getCantidadProducto().getCantidadReservada());
   }
 
   @Test
@@ -1021,5 +1010,17 @@ class ProductoServiceImplTest {
     assertEquals(2L, productoFaltante.getIdSucursal());
     assertEquals(BigDecimal.TEN, productoFaltante.getCantidadSolicitada());
     assertEquals(BigDecimal.ONE, productoFaltante.getCantidadDisponible());
+  }
+
+  @Test
+  void shouldAgregarCantidadReservada() {
+    productoService.agregarCantidadReservada(1L, BigDecimal.TEN);
+    verify(productoRepository).actualizarCantidadReservada(1L, BigDecimal.TEN);
+  }
+
+  @Test
+  void shouldQuitarCantidadReservada() {
+    productoService.quitarCantidadReservada(1L, BigDecimal.TEN);
+    verify(productoRepository).actualizarCantidadReservada(1L, BigDecimal.TEN.negate());
   }
 }

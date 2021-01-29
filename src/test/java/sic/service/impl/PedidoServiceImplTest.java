@@ -9,6 +9,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
@@ -51,9 +52,16 @@ class PedidoServiceImplTest {
   void shouldCancelarPedidoAbierto() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
+    when(pedidoRepository.save(pedido)).thenReturn(pedido);
     pedidoService.cancelar(pedido);
-    verify(pedidoRepository, times(1)).save(pedido);
+    verify(pedidoRepository).save(pedido);
   }
 
   @Test
@@ -309,5 +317,80 @@ class PedidoServiceImplTest {
                 "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
                 "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
     assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
+  }
+
+  @Test
+  void shouldActualizarCantidadReservadaDeProductosPorAlta() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
+    pedidoService.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido);
+    verify(productoService).agregarCantidadReservada(1L, BigDecimal.TEN);
+  }
+
+  @Test
+  void shouldActualizarCantidadReservadaDeProductosPorCancelacion() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.CANCELADO);
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
+    pedidoService.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido);
+    verify(productoService).quitarCantidadReservada(1L, BigDecimal.TEN);
+  }
+
+  @Test
+  void shouldThrowsServiceExceptionActualizarCantidadReservadaDeProductosPorAltaOrCancelacion() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.CERRADO);
+    assertThrows(
+        ServiceException.class,
+        () -> pedidoService.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido));
+    verify(messageSource)
+        .getMessage(eq("mensaje_producto_error_actualizar_cantidad_reservada"), any(), any());
+  }
+
+  @Test
+  void shouldActualizarCantidadReservadaDeProductosPorModificacion() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
+    List<RenglonPedido> renglonesAnterioresPedido = new ArrayList<>();
+    RenglonPedido renglonAnteriorPedido = new RenglonPedido();
+    renglonAnteriorPedido.setIdProductoItem(5L);
+    renglonAnteriorPedido.setCantidad(BigDecimal.ONE);
+    renglonesAnterioresPedido.add(renglonAnteriorPedido);
+    pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido);
+    verify(productoService).quitarCantidadReservada(5L, BigDecimal.ONE);
+    verify(productoService).agregarCantidadReservada(1L, BigDecimal.TEN);
+  }
+
+  @Test
+  void shouldThrowsServiceExceptionActualizarCantidadReservadaDeProductosPorModificacion() {
+    Pedido pedido = new Pedido();
+    pedido.setEstado(EstadoPedido.CANCELADO);
+    List<RenglonPedido> renglonesAnterioresPedido = new ArrayList<>();
+    RenglonPedido renglonAnteriorPedido = new RenglonPedido();
+    renglonAnteriorPedido.setIdProductoItem(5L);
+    renglonAnteriorPedido.setCantidad(BigDecimal.ONE);
+    renglonesAnterioresPedido.add(renglonAnteriorPedido);
+    assertThrows(
+            ServiceException.class,
+            () -> pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido));
+    verify(messageSource)
+            .getMessage(eq("mensaje_producto_error_actualizar_cantidad_reservada"), any(), any());
   }
 }
