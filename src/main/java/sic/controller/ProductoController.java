@@ -229,13 +229,14 @@ public class ProductoController {
     productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
 
-  @GetMapping("/productos/favoritos")
+  @GetMapping("/productos/favoritos/sucursales/{idSucursal}")
   public Page<Producto> getProductosFavoritosDelCliente(
+          @PathVariable long idSucursal,
           @RequestParam int pagina,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-    return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, pagina);
+    return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, idSucursal, pagina);
   }
 
   @DeleteMapping("/productos/{idProducto}/favoritos")

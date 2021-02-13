@@ -1192,7 +1192,7 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina) {
+  public Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, long idSucursal, int pagina) {
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     QProductoFavorito qProductoFavorito = QProductoFavorito.productoFavorito;
     BooleanBuilder builder = new BooleanBuilder();
@@ -1210,6 +1210,7 @@ public class ProductoServiceImpl implements IProductoService {
                     productoFavorito -> {
                       Producto producto = productoFavorito.getProducto();
                       producto.setFavorito(true);
+                      this.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
                       productos.add(producto);
                     });
     return new PageImpl<>(productos, pageable.getPageable(), pageable.getTotalElements());

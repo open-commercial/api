@@ -99,7 +99,7 @@ public interface IProductoService {
 
   Producto guardarProductoFavorito(long idUsuario, long idProducto);
 
-  Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, int pagina);
+  Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, long idSucursal, int pagina);
 
   List<Producto> getProductosFavoritosDelClientePorIdUsuario(long idUsuario);
 

@@ -848,6 +848,16 @@ class ProductoServiceImplTest {
     Producto producto = new Producto();
     producto.setDescripcion("Producto Test");
     producto.setIdProducto(1L);
+    CantidadProductoEmbeddable cantidadProductoEmbeddable = new CantidadProductoEmbeddable();
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    Set<CantidadEnSucursal> cantidadesEnSucursal = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setIdCantidadEnSucursal(1L);
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadProductoEmbeddable.setCantidadEnSucursales(cantidadesEnSucursal);
+    producto.setCantidadProducto(cantidadProductoEmbeddable);
     List<ProductoFavorito> productosFavoritos = new ArrayList<>();
     ProductoFavorito productoFavorito = new ProductoFavorito();
     productoFavorito.setCliente(cliente);
@@ -857,7 +867,7 @@ class ProductoServiceImplTest {
     when(productoFavoritoRepository.findAll(
             any(), eq(PageRequest.of(1, 15, Sort.by(Sort.Direction.DESC, "idProductoFavorito")))))
         .thenReturn(pageable);
-    Page<Producto> paginaProductos = productoService.getPaginaProductosFavoritosDelCliente(1L, 1);
+    Page<Producto> paginaProductos = productoService.getPaginaProductosFavoritosDelCliente(1L, 1L, 1);
     assertNotNull(paginaProductos);
     assertEquals(paginaProductos.getTotalElements(), pageable.getTotalElements());
     assertEquals(paginaProductos.getTotalPages(), pageable.getTotalElements());

@@ -146,8 +146,8 @@ class ProductoControllerTest {
                                     .compact())
                     .getBody();
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-    productoController.getProductosFavoritosDelCliente(0, "headers");
-    verify(productoService).getPaginaProductosFavoritosDelCliente(1L, 0);
+    productoController.getProductosFavoritosDelCliente(1L,0, "headers");
+    verify(productoService).getPaginaProductosFavoritosDelCliente(1L, 1L, 0);
   }
 
   @Test
