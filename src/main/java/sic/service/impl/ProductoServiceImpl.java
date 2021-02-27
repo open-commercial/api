@@ -1290,4 +1290,10 @@ public class ProductoServiceImpl implements IProductoService {
             .ilimitado(productoDTO.isIlimitado())
             .build();
   }
+
+  @Override
+  public Page<Producto> getProductosRelacionados(long idProducto, int pagina) {
+    Pageable pageable = PageRequest.of(0, TAMANIO_PAGINA_DEFAULT);
+    return productoFavoritoRepository.buscarProductosRelacionadosPorRubro(this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), pageable);
+  }
 }

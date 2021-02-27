@@ -8,10 +8,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -260,5 +256,10 @@ public class ProductoController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
+  }
+
+  @GetMapping("/productos/{idProducto}/recomendados")
+  public Page<Producto> getProductosRecomendados(@PathVariable long idProducto, @RequestParam int pagina) {
+    return productoService.getProductosRelacionados(idProducto, pagina);
   }
 }

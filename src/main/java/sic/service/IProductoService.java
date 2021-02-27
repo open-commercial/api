@@ -118,4 +118,6 @@ public interface IProductoService {
   PrecioProductoEmbeddable construirPrecioProductoEmbeddable(ProductoDTO productoDTO);
 
   CantidadProductoEmbeddable construirCantidadProductoEmbeddable(ProductoDTO productoDTO);
+
+  Page<Producto> getProductosRelacionados(long idProducto, int pagina);
 }

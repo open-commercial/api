@@ -1032,4 +1032,23 @@ class ProductoServiceImplTest {
     assertEquals(BigDecimal.TEN, productoFaltante.getCantidadSolicitada());
     assertEquals(BigDecimal.ONE, productoFaltante.getCantidadDisponible());
   }
+
+  @Test
+  void shouldGetProductosRelacionados() {
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCodigo("321");
+    producto.setDescripcion("Producto test");
+    Rubro rubro = new Rubro();
+    rubro.setIdRubro(1L);
+    rubro.setNombre("Ferretería");
+    producto.setRubro(rubro);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    List<Producto> listaProducto = new ArrayList<>();
+    listaProducto.add(producto);
+    Page<Producto> newPage = new PageImpl<>(listaProducto);
+    Pageable pageable = PageRequest.of(0, 15);
+    when(productoFavoritoRepository.buscarProductosRelacionadosPorRubro(1L, pageable)).thenReturn(newPage);
+    assertEquals(newPage, productoService.getProductosRelacionados(1L, 0));
+  }
 }
