@@ -330,6 +330,7 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("10.000000000000000"),
         productosRecuperados.get(0).getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("0E-15"), productosRecuperados.get(0).getCantidadReservada());
     assertEquals("Metro", productosRecuperados.get(0).getNombreMedida());
     assertEquals(
         new BigDecimal("100.000000000000000"), productosRecuperados.get(0).getPrecioCosto());
@@ -867,6 +868,8 @@ class AppIntegrationTest {
     productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("8.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("10.000000000000000"), productoDos.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("5.000000000000000"), productoUno.getCantidadReservada());
+    assertEquals(new BigDecimal("2.000000000000000"), productoDos.getCantidadReservada());
     assertEquals(new BigDecimal("5947.200000000000000"), pedidoRecuperado.getTotal());
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =
@@ -959,6 +962,7 @@ class AppIntegrationTest {
     restTemplate.put(apiPrefix + "/pedidos", pedidoDTO);
     Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("9.000000000000000"), productoDos.getCantidadTotalEnSucursales());
+    assertEquals(new BigDecimal("3.000000000000000"), productoDos.getCantidadReservada());
     criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
     requestEntity = new HttpEntity<>(criteria);
     resultadoBusquedaPedido =

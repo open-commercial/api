@@ -223,10 +223,8 @@ public class ProductoServiceImpl implements IProductoService {
                 TAMANIO_PAGINA_DEFAULT));
     productos.stream()
         .forEach(
-            producto -> {
-              this.calcularCantidadEnSucursalesDisponible(producto, idSucursal);
-              this.calcularCantidadReservada(producto, idSucursal);
-            });
+            producto ->
+              this.calcularCantidadEnSucursalesDisponible(producto, idSucursal));
     return productos;
   }
 
@@ -384,6 +382,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.calcularPrecioBonificado(producto);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, producto);
     producto.getCantidadProducto().setIlimitado(false);
+    producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
     producto = productoRepository.save(producto);
     logger.warn(
         messageSource.getMessage(
@@ -1165,12 +1164,6 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Producto calcularCantidadReservada(Producto producto, Long idSucursal) {
-    producto.getCantidadProducto().setCantidadReservada(pedidoService.getCantidadReservadaDeProducto(producto.getIdProducto(), idSucursal));
-    return producto;
-  }
-
-  @Override
   public Producto guardarProductoFavorito(long idUsuario, long idProducto) {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     if (this.isFavorito(idUsuario, idProducto)) {
@@ -1289,5 +1282,15 @@ public class ProductoServiceImpl implements IProductoService {
             .bulto(productoDTO.getBulto())
             .ilimitado(productoDTO.isIlimitado())
             .build();
+  }
+
+  @Override
+  public void agregarCantidadReservada(long idProducto, BigDecimal cantidadParaAgregar) {
+      productoRepository.actualizarCantidadReservada(idProducto, cantidadParaAgregar);
+  }
+
+  @Override
+  public void quitarCantidadReservada(long idProducto, BigDecimal cantidadParaQuitar) {
+      productoRepository.actualizarCantidadReservada(idProducto, cantidadParaQuitar.negate());
   }
 }
