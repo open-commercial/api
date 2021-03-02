@@ -95,8 +95,6 @@ public interface IProductoService {
 
   Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada);
 
-  Producto calcularCantidadReservada(Producto producto, Long idSucursal);
-
   Producto guardarProductoFavorito(long idUsuario, long idProducto);
 
   Page<Producto> getPaginaProductosFavoritosDelCliente(long idUsuario, long idSucursal, int pagina);
@@ -120,4 +118,8 @@ public interface IProductoService {
   CantidadProductoEmbeddable construirCantidadProductoEmbeddable(ProductoDTO productoDTO);
 
   Page<Producto> getProductosRelacionados(long idProducto, int pagina);
+
+  void agregarCantidadReservada(long idProducto, BigDecimal cantidadParaAgregar);
+
+  void quitarCantidadReservada(long idProducto, BigDecimal cantidadParaQuitar);
 }

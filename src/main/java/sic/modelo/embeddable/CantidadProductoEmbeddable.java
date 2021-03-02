@@ -45,7 +45,9 @@ public class CantidadProductoEmbeddable implements Serializable  {
     @Transient
     private BigDecimal cantidadTotalEnSucursalesDisponible;
 
-    @Transient
+    @Column(precision = 25, scale = 15)
+    @DecimalMin(value = "0", message = "{mensaje_producto_cantidad_negativa}")
+    @JsonView(Views.Vendedor.class)
     private BigDecimal cantidadReservada;
 
     @Column(precision = 25, scale = 15)
