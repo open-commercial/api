@@ -117,6 +117,8 @@ public interface IProductoService {
 
   CantidadProductoEmbeddable construirCantidadProductoEmbeddable(ProductoDTO productoDTO);
 
+  Page<Producto> getProductosRelacionados(long idProducto, int pagina);
+
   void agregarCantidadReservada(long idProducto, BigDecimal cantidadParaAgregar);
 
   void quitarCantidadReservada(long idProducto, BigDecimal cantidadParaQuitar);

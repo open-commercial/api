@@ -218,4 +218,10 @@ class ProductoControllerTest {
     productoController.getCantidadDeProductosFavoritos("headers");
     verify(productoService).getCantidadDeProductosFavoritos(1L);
   }
+
+  @Test
+  void shouldGetProductosRelacionados() {
+    productoController.getProductosRecomendados(1L, 0);
+    verify(productoService).getProductosRelacionados(1L, 0);
+  }
 }
