@@ -1,5 +1,7 @@
 package sic.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -29,4 +31,10 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
           + "WHERE p.idProducto = :idProducto")
   int actualizarCantidadReservada(
       @Param("idProducto") long idProducto, @Param("cantidad") BigDecimal cantidad);
+
+  @Query(
+      "SELECT p from Producto p WHERE p.rubro.idRubro = :idRubro AND p.idProducto <> :idProducto "
+          + "order by p.precioProducto.oferta desc")
+  Page<Producto> buscarProductosRelacionadosPorRubro(
+      @Param("idRubro") long idRubro, @Param("idProducto") long idProducto, Pageable page);
 }

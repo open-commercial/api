@@ -26,10 +26,4 @@ public interface ProductoFavoritoRepository
 
   @Query("SELECT COUNT(pf) FROM ProductoFavorito pf WHERE pf.cliente = :cliente")
   Long getCantidadDeArticulosEnFavoritos(@Param("cliente") Cliente cliente);
-
-  @Query(
-      "SELECT p from ProductoFavorito pf JOIN pf.producto p WHERE p.rubro.idRubro = :idRubro AND p.idProducto <> :idProducto " +
-              "order by p.precioProducto.oferta desc, pf.idProductoFavorito desc")
-  Page<Producto> buscarProductosRelacionadosPorRubro(
-      @Param("idRubro") long idRubro, @Param("idProducto") long idProducto, Pageable page);
 }
