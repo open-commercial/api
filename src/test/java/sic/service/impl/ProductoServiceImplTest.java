@@ -1037,7 +1037,7 @@ class ProductoServiceImplTest {
     listaProducto.add(producto);
     Page<Producto> newPage = new PageImpl<>(listaProducto);
     Pageable pageable = PageRequest.of(0, 15);
-    when(productoFavoritoRepository.buscarProductosRelacionadosPorRubro(1L, pageable)).thenReturn(newPage);
+    when(productoFavoritoRepository.buscarProductosRelacionadosPorRubro(1L, 1L, pageable)).thenReturn(newPage);
     assertEquals(newPage, productoService.getProductosRelacionados(1L, 0));
     }
 

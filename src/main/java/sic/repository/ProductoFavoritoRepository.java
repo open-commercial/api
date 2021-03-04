@@ -28,6 +28,8 @@ public interface ProductoFavoritoRepository
   Long getCantidadDeArticulosEnFavoritos(@Param("cliente") Cliente cliente);
 
   @Query(
-      "SELECT p from ProductoFavorito pf LEFT JOIN pf.producto p WHERE p.rubro.idRubro = :idRubro order by p.precioProducto.oferta desc, pf.idProductoFavorito desc")
-  Page<Producto> buscarProductosRelacionadosPorRubro(@Param("idRubro") long idRubro, Pageable page);
+      "SELECT p from ProductoFavorito pf JOIN pf.producto p WHERE p.rubro.idRubro = :idRubro AND p.idProducto <> :idProducto " +
+              "order by p.precioProducto.oferta desc, pf.idProductoFavorito desc")
+  Page<Producto> buscarProductosRelacionadosPorRubro(
+      @Param("idRubro") long idRubro, @Param("idProducto") long idProducto, Pageable page);
 }
