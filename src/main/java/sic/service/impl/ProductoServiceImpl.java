@@ -1286,7 +1286,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Page<Producto> getProductosRelacionados(long idProducto, int pagina) {
-    Pageable pageable = PageRequest.of(0, TAMANIO_PAGINA_DEFAULT);
+    Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     return productoRepository.buscarProductosRelacionadosPorRubro(this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
   }
 
