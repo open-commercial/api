@@ -34,7 +34,7 @@ public interface ProductoRepository extends PagingAndSortingRepository<Producto,
 
   @Query(
       "SELECT p from Producto p WHERE p.rubro.idRubro = :idRubro AND p.publico = true AND p.idProducto <> :idProducto "
-          + "order by p.precioProducto.oferta desc")
+          + "AND p.eliminado = false order by p.precioProducto.oferta desc")
   Page<Producto> buscarProductosRelacionadosPorRubro(
       @Param("idRubro") long idRubro, @Param("idProducto") long idProducto, Pageable page);
 }
