@@ -414,6 +414,7 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
+    productoPorActualizar.getCantidadProducto().setCantidadReservada(productoPersistido.getCantidadProducto().getCantidadReservada());
     photoVideoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(

@@ -360,19 +360,6 @@ class ProductoServiceImplTest {
 
   @Test
   void shouldTestActualizarMultiplesProductos() {
-    ProductosParaActualizarDTO productosParaActualizarDTO =
-        ProductosParaActualizarDTO.builder()
-            .idProducto(new long[] {1L})
-            .cantidadVentaMinima(BigDecimal.TEN)
-            .idMedida(1L)
-            .idRubro(1L)
-            .idProveedor(2L)
-            .gananciaPorcentaje(BigDecimal.TEN)
-            .ivaPorcentaje(new BigDecimal("21"))
-            .precioCosto(BigDecimal.TEN)
-            .porcentajeBonificacionPrecio(BigDecimal.TEN)
-            .publico(true)
-            .build();
     Producto producto = this.construirProducto();
     producto.setIdProducto(1L);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
