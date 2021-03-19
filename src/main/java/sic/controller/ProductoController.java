@@ -256,8 +256,8 @@ public class ProductoController {
     return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
   }
 
-  @GetMapping("/productos/{idProducto}/recomendados")
-  public Page<Producto> getProductosRecomendados(@PathVariable long idProducto, @RequestParam int pagina) {
-    return productoService.getProductosRelacionados(idProducto, pagina);
+  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}/recomendados")
+  public Page<Producto> getProductosRecomendados(@PathVariable long idProducto, @PathVariable long idSucursal, @RequestParam int pagina) {
+    return productoService.getProductosRelacionados(idProducto, idSucursal, pagina);
   }
 }

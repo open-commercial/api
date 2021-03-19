@@ -1019,13 +1019,26 @@ class ProductoServiceImplTest {
     rubro.setIdRubro(1L);
     rubro.setNombre("Ferretería");
     producto.setRubro(rubro);
+    Sucursal sucursal = new Sucursal();
+    sucursal.setIdSucursal(1L);
+    ConfiguracionSucursal configuracionSucursal = new ConfiguracionSucursal();
+    sucursal.setConfiguracionSucursal(configuracionSucursal);
+    producto.setCantidadProducto(new CantidadProductoEmbeddable());
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursal.setCantidad(new BigDecimal("9"));
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+    producto.getCantidadProducto().setIlimitado(false);
+    when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
     List<Producto> listaProducto = new ArrayList<>();
     listaProducto.add(producto);
     Page<Producto> newPage = new PageImpl<>(listaProducto);
     Pageable pageable = PageRequest.of(0, 15);
     when(productoRepository.buscarProductosRelacionadosPorRubro(1L, 1L, pageable)).thenReturn(newPage);
-    assertEquals(newPage, productoService.getProductosRelacionados(1L, 0));
+    assertEquals(newPage, productoService.getProductosRelacionados(1L, 1L, 0));
     }
 
   @Test

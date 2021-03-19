@@ -1286,8 +1286,10 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> getProductosRelacionados(long idProducto, int pagina) {
+  public Page<Producto> getProductosRelacionados(long idProducto, long idSucursal, int pagina) {
     Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
+    Page<Producto> productosRelacionados = productoRepository.buscarProductosRelacionadosPorRubro(this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
+    productosRelacionados.forEach(producto -> this.calcularCantidadEnSucursalesDisponible(producto, idSucursal));
     return productoRepository.buscarProductosRelacionadosPorRubro(this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
   }
 

@@ -221,7 +221,7 @@ class ProductoControllerTest {
 
   @Test
   void shouldGetProductosRelacionados() {
-    productoController.getProductosRecomendados(1L, 0);
-    verify(productoService).getProductosRelacionados(1L, 0);
+    productoController.getProductosRecomendados(1L, 1L, 0);
+    verify(productoService).getProductosRelacionados(1L, 1L, 0);
   }
 }
