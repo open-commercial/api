@@ -53,7 +53,7 @@ public interface IPedidoService {
 
   BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
 
-  void actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(Pedido pedido);
+  void actualizarCantidadReservadaDeProductosPorCambioDeEstado(Pedido pedido);
 
   void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
 }

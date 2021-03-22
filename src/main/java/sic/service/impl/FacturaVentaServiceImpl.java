@@ -311,6 +311,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
       pedido.setEstado(EstadoPedido.CERRADO);
+      pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
       this.calcularValoresFacturasVentaAndActualizarStock(facturas);
       facturas.forEach(f -> f.setPedido(pedido));
       for (FacturaVenta f : facturas) {

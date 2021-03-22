@@ -329,7 +329,7 @@ class PedidoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.TEN);
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
-    pedidoService.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido);
+    pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
     verify(productoService).agregarCantidadReservada(1L, BigDecimal.TEN);
   }
 
@@ -343,19 +343,22 @@ class PedidoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.TEN);
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
-    pedidoService.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido);
+    pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
     verify(productoService).quitarCantidadReservada(1L, BigDecimal.TEN);
   }
 
   @Test
-  void shouldThrowsServiceExceptionActualizarCantidadReservadaDeProductosPorAltaOrCancelacion() {
+  void shouldActualizarCantidadReservadaDeProductosPorCierre() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CERRADO);
-    assertThrows(
-        ServiceException.class,
-        () -> pedidoService.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido));
-    verify(messageSource)
-        .getMessage(eq("mensaje_producto_error_actualizar_cantidad_reservada"), any(), any());
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
+    pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
+    verify(productoService).quitarCantidadReservada(1L, BigDecimal.TEN);
   }
 
   @Test

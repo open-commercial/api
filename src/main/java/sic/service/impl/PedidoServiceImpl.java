@@ -202,7 +202,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
-    this.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido);
+    this.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
@@ -477,7 +477,7 @@ public class PedidoServiceImpl implements IPedidoService {
       pedido.setEstado(EstadoPedido.CANCELADO);
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
       pedido = pedidoRepository.save(pedido);
-      this.actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(pedido);
+      this.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
       logger.warn(
           messageSource.getMessage(
               "mensaje_pedido_cancelado", new Object[] {pedido}, Locale.getDefault()));
@@ -687,11 +687,11 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public void actualizarCantidadReservadaDeProductosPorAltaOrCancelacion(Pedido pedido) {
+  public void actualizarCantidadReservadaDeProductosPorCambioDeEstado(Pedido pedido) {
     switch (pedido.getEstado()) {
       case ABIERTO -> pedido.getRenglones().forEach(renglonPedido ->
               productoService.agregarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
-      case CANCELADO -> pedido.getRenglones().forEach(renglonPedido ->
+      case CANCELADO, CERRADO -> pedido.getRenglones().forEach(renglonPedido ->
               productoService.quitarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
       default -> throw new ServiceException(
               messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada", null, Locale.getDefault()));
