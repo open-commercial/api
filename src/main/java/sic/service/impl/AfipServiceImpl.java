@@ -1,21 +1,12 @@
 package sic.service.impl;
 
+import afip.wsfe.wsdl.*;
 import org.springframework.context.MessageSource;
 import sic.modelo.*;
 import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
-import afip.wsfe.wsdl.AlicIva;
-import afip.wsfe.wsdl.ArrayOfAlicIva;
-import afip.wsfe.wsdl.ArrayOfFECAEDetRequest;
-import afip.wsfe.wsdl.FEAuthRequest;
-import afip.wsfe.wsdl.FECAECabRequest;
-import afip.wsfe.wsdl.FECAEDetRequest;
-import afip.wsfe.wsdl.FECAERequest;
-import afip.wsfe.wsdl.FECAEResponse;
-import afip.wsfe.wsdl.FECAESolicitar;
-import afip.wsfe.wsdl.FECompUltimoAutorizado;
-import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -436,6 +427,17 @@ public class AfipServiceImpl implements IAfipService {
       detalle.setDocTipo(
           (comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
       detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
+    }
+    if (comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B
+        || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C) {
+      Periodo periodo = new Periodo();
+      periodo.setFchDesde(comprobante.getFecha().format(DateTimeFormatter.BASIC_ISO_DATE));
+      periodo.setFchHasta(comprobante.getFecha().format(DateTimeFormatter.BASIC_ISO_DATE));
+      detalle.setPeriodoAsoc(periodo);
     }
   }
 
