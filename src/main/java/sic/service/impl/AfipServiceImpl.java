@@ -260,6 +260,7 @@ public class AfipServiceImpl implements IAfipService {
     FECAERequest fecaeRequest = new FECAERequest();
     FECAECabRequest cabecera = new FECAECabRequest();
     FECAEDetRequest detalle = new FECAEDetRequest();
+    this.agregarPeridoAlDetalle(comprobante, detalle);
     // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B,
     //    7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C. 12: Nota Debito C. 13: Nota Credito C.
     // DocTipo = 80: CUIT, 86: CUIL, 96: DNI, 99: Doc.(Otro)
@@ -428,6 +429,9 @@ public class AfipServiceImpl implements IAfipService {
           (comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
       detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
     }
+  }
+
+  private void agregarPeridoAlDetalle(ComprobanteAFIP comprobante, FECAEDetRequest detalle) {
     if (comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
         || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
         || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C
