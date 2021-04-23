@@ -585,6 +585,11 @@ public class NotaServiceImpl implements INotaService {
             messageSource.getMessage("mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
       }
     } else {
+      Recibo recibo = ((NotaDebito) nota).getRecibo();
+      if (recibo != null && recibo.getEstado() != EstadoRecibo.APROBADO)
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_nota_debito_recibo_no_aprobado", null, Locale.getDefault()));
       if (((NotaDebito) nota).getRenglonesNotaDebito() == null
           || ((NotaDebito) nota).getRenglonesNotaDebito().isEmpty()) {
         throw new BusinessServiceException(

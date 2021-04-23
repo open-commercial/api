@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import sic.modelo.EstadoRecibo;
 import sic.modelo.Sucursal;
 import sic.modelo.Recibo;
 
@@ -98,4 +100,9 @@ public interface ReciboRepository
       @Param("idSucursal") long idSucursal,
       @Param("desde") LocalDateTime desde,
       @Param("hasta") LocalDateTime hasta);
+
+  @Modifying
+  @Query("UPDATE Recibo r SET r.urlImagen = :urlImagen WHERE r.idRecibo = :idRecibo")
+  int actualizarUrlImagen(@Param("idRecibo") long idRecibo, @Param("urlImagen") String urlImagen);
+
 }

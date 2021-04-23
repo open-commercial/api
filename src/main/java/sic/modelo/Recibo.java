@@ -75,6 +75,15 @@ public class Recibo implements Serializable {
   @Positive(message = "{mensaje_recibo_monto_igual_menor_cero}")
   private BigDecimal monto;
 
+  @Pattern(
+          regexp = "^https:\\/\\/res.cloudinary.com\\/.*",
+          message = "{mensaje_url_imagen_no_valida}")
+  @JsonView(Views.Comprador.class)
+  private String urlImagen;
+
+  @Enumerated(EnumType.STRING)
+  private EstadoRecibo estado;
+
   @JsonGetter("idFormaDePago")
   public long getIdFormaDePago() {
     return formaDePago.getIdFormaDePago();

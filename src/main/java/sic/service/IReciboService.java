@@ -10,6 +10,7 @@ import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.modelo.dto.NuevoReciboDepositoDTO;
 
 public interface IReciboService {
 
@@ -38,6 +39,10 @@ public interface IReciboService {
   Recibo construirReciboPorPayment(
       Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment);
 
+  Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO);
+
+  void aprobarRecibo(long idRecibo);
+
   long getSiguienteNumeroRecibo(long idSucursal, long serie);
 
   void eliminar(long idRecibo);
@@ -62,4 +67,6 @@ public interface IReciboService {
   BigDecimal getTotalRecibosClientesEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
 
   BigDecimal getTotalRecibosProveedoresEntreFechas(long idSucursal, LocalDateTime desde, LocalDateTime hasta);
+
+  String subirImagenRecibo(long idRecibo, byte[] imagen);
 }

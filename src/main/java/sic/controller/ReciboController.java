@@ -10,9 +10,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.EstadoRecibo;
 import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
+import sic.modelo.dto.NuevoReciboClienteDTO;
+import sic.modelo.dto.NuevoReciboDepositoDTO;
+import sic.modelo.dto.NuevoReciboProveedorDTO;
 import sic.modelo.dto.ReciboDTO;
 import sic.service.*;
 import java.math.BigDecimal;
@@ -71,33 +75,51 @@ public class ReciboController {
   @PostMapping("/recibos/clientes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Recibo guardarReciboCliente(
-      @RequestBody ReciboDTO reciboDTO,
+      @RequestBody NuevoReciboClienteDTO nuevoReciboClienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
-    recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
-    recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
+    Recibo recibo = new Recibo();
+    recibo.setConcepto(nuevoReciboClienteDTO.getConcepto());
+    recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboClienteDTO.getIdSucursal()));
+    recibo.setCliente(
+        clienteService.getClienteNoEliminadoPorId(nuevoReciboClienteDTO.getIdCliente()));
+    recibo.setFormaDePago(
+        formaDePagoService.getFormasDePagoNoEliminadoPorId(
+            nuevoReciboClienteDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
+    recibo.setEstado(EstadoRecibo.APROBADO);
+    recibo.setMonto(nuevoReciboClienteDTO.getMonto());
     return reciboService.guardar(recibo);
   }
 
   @PostMapping("/recibos/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Recibo guardarReciboProveedor(
-      @RequestBody ReciboDTO reciboDTO,
+      @RequestBody NuevoReciboProveedorDTO nuevoReciboProveedorDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
-    recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
-    recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
+    Recibo recibo = new Recibo();
+    recibo.setConcepto(nuevoReciboProveedorDTO.getConcepto());
+    recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboProveedorDTO.getIdSucursal()));
+    recibo.setProveedor(
+        proveedorService.getProveedorNoEliminadoPorId(nuevoReciboProveedorDTO.getIdProveedor()));
+    recibo.setFormaDePago(
+        formaDePagoService.getFormasDePagoNoEliminadoPorId(
+            nuevoReciboProveedorDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
+    recibo.setMonto(nuevoReciboProveedorDTO.getMonto());
+    recibo.setEstado(EstadoRecibo.APROBADO);
     return reciboService.guardar(recibo);
+  }
+
+  @PostMapping("/recibos/clientes/depositos")
+  @AccesoRolesPermitidos({Rol.COMPRADOR})
+  public Recibo guardarReciboPorDeposito(@RequestBody NuevoReciboDepositoDTO nuevoReciboDepositoDTO) {
+    return reciboService.guardarReciboPorDeposito(nuevoReciboDepositoDTO);
   }
 
   @DeleteMapping("/recibos/{idRecibo}")
@@ -114,5 +136,11 @@ public class ReciboController {
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF = reciboService.getReporteRecibo(reciboService.getReciboNoEliminadoPorId(idRecibo));
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
+
+  @PutMapping("/recibos/{idRecibo}/aprobar")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void aprobarRecibo(@PathVariable long idRecibo) {
+    reciboService.aprobarRecibo(idRecibo);
   }
 }

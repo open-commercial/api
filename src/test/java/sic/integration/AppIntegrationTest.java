@@ -531,9 +531,9 @@ class AppIntegrationTest {
         new BigDecimal("-554.540000000000000"),
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
-    Recibo recibo =
-        Recibo.builder()
-            .monto(554.54)
+    NuevoReciboProveedorDTO recibo =
+        NuevoReciboProveedorDTO.builder()
+            .monto(new BigDecimal("554.54"))
             .concepto("Recibo para proveedor")
             .idSucursal(sucursal.getIdSucursal())
             .idProveedor(proveedorRecuperado.getIdProveedor())
@@ -541,7 +541,11 @@ class AppIntegrationTest {
             .build();
     Recibo reciboRecuperado =
         restTemplate.postForObject(apiPrefix + "/recibos/proveedores", recibo, Recibo.class);
-    assertEquals(recibo, reciboRecuperado);
+    assertEquals(recibo.getMonto().doubleValue(), reciboRecuperado.getMonto());
+    assertEquals(recibo.getIdFormaDePago(), reciboRecuperado.getIdFormaDePago());
+    assertEquals(recibo.getIdSucursal(), reciboRecuperado.getIdSucursal());
+    assertEquals(recibo.getIdProveedor(), reciboRecuperado.getIdProveedor());
+    assertEquals(recibo.getConcepto(), reciboRecuperado.getConcepto());
     assertEquals(
         0.0,
         restTemplate
@@ -1212,10 +1216,9 @@ class AppIntegrationTest {
         restTemplate
             .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());
-    Recibo recibo =
-        Recibo.builder()
+    NuevoReciboClienteDTO recibo = NuevoReciboClienteDTO.builder()
             .concepto("Recibo Test")
-            .monto(108320.27151325)
+            .monto(new BigDecimal("108320.27151325"))
             .idSucursal(sucursal.getIdSucursal())
             .idCliente(cliente.getIdCliente())
             .idFormaDePago(1L)
@@ -1225,7 +1228,11 @@ class AppIntegrationTest {
     assertNotNull(
         restTemplate.getForObject(
             apiPrefix + "/recibos/" + reciboDeFactura.getIdRecibo() + "/reporte", byte[].class));
-    assertEquals(recibo, reciboDeFactura);
+    assertEquals(recibo.getConcepto(), reciboDeFactura.getConcepto());
+    assertEquals(recibo.getMonto().doubleValue(), reciboDeFactura.getMonto());
+    assertEquals(recibo.getIdSucursal(), reciboDeFactura.getIdSucursal());
+    assertEquals(recibo.getIdSucursal(), reciboDeFactura.getIdCliente());
+    assertEquals(recibo.getIdFormaDePago(), reciboDeFactura.getIdFormaDePago());
     assertEquals(
         0.0,
         restTemplate
@@ -1453,10 +1460,10 @@ class AppIntegrationTest {
     assertEquals("theRedWolf", cliente.getNombreFiscal());
     assertEquals(0.0, cliente.getMontoCompraMinima().doubleValue());
     assertFalse(cliente.isPuedeComprarAPlazo());
-    sic.model.CuentaCorrienteCliente cuentaCorrienteCliente =
+    CuentaCorrienteCliente cuentaCorrienteCliente =
         restTemplate.getForObject(
             apiPrefix + "/cuentas-corriente/clientes/" + cliente.getIdCliente(),
-            sic.model.CuentaCorrienteCliente.class);
+            CuentaCorrienteCliente.class);
     assertNotNull(cuentaCorrienteCliente);
     assertEquals(0.0, cuentaCorrienteCliente.getSaldo().doubleValue());
     cliente.setUbicacionFacturacion(Ubicacion.builder().idLocalidad(2L).idProvincia(2L).build());
@@ -1538,8 +1545,58 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Cerrar caja y verificar movimientos")
+  @DisplayName("Realizar una transferencia para un pedido, luego aprobarlo")
   @Order(14)
+  void test() throws IOException {
+    this.iniciarSesionComoAdministrador();
+    Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
+    assertEquals("Sansa María", usuario.getNombre());
+    assertEquals("Stark", usuario.getApellido());
+    assertTrue(usuario.isHabilitado());
+    this.token =
+            restTemplate
+                    .postForEntity(
+                            apiPrefix + "/login",
+                            new Credencial(usuario.getUsername(), "caraDeMala"),
+                            String.class)
+                    .getBody();
+    BusquedaPedidoCriteria pedidoCriteria =
+            BusquedaPedidoCriteria.builder().idSucursal(1L).build();
+    HttpEntity<BusquedaPedidoCriteria> requestEntity = new HttpEntity<>(pedidoCriteria);
+    PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
+            restTemplate
+                    .exchange(
+                            apiPrefix + "/pedidos/busqueda/criteria",
+                            HttpMethod.POST,
+                            requestEntity,
+                            new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
+                    .getBody();
+    assertNotNull(resultadoBusquedaPedido);
+    List<Pedido> pedidosRecuperados = resultadoBusquedaPedido.getContent();
+    assertEquals(1, pedidosRecuperados.size());
+    BufferedImage bImage = ImageIO.read(getClass().getResource("/imagenProductoTest.jpeg"));
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ImageIO.write(bImage, "jpeg", bos);
+    NuevoReciboDepositoDTO reciboDepositoDTO = NuevoReciboDepositoDTO.builder()
+            .concepto("Transferencia Bancaria")
+            .idPedido(pedidosRecuperados.get(0).getIdPedido())
+            .imagen(bos.toByteArray())
+            .monto(new BigDecimal("3000"))
+            .build();
+    Recibo reciboCreado = restTemplate.postForObject(apiPrefix + "/recibos/clientes/depositos", reciboDepositoDTO, Recibo.class);
+    assertEquals(reciboDepositoDTO.getConcepto(), reciboCreado.getConcepto());
+    assertEquals(reciboDepositoDTO.getMonto().doubleValue(), reciboCreado.getMonto());
+    assertNotNull(reciboCreado.getUrlImagen());
+    assertEquals(EstadoRecibo.SIN_CHEQUEAR, reciboCreado.getEstado());
+    this.iniciarSesionComoAdministrador();
+    restTemplate.put(apiPrefix + "/recibos/" + reciboCreado.getIdRecibo() + "/aprobar",null);
+    reciboCreado = restTemplate.getForObject(apiPrefix + "/recibos/" + reciboCreado.getIdRecibo(), Recibo.class);
+    assertEquals(EstadoRecibo.APROBADO, reciboCreado.getEstado());
+  }
+
+  @Test
+  @DisplayName("Cerrar caja y verificar movimientos")
+  @Order(15)
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1606,7 +1663,7 @@ class AppIntegrationTest {
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
             BigDecimal.class));
     assertEquals(
-        new BigDecimal("108265.731513250000000"),
+        new BigDecimal("111265.731513250000000"),
         restTemplate.getForObject(
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
             BigDecimal.class));
@@ -1614,7 +1671,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Reabrir caja, corregir saldo con un gasto por $750 en efectivo")
-  @Order(15)
+  @Order(16)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
@@ -1692,7 +1749,7 @@ class AppIntegrationTest {
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
             BigDecimal.class));
     assertEquals(
-        new BigDecimal("107615.731513250000000"),
+        new BigDecimal("110615.731513250000000"),
         restTemplate.getForObject(
             apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
             BigDecimal.class));
@@ -1700,7 +1757,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar un pedido, luego intentar cancelarlo sin éxito")
-  @Order(16)
+  @Order(17)
   void testEscenarioFacturarPedidoAndIntentarEliminarlo() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();
@@ -1834,7 +1891,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Actualizar stock de un producto para tener cantidades en dos sucursales")
-  @Order(17)
+  @Order(18)
   void testEscenarioActualizarStockParaDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Cliente clienteParaEditar = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
@@ -1914,7 +1971,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Realizar un pedido que requiera del stock de ambas")
-  @Order(18)
+  @Order(19)
   void testEscenarioPedidoConStockDeDosSucursales() {
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
@@ -2004,7 +2061,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Facturar el pedido anterior")
-  @Order(19)
+  @Order(20)
   void testEscenarioFacturarPedido() {
     this.iniciarSesionComoAdministrador();
     BusquedaPedidoCriteria pedidoCriteria =
@@ -2060,7 +2117,7 @@ class AppIntegrationTest {
 
   @Test
   @DisplayName("Verificar stock y cerrar caja")
-  @Order(20)
+  @Order(21)
   void testEscenarioVerificarStockAndCerrarCaja() {
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder().build();

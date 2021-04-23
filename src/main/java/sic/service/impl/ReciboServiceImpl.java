@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.modelo.dto.NuevoReciboDepositoDTO;
 import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -40,6 +41,8 @@ public class ReciboServiceImpl implements IReciboService {
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
+  private final IPedidoService pedidoService;
+  private final IPhotoVideoUploader photoVideoUploader;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
@@ -54,6 +57,8 @@ public class ReciboServiceImpl implements IReciboService {
     INotaService notaService,
     IFormaDePagoService formaDePagoService,
     ICajaService cajaService,
+    IPedidoService pedidoService,
+    IPhotoVideoUploader photoVideoUploader,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.reciboRepository = reciboRepository;
@@ -62,6 +67,8 @@ public class ReciboServiceImpl implements IReciboService {
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
+    this.pedidoService = pedidoService;
+    this.photoVideoUploader = photoVideoUploader;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -173,7 +180,8 @@ public class ReciboServiceImpl implements IReciboService {
             recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip()));
     this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
-    this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+    if (recibo.getEstado() == EstadoRecibo.APROBADO)
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
     logger.warn("El Recibo {} se guardó correctamente.", recibo);
     return recibo;
   }
@@ -269,6 +277,50 @@ public class ReciboServiceImpl implements IReciboService {
     return nuevoRecibo;
   }
 
+  @Transactional
+  @Override
+  public Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO) {
+    if (nuevoReciboDepositoDTO.getImagen() == null)
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_recibo_deposito_sin_imagen", null, Locale.getDefault()));
+    Pedido pedidoRelacionadoAlDeposito =
+            pedidoService.getPedidoNoEliminadoPorId(nuevoReciboDepositoDTO.getIdPedido());
+    Recibo recibo = new Recibo();
+    recibo.setSucursal(sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
+    recibo.setConcepto(nuevoReciboDepositoDTO.getConcepto());
+    recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
+    recibo.setFormaDePago(
+        formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.TRANSFERENCIA_BANCARIA));
+    recibo.setUsuario(pedidoRelacionadoAlDeposito.getUsuario());
+    recibo.setFecha(LocalDateTime.now());
+    recibo.setEstado(EstadoRecibo.SIN_CHEQUEAR);
+    recibo.setMonto(nuevoReciboDepositoDTO.getMonto());
+    recibo = this.guardar(recibo);
+    recibo.setUrlImagen(
+        this.subirImagenRecibo(recibo.getIdRecibo(), nuevoReciboDepositoDTO.getImagen()));
+    return recibo;
+  }
+
+  @Override
+  @Transactional
+  public void aprobarRecibo(long idRecibo) {
+    Recibo recibo = this.getReciboNoEliminadoPorId(idRecibo);
+    if (recibo.getEstado() == EstadoRecibo.APROBADO)
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_recibo_ya_aprobado", null, Locale.getDefault()));
+    recibo.setEstado(EstadoRecibo.APROBADO);
+    reciboRepository.save(recibo);
+  }
+
+  @Override
+  @Transactional
+  public String subirImagenRecibo(long idRecibo, byte[] imagen) {
+    String urlImagen =
+        photoVideoUploader.subirImagen(Recibo.class.getSimpleName() + idRecibo, imagen);
+    reciboRepository.actualizarUrlImagen(idRecibo, urlImagen);
+    return urlImagen;
+  }
+
   @Override
   @Transactional
   public void eliminar(long idRecibo) {
@@ -311,9 +363,13 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public byte[] getReporteRecibo(Recibo recibo) {
+    if (recibo.getEstado() != EstadoRecibo.APROBADO)
+      throw new BusinessServiceException(
+          messageSource.getMessage(
+              "mensaje_recibo_reporte_no_aprobado", null, Locale.getDefault()));
     if (recibo.getProveedor() != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
     }
     Map<String, Object> params = new HashMap<>();
     params.put("recibo", recibo);
