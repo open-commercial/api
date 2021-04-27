@@ -1,7 +1,6 @@
 package sic.controller;
 
 import io.jsonwebtoken.Claims;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +16,6 @@ import sic.modelo.Rol;
 import sic.modelo.dto.NuevoReciboClienteDTO;
 import sic.modelo.dto.NuevoReciboDepositoDTO;
 import sic.modelo.dto.NuevoReciboProveedorDTO;
-import sic.modelo.dto.ReciboDTO;
 import sic.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,8 +31,6 @@ public class ReciboController {
   private final IProveedorService proveedorService;
   private final IFormaDePagoService formaDePagoService;
   private final IAuthService authService;
-  private final ModelMapper modelMapper;
-
   @Autowired
   public ReciboController(
       IReciboService reciboService,
@@ -43,8 +39,7 @@ public class ReciboController {
       IClienteService clienteService,
       IProveedorService proveedorService,
       IFormaDePagoService formaDePagoService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+      IAuthService authService) {
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
@@ -52,7 +47,6 @@ public class ReciboController {
     this.formaDePagoService = formaDePagoService;
     this.proveedorService = proveedorService;
     this.authService = authService;
-    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/recibos/{idRecibo}")
@@ -77,7 +71,7 @@ public class ReciboController {
   public Recibo guardarReciboCliente(
       @RequestBody NuevoReciboClienteDTO nuevoReciboClienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Recibo recibo = new Recibo();
+    var recibo = new Recibo();
     recibo.setConcepto(nuevoReciboClienteDTO.getConcepto());
     recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboClienteDTO.getIdSucursal()));
     recibo.setCliente(
@@ -85,7 +79,7 @@ public class ReciboController {
     recibo.setFormaDePago(
         formaDePagoService.getFormasDePagoNoEliminadoPorId(
             nuevoReciboClienteDTO.getIdFormaDePago()));
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    var claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
@@ -99,7 +93,7 @@ public class ReciboController {
   public Recibo guardarReciboProveedor(
       @RequestBody NuevoReciboProveedorDTO nuevoReciboProveedorDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Recibo recibo = new Recibo();
+    var recibo = new Recibo();
     recibo.setConcepto(nuevoReciboProveedorDTO.getConcepto());
     recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboProveedorDTO.getIdSucursal()));
     recibo.setProveedor(
@@ -107,7 +101,7 @@ public class ReciboController {
     recibo.setFormaDePago(
         formaDePagoService.getFormasDePagoNoEliminadoPorId(
             nuevoReciboProveedorDTO.getIdFormaDePago()));
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    var claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
@@ -130,7 +124,7 @@ public class ReciboController {
 
   @GetMapping("/recibos/{idRecibo}/reporte")
   public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {
-    HttpHeaders headers = new HttpHeaders();
+    var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
     headers.add("content-disposition", "inline; filename=Recibo.pdf");
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");

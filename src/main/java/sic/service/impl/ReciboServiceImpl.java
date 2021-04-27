@@ -91,8 +91,8 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
-    QRecibo qRecibo = QRecibo.recibo;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qRecibo = QRecibo.recibo;
+    var builder = new BooleanBuilder();
     if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -145,7 +145,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
     if (pagina == null) pagina = 0;
-    String ordenDefault = "fecha";
+    var ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
@@ -210,7 +210,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public long getSiguienteNumeroRecibo(long idSucursal, long serie) {
-    Recibo recibo =
+    var recibo =
       reciboRepository.findTopBySucursalAndNumSerieOrderByNumReciboDesc(
         sucursalService.getSucursalPorId(idSucursal), serie);
     if (recibo == null) {
@@ -231,7 +231,7 @@ public class ReciboServiceImpl implements IReciboService {
     List<Recibo> recibos = new ArrayList<>();
     if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
       HashMap<Long, BigDecimal> mapIdsFormaDePago = new HashMap<>();
-      for (int i = 0; i < idsFormaDePago.length; i++) {
+      for (var i = 0; i < idsFormaDePago.length; i++) {
         if (mapIdsFormaDePago.containsKey(idsFormaDePago[i])) {
           mapIdsFormaDePago.put(
               idsFormaDePago[i], mapIdsFormaDePago.get(idsFormaDePago[i]).add(montos[i]));
@@ -241,13 +241,13 @@ public class ReciboServiceImpl implements IReciboService {
       }
       mapIdsFormaDePago.forEach(
           (k, v) -> {
-            Recibo recibo = new Recibo();
+            var recibo = new Recibo();
             recibo.setCliente(cliente);
             recibo.setUsuario(usuario);
-            Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
+            var sucursal = sucursalService.getSucursalPorId(idSucursal);
             recibo.setSucursal(sucursal);
             recibo.setFecha(fecha);
-            FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
+            var fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
             recibo.setFormaDePago(fdp);
             recibo.setMonto(v);
             recibo.setNumSerie(
@@ -264,7 +264,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public Recibo construirReciboPorPayment(
       Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment) {
-    Recibo nuevoRecibo = new Recibo();
+    var nuevoRecibo = new Recibo();
     nuevoRecibo.setSucursal(sucursal);
     nuevoRecibo.setFormaDePago(
         formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
@@ -283,9 +283,9 @@ public class ReciboServiceImpl implements IReciboService {
     if (nuevoReciboDepositoDTO.getImagen() == null)
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_recibo_deposito_sin_imagen", null, Locale.getDefault()));
-    Pedido pedidoRelacionadoAlDeposito =
+    var pedidoRelacionadoAlDeposito =
             pedidoService.getPedidoNoEliminadoPorId(nuevoReciboDepositoDTO.getIdPedido());
-    Recibo recibo = new Recibo();
+    var recibo = new Recibo();
     recibo.setSucursal(sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
     recibo.setConcepto(nuevoReciboDepositoDTO.getConcepto());
     recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
@@ -304,7 +304,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   @Transactional
   public void aprobarRecibo(long idRecibo) {
-    Recibo recibo = this.getReciboNoEliminadoPorId(idRecibo);
+    var recibo = this.getReciboNoEliminadoPorId(idRecibo);
     if (recibo.getEstado() == EstadoRecibo.APROBADO)
         throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_recibo_ya_aprobado", null, Locale.getDefault()));
@@ -324,7 +324,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   @Transactional
   public void eliminar(long idRecibo) {
-    Recibo r = this.getReciboNoEliminadoPorId(idRecibo);
+    var r = this.getReciboNoEliminadoPorId(idRecibo);
     if (!notaService.existsNotaDebitoPorRecibo(r)) {
       r.setEliminado(true);
       this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
@@ -338,7 +338,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   private void actualizarCajaPorEliminacionDeRecibo(Recibo recibo) {
-    Caja caja =
+    var caja =
         this.cajaService.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
             recibo.getSucursal().getIdSucursal(), recibo.getFecha());
     BigDecimal monto = BigDecimal.ZERO;
