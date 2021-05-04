@@ -112,8 +112,12 @@ public class ReciboController {
 
   @PostMapping("/recibos/clientes/depositos")
   @AccesoRolesPermitidos({Rol.COMPRADOR})
-  public Recibo guardarReciboPorDeposito(@RequestBody NuevoReciboDepositoDTO nuevoReciboDepositoDTO) {
-    return reciboService.guardarReciboPorDeposito(nuevoReciboDepositoDTO);
+  public Recibo guardarReciboPorDeposito(
+      @RequestBody NuevoReciboDepositoDTO nuevoReciboDepositoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    return reciboService.guardarReciboPorDeposito(
+        nuevoReciboDepositoDTO,
+        (Integer) authService.getClaimsDelToken(authorizationHeader).get("idUsuario"));
   }
 
   @DeleteMapping("/recibos/{idRecibo}")

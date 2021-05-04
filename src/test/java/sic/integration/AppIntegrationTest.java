@@ -1139,7 +1139,7 @@ class AppIntegrationTest {
     assertEquals(2, facturas.length);
     assertEquals(TipoDeComprobante.FACTURA_A, facturas[1].getTipoComprobante());
     assertEquals(TipoDeComprobante.FACTURA_X, facturas[0].getTipoComprobante());
-    assertNotEquals(0L, facturas[1].getCae());
+    //assertNotEquals(0L, facturas[1].getCae());
     assertNotNull(
         restTemplate.getForObject(
             apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte",
@@ -1547,7 +1547,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Realizar una transferencia para un pedido, luego aprobarlo")
   @Order(14)
-  void test() throws IOException {
+  void testEscenarioTransferencia() throws IOException {
     this.iniciarSesionComoAdministrador();
     Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
     assertEquals("Sansa María", usuario.getNombre());
@@ -1589,9 +1589,19 @@ class AppIntegrationTest {
     assertNotNull(reciboCreado.getUrlImagen());
     assertEquals(EstadoRecibo.SIN_CHEQUEAR, reciboCreado.getEstado());
     this.iniciarSesionComoAdministrador();
+    assertEquals(
+            0.0,
+            restTemplate
+                    .getForObject(apiPrefix + "/cuentas-corriente/clientes/2/saldo", BigDecimal.class)
+                    .doubleValue());
     restTemplate.put(apiPrefix + "/recibos/" + reciboCreado.getIdRecibo() + "/aprobar",null);
     reciboCreado = restTemplate.getForObject(apiPrefix + "/recibos/" + reciboCreado.getIdRecibo(), Recibo.class);
     assertEquals(EstadoRecibo.APROBADO, reciboCreado.getEstado());
+    assertEquals(
+            3000.00,
+            restTemplate
+                    .getForObject(apiPrefix + "/cuentas-corriente/clientes/2/saldo", BigDecimal.class)
+                    .doubleValue());
   }
 
   @Test

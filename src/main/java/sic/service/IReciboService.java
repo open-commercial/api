@@ -39,7 +39,7 @@ public interface IReciboService {
   Recibo construirReciboPorPayment(
       Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment);
 
-  Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO);
+  Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO, long idUsuario);
 
   void aprobarRecibo(long idRecibo);
 

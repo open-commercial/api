@@ -27,7 +27,8 @@ public interface ReciboRepository
       "SELECT r FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
-          + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+          + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false "
+          + "AND r.estado  = sic.modelo.EstadoRecibo.APROBADO")
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
       @Param("idFormaDePago") long idFormaDePago,

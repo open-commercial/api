@@ -13,7 +13,8 @@ import java.math.BigDecimal;
 @Builder
 public class NuevoReciboDepositoDTO {
 
-    private long idPedido;
+    private Long idPedido;
+    private Long idSucursal;
     private String concepto;
     private byte[] imagen;
     private BigDecimal monto;

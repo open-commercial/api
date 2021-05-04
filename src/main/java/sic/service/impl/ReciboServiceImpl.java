@@ -42,6 +42,8 @@ public class ReciboServiceImpl implements IReciboService {
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
   private final IPedidoService pedidoService;
+  private final IClienteService clienteService;
+  private final IUsuarioService usuarioService;
   private final IPhotoVideoUploader photoVideoUploader;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
@@ -58,6 +60,8 @@ public class ReciboServiceImpl implements IReciboService {
     IFormaDePagoService formaDePagoService,
     ICajaService cajaService,
     IPedidoService pedidoService,
+    IClienteService clienteService,
+    IUsuarioService usuarioService,
     IPhotoVideoUploader photoVideoUploader,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -68,6 +72,8 @@ public class ReciboServiceImpl implements IReciboService {
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
     this.pedidoService = pedidoService;
+    this.clienteService = clienteService;
+    this.usuarioService = usuarioService;
     this.photoVideoUploader = photoVideoUploader;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -279,19 +285,25 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Transactional
   @Override
-  public Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO) {
+  public Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO, long idUsuario) {
     if (nuevoReciboDepositoDTO.getImagen() == null)
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_recibo_deposito_sin_imagen", null, Locale.getDefault()));
-    var pedidoRelacionadoAlDeposito =
-            pedidoService.getPedidoNoEliminadoPorId(nuevoReciboDepositoDTO.getIdPedido());
     var recibo = new Recibo();
-    recibo.setSucursal(sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
+    if (nuevoReciboDepositoDTO.getIdPedido() != null  && nuevoReciboDepositoDTO.getIdPedido() != 0L) {
+      var pedidoRelacionadoAlDeposito =
+              pedidoService.getPedidoNoEliminadoPorId(nuevoReciboDepositoDTO.getIdPedido());
+      recibo.setSucursal(sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
+      recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
+      recibo.setUsuario(pedidoRelacionadoAlDeposito.getUsuario());
+    } else {
+      recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboDepositoDTO.getIdSucursal()));
+      recibo.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
+      recibo.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    }
     recibo.setConcepto(nuevoReciboDepositoDTO.getConcepto());
-    recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
     recibo.setFormaDePago(
         formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.TRANSFERENCIA_BANCARIA));
-    recibo.setUsuario(pedidoRelacionadoAlDeposito.getUsuario());
     recibo.setFecha(LocalDateTime.now());
     recibo.setEstado(EstadoRecibo.SIN_CHEQUEAR);
     recibo.setMonto(nuevoReciboDepositoDTO.getMonto());
@@ -309,6 +321,8 @@ public class ReciboServiceImpl implements IReciboService {
         throw new BusinessServiceException(messageSource.getMessage(
                 "mensaje_recibo_ya_aprobado", null, Locale.getDefault()));
     recibo.setEstado(EstadoRecibo.APROBADO);
+    this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+    logger.warn("El Recibo {} se aprobó correctamente.", recibo);
     reciboRepository.save(recibo);
   }
 
