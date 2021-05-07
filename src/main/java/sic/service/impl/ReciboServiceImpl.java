@@ -302,7 +302,7 @@ public class ReciboServiceImpl implements IReciboService {
           || pedidoRelacionadoAlDeposito.getEstado() == EstadoPedido.CANCELADO)
         throw new BusinessServiceException(
             messageSource.getMessage(
-                "mensaje_recibo_deposito_sin_imagen", null, Locale.getDefault()));
+                "mensaje_recibo_pedido_incorrecto", null, Locale.getDefault()));
       recibo.setSucursal(
           sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
       recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
