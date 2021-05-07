@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.modelo.dto.NuevoReciboDepositoDTO;
 import sic.repository.ReciboRepository;
 import sic.service.IConfiguracionSucursalService;
 import sic.service.IFormaDePagoService;
@@ -213,6 +214,12 @@ class ReciboServiceImplTest {
     when(reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado("1", false)).thenReturn(Optional.of(recibo));
     assertThrows(BusinessServiceException.class, () -> reciboServiceImpl.validarReglasDeNegocio(recibo));
     verify(messageSource).getMessage(eq("mensaje_recibo_de_pago_ya_existente"), any(), any());
+  }
+
+  @Test
+  void should() {
+    NuevoReciboDepositoDTO nuevoReciboDepositoDTO = NuevoReciboDepositoDTO.builder()
+            .build();
   }
 
 }

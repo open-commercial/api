@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -12,6 +13,9 @@ import javax.swing.ImageIcon;
 import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +51,7 @@ public class ReciboServiceImpl implements IReciboService {
   private final IPhotoVideoUploader photoVideoUploader;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final String URL_SIN_IMAGEN = "https://res.cloudinary.com/hf0vu1bg2/image/upload/q_10/f_jpg/v1545616229/assets/sin_imagen.jpg";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -293,7 +298,13 @@ public class ReciboServiceImpl implements IReciboService {
     if (nuevoReciboDepositoDTO.getIdPedido() != null  && nuevoReciboDepositoDTO.getIdPedido() != 0L) {
       var pedidoRelacionadoAlDeposito =
               pedidoService.getPedidoNoEliminadoPorId(nuevoReciboDepositoDTO.getIdPedido());
-      recibo.setSucursal(sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
+      if (pedidoRelacionadoAlDeposito.getEstado() == EstadoPedido.CERRADO
+          || pedidoRelacionadoAlDeposito.getEstado() == EstadoPedido.CANCELADO)
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_recibo_deposito_sin_imagen", null, Locale.getDefault()));
+      recibo.setSucursal(
+          sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
       recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
       recibo.setUsuario(pedidoRelacionadoAlDeposito.getUsuario());
     } else {
@@ -377,10 +388,6 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public byte[] getReporteRecibo(Recibo recibo) {
-    if (recibo.getEstado() != EstadoRecibo.APROBADO)
-      throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_recibo_reporte_no_aprobado", null, Locale.getDefault()));
     if (recibo.getProveedor() != null) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
@@ -390,25 +397,46 @@ public class ReciboServiceImpl implements IReciboService {
     if (recibo.getSucursal().getLogo() != null && !recibo.getSucursal().getLogo().isEmpty()) {
       try {
         params.put(
-            "logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
+            "logo",
+            new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
+        params.put(
+                "sinImagen", new ImageIcon(ImageIO.read(new URL(URL_SIN_IMAGEN))).getImage());
       } catch (IOException ex) {
-        throw new ServiceException(messageSource.getMessage(
-          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    JasperReport jasperDesign;
+    JasperReport reporteRecibo;
+    JasperReport reporteComprobante;
+    JasperPrint printReporte;
+    JasperPrint printComprobante;
+    List<JasperPrint> reportes = new ArrayList<>();
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+      reporteRecibo =
+          JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+      printReporte = JasperFillManager.fillReport(reporteRecibo, params);
+      reportes.add(printReporte);
+      if (recibo.getUrlImagen() != null) {
+        reporteComprobante =
+            JasperCompileManager.compileReport(
+                "src/main/resources/sic/vista/reportes/ComprobanteRecibo.jrxml");
+        printComprobante = JasperFillManager.fillReport(reporteComprobante, params);
+        reportes.add(printComprobante);
+      }
     } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
     try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(jasperDesign, params));
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      JRPdfExporter exporter = new JRPdfExporter();
+      exporter.setExporterInput(SimpleExporterInput.getInstance(reportes));
+      exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(baos));
+      exporter.exportReport();
+      return baos.toByteArray();
     } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
   }
 

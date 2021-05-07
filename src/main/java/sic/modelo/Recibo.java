@@ -73,6 +73,7 @@ public class Recibo implements Serializable {
 
   @Column(precision = 25, scale = 15)
   @Positive(message = "{mensaje_recibo_monto_igual_menor_cero}")
+  @NotNull(message = "{mensaje_recibo_sin_monto}")
   private BigDecimal monto;
 
   @Pattern(

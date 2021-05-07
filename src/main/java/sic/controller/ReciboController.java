@@ -1,6 +1,5 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
