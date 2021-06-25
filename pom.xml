@@ -15,7 +15,7 @@
         <version>2.3.0.RELEASE</version>
         <relativePath/>
     </parent>
-    
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>sic.App</start-class>
@@ -38,7 +38,7 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports</artifactId>
-            <version>6.16.0</version>
+            <version>6.17.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
