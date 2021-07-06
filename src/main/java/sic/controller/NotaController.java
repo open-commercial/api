@@ -222,32 +222,6 @@ public class NotaController {
             usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue())));
   }
 
-//  @PostMapping("/notas/debito")
-//  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-//  public NotaDebito guardarNotaDebito(
-//      @RequestBody NotaDebitoDTO notaDebitoDTO,
-//      @RequestHeader("Authorization") String authorizationHeader) {
-//    NotaDebito notaDebito = modelMapper.map(notaDebitoDTO, NotaDebito.class);
-//    notaDebito.setSucursal(sucursalService.getSucursalPorId(notaDebitoDTO.getIdSucursal()));
-//    if (notaDebitoDTO.getIdCliente() != null) {
-//      notaDebito.setCliente(clienteService.getClienteNoEliminadoPorId(notaDebitoDTO.getIdCliente()));
-//      notaDebito.setMovimiento(Movimiento.VENTA);
-//    }
-//    if (notaDebitoDTO.getIdProveedor() != null) {
-//      notaDebito.setProveedor(
-//          proveedorService.getProveedorNoEliminadoPorId(notaDebitoDTO.getIdProveedor()));
-//      notaDebito.setMovimiento(Movimiento.COMPRA);
-//    }
-//    // recibo
-//    if (notaDebitoDTO.getIdRecibo() != null) {
-//      notaDebito.setRecibo(reciboService.getReciboNoEliminadoPorId(notaDebitoDTO.getIdRecibo()));
-//    }
-//    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-//    notaDebito.setUsuario(
-//        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
-//    return notaService.guardarNotaDebito(notaDebito);
-//  }
-
   @GetMapping("/notas/{idNota}/reporte")
   public ResponseEntity<byte[]> getReporteNota(@PathVariable long idNota) {
     HttpHeaders headers = new HttpHeaders();
