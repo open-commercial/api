@@ -1,7 +1,5 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
@@ -10,10 +8,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.modelo.EstadoRecibo;
 import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
-import sic.modelo.dto.ReciboDTO;
+import sic.modelo.dto.NuevoReciboClienteDTO;
+import sic.modelo.dto.NuevoReciboDepositoDTO;
+import sic.modelo.dto.NuevoReciboProveedorDTO;
 import sic.service.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,8 +30,6 @@ public class ReciboController {
   private final IProveedorService proveedorService;
   private final IFormaDePagoService formaDePagoService;
   private final IAuthService authService;
-  private final ModelMapper modelMapper;
-
   @Autowired
   public ReciboController(
       IReciboService reciboService,
@@ -39,8 +38,7 @@ public class ReciboController {
       IClienteService clienteService,
       IProveedorService proveedorService,
       IFormaDePagoService formaDePagoService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+      IAuthService authService) {
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
@@ -48,7 +46,6 @@ public class ReciboController {
     this.formaDePagoService = formaDePagoService;
     this.proveedorService = proveedorService;
     this.authService = authService;
-    this.modelMapper = modelMapper;
   }
 
   @GetMapping("/recibos/{idRecibo}")
@@ -71,33 +68,55 @@ public class ReciboController {
   @PostMapping("/recibos/clientes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Recibo guardarReciboCliente(
-      @RequestBody ReciboDTO reciboDTO,
+      @RequestBody NuevoReciboClienteDTO nuevoReciboClienteDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
-    recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
-    recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    var recibo = new Recibo();
+    recibo.setConcepto(nuevoReciboClienteDTO.getConcepto());
+    recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboClienteDTO.getIdSucursal()));
+    recibo.setCliente(
+        clienteService.getClienteNoEliminadoPorId(nuevoReciboClienteDTO.getIdCliente()));
+    recibo.setFormaDePago(
+        formaDePagoService.getFormasDePagoNoEliminadoPorId(
+            nuevoReciboClienteDTO.getIdFormaDePago()));
+    var claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
+    recibo.setEstado(EstadoRecibo.APROBADO);
+    recibo.setMonto(nuevoReciboClienteDTO.getMonto());
     return reciboService.guardar(recibo);
   }
 
   @PostMapping("/recibos/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Recibo guardarReciboProveedor(
-      @RequestBody ReciboDTO reciboDTO,
+      @RequestBody NuevoReciboProveedorDTO nuevoReciboProveedorDTO,
       @RequestHeader("Authorization") String authorizationHeader) {
-    Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
-    recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
-    recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
-    recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
+    var recibo = new Recibo();
+    recibo.setConcepto(nuevoReciboProveedorDTO.getConcepto());
+    recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboProveedorDTO.getIdSucursal()));
+    recibo.setProveedor(
+        proveedorService.getProveedorNoEliminadoPorId(nuevoReciboProveedorDTO.getIdProveedor()));
+    recibo.setFormaDePago(
+        formaDePagoService.getFormasDePagoNoEliminadoPorId(
+            nuevoReciboProveedorDTO.getIdFormaDePago()));
+    var claims = authService.getClaimsDelToken(authorizationHeader);
     recibo.setUsuario(
         usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
     recibo.setFecha(LocalDateTime.now());
+    recibo.setMonto(nuevoReciboProveedorDTO.getMonto());
+    recibo.setEstado(EstadoRecibo.APROBADO);
     return reciboService.guardar(recibo);
+  }
+
+  @PostMapping("/recibos/clientes/depositos")
+  @AccesoRolesPermitidos({Rol.COMPRADOR})
+  public Recibo guardarReciboPorDeposito(
+      @RequestBody NuevoReciboDepositoDTO nuevoReciboDepositoDTO,
+      @RequestHeader("Authorization") String authorizationHeader) {
+    return reciboService.guardarReciboPorDeposito(
+        nuevoReciboDepositoDTO,
+        (Integer) authService.getClaimsDelToken(authorizationHeader).get("idUsuario"));
   }
 
   @DeleteMapping("/recibos/{idRecibo}")
@@ -108,11 +127,17 @@ public class ReciboController {
 
   @GetMapping("/recibos/{idRecibo}/reporte")
   public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {
-    HttpHeaders headers = new HttpHeaders();
+    var headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
     headers.add("content-disposition", "inline; filename=Recibo.pdf");
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF = reciboService.getReporteRecibo(reciboService.getReciboNoEliminadoPorId(idRecibo));
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
+
+  @PutMapping("/recibos/{idRecibo}/aprobar")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public void aprobarRecibo(@PathVariable long idRecibo) {
+    reciboService.aprobarRecibo(idRecibo);
   }
 }

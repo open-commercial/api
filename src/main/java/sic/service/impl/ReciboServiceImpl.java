@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
@@ -12,6 +13,9 @@ import javax.swing.ImageIcon;
 import com.mercadopago.resources.Payment;
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.engine.export.JRPdfExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.modelo.dto.NuevoReciboDepositoDTO;
 import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -40,8 +45,13 @@ public class ReciboServiceImpl implements IReciboService {
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
+  private final IPedidoService pedidoService;
+  private final IClienteService clienteService;
+  private final IUsuarioService usuarioService;
+  private final IPhotoVideoUploader photoVideoUploader;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final String URL_SIN_IMAGEN = "https://res.cloudinary.com/hf0vu1bg2/image/upload/q_10/f_jpg/v1545616229/assets/sin_imagen.jpg";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -54,6 +64,10 @@ public class ReciboServiceImpl implements IReciboService {
     INotaService notaService,
     IFormaDePagoService formaDePagoService,
     ICajaService cajaService,
+    IPedidoService pedidoService,
+    IClienteService clienteService,
+    IUsuarioService usuarioService,
+    IPhotoVideoUploader photoVideoUploader,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.reciboRepository = reciboRepository;
@@ -62,6 +76,10 @@ public class ReciboServiceImpl implements IReciboService {
     this.notaService = notaService;
     this.formaDePagoService = formaDePagoService;
     this.cajaService = cajaService;
+    this.pedidoService = pedidoService;
+    this.clienteService = clienteService;
+    this.usuarioService = usuarioService;
+    this.photoVideoUploader = photoVideoUploader;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -84,8 +102,8 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public BooleanBuilder getBuilder(BusquedaReciboCriteria criteria) {
-    QRecibo qRecibo = QRecibo.recibo;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qRecibo = QRecibo.recibo;
+    var builder = new BooleanBuilder();
     if (criteria.getConcepto() != null) {
       String[] terminos = criteria.getConcepto().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
@@ -138,7 +156,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
     if (pagina == null) pagina = 0;
-    String ordenDefault = "fecha";
+    var ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
@@ -173,7 +191,8 @@ public class ReciboServiceImpl implements IReciboService {
             recibo.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip()));
     this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
-    this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+    if (recibo.getEstado() == EstadoRecibo.APROBADO)
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
     logger.warn("El Recibo {} se guardó correctamente.", recibo);
     return recibo;
   }
@@ -202,7 +221,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public long getSiguienteNumeroRecibo(long idSucursal, long serie) {
-    Recibo recibo =
+    var recibo =
       reciboRepository.findTopBySucursalAndNumSerieOrderByNumReciboDesc(
         sucursalService.getSucursalPorId(idSucursal), serie);
     if (recibo == null) {
@@ -223,7 +242,7 @@ public class ReciboServiceImpl implements IReciboService {
     List<Recibo> recibos = new ArrayList<>();
     if (idsFormaDePago != null && montos != null && idsFormaDePago.length == montos.length) {
       HashMap<Long, BigDecimal> mapIdsFormaDePago = new HashMap<>();
-      for (int i = 0; i < idsFormaDePago.length; i++) {
+      for (var i = 0; i < idsFormaDePago.length; i++) {
         if (mapIdsFormaDePago.containsKey(idsFormaDePago[i])) {
           mapIdsFormaDePago.put(
               idsFormaDePago[i], mapIdsFormaDePago.get(idsFormaDePago[i]).add(montos[i]));
@@ -233,13 +252,13 @@ public class ReciboServiceImpl implements IReciboService {
       }
       mapIdsFormaDePago.forEach(
           (k, v) -> {
-            Recibo recibo = new Recibo();
+            var recibo = new Recibo();
             recibo.setCliente(cliente);
             recibo.setUsuario(usuario);
-            Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
+            var sucursal = sucursalService.getSucursalPorId(idSucursal);
             recibo.setSucursal(sucursal);
             recibo.setFecha(fecha);
-            FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
+            var fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
             recibo.setFormaDePago(fdp);
             recibo.setMonto(v);
             recibo.setNumSerie(
@@ -256,7 +275,7 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public Recibo construirReciboPorPayment(
       Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment) {
-    Recibo nuevoRecibo = new Recibo();
+    var nuevoRecibo = new Recibo();
     nuevoRecibo.setSucursal(sucursal);
     nuevoRecibo.setFormaDePago(
         formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
@@ -269,10 +288,68 @@ public class ReciboServiceImpl implements IReciboService {
     return nuevoRecibo;
   }
 
+  @Transactional
+  @Override
+  public Recibo guardarReciboPorDeposito(NuevoReciboDepositoDTO nuevoReciboDepositoDTO, long idUsuario) {
+    if (nuevoReciboDepositoDTO.getImagen() == null)
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_recibo_deposito_sin_imagen", null, Locale.getDefault()));
+    var recibo = new Recibo();
+    if (nuevoReciboDepositoDTO.getIdPedido() != null  && nuevoReciboDepositoDTO.getIdPedido() != 0L) {
+      var pedidoRelacionadoAlDeposito =
+              pedidoService.getPedidoNoEliminadoPorId(nuevoReciboDepositoDTO.getIdPedido());
+      if (pedidoRelacionadoAlDeposito.getEstado() == EstadoPedido.CERRADO
+          || pedidoRelacionadoAlDeposito.getEstado() == EstadoPedido.CANCELADO)
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_recibo_pedido_incorrecto", null, Locale.getDefault()));
+      recibo.setSucursal(
+          sucursalService.getSucursalPorId(pedidoRelacionadoAlDeposito.getIdSucursal()));
+      recibo.setCliente(pedidoRelacionadoAlDeposito.getCliente());
+      recibo.setUsuario(pedidoRelacionadoAlDeposito.getUsuario());
+    } else {
+      recibo.setSucursal(sucursalService.getSucursalPorId(nuevoReciboDepositoDTO.getIdSucursal()));
+      recibo.setCliente(clienteService.getClientePorIdUsuario(idUsuario));
+      recibo.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
+    }
+    recibo.setConcepto(nuevoReciboDepositoDTO.getConcepto());
+    recibo.setFormaDePago(
+        formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.TRANSFERENCIA_BANCARIA));
+    recibo.setFecha(LocalDateTime.now());
+    recibo.setEstado(EstadoRecibo.SIN_CHEQUEAR);
+    recibo.setMonto(nuevoReciboDepositoDTO.getMonto());
+    recibo = this.guardar(recibo);
+    recibo.setUrlImagen(
+        this.subirImagenRecibo(recibo.getIdRecibo(), nuevoReciboDepositoDTO.getImagen()));
+    return recibo;
+  }
+
+  @Override
+  @Transactional
+  public void aprobarRecibo(long idRecibo) {
+    var recibo = this.getReciboNoEliminadoPorId(idRecibo);
+    if (recibo.getEstado() == EstadoRecibo.APROBADO)
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_recibo_ya_aprobado", null, Locale.getDefault()));
+    recibo.setEstado(EstadoRecibo.APROBADO);
+    this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
+    logger.warn("El Recibo {} se aprobó correctamente.", recibo);
+    reciboRepository.save(recibo);
+  }
+
+  @Override
+  @Transactional
+  public String subirImagenRecibo(long idRecibo, byte[] imagen) {
+    String urlImagen =
+        photoVideoUploader.subirImagen(Recibo.class.getSimpleName() + idRecibo, imagen);
+    reciboRepository.actualizarUrlImagen(idRecibo, urlImagen);
+    return urlImagen;
+  }
+
   @Override
   @Transactional
   public void eliminar(long idRecibo) {
-    Recibo r = this.getReciboNoEliminadoPorId(idRecibo);
+    var r = this.getReciboNoEliminadoPorId(idRecibo);
     if (!notaService.existsNotaDebitoPorRecibo(r)) {
       r.setEliminado(true);
       this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
@@ -286,7 +363,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   private void actualizarCajaPorEliminacionDeRecibo(Recibo recibo) {
-    Caja caja =
+    var caja =
         this.cajaService.encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
             recibo.getSucursal().getIdSucursal(), recibo.getFecha());
     BigDecimal monto = BigDecimal.ZERO;
@@ -312,33 +389,54 @@ public class ReciboServiceImpl implements IReciboService {
   @Override
   public byte[] getReporteRecibo(Recibo recibo) {
     if (recibo.getProveedor() != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+          messageSource.getMessage("mensaje_recibo_reporte_proveedor", null, Locale.getDefault()));
     }
     Map<String, Object> params = new HashMap<>();
     params.put("recibo", recibo);
     if (recibo.getSucursal().getLogo() != null && !recibo.getSucursal().getLogo().isEmpty()) {
       try {
         params.put(
-            "logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
+            "logo",
+            new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
+        params.put(
+                "sinImagen", new ImageIcon(ImageIO.read(new URL(URL_SIN_IMAGEN))).getImage());
       } catch (IOException ex) {
-        throw new ServiceException(messageSource.getMessage(
-          "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+        throw new ServiceException(
+            messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    JasperReport jasperDesign;
+    JasperReport reporteRecibo;
+    JasperReport reporteComprobante;
+    JasperPrint printReporte;
+    JasperPrint printComprobante;
+    List<JasperPrint> reportes = new ArrayList<>();
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+      reporteRecibo =
+          JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+      printReporte = JasperFillManager.fillReport(reporteRecibo, params);
+      reportes.add(printReporte);
+      if (recibo.getUrlImagen() != null) {
+        reporteComprobante =
+            JasperCompileManager.compileReport(
+                "src/main/resources/sic/vista/reportes/ComprobanteRecibo.jrxml");
+        printComprobante = JasperFillManager.fillReport(reporteComprobante, params);
+        reportes.add(printComprobante);
+      }
     } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
     try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(jasperDesign, params));
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      JRPdfExporter exporter = new JRPdfExporter();
+      exporter.setExporterInput(SimpleExporterInput.getInstance(reportes));
+      exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(baos));
+      exporter.exportReport();
+      return baos.toByteArray();
     } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(
+          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
   }
 

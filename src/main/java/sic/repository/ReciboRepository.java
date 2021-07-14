@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -26,7 +27,8 @@ public interface ReciboRepository
       "SELECT r FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
-          + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
+          + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false "
+          + "AND r.estado  = sic.modelo.EstadoRecibo.APROBADO")
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
       @Param("idSucursal") long idSucursal,
       @Param("idFormaDePago") long idFormaDePago,
@@ -98,4 +100,9 @@ public interface ReciboRepository
       @Param("idSucursal") long idSucursal,
       @Param("desde") LocalDateTime desde,
       @Param("hasta") LocalDateTime hasta);
+
+  @Modifying
+  @Query("UPDATE Recibo r SET r.urlImagen = :urlImagen WHERE r.idRecibo = :idRecibo")
+  int actualizarUrlImagen(@Param("idRecibo") long idRecibo, @Param("urlImagen") String urlImagen);
+
 }

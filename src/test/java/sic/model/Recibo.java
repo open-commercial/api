@@ -1,6 +1,7 @@
 package sic.model;
 
 import lombok.*;
+import sic.modelo.EstadoRecibo;
 
 import java.time.LocalDateTime;
 
@@ -40,4 +41,6 @@ public class Recibo {
   private Long idViajante;
   private String nombreViajante;
   private double monto;
+  private String urlImagen;
+  private EstadoRecibo estado;
 }

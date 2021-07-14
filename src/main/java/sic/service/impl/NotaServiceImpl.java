@@ -117,7 +117,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   @Transactional
   public void eliminarNota(long idNota) {
-    Nota nota = this.getNotaNoEliminadaPorId(idNota);
+    var nota = this.getNotaNoEliminadaPorId(idNota);
     if (nota.getMovimiento() == Movimiento.COMPRA && nota.getFacturaCompra() != null) {
       throw new BusinessServiceException(
           messageSource.getMessage(
@@ -178,7 +178,7 @@ public class NotaServiceImpl implements INotaService {
 
   private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
     if (pagina == null) pagina = 0;
-    String ordenDefault = "fecha";
+    var ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
@@ -195,8 +195,8 @@ public class NotaServiceImpl implements INotaService {
 
   private BooleanBuilder getBuilderNotaCredito(
       BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qNotaCredito = QNotaCredito.notaCredito;
+    var builder = new BooleanBuilder();
     builder.and(
         qNotaCredito
             .sucursal
@@ -231,8 +231,8 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNotaCredito.serie.eq(criteria.getNumSerie()))
           .and(qNotaCredito.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
-    BooleanBuilder rsPredicate = new BooleanBuilder();
+    var usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
+    var rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
@@ -242,7 +242,7 @@ public class NotaServiceImpl implements INotaService {
             rsPredicate.or(qNotaCredito.cliente.viajante.eq(usuarioLogueado));
             break;
           case COMPRADOR:
-            Cliente clienteRelacionado =
+            var clienteRelacionado =
                 clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
             if (clienteRelacionado != null) {
               rsPredicate.or(qNotaCredito.cliente.eq(clienteRelacionado));
@@ -259,8 +259,8 @@ public class NotaServiceImpl implements INotaService {
 
   private BooleanBuilder getBuilderNotaDebito(
       BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
-    QNotaDebito qNotaDebito = QNotaDebito.notaDebito;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qNotaDebito = QNotaDebito.notaDebito;
+    var builder = new BooleanBuilder();
     builder.and(
         qNotaDebito
             .sucursal
@@ -295,8 +295,8 @@ public class NotaServiceImpl implements INotaService {
       builder
           .and(qNotaDebito.serie.eq(criteria.getNumSerie()))
           .and(qNotaDebito.nroNota.eq(criteria.getNumNota()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
-    BooleanBuilder rsPredicate = new BooleanBuilder();
+    var usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
+    var rsPredicate = new BooleanBuilder();
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
         && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
@@ -337,8 +337,8 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<TipoDeComprobante> getTipoNotaCreditoCliente(Long idCliente, Long idSucursal) {
     List<TipoDeComprobante> tiposPermitidos = new ArrayList<>();
-    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+    var sucursal = sucursalService.getSucursalPorId(idSucursal);
+    var cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())
         && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       tiposPermitidos.add(TipoDeComprobante.NOTA_CREDITO_A);
@@ -356,8 +356,8 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<TipoDeComprobante> getTipoNotaDebitoCliente(Long idCliente, Long idSucursal) {
     List<TipoDeComprobante> tiposPermitidos = new ArrayList<>();
-    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
-    Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+    var sucursal = sucursalService.getSucursalPorId(idSucursal);
+    var cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())
         && CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
       tiposPermitidos.add(TipoDeComprobante.NOTA_DEBITO_A);
@@ -375,8 +375,8 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<TipoDeComprobante> getTipoNotaCreditoProveedor(Long idProveedor, Long idSucursal) {
     List<TipoDeComprobante> tiposPermitidos = new ArrayList<>();
-    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
-    Proveedor proveedor = proveedorService.getProveedorNoEliminadoPorId(idProveedor);
+    var sucursal = sucursalService.getSucursalPorId(idSucursal);
+    var proveedor = proveedorService.getProveedorNoEliminadoPorId(idProveedor);
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
         tiposPermitidos.add(TipoDeComprobante.NOTA_CREDITO_A);
@@ -398,8 +398,8 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<TipoDeComprobante> getTipoNotaDebitoProveedor(Long idProveedor, Long idSucursal) {
     List<TipoDeComprobante> tiposPermitidos = new ArrayList<>();
-    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
-    Proveedor proveedor = proveedorService.getProveedorNoEliminadoPorId(idProveedor);
+    var sucursal = sucursalService.getSucursalPorId(idSucursal);
+    var proveedor = proveedorService.getProveedorNoEliminadoPorId(idProveedor);
     if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
       if (CategoriaIVA.discriminaIVA(proveedor.getCategoriaIVA())) {
         tiposPermitidos.add(TipoDeComprobante.NOTA_DEBITO_A);
@@ -421,7 +421,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public List<NotaCredito> getNotasCreditoPorFactura(Long idFactura) {
     List<NotaCredito> notasCredito = new ArrayList<>();
-    Factura factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
+    var factura = facturaService.getFacturaNoEliminadaPorId(idFactura);
     if (factura instanceof FacturaVenta) {
       notasCredito =
           notaCreditoRepository.findAllByFacturaVentaAndEliminada((FacturaVenta) factura, false);
@@ -470,7 +470,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public long getSiguienteNumeroNotaDebitoCliente(
       Long idSucursal, TipoDeComprobante tipoDeComprobante) {
-    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
+    var sucursal = sucursalService.getSucursalPorId(idSucursal);
     Long numeroNota =
         notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(
             tipoDeComprobante,
@@ -482,7 +482,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public long getSiguienteNumeroNotaCreditoCliente(
       Long idSucursal, TipoDeComprobante tipoDeComprobante) {
-    Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
+    var sucursal = sucursalService.getSucursalPorId(idSucursal);
     Long numeroNota =
         notaCreditoRepository.buscarMayorNumNotaCreditoClienteSegunTipo(
             tipoDeComprobante,
@@ -585,6 +585,11 @@ public class NotaServiceImpl implements INotaService {
             messageSource.getMessage("mensaje_nota_de_renglones_vacio", null, Locale.getDefault()));
       }
     } else {
+      var recibo = ((NotaDebito) nota).getRecibo();
+      if (recibo != null && recibo.getEstado() != EstadoRecibo.APROBADO)
+        throw new BusinessServiceException(
+            messageSource.getMessage(
+                "mensaje_nota_debito_recibo_no_aprobado", null, Locale.getDefault()));
       if (((NotaDebito) nota).getRenglonesNotaDebito() == null
           || ((NotaDebito) nota).getRenglonesNotaDebito().isEmpty()) {
         throw new BusinessServiceException(
@@ -598,8 +603,8 @@ public class NotaServiceImpl implements INotaService {
     List<RenglonNotaCredito> renglonesNotaCredito = notaCredito.getRenglonesNotaCredito();
     BigDecimal subTotal = BigDecimal.ZERO;
     BigDecimal[] importes = new BigDecimal[renglonesNotaCredito.size()];
-    int i = 0;
-    int sizeRenglonesCredito = renglonesNotaCredito.size();
+    var i = 0;
+    var sizeRenglonesCredito = renglonesNotaCredito.size();
     // IVA - importe
     BigDecimal iva21 = BigDecimal.ZERO;
     BigDecimal iva105 = BigDecimal.ZERO;
@@ -819,8 +824,8 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public NotaCredito calcularNotaCreditoConFactura(
       NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario) {
-    NotaCredito notaCreditoNueva = new NotaCredito();
-    Factura factura =
+    var notaCreditoNueva = new NotaCredito();
+    var factura =
         facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
     if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
         || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
@@ -911,7 +916,7 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public NotaCredito calcularNotaCreditoSinFactura(
       NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO, Usuario usuario) {
-    NotaCredito notaCreditoNueva = new NotaCredito();
+    var notaCreditoNueva = new NotaCredito();
     if (nuevaNotaCreditoSinFacturaDTO.getDetalle() == null
         || nuevaNotaCreditoSinFacturaDTO.getDetalle().isEmpty()) {
       throw new BusinessServiceException(
@@ -981,9 +986,9 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public NotaDebito calcularNotaDebitoConRecibo(
       NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario) {
-    NotaDebito notaDebitoCalculada = new NotaDebito();
+    var notaDebitoCalculada = new NotaDebito();
     notaDebitoCalculada.setFecha(LocalDateTime.now());
-    Recibo reciboRelacionado =
+    var reciboRelacionado =
         reciboService.getReciboNoEliminadoPorId(nuevaNotaDebitoDeReciboDTO.getIdRecibo());
     if (reciboRelacionado.getCliente() != null) {
       notaDebitoCalculada.setCliente(reciboRelacionado.getCliente());
@@ -1053,12 +1058,12 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public NotaDebito calcularNotaDebitoSinRecibo(
       NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario) {
-    NotaDebito notaDebitoCalculada = new NotaDebito();
+    var notaDebitoCalculada = new NotaDebito();
     notaDebitoCalculada.setFecha(LocalDateTime.now());
     notaDebitoCalculada.setSucursal(sucursalService.getSucursalPorId(nuevaNotaDebitoSinReciboDTO.getIdSucursal()));
     if (nuevaNotaDebitoSinReciboDTO.getTipoDeComprobante() != null) {
       if (nuevaNotaDebitoSinReciboDTO.getIdCliente() != null) {
-        Cliente cliente =
+        var cliente =
             clienteService.getClienteNoEliminadoPorId(nuevaNotaDebitoSinReciboDTO.getIdCliente());
         notaDebitoCalculada.setCliente(cliente);
         notaDebitoCalculada.setMovimiento(Movimiento.VENTA);
@@ -1069,7 +1074,7 @@ public class NotaServiceImpl implements INotaService {
               messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
         }
       } else if (nuevaNotaDebitoSinReciboDTO.getIdProveedor() != null) {
-        Proveedor proveedor =
+        var proveedor =
             proveedorService.getProveedorNoEliminadoPorId(
                 nuevaNotaDebitoSinReciboDTO.getIdProveedor());
         notaDebitoCalculada.setProveedor(proveedor);
@@ -1242,7 +1247,7 @@ public class NotaServiceImpl implements INotaService {
       ds = new JRBeanCollectionDataSource(renglones);
       params.put("notaDebito", nota);
     }
-    ConfiguracionSucursal configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
+    var configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
         || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
@@ -1308,8 +1313,8 @@ public class NotaServiceImpl implements INotaService {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
     RenglonNotaCredito renglonNota;
     if (cantidad.length == idRenglonFactura.length) {
-      for (int i = 0; i < idRenglonFactura.length; i++) {
-        RenglonFactura renglonFactura = facturaService.getRenglonFactura(idRenglonFactura[i]);
+      for (var i = 0; i < idRenglonFactura.length; i++) {
+        var renglonFactura = facturaService.getRenglonFactura(idRenglonFactura[i]);
         if (renglonFactura.getCantidad().compareTo(cantidad[i]) < 0
             || cantidad[i].compareTo(BigDecimal.ZERO) < 0) {
           throw new BusinessServiceException(
@@ -1374,7 +1379,7 @@ public class NotaServiceImpl implements INotaService {
   public RenglonNotaCredito calcularRenglonCredito(
       TipoDeComprobante tipo, String detalle, BigDecimal monto) {
     this.validarTipoNotaCredito(tipo);
-    RenglonNotaCredito renglonNota = new RenglonNotaCredito();
+    var renglonNota = new RenglonNotaCredito();
     renglonNota.setIdProductoItem(null);
     renglonNota.setCodigoItem(null);
     renglonNota.setDescripcionItem(detalle);
@@ -1447,7 +1452,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public RenglonNotaDebito calcularRenglonDebitoConRecibo(Recibo recibo) {
-    RenglonNotaDebito renglonNota = new RenglonNotaDebito();
+    var renglonNota = new RenglonNotaDebito();
     String descripcion =
         "Nº Recibo " + recibo.getNumSerie() + "-" + recibo.getNumRecibo() + ": " + recibo.getConcepto();
     renglonNota.setDescripcion(descripcion);
@@ -1462,35 +1467,31 @@ public class NotaServiceImpl implements INotaService {
   @Override
   public RenglonNotaDebito calcularRenglonDebito(
       BigDecimal monto, TipoDeComprobante tipoDeComprobante) {
-    RenglonNotaDebito renglonNota = new RenglonNotaDebito();
+    var renglonNota = new RenglonNotaDebito();
     renglonNota.setDescripcion("Gasto Administrativo");
     switch (tipoDeComprobante) {
-      case NOTA_DEBITO_A:
-      case NOTA_DEBITO_B:
-      case NOTA_DEBITO_PRESUPUESTO:
+      case NOTA_DEBITO_A, NOTA_DEBITO_B, NOTA_DEBITO_PRESUPUESTO -> {
         renglonNota.setMonto(
-            monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
+                monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
         renglonNota.setIvaPorcentaje(IVA_21);
         renglonNota.setIvaNeto(
-            renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
-        break;
-      case NOTA_DEBITO_C:
-      case NOTA_DEBITO_X:
+                renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
+      }
+      case NOTA_DEBITO_C, NOTA_DEBITO_X -> {
         renglonNota.setMonto(monto);
         renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
         renglonNota.setIvaNeto(BigDecimal.ZERO);
-        break;
-      case NOTA_DEBITO_Y:
+      }
+      case NOTA_DEBITO_Y -> {
         renglonNota.setMonto(
-            monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
+                monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
         renglonNota.setIvaPorcentaje(IVA_105);
         renglonNota.setIvaNeto(
-            renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
-        break;
-      default:
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+                renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
+      }
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setImporteNeto(renglonNota.getIvaNeto().add(renglonNota.getImporteBruto()));
@@ -1633,8 +1634,8 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public boolean existeNotaCreditoAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
-    QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qNotaCredito = QNotaCredito.notaCredito;
+    var builder = new BooleanBuilder();
     builder.and(
         qNotaCredito
             .idNota
@@ -1651,8 +1652,8 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public boolean existeNotaDebitoAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
-    QNotaDebito qNotaDebito = QNotaDebito.notaDebito;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qNotaDebito = QNotaDebito.notaDebito;
+    var builder = new BooleanBuilder();
     builder.and(
         qNotaDebito
             .idNota

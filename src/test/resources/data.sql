@@ -7,7 +7,7 @@ VALUES ('N3400',50.000000000000000,false,'Corrientes',1),
        ('H3500',150.000000000000000,false,'Resistencia',3);
 
 INSERT INTO formadepago(afecta_caja, eliminada, nombre, predeterminado)
-VALUES (true,false,'Efectivo',true), (false, false, 'Cheque de 3ros', false);
+VALUES (true,false,'Efectivo',true), (false, false, 'Cheque de 3ros', false), (false, false, 'Transferencia Bancaria', false);
 
 INSERT INTO usuario (apellido, eliminado, email, habilitado, id_sucursal_predeterminada, nombre,
     password, password_recovery_key, password_recovery_key_expiration_date, username)

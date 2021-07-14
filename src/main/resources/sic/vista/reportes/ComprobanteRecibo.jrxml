@@ -17,8 +17,8 @@
 	<parameter name="recibo" class="sic.modelo.Recibo"/>
 	<parameter name="numSerie" class="java.lang.Long"/>
 	<parameter name="logo" class="java.awt.Image"/>
-	<parameter name="formasDePago" class="java.lang.String"/>
 	<parameter name="numRecibo" class="java.lang.Long"/>
+	<parameter name="sinImagen" class="java.awt.Image"/>
 	<background>
 		<band splitType="Stretch"/>
 	</background>
@@ -175,14 +175,15 @@ $P{recibo}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "M
 				<text><![CDATA[Inicio Actividades:]]></text>
 			</staticText>
 			<staticText>
-				<reportElement x="240" y="15" width="75" height="30" uuid="9f209d00-b442-47d4-a7bd-291fb3b1c8be">
+				<reportElement x="200" y="15" width="150" height="60" uuid="9f209d00-b442-47d4-a7bd-291fb3b1c8be">
 					<property name="local_mesure_unitheight" value="pixel"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
 				<textElement textAlignment="Center" verticalAlignment="Middle">
 					<font size="16" isBold="true"/>
 				</textElement>
-				<text><![CDATA[RECIBO]]></text>
+				<text><![CDATA[COMPROBANTE
+RECIBO]]></text>
 			</staticText>
 			<staticText>
 				<reportElement mode="Transparent" x="360" y="15" width="99" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="4f584c9b-889f-4b77-ba6c-cfc29ead7cea"/>
@@ -209,79 +210,14 @@ $P{recibo}.getSucursal().getCategoriaIVA().toString().equals("MONOTRIBUTO") ? "M
 		<band/>
 	</pageFooter>
 	<lastPageFooter>
-		<band height="171">
-			<staticText>
-				<reportElement x="360" y="150" width="90" height="15" uuid="b49e2275-7a64-44f7-851d-a775f929eaa4">
+		<band height="170">
+			<image hAlign="Center" vAlign="Middle">
+				<reportElement x="109" y="-1" width="350" height="170" uuid="f85a7458-f317-4622-a6ed-e817709fce2f">
+					<property name="com.jaspersoft.studio.unit.width" value="px"/>
 					<property name="com.jaspersoft.studio.unit.height" value="px"/>
 				</reportElement>
-				<textElement textAlignment="Right" verticalAlignment="Middle">
-					<font size="12" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Monto:]]></text>
-			</staticText>
-			<textField isBlankWhenNull="false">
-				<reportElement mode="Transparent" x="450" y="150" width="105" height="15" forecolor="#000000" backcolor="#FFFFFF" uuid="e063a476-1e47-4947-9f7f-04ad07139b9e">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Right" verticalAlignment="Middle" rotation="None" markup="none">
-					<font size="12" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false" pdfEncoding="Cp1252" isPdfEmbedded="false"/>
-					<paragraph lineSpacing="Single"/>
-				</textElement>
-				<textFieldExpression><![CDATA[new java.text.DecimalFormat("$#,##0.##").format(Double.valueOf($P{recibo}.getMonto().doubleValue()))]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement x="0" y="60" width="555" height="15" uuid="73b22264-238a-44d1-9501-19fe03d257be">
-					<property name="local_mesure_unitheight" value="pixel"/>
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement>
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Forma de Pago: " + $P{recibo}.getFormaDePago().getNombre()]]></textFieldExpression>
-			</textField>
-			<textField>
-				<reportElement positionType="FixRelativeToBottom" x="0" y="10" width="555" height="50" uuid="7d4cd7c6-3ef8-449b-b63b-9d16f6eb9934"/>
-				<textElement verticalAlignment="Top">
-					<font size="12"/>
-				</textElement>
-				<textFieldExpression><![CDATA["Recibí conforme de " + $P{recibo}.getCliente().getNombreFiscal() + "  (" + $P{recibo}.getCliente().getNroCliente() + ") " + " la cantidad de " + new java.text.DecimalFormat("$#,##0.##").format(Double.valueOf($P{recibo}.getMonto().doubleValue())) + " por concepto de " + $P{recibo}.getConcepto()]]></textFieldExpression>
-			</textField>
-			<staticText>
-				<reportElement x="0" y="130" width="60" height="15" uuid="cdb318a8-d17d-463d-9a89-7c074621b64a">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Bottom">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Firma:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="0" y="150" width="60" height="15" uuid="e2dda16f-1921-458f-818c-ee168e926930">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement verticalAlignment="Bottom">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[Aclaración:]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="60" y="130" width="150" height="15" uuid="03904d56-8247-470f-b7a3-dc0b5028266b">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Bottom">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[................................................]]></text>
-			</staticText>
-			<staticText>
-				<reportElement x="60" y="150" width="150" height="15" uuid="0d8e57ae-5e94-4040-a0bc-e9a389e72beb">
-					<property name="com.jaspersoft.studio.unit.height" value="px"/>
-				</reportElement>
-				<textElement textAlignment="Left" verticalAlignment="Bottom">
-					<font size="8" isBold="true"/>
-				</textElement>
-				<text><![CDATA[................................................]]></text>
-			</staticText>
+				<imageExpression><![CDATA[$P{recibo}.getUrlImagen() == null ? $P{sinImagen} : $P{recibo}.getUrlImagen() ]]></imageExpression>
+			</image>
 		</band>
 	</lastPageFooter>
 </jasperReport>
