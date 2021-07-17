@@ -145,7 +145,7 @@ class AppIntegrationTest {
             .nombre("FirstOfAll")
             .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
             .email("support@globocorporation.com")
-            .idFiscal(30712391215L)
+            .idFiscal(20311023188L)
             .ubicacion(Ubicacion.builder().idLocalidad(1L).idProvincia(1L).build())
             .build();
     Sucursal sucursalRecuperada =
