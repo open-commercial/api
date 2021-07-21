@@ -807,7 +807,7 @@ public class NotaServiceImpl implements INotaService {
         || nuevaNotaCreditoSinFacturaDTO.getDetalle().isEmpty()) {
       throw new BusinessServiceException(
           messageSource.getMessage(
-              "mensaje_nota_renglon_sin_descripcion", null, Locale.getDefault()));
+              "mensaje_nota_sin_descripcion", null, Locale.getDefault()));
     }
     List<RenglonNotaCredito> renglones = new ArrayList<>();
     notaCreditoNueva.setTipoComprobante(nuevaNotaCreditoSinFacturaDTO.getTipo());

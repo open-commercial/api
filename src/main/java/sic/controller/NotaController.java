@@ -27,36 +27,21 @@ public class NotaController {
   private final INotaService notaService;
   private final IReciboService reciboService;
   private final ISucursalService sucursalService;
-  private final IClienteService clienteService;
-  private final IProveedorService proveedorService;
   private final IUsuarioService usuarioService;
-  private final IFacturaService facturaService;
   private final IAuthService authService;
-  private final ModelMapper modelMapper;
-  private final MessageSource messageSource;
 
   @Autowired
   public NotaController(
       INotaService notaService,
       IReciboService reciboService,
       ISucursalService sucursalService,
-      IClienteService clienteService,
-      IProveedorService proveedorService,
       IUsuarioService usuarioService,
-      IFacturaService facturaService,
-      IAuthService authService,
-      ModelMapper modelMapper,
-      MessageSource messageSource) {
+      IAuthService authService) {
     this.notaService = notaService;
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
-    this.clienteService = clienteService;
-    this.proveedorService = proveedorService;
     this.usuarioService = usuarioService;
-    this.facturaService = facturaService;
     this.authService = authService;
-    this.modelMapper = modelMapper;
-    this.messageSource = messageSource;
   }
 
   @GetMapping("/notas/{idNota}")

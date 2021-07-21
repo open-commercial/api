@@ -625,6 +625,7 @@ class AppIntegrationTest {
             .motivo("Unidad Fallada")
             .build();
     NotaCredito notaCredito = restTemplate.postForObject(apiPrefix + "/notas/credito/factura", nuevaNotaCreditoDeFacturaDTO, NotaCredito.class);
+    assertEquals(Movimiento.COMPRA, notaCredito.getMovimiento());
     assertEquals(notaCredito.getIdFacturaCompra(), facturasRecuperadas.get(0).getIdFactura());
     assertEquals(notaCredito.getIdNota(), 1L);
     assertEquals(
