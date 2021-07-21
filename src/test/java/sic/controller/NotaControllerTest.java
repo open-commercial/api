@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {NotaController.class, MessageSource.class})
-public class NotaControllerTest {
+class NotaControllerTest {
 
   @MockBean INotaService notaService;
   @MockBean IReciboService reciboService;

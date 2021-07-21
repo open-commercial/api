@@ -1004,11 +1004,11 @@ public class NotaServiceImpl implements INotaService {
   @Override
   @Transactional
   public NotaDebito guardarNotaDebito(NotaDebito notaDebito) {
-    //customValidator.validar(notaDebito);
+    customValidator.validar(notaDebito);
     if (notaDebito.getFecha() == null) {
       notaDebito.setFecha(LocalDateTime.now());
     }
-    //this.validarReglasDeNegocio(notaDebito);
+    this.validarReglasDeNegocio(notaDebito);
     if (notaDebito.getMovimiento().equals(Movimiento.VENTA)) {
       if (!this.getTipoNotaDebitoCliente(
               notaDebito.getCliente().getIdCliente(), notaDebito.getSucursal().getIdSucursal())
@@ -1029,7 +1029,7 @@ public class NotaServiceImpl implements INotaService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
     }
-    //this.validarCalculosDebito(notaDebito);
+    this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
     if (notaDebito.getRecibo() != null
         && notaDebito.getRecibo().getIdPagoMercadoPago() != null
