@@ -7,15 +7,19 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
 import sic.repository.NotaDebitoRepository;
-import sic.repository.NotaRepository;
 import sic.util.CustomValidator;
 
 @ExtendWith(SpringExtension.class)
@@ -339,5 +343,66 @@ class NotaServiceImplTest {
       when(sucursalServiceImpl.getSucursalPorId(1L)).thenReturn(sucursal);
       when(notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(TipoDeComprobante.NOTA_DEBITO_A, 1, 1L)).thenReturn(null);
       assertEquals(1L, notaServiceImpl.getSiguienteNumeroNotaDebitoCliente(1L, TipoDeComprobante.NOTA_DEBITO_A));
+  }
+
+  @Test
+  void shouldNotCalcularNotaCreditoSinFacturaSinDescripcion() {
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO = NuevaNotaCreditoSinFacturaDTO.builder()
+            .build();
+    Usuario usuario = new Usuario();
+    assertThrows(
+            BusinessServiceException.class,
+            () -> notaServiceImpl.calcularNotaCreditoSinFactura(nuevaNotaCreditoSinFacturaDTO, usuario));
+    verify(messageSource).getMessage(eq("mensaje_nota_sin_descripcion"), any(), any());
+  }
+
+  @Test
+  void shouldNotCalcularNotaCreditoSinFacturaSinClienteNiProveedor() {
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO = NuevaNotaCreditoSinFacturaDTO.builder()
+            .detalle("Detalle nueva nota de credito sin factura")
+            .tipo(TipoDeComprobante.NOTA_CREDITO_A)
+            .monto(BigDecimal.TEN)
+            .build();
+    Usuario usuario = new Usuario();
+    assertThrows(
+            BusinessServiceException.class,
+            () -> notaServiceImpl.calcularNotaCreditoSinFactura(nuevaNotaCreditoSinFacturaDTO, usuario));
+    verify(messageSource).getMessage(eq("mensaje_nota_cliente_proveedor_juntos"), any(), any());
+  }
+
+  @Test
+  void shouldCalcularNotaCreditoClienteSinFactura() {
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO = NuevaNotaCreditoSinFacturaDTO.builder()
+            .detalle("Detalle nueva nota de credito sin factura")
+            .tipo(TipoDeComprobante.NOTA_CREDITO_A)
+            .monto(BigDecimal.TEN)
+            .idCliente(1L)
+            .build();
+    Usuario usuario = new Usuario();
+    Cliente cliente = new Cliente();
+    when(clienteService.getClienteNoEliminadoPorId(1L)).thenReturn(cliente);
+    NotaCredito notaCredito = notaServiceImpl.calcularNotaCreditoSinFactura(nuevaNotaCreditoSinFacturaDTO, usuario);
+    assertNotNull(notaCredito);
+    assertEquals(new BigDecimal("8.264462809917355"), notaCredito.getSubTotalBruto());
+    assertEquals(new BigDecimal("1.735537190082645"), notaCredito.getIva21Neto());
+    assertEquals(new BigDecimal("10.000000000000000"), notaCredito.getTotal());
+  }
+
+  @Test
+  void shouldCalcularNotaCreditoProveedorSinFactura() {
+    NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO = NuevaNotaCreditoSinFacturaDTO.builder()
+            .detalle("Detalle nueva nota de credito sin factura")
+            .tipo(TipoDeComprobante.NOTA_CREDITO_A)
+            .monto(BigDecimal.TEN)
+            .idProveedor(1L)
+            .build();
+    Usuario usuario = new Usuario();
+    Proveedor proveedor = new Proveedor();
+    when(proveedorService.getProveedorNoEliminadoPorId(1L)).thenReturn(proveedor);
+    NotaCredito notaCredito = notaServiceImpl.calcularNotaCreditoSinFactura(nuevaNotaCreditoSinFacturaDTO, usuario);
+    assertNotNull(notaCredito);
+    assertEquals(new BigDecimal("8.264462809917355"), notaCredito.getSubTotalBruto());
+    assertEquals(new BigDecimal("1.735537190082645"), notaCredito.getIva21Neto());
+    assertEquals(new BigDecimal("10.000000000000000"), notaCredito.getTotal());
   }
 }

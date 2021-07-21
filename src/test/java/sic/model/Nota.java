@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import sic.modelo.Movimiento;
 import sic.modelo.TipoDeComprobante;
 
 import java.math.BigDecimal;
@@ -44,6 +45,7 @@ public class Nota {
   private Long idProveedor;
   private String razonSocialProveedor;
   private Long idFacturaCompra;
+  private Movimiento movimiento;
   private long idUsuario;
   private String nombreUsuario;
   private String motivo;
