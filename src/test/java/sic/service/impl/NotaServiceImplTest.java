@@ -394,7 +394,7 @@ class NotaServiceImplTest {
             .detalle("Detalle nueva nota de credito sin factura")
             .tipo(TipoDeComprobante.NOTA_CREDITO_A)
             .monto(BigDecimal.TEN)
-            .idCliente(1L)
+            .idProveedor(1L)
             .build();
     Usuario usuario = new Usuario();
     Proveedor proveedor = new Proveedor();
