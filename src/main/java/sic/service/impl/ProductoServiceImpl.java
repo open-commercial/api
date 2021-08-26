@@ -356,7 +356,6 @@ public class ProductoServiceImpl implements IProductoService {
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto.getCantidadProducto().setCantMinima(nuevoProductoDTO.getCantMinima());
-    producto.getCantidadProducto().setBulto(nuevoProductoDTO.getBulto());
     producto.setPrecioProducto(new PrecioProductoEmbeddable());
     producto.getPrecioProducto().setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
     producto.getPrecioProducto().setGananciaPorcentaje(nuevoProductoDTO.getGananciaPorcentaje());
@@ -398,6 +397,7 @@ public class ProductoServiceImpl implements IProductoService {
   public void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen) {
     productoPorActualizar.setFechaAlta(productoPersistido.getFechaAlta());
     productoPorActualizar.setFechaUltimaModificacion(LocalDateTime.now());
+    productoPorActualizar.getCantidadProducto().setCantidadReservada(productoPersistido.getCantidadProducto().getCantidadReservada());
     customValidator.validar(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
@@ -414,7 +414,6 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
-    productoPorActualizar.getCantidadProducto().setCantidadReservada(productoPersistido.getCantidadProducto().getCantidadReservada());
     photoVideoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
@@ -770,7 +769,7 @@ public class ProductoServiceImpl implements IProductoService {
       }
       if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getCantidadVentaMinima() != null
                 && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
-          p.getCantidadProducto().setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
+          p.getCantidadProducto().setCantMinima(productosParaActualizarDTO.getCantidadVentaMinima());
       }
       if (actualizaPrecios) {
         p.getPrecioProducto().setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
@@ -870,10 +869,12 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Producto getProductoPorCodigo(String codigo) {
-    if (codigo.isEmpty()) {
-      return null;
+    Optional<Producto> producto = productoRepository.findByCodigoAndEliminado(codigo, false);
+    if (producto.isPresent()) {
+      return producto.get();
     } else {
-      return productoRepository.findByCodigoAndEliminado(codigo, false);
+      throw new EntityNotFoundException(
+              messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -1280,7 +1281,6 @@ public class ProductoServiceImpl implements IProductoService {
             .cantidadEnSucursales(cantidadEnSucursales)
             .cantidadTotalEnSucursales(productoDTO.getCantidadTotalEnSucursales())
             .cantMinima(productoDTO.getCantMinima())
-            .bulto(productoDTO.getBulto())
             .ilimitado(productoDTO.isIlimitado())
             .build();
   }

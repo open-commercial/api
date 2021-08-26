@@ -23,7 +23,6 @@ public class Producto {
   private BigDecimal cantidadTotalEnSucursalesDisponible;
   private boolean hayStock;
   private BigDecimal cantMinima;
-  private BigDecimal bulto;
   private Long idMedida;
   private String nombreMedida;
   private BigDecimal precioCosto;

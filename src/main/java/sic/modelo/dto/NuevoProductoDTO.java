@@ -27,11 +27,9 @@ public class NuevoProductoDTO {
   @NotEmpty(message = "{mensaje_producto_cantidad_en_sucursales_vacia}")
   private Map<Long,BigDecimal> cantidadEnSucursal;
   private boolean hayStock;
-  @DecimalMin(value = "0", message = "{mensaje_producto_cantidadMinima_negativa}")
-  private BigDecimal cantMinima;
   @DecimalMin(value = "1", message = "{mensaje_producto_cantidad_venta_minima_invalida}")
   @NotNull(message = "{mensaje_producto_cantidad_venta_minima_invalida}")
-  private BigDecimal bulto;
+  private BigDecimal cantMinima;
   @DecimalMin(value = "0", message = "{mensaje_producto_precioCosto_negativo}")
   private BigDecimal precioCosto;
   @DecimalMin(value = "0", message = "{mensaje_producto_gananciaPorcentaje_negativo}")

@@ -73,7 +73,7 @@ class ProductoServiceImplTest {
     producto.getPrecioProducto().setPrecioBonificado(new BigDecimal("135"));
     producto.getPrecioProducto().setPorcentajeBonificacionOferta(BigDecimal.ZERO);
     producto.setCantidadProducto(new CantidadProductoEmbeddable());
-    producto.getCantidadProducto().setBulto(new BigDecimal("5"));
+    producto.getCantidadProducto().setCantMinima(new BigDecimal("5"));
     producto.setFechaAlta(LocalDateTime.now());
     producto.setFechaUltimaModificacion(LocalDateTime.now());
     Sucursal sucursal = new Sucursal();
@@ -87,6 +87,7 @@ class ProductoServiceImplTest {
     cantidadEnSucursal.setSucursal(sucursal);
     producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
     producto.getCantidadProducto().setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
     producto.setRubro(rubro);
     producto.setProveedor(proveedor);
     return producto;
@@ -167,7 +168,7 @@ class ProductoServiceImplTest {
                     put(1L, BigDecimal.TEN);
                   }
                 })
-            .bulto(BigDecimal.ONE)
+            .cantMinima(BigDecimal.ONE)
             .precioCosto(new BigDecimal("100"))
             .gananciaPorcentaje(new BigDecimal("900"))
             .gananciaNeto(new BigDecimal("900"))
@@ -190,7 +191,7 @@ class ProductoServiceImplTest {
         .thenReturn(null);
     Producto productoDuplicado = new Producto();
     productoDuplicado.setDescripcion("12345");
-    when(productoRepository.findByCodigoAndEliminado("12345", false)).thenReturn(productoDuplicado);
+    when(productoRepository.findByCodigoAndEliminado("12345", false)).thenReturn(Optional.of(productoDuplicado));
     assertThrows(
         BusinessServiceException.class,
         () -> productoService.guardar(nuevoProductoUno, 1L, 1L, 1L));
@@ -208,7 +209,7 @@ class ProductoServiceImplTest {
                     put(1L, BigDecimal.TEN);
                   }
                 })
-            .bulto(BigDecimal.ONE)
+            .cantMinima(BigDecimal.ONE)
             .precioCosto(new BigDecimal("100"))
             .gananciaPorcentaje(new BigDecimal("900"))
             .gananciaNeto(new BigDecimal("900"))
@@ -238,7 +239,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldThrownBusinessExceptionActualizacionProductoDuplicadoCodigo() {
+  void shouldThrownBusinessExceptionValidarProductoDuplicadoCodigo() {
     Producto productoParaActualizar = this.construirProducto();
     productoParaActualizar.setIdProducto(1L);
     Producto productoPersistido = this.construirProducto();
@@ -457,7 +458,7 @@ class ProductoServiceImplTest {
     Producto productoDuplicado = this.construirProducto();
     productoDuplicado.setIdProducto(2L);
     when(productoRepository.findByCodigoAndEliminado(producto.getCodigo(), false))
-        .thenReturn(productoDuplicado);
+        .thenReturn(Optional.of(productoDuplicado));
     assertThrows(
         BusinessServiceException.class,
         () -> productoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, producto));

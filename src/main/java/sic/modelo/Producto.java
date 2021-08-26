@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 import lombok.AllArgsConstructor;
@@ -45,11 +46,13 @@ public class Producto implements Serializable {
   @JsonUnwrapped
   @Embedded
   @JsonView(Views.Comprador.class)
+  @Valid
   private PrecioProductoEmbeddable precioProducto;
 
   @JsonUnwrapped
   @Embedded
   @JsonView(Views.Comprador.class)
+  @Valid
   private CantidadProductoEmbeddable cantidadProducto;
 
   @ManyToOne

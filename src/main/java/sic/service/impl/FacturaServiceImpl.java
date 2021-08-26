@@ -462,6 +462,6 @@ public class FacturaServiceImpl implements IFacturaService {
   @Override
   public boolean marcarRenglonParaAplicarBonificacion(long idProducto, BigDecimal cantidad) {
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
-    return cantidad.compareTo(producto.getCantidadProducto().getBulto()) >= 0;
+    return cantidad.compareTo(producto.getCantidadProducto().getCantMinima()) >= 0;
   }
 }
