@@ -18,4 +18,5 @@ public class NuevaNotaCreditoDeFacturaDTO {
   private Long[] idsRenglonesFactura;
   private boolean modificaStock;
   private String motivo;
+  private DetalleCompraDTO detalleCompra;
 }

@@ -791,6 +791,11 @@ public class NotaServiceImpl implements INotaService {
               ((FacturaCompra) factura).getIdProveedor()));
       notaCreditoNueva.setFacturaCompra((FacturaCompra) factura);
       notaCreditoNueva.setMovimiento(Movimiento.COMPRA);
+      if (nuevaNotaCreditoDeFacturaDTO.getDetalleCompra() != null) {
+        notaCreditoNueva.setSerie(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getSerie());
+        notaCreditoNueva.setNroNota(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getNroNota());
+        notaCreditoNueva.setCae(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getCAE());
+      }
     }
     notaCreditoNueva.setSucursal(factura.getSucursal());
     notaCreditoNueva.setModificaStock(nuevaNotaCreditoDeFacturaDTO.isModificaStock());
