@@ -4,15 +4,19 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.*;
 import sic.repository.CarritoCompraRepository;
@@ -29,6 +33,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IPedidoService pedidoService;
+  private final MessageSource messageSource;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
@@ -39,13 +44,15 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
           IProductoService productoService,
           ISucursalService sucursalService,
           IClienteService clienteService,
-          IPedidoService pedidoService) {
+          IPedidoService pedidoService,
+          MessageSource messageSource) {
     this.carritoCompraRepository = carritoCompraRepository;
     this.usuarioService = usuarioService;
     this.productoService = productoService;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.pedidoService = pedidoService;
+    this.messageSource = messageSource;
   }
 
   @Override
@@ -119,7 +126,13 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   @Override
   public void agregarOrModificarItem(long idUsuario, long idProducto, BigDecimal cantidad) {
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    Cliente clienteRelacionado = clienteService.getClientePorIdUsuario(idUsuario);
     Producto producto = productoService.getProductoNoEliminadoPorId(idProducto);
+    if (clienteRelacionado.isPuedeComprarAPlazo() && !producto.isParaCatalogo()) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_producto_no_existente", null, Locale.getDefault()));
+    }
     ItemCarritoCompra item =
         carritoCompraRepository.findByUsuarioAndProducto(idUsuario, idProducto);
     if (item == null) {
@@ -172,7 +185,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   @Transactional
   public Pedido crearPedido(NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO, Long idUsuario) {
     Usuario usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    List<ItemCarritoCompra> items =
+    List<ItemCarritoCompra> items = //validar items conta la capacidad de compra a plazo del cliente
         carritoCompraRepository.findAllByUsuarioOrderByIdItemCarritoCompraDesc(usuario);
     Pedido pedido = new Pedido();
     pedido.setCliente(clienteService.getClientePorIdUsuario(idUsuario));

@@ -87,12 +87,18 @@ public class ProductoController {
   public Page<Producto> buscarProductos(
       @PathVariable long idSucursal,
       @RequestBody BusquedaProductoCriteria criteria,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos = productoService.buscarProductos(criteria, idSucursal);
+    Page<Producto> productos;
     if (authorizationHeader != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      productos = productoService.buscarProductosParaCatalogo(criteria, idSucursal, idUsuarioLoggedIn);
+// acá
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
+    } else {
+      productos = productoService.buscarProductos(criteria, idSucursal);
     }
     return productos;
   }

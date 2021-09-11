@@ -62,6 +62,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
+  private final IUsuarioService usuarioService;
   private final ICorreoElectronicoService correoElectronicoService;
   private static final int TAMANIO_PAGINA_DEFAULT = 15;
   private static final String FORMATO_XLSX = "xlsx";
@@ -84,6 +85,7 @@ public class ProductoServiceImpl implements IProductoService {
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
     IClienteService clienteService,
+    IUsuarioService usuarioService,
     ICorreoElectronicoService correoElectronicoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -98,6 +100,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
     this.clienteService = clienteService;
+    this.usuarioService = usuarioService;
     this.correoElectronicoService = correoElectronicoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -229,6 +232,22 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
+  public Page<Producto> buscarProductosParaCatalogo(BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario) {
+    Usuario usuarioDeConsulta = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    if (usuarioDeConsulta.getRoles().contains(Rol.COMPRADOR) && usuarioDeConsulta.getRoles().size() == 1) {
+        Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
+        if (clienteDeUsuario != null && clienteDeUsuario.isPuedeComprarAPlazo()) {
+          criteria.setListarSoloParaCatalogo(true);
+          return this.buscarProductos(criteria, idSucursal);
+        } else {
+          return  this.buscarProductos(criteria, idSucursal);
+        }
+    } else {
+      return this.buscarProductos(criteria, idSucursal);
+    }
+  }
+
+  @Override
   public void marcarFavoritos(Page<Producto> productos, long idUsuario) {
     List<Producto> productosFavoritos = this.getProductosFavoritosDelClientePorIdUsuario(idUsuario);
     productos.forEach(p -> {
@@ -297,6 +316,8 @@ public class ProductoServiceImpl implements IProductoService {
       builder
           .and(qProducto.cantidadProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO))
           .and(qProducto.cantidadProducto.ilimitado.eq(false));
+    if (criteria.isListarSoloParaCatalogo())
+      builder.and(qProducto.paraCatalogo.isTrue());
     if (criteria.getPublico() != null) {
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());

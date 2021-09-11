@@ -38,6 +38,8 @@ public interface IProductoService {
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, Long idSucursal);
 
+  Page<Producto> buscarProductosParaCatalogo(BusquedaProductoCriteria criteria, Long idSucursal, Long isSucursal);
+
   void marcarFavoritos(Page<Producto> productos, long idUsuario);
 
   BooleanBuilder getBuilder(BusquedaProductoCriteria criteria);

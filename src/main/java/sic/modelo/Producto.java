@@ -68,6 +68,9 @@ public class Producto implements Serializable {
 
   private boolean publico;
 
+  @JsonView(Views.Vendedor.class)
+  private boolean paraCatalogo;
+
   @NotNull(message = "{mensaje_producto_fecha_ultima_modificacion_vacia}")
   private LocalDateTime fechaUltimaModificacion;
 
