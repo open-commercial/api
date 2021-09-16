@@ -240,7 +240,10 @@ public class ProductoServiceImpl implements IProductoService {
           throw new BusinessServiceException(
                   messageSource.getMessage("mensaje_cliente_no_existente", null, Locale.getDefault()));
         } else {
-          if (clienteDeUsuario.isPuedeComprarAPlazo()) {
+          if (clienteDeUsuario.isPuedeComprarAPlazo()
+                  && !usuarioDeConsulta.getRoles().contains(Rol.ADMINISTRADOR)
+                  && !usuarioDeConsulta.getRoles().contains(Rol.ENCARGADO)
+                  && !usuarioDeConsulta.getRoles().contains(Rol.VENDEDOR)) {
             criteria.setListarSoloParaCatalogo(true);
           }
           return this.buscarProductos(criteria, idSucursal);
