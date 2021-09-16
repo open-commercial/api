@@ -37,6 +37,7 @@ public class Producto {
   private String nombreRubro;
   private boolean ilimitado;
   private boolean publico;
+  private boolean paraCatalogo;
   private boolean oferta;
   private BigDecimal porcentajeBonificacionOferta;
   private BigDecimal porcentajeBonificacionPrecio;

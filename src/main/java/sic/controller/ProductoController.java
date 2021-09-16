@@ -87,12 +87,30 @@ public class ProductoController {
   public Page<Producto> buscarProductos(
       @PathVariable long idSucursal,
       @RequestBody BusquedaProductoCriteria criteria,
+      @RequestParam(required = false) Long idCliente,
+      @RequestParam(required = false) Movimiento movimiento,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
-    Page<Producto> productos = productoService.buscarProductos(criteria, idSucursal);
-    if (authorizationHeader != null) {
+    Page<Producto> productos;
+    boolean esAutogestion = authorizationHeader != null &&
+            movimiento != null &&
+            movimiento.equals(Movimiento.COMPRA)
+            && idCliente == null;
+    boolean esGestionAdministrativa = authorizationHeader != null &&
+            movimiento != null &&
+            movimiento.equals(Movimiento.VENTA)
+            && idCliente != null;
+    if (esAutogestion) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      productos = productoService.buscarProductosDeCatalogoParaUsuario(criteria, idSucursal, idUsuarioLoggedIn);
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
+    } else if (esGestionAdministrativa) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      productos = productoService.buscarProductosDeCatalogoParaVenta(criteria, idSucursal, idUsuarioLoggedIn, idCliente);
+      productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
+    } else {
+      productos = productoService.buscarProductos(criteria, idSucursal);
     }
     return productos;
   }
