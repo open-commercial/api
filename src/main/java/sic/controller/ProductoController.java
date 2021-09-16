@@ -91,11 +91,23 @@ public class ProductoController {
       @RequestParam(required = false) Movimiento movimiento,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos;
-    if (authorizationHeader != null) {
+    boolean esAutogestion = authorizationHeader != null &&
+            movimiento != null &&
+            movimiento.equals(Movimiento.COMPRA)
+            && idCliente == null;
+    boolean esGestionAdministrativa = authorizationHeader != null &&
+            movimiento != null &&
+            movimiento.equals(Movimiento.VENTA)
+            && idCliente != null;
+    if (esAutogestion) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
       long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
-      productos = productoService.buscarProductosParaCatalogo(criteria, idSucursal, idUsuarioLoggedIn);
-// acá
+      productos = productoService.buscarProductosDeCatalogoParaUsuario(criteria, idSucursal, idUsuarioLoggedIn);
+      productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
+    } else if (esGestionAdministrativa) {
+      Claims claims = authService.getClaimsDelToken(authorizationHeader);
+      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      productos = productoService.buscarProductosDeCatalogoParaVenta(criteria, idSucursal, idUsuarioLoggedIn, idCliente);
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
     } else {
       productos = productoService.buscarProductos(criteria, idSucursal);

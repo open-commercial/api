@@ -1,0 +1,1 @@
+ALTER TABLE producto ADD paraCatalogo bit(1) default 0; 

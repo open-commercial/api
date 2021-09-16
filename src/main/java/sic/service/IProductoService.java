@@ -38,7 +38,9 @@ public interface IProductoService {
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, Long idSucursal);
 
-  Page<Producto> buscarProductosParaCatalogo(BusquedaProductoCriteria criteria, Long idSucursal, Long isSucursal);
+  Page<Producto> buscarProductosDeCatalogoParaUsuario(BusquedaProductoCriteria criteria, Long idSucursal, Long isSucursal);
+
+  Page<Producto> buscarProductosDeCatalogoParaVenta(BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario, Long idCliente);
 
   void marcarFavoritos(Page<Producto> productos, long idUsuario);
 

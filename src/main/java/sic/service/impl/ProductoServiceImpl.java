@@ -232,17 +232,42 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Page<Producto> buscarProductosParaCatalogo(BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario) {
+  public Page<Producto> buscarProductosDeCatalogoParaUsuario(BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario) {
     Usuario usuarioDeConsulta = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
-    if (usuarioDeConsulta.getRoles().contains(Rol.COMPRADOR) && usuarioDeConsulta.getRoles().size() == 1) {
+    if (usuarioDeConsulta.getRoles().contains(Rol.COMPRADOR)) {
         Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(idUsuario);
-        if (clienteDeUsuario != null && clienteDeUsuario.isPuedeComprarAPlazo()) {
-          criteria.setListarSoloParaCatalogo(true);
-          return this.buscarProductos(criteria, idSucursal);
+        if (clienteDeUsuario == null) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage("mensaje_cliente_no_existente", null, Locale.getDefault()));
         } else {
-          return  this.buscarProductos(criteria, idSucursal);
+          if (clienteDeUsuario.isPuedeComprarAPlazo()) {
+            criteria.setListarSoloParaCatalogo(true);
+          }
+          return this.buscarProductos(criteria, idSucursal);
         }
     } else {
+      return this.buscarProductos(criteria, idSucursal);
+    }
+  }
+
+  @Override
+  public Page<Producto> buscarProductosDeCatalogoParaVenta(BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario, Long idCliente) {
+    Usuario usuarioDeConsulta = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
+    if (usuarioDeConsulta.getRoles().contains(Rol.COMPRADOR) && usuarioDeConsulta.getRoles().size() == 1) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_usuario_rol_no_valido", null, Locale.getDefault()));
+    } else {
+      Cliente clienteSeleccionado = clienteService.getClienteNoEliminadoPorId(idCliente);
+      if (clienteSeleccionado == null) {
+        throw new BusinessServiceException(
+                messageSource.getMessage("mensaje_cliente_no_existente", null, Locale.getDefault()));
+      }
+      if (clienteSeleccionado.isPuedeComprarAPlazo()
+              && !usuarioDeConsulta.getRoles().contains(Rol.ADMINISTRADOR)
+              && !usuarioDeConsulta.getRoles().contains(Rol.ENCARGADO)
+              && !usuarioDeConsulta.getRoles().contains(Rol.VENDEDOR)) {
+        criteria.setListarSoloParaCatalogo(true);
+      }
       return this.buscarProductos(criteria, idSucursal);
     }
   }
@@ -403,6 +428,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.calcularPrecioBonificado(producto);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, producto);
     producto.getCantidadProducto().setIlimitado(false);
+    producto.setParaCatalogo(nuevoProductoDTO.isParaCatalogo());
     producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
     producto = productoRepository.save(producto);
     logger.warn(
@@ -792,6 +818,9 @@ public class ProductoServiceImpl implements IProductoService {
       if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getCantidadVentaMinima() != null
                 && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
           p.getCantidadProducto().setBulto(productosParaActualizarDTO.getCantidadVentaMinima());
+      }
+      if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getParaCatalogo() != null) {
+        p.setParaCatalogo(productosParaActualizarDTO.getParaCatalogo());
       }
       if (actualizaPrecios) {
         p.getPrecioProducto().setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());

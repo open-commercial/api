@@ -53,6 +53,7 @@ public class NuevoProductoDTO {
   @DecimalMin(value = "0", message = "{mensaje_producto_precioLista_negativo}")
   private BigDecimal precioLista;
   private boolean publico;
+  private boolean paraCatalogo;
   private LocalDateTime fechaUltimaModificacion;
   private String nota;
   private LocalDate fechaVencimiento;
