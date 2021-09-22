@@ -64,7 +64,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IClienteService clienteService;
   private final IUsuarioService usuarioService;
   private final ICorreoElectronicoService correoElectronicoService;
-  private static final int TAMANIO_PAGINA_DEFAULT = 15;
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String FORMATO_XLSX = "xlsx";
   private static final String FORMATO_PDF = "pdf";
   private static final String URL_PRODUCTO_SIN_IMAGEN = "https://res.cloudinary.com/hf0vu1bg2/image/upload/q_10/f_jpg/v1545616229/assets/sin_imagen.jpg";
