@@ -16,5 +16,5 @@ public class DetalleCompraDTO {
     private LocalDateTime fecha;
     private Long serie;
     private Long nroNota;
-    private Long CAE;
+    private Long cae;
 }

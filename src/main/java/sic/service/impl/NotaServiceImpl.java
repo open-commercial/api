@@ -794,7 +794,7 @@ public class NotaServiceImpl implements INotaService {
       if (nuevaNotaCreditoDeFacturaDTO.getDetalleCompra() != null) {
         notaCreditoNueva.setSerie(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getSerie());
         notaCreditoNueva.setNroNota(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getNroNota());
-        notaCreditoNueva.setCae(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getCAE());
+        notaCreditoNueva.setCae(nuevaNotaCreditoDeFacturaDTO.getDetalleCompra().getCae());
       }
     }
     notaCreditoNueva.setSucursal(factura.getSucursal());
@@ -870,7 +870,7 @@ public class NotaServiceImpl implements INotaService {
       if (nuevaNotaCreditoSinFacturaDTO.getDetalleCompra() != null) {
         notaCreditoNueva.setSerie(nuevaNotaCreditoSinFacturaDTO.getDetalleCompra().getSerie());
         notaCreditoNueva.setNroNota(nuevaNotaCreditoSinFacturaDTO.getDetalleCompra().getNroNota());
-        notaCreditoNueva.setCae(nuevaNotaCreditoSinFacturaDTO.getDetalleCompra().getCAE());
+        notaCreditoNueva.setCae(nuevaNotaCreditoSinFacturaDTO.getDetalleCompra().getCae());
       }
     }
     notaCreditoNueva.setSucursal(

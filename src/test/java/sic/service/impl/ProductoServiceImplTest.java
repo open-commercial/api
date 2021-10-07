@@ -48,6 +48,7 @@ class ProductoServiceImplTest {
   @MockBean TraspasoServiceImpl traspasoService;
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ClienteServiceImpl clienteService;
+  @MockBean UsuarioServiceImpl usuarioService;
   @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
   @MockBean ProductoRepository productoRepository;
   @MockBean ProductoFavoritoRepository productoFavoritoRepository;
@@ -1051,5 +1052,14 @@ class ProductoServiceImplTest {
   void shouldQuitarCantidadReservada() {
     productoService.quitarCantidadReservada(1L, BigDecimal.TEN);
     verify(productoRepository).actualizarCantidadReservada(1L, BigDecimal.TEN.negate());
+  }
+
+  @Test
+  void shouldBuscarProductoDeCatalogoParaUsuario() {
+    Usuario usuarioDeConsulta = new Usuario();
+    usuarioDeConsulta.setRoles(Collections.singletonList(Rol.COMPRADOR));
+    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioDeConsulta);
+    Cliente clienteDeUsuario = new Cliente();
+    clienteDeUsuario.setPuedeComprarAPlazo(true);
   }
 }
