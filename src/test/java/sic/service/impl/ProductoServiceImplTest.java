@@ -413,6 +413,8 @@ class ProductoServiceImplTest {
     producto2.setPrecioProducto(new PrecioProductoEmbeddable());
     when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
     when(productoRepository.findById(2L)).thenReturn(Optional.of(producto2));
+    when(productoRepository.findByCodigoAndEliminado("1a", false)).thenReturn(Optional.of(producto1));
+    when(productoRepository.findByCodigoAndEliminado("2b", false)).thenReturn(Optional.of(producto2));
     productoService.actualizarMultiples(
             ProductosParaActualizarDTO.builder()
                     .idProducto(new long[] {1L, 2L})

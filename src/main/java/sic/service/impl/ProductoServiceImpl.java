@@ -869,13 +869,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Producto getProductoPorCodigo(String codigo) {
-    Optional<Producto> producto = productoRepository.findByCodigoAndEliminado(codigo, false);
-    if (producto.isPresent()) {
-      return producto.get();
-    } else {
-      throw new EntityNotFoundException(
-              messageSource.getMessage("mensaje_producto_no_existente", null, Locale.getDefault()));
-    }
+    return productoRepository.findByCodigoAndEliminado(codigo, false).orElse(null);
   }
 
   @Override
