@@ -67,7 +67,7 @@ class ProductoRepositoryTest {
           producto.setProveedor(proveedor);
           producto.setRubro(rubro);
           producto.setCantidadProducto(new CantidadProductoEmbeddable());
-          producto.getCantidadProducto().setBulto(BigDecimal.ONE);
+          producto.getCantidadProducto().setCantMinima(BigDecimal.ONE);
           producto.setFechaAlta(LocalDateTime.now());
           producto.setFechaUltimaModificacion(LocalDateTime.now());
           Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
@@ -76,6 +76,7 @@ class ProductoRepositoryTest {
           cantidadEnSucursal.setSucursal(sucursal);
           cantidadEnSucursales.add(cantidadEnSucursal);
           producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+          producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
           producto
               .getCantidadProducto()
               .setCantidadTotalEnSucursales(
@@ -123,7 +124,7 @@ class ProductoRepositoryTest {
     producto.setProveedor(proveedor);
     producto.setRubro(rubro);
     producto.setCantidadProducto(new CantidadProductoEmbeddable());
-    producto.getCantidadProducto().setBulto(BigDecimal.ONE);
+    producto.getCantidadProducto().setCantMinima(BigDecimal.ONE);
     producto.setFechaAlta(LocalDateTime.now());
     producto.setFechaUltimaModificacion(LocalDateTime.now());
     Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
@@ -132,6 +133,7 @@ class ProductoRepositoryTest {
     cantidadEnSucursal.setSucursal(sucursal);
     cantidadEnSucursales.add(cantidadEnSucursal);
     producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+    producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
     producto
         .getCantidadProducto()
         .setCantidadTotalEnSucursales(

@@ -155,7 +155,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
     if (itemCarritoCompra != null) {
       if (itemCarritoCompra
               .getCantidad()
-              .compareTo(itemCarritoCompra.getProducto().getCantidadProducto().getBulto())
+              .compareTo(itemCarritoCompra.getProducto().getCantidadProducto().getCantMinima())
           >= 0) {
         itemCarritoCompra.setImporte(
             itemCarritoCompra

@@ -22,7 +22,6 @@ public class ProductoDTO implements Serializable {
   private BigDecimal cantidadTotalEnSucursales;
   private boolean hayStock;
   private BigDecimal cantMinima;
-  private BigDecimal bulto;
   private String nombreMedida;
   private BigDecimal precioCosto;
   private BigDecimal gananciaPorcentaje;

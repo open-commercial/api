@@ -11,11 +11,12 @@ import sic.modelo.Producto;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public interface ProductoRepository extends PagingAndSortingRepository<Producto, Long>,
   QuerydslPredicateExecutor<Producto>, ProductoRepositoryCustom {
 
-  Producto findByCodigoAndEliminado(String codigo, boolean eliminado);
+  Optional<Producto> findByCodigoAndEliminado(String codigo, boolean eliminado);
 
   Producto findByDescripcionAndEliminado(String descripcion, boolean eliminado);
 

@@ -140,7 +140,7 @@ class FacturaVentaServiceImplTest {
     RenglonFactura renglon6 = Mockito.mock(RenglonFactura.class);
     Producto producto1 = Mockito.mock(Producto.class);
     CantidadProductoEmbeddable cantidadProducto1 = new CantidadProductoEmbeddable();
-    cantidadProducto1.setBulto(BigDecimal.ONE);
+    cantidadProducto1.setCantMinima(BigDecimal.ONE);
     PrecioProductoEmbeddable precioProducto1 = new PrecioProductoEmbeddable();
     precioProducto1.setPrecioVentaPublico(BigDecimal.ONE);
     precioProducto1.setIvaPorcentaje(new BigDecimal("21.00"));
@@ -149,7 +149,7 @@ class FacturaVentaServiceImplTest {
     when(producto1.getPrecioProducto()).thenReturn(precioProducto1);
     Producto producto2 = Mockito.mock(Producto.class);
     CantidadProductoEmbeddable cantidadProducto2 = new CantidadProductoEmbeddable();
-    cantidadProducto2.setBulto(BigDecimal.ONE);
+    cantidadProducto2.setCantMinima(BigDecimal.ONE);
     PrecioProductoEmbeddable precioProducto2 = new PrecioProductoEmbeddable();
     precioProducto2.setPrecioVentaPublico(BigDecimal.ONE);
     precioProducto2.setIvaPorcentaje(new BigDecimal("21.00"));
@@ -158,7 +158,7 @@ class FacturaVentaServiceImplTest {
     when(producto2.getPrecioProducto()).thenReturn(precioProducto2);
     Producto producto3 = Mockito.mock(Producto.class);
     CantidadProductoEmbeddable cantidadProducto3 = new CantidadProductoEmbeddable();
-    cantidadProducto3.setBulto(BigDecimal.ONE);
+    cantidadProducto3.setCantMinima(BigDecimal.ONE);
     PrecioProductoEmbeddable precioProducto3 = new PrecioProductoEmbeddable();
     precioProducto3.setPrecioVentaPublico(BigDecimal.ONE);
     precioProducto3.setIvaPorcentaje(new BigDecimal("21.00"));
@@ -167,7 +167,7 @@ class FacturaVentaServiceImplTest {
     when(producto3.getPrecioProducto()).thenReturn(precioProducto3);
     Producto producto4 = Mockito.mock(Producto.class);
     CantidadProductoEmbeddable cantidadProducto4 = new CantidadProductoEmbeddable();
-    cantidadProducto4.setBulto(BigDecimal.ONE);
+    cantidadProducto4.setCantMinima(BigDecimal.ONE);
     PrecioProductoEmbeddable precioProducto4 = new PrecioProductoEmbeddable();
     precioProducto4.setPrecioVentaPublico(BigDecimal.ONE);
     precioProducto4.setIvaPorcentaje(new BigDecimal("21.00"));
@@ -176,7 +176,7 @@ class FacturaVentaServiceImplTest {
     when(producto4.getPrecioProducto()).thenReturn(precioProducto4);
     Producto producto5 = Mockito.mock(Producto.class);
     CantidadProductoEmbeddable cantidadProducto5 = new CantidadProductoEmbeddable();
-    cantidadProducto5.setBulto(BigDecimal.ONE);
+    cantidadProducto5.setCantMinima(BigDecimal.ONE);
     PrecioProductoEmbeddable precioProducto5 = new PrecioProductoEmbeddable();
     precioProducto5.setPrecioVentaPublico(BigDecimal.ONE);
     precioProducto5.setIvaPorcentaje(new BigDecimal("21.00"));
@@ -185,7 +185,7 @@ class FacturaVentaServiceImplTest {
     when(producto5.getPrecioProducto()).thenReturn(precioProducto5);
     Producto producto6 = Mockito.mock(Producto.class);
     CantidadProductoEmbeddable cantidadProducto6 = new CantidadProductoEmbeddable();
-    cantidadProducto6.setBulto(BigDecimal.ONE);
+    cantidadProducto6.setCantMinima(BigDecimal.ONE);
     PrecioProductoEmbeddable precioProducto6 = new PrecioProductoEmbeddable();
     precioProducto6.setPrecioVentaPublico(BigDecimal.ONE);
     precioProducto6.setIvaPorcentaje(new BigDecimal("21.00"));
@@ -592,7 +592,7 @@ class FacturaVentaServiceImplTest {
     productoParaRetorno.getPrecioProducto().setPrecioBonificado(new BigDecimal("135"));
     productoParaRetorno.getPrecioProducto().setPorcentajeBonificacionOferta(BigDecimal.ZERO);
     productoParaRetorno.setCantidadProducto(new CantidadProductoEmbeddable());
-    productoParaRetorno.getCantidadProducto().setBulto(new BigDecimal("5"));
+    productoParaRetorno.getCantidadProducto().setCantMinima(new BigDecimal("5"));
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
     when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(productoParaRetorno);
     assertFalse(
@@ -704,7 +704,7 @@ class FacturaVentaServiceImplTest {
     Producto producto = new Producto();
     producto.setIdProducto(1L);
     producto.setCantidadProducto(new CantidadProductoEmbeddable());
-    producto.getCantidadProducto().setBulto(new BigDecimal("5"));
+    producto.getCantidadProducto().setCantMinima(new BigDecimal("5"));
     Medida medidaProducto = new Medida();
     medidaProducto.setNombre("Metro");
     producto.setMedida(medidaProducto);

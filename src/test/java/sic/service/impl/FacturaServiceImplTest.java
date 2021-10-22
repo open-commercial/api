@@ -71,7 +71,7 @@ class FacturaServiceImplTest {
   void shouldMarcarRenglonParaAplicarBonificacion() {
     Producto productoParaRetorno = new Producto();
     productoParaRetorno.setCantidadProducto(new CantidadProductoEmbeddable());
-    productoParaRetorno.getCantidadProducto().setBulto(new BigDecimal("5"));
+    productoParaRetorno.getCantidadProducto().setCantMinima(new BigDecimal("5"));
     when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoParaRetorno);
     assertTrue(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("5")));
     assertFalse(facturaServiceImpl.marcarRenglonParaAplicarBonificacion(1L, new BigDecimal("3")));

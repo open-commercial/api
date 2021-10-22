@@ -187,11 +187,11 @@ public class ProductoController {
                       .stream()
                       .map(CantidadEnSucursal::getCantidad)
                       .reduce(BigDecimal.ZERO, BigDecimal::add));
-      if (productoPorActualizar.getCantidadProducto().getBulto() == null)
-        productoPorActualizar.getCantidadProducto().setBulto(productoPersistido.getCantidadProducto().getBulto());
+      if (productoPorActualizar.getCantidadProducto().getCantMinima() == null)
+        productoPorActualizar.getCantidadProducto().setCantMinima(productoPersistido.getCantidadProducto().getCantMinima());
     } else {
         productoPorActualizar.getCantidadProducto().setCantidadEnSucursales(productoPersistido.getCantidadProducto().getCantidadEnSucursales());
-        productoPorActualizar.getCantidadProducto().setBulto(productoPersistido.getCantidadProducto().getBulto());
+        productoPorActualizar.getCantidadProducto().setCantMinima(productoPersistido.getCantidadProducto().getCantMinima());
     }
     if (productoPorActualizar.getPrecioProducto().getPorcentajeBonificacionOferta() == null)
       productoPorActualizar.getPrecioProducto().setPorcentajeBonificacionOferta(

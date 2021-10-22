@@ -586,13 +586,13 @@ public class PedidoServiceImpl implements IPedidoService {
     nuevoRenglon.setMedidaItem(producto.getMedida().getNombre());
     nuevoRenglon.setPrecioUnitario(producto.getPrecioProducto().getPrecioLista());
     if (producto.getPrecioProducto().isOferta()
-        && nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getBulto()) >= 0
+        && nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getCantMinima()) >= 0
         && producto.getPrecioProducto().getPorcentajeBonificacionOferta() != null) {
       nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionOferta());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(
               nuevoRenglon.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionOferta()));
-    } else if (nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getBulto()) >= 0) {
+    } else if (nuevoRenglon.getCantidad().compareTo(producto.getCantidadProducto().getCantMinima()) >= 0) {
       nuevoRenglon.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionPrecio());
       nuevoRenglon.setBonificacionNeta(
           CalculosComprobante.calcularProporcion(

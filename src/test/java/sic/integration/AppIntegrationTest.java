@@ -252,7 +252,7 @@ class AppIntegrationTest {
                     put(1L, BigDecimal.TEN);
                   }
                 })
-            .bulto(BigDecimal.ONE)
+            .cantMinima(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
             .gananciaNeto(new BigDecimal("900"))
@@ -272,7 +272,7 @@ class AppIntegrationTest {
                     put(1L, new BigDecimal("9"));
                   }
                 })
-            .bulto(BigDecimal.ONE)
+            .cantMinima(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
             .gananciaNeto(new BigDecimal("900"))
@@ -292,7 +292,7 @@ class AppIntegrationTest {
                     put(1L, new BigDecimal("10"));
                   }
                 })
-            .bulto(BigDecimal.ONE)
+            .cantMinima(BigDecimal.ONE)
             .precioCosto(new BigDecimal("10859.73"))
             .gananciaPorcentaje(new BigDecimal("11.37"))
             .gananciaNeto(new BigDecimal("1234.751"))
@@ -780,7 +780,7 @@ class AppIntegrationTest {
                     put(1L, BigDecimal.TEN);
                   }
                 })
-            .bulto(BigDecimal.ONE)
+            .cantMinima(BigDecimal.ONE)
             .precioCosto(CIEN)
             .gananciaPorcentaje(new BigDecimal("900"))
             .gananciaNeto(new BigDecimal("900"))
