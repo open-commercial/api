@@ -909,6 +909,11 @@ public class NotaServiceImpl implements INotaService {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
       }
+      if (nuevaNotaDebitoDeReciboDTO.getDetalleCompra() != null) {
+          notaDebitoCalculada.setSerie(nuevaNotaDebitoDeReciboDTO.getDetalleCompra().getSerie());
+          notaDebitoCalculada.setNroNota(nuevaNotaDebitoDeReciboDTO.getDetalleCompra().getNroNota());
+          notaDebitoCalculada.setCae(nuevaNotaDebitoDeReciboDTO.getDetalleCompra().getCae());
+      }
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_nota_parametros_faltantes", null, Locale.getDefault()));

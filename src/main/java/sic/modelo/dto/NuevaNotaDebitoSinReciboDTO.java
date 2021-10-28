@@ -20,5 +20,6 @@ public class NuevaNotaDebitoSinReciboDTO {
   private String motivo;
   private BigDecimal gastoAdministrativo;
   private TipoDeComprobante tipoDeComprobante;
+  private DetalleCompraDTO detalleCompra;
 
 }
