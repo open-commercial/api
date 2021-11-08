@@ -192,6 +192,7 @@ public class ProductoController {
     } else {
         productoPorActualizar.getCantidadProducto().setCantidadEnSucursales(productoPersistido.getCantidadProducto().getCantidadEnSucursales());
         productoPorActualizar.getCantidadProducto().setCantMinima(productoPersistido.getCantidadProducto().getCantMinima());
+        productoPorActualizar.getCantidadProducto().setCantidadTotalEnSucursales(productoPersistido.getCantidadProducto().getCantidadTotalEnSucursales());
     }
     if (productoPorActualizar.getPrecioProducto().getPorcentajeBonificacionOferta() == null)
       productoPorActualizar.getPrecioProducto().setPorcentajeBonificacionOferta(
