@@ -344,8 +344,8 @@ public class ProductoServiceImpl implements IProductoService {
       builder
           .and(qProducto.cantidadProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO))
           .and(qProducto.cantidadProducto.ilimitado.eq(false));
-    if (criteria.isListarSoloParaCatalogo())
-      builder.and(qProducto.paraCatalogo.isTrue());
+    if (criteria.getListarSoloParaCatalogo() != null)
+      builder.and(Boolean.TRUE.equals(criteria.getListarSoloParaCatalogo()) ? qProducto.paraCatalogo.isTrue() : qProducto.paraCatalogo.isFalse());
     if (criteria.getPublico() != null) {
       if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
       else builder.and(qProducto.publico.isFalse());
