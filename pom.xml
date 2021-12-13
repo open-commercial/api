@@ -20,6 +20,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <start-class>sic.App</start-class>
         <java.version>14</java.version>
+        <!-- Fix al exploit log4shell CVE-2021-44228 -->
+        <log4j2.version>2.15.0</log4j2.version>
     </properties>
 
     <repositories>
