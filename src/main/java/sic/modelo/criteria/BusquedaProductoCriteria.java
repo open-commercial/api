@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,6 +23,6 @@ public class BusquedaProductoCriteria {
   private Boolean publico;
   private Boolean oferta;
   private Integer pagina;
-  private String ordenarPor;
+  private List<String> ordenarPor;
   private String sentido;
 }

@@ -95,7 +95,7 @@ public interface IProductoService {
 
   String subirImagenProducto(long idProducto, byte[] imagen);
 
-  Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina);
+  Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina);
 
   Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada);
 
