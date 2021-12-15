@@ -527,16 +527,22 @@ class ProductoServiceImplTest {
     Pageable pageable = productoService.getPageable(0, null, null, Integer.MAX_VALUE);
     assertEquals("descripcion: ASC", pageable.getSort().toString());
     assertEquals(0, pageable.getPageNumber());
-    pageable = productoService.getPageable(1, "rubro.nombre", "ASC", Integer.MAX_VALUE);
+    List<String> ordenes = new ArrayList<>();
+    ordenes.add("rubro.nombre");
+    pageable = productoService.getPageable(1, ordenes, "ASC", Integer.MAX_VALUE);
     assertEquals("rubro.nombre: ASC", pageable.getSort().toString());
     assertEquals(1, pageable.getPageNumber());
-    pageable = productoService.getPageable(3, "rubro.nombre", "DESC", Integer.MAX_VALUE);
+    ordenes.clear();
+    ordenes.add("rubro.nombre");
+    pageable = productoService.getPageable(3, ordenes, "DESC", Integer.MAX_VALUE);
     assertEquals("rubro.nombre: DESC", pageable.getSort().toString());
     assertEquals(3, pageable.getPageNumber());
-    pageable = productoService.getPageable(3, "codigo", "NO", Integer.MAX_VALUE);
+    ordenes.clear();
+    ordenes.add("codigo");
+    pageable = productoService.getPageable(3, ordenes, "NO", Integer.MAX_VALUE);
     assertEquals("descripcion: DESC", pageable.getSort().toString());
     assertEquals(3, pageable.getPageNumber());
-    pageable = productoService.getPageable(null, "codigo", "NO", Integer.MAX_VALUE);
+    pageable = productoService.getPageable(null, ordenes, "NO", Integer.MAX_VALUE);
     assertEquals("descripcion: DESC", pageable.getSort().toString());
     assertEquals(0, pageable.getPageNumber());
   }
@@ -931,8 +937,10 @@ class ProductoServiceImplTest {
     productoDos.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
     productoDos.getCantidadProducto().setCantidadTotalEnSucursales(BigDecimal.TEN);
     Page<Producto> paginaProductos = new PageImpl<>(productos);
+    List<String> ordenes = new ArrayList<>();
+    ordenes.add("descripcion");
     BusquedaProductoCriteria criteriaProductos =
-        BusquedaProductoCriteria.builder().pagina(0).ordenarPor("descripcion").sentido("ASC").build();
+        BusquedaProductoCriteria.builder().pagina(0).ordenarPor(ordenes).sentido("ASC").build();
     BooleanBuilder builder = productoService.getBuilder(criteriaProductos);
     Pageable pageable =
         productoService.getPageable(

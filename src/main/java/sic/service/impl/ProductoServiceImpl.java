@@ -298,17 +298,20 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int tamanioPagina) {
+  public Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina) {
     if (pagina == null) pagina = 0;
     String ordenDefault = "descripcion";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
     } else {
+      List<Sort.Order> ordenes = new ArrayList<>();
       switch (sentido) {
         case "ASC":
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
+          ordenarPor.forEach(orden -> ordenes.add(new Sort.Order(Sort.Direction.ASC, orden)));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
         case "DESC":
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
+          ordenarPor.forEach(orden -> ordenes.add(new Sort.Order(Sort.Direction.DESC, orden)));
+          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
         default:
           return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
