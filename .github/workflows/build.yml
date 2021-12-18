@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-java@v2.4.0
         with:
           java-version: 17
-          distribution: adopt
+          distribution: temurin
 #      - name: Set timezone
 #        uses: zcong1993/setup-timezone@master
 #        with:
