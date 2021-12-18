@@ -519,13 +519,13 @@ class AppIntegrationTest {
     assertNotNull(resultadoBusquedaCompra);
     List<FacturaCompra> facturasRecuperadas = resultadoBusquedaCompra.getContent();
     assertEquals(1, facturasRecuperadas.size());
-    assertEquals(new BigDecimal("560.0"), facturasRecuperadas.get(0).getSubTotal());
-    assertEquals(new BigDecimal("56.0"), facturasRecuperadas.get(0).getRecargoNeto());
-    assertEquals(new BigDecimal("140.0"), facturasRecuperadas.get(0).getDescuentoNeto());
-    assertEquals(new BigDecimal("476.0"), facturasRecuperadas.get(0).getSubTotalBruto());
-    assertEquals(new BigDecimal("21.42"), facturasRecuperadas.get(0).getIva105Neto());
-    assertEquals(new BigDecimal("57.12"), facturasRecuperadas.get(0).getIva21Neto());
-    assertEquals(new BigDecimal("554.54"), facturasRecuperadas.get(0).getTotal());
+    assertEquals(new BigDecimal("560.000000000000000"), facturasRecuperadas.get(0).getSubTotal());
+    assertEquals(new BigDecimal("56.000000000000000"), facturasRecuperadas.get(0).getRecargoNeto());
+    assertEquals(new BigDecimal("140.000000000000000"), facturasRecuperadas.get(0).getDescuentoNeto());
+    assertEquals(new BigDecimal("476.000000000000000"), facturasRecuperadas.get(0).getSubTotalBruto());
+    assertEquals(new BigDecimal("21.420000000000000"), facturasRecuperadas.get(0).getIva105Neto());
+    assertEquals(new BigDecimal("57.120000000000000"), facturasRecuperadas.get(0).getIva21Neto());
+    assertEquals(new BigDecimal("554.540000000000000"), facturasRecuperadas.get(0).getTotal());
     assertNotNull(facturasRecuperadas.get(0).getFechaAlta());
     assertEquals(
         proveedorRecuperado.getRazonSocial(), facturasRecuperadas.get(0).getRazonSocialProveedor());

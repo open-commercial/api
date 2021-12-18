@@ -1,4 +1,5 @@
-INSERT INTO provincia(nombre) VALUES ('Corrientes'),('Misiones'),('Chaco');
+INSERT INTO provincia(nombre)
+VALUES ('Corrientes'),('Misiones'),('Chaco');
 
 INSERT INTO localidad(codigo_postal, costo_envio, envio_gratuito, nombre, id_provincia)
 VALUES ('N3400',50.000000000000000,false,'Corrientes',1),
