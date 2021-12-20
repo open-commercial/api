@@ -1,7 +1,5 @@
 package sic.repository;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -23,6 +21,8 @@ public interface ProductoFavoritoRepository
   void deleteByClienteAndProducto(Cliente cliente, Producto producto);
 
   void deleteAllByCliente(Cliente cliente);
+
+  void deleteAllByProducto(Producto producto);
 
   @Query("SELECT COUNT(pf) FROM ProductoFavorito pf WHERE pf.cliente = :cliente")
   Long getCantidadDeArticulosEnFavoritos(@Param("cliente") Cliente cliente);
