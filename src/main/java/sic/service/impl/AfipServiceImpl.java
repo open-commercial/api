@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import afip.wsfe.wsdl.*;
 import org.springframework.context.MessageSource;
+import org.xml.sax.SAXException;
 import sic.modelo.*;
 import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.service.*;
@@ -81,7 +82,9 @@ public class AfipServiceImpl implements IAfipService {
         try {
           String loginTicketResponse = afipWebServiceSOAPClient.loginCMS(loginCms);
           Reader tokenReader = new StringReader(loginTicketResponse);
-          Document tokenDoc = new SAXReader(false).read(tokenReader);
+          var saxReader = new SAXReader(false);
+          saxReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+          Document tokenDoc = saxReader.read(tokenReader);
           String tokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/token");
           String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
           feAuthRequest.setToken(tokenWSAA);
@@ -97,7 +100,7 @@ public class AfipServiceImpl implements IAfipService {
               LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
           configuracionSucursalService.actualizar(configuracionSucursal);
           return feAuthRequest;
-        } catch (DocumentException | IOException | WebServiceClientException ex) {
+        } catch (DocumentException | IOException | WebServiceClientException | SAXException ex) {
           throw new ServiceException(
                   messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
         }
@@ -245,10 +248,7 @@ public class AfipServiceImpl implements IAfipService {
       FERecuperaLastCbteResponse response =
           afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
       return response.getCbteNro() + 1;
-    } catch (WebServiceClientException ex) {
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
-    } catch (IOException ex) {
+    } catch (WebServiceClientException | IOException ex) {
       throw new ServiceException(messageSource.getMessage(
         "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
     }

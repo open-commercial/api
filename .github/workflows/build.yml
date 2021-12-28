@@ -15,9 +15,10 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up JDK
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2.4.0
         with:
-          java-version: 14
+          java-version: 17
+          distribution: temurin
 #      - name: Set timezone
 #        uses: zcong1993/setup-timezone@master
 #        with:
