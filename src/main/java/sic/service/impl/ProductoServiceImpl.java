@@ -463,6 +463,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
+      this.quitarProductoDeFavoritos(productoPersistido.getIdProducto());
     }
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
@@ -759,6 +760,7 @@ public class ProductoServiceImpl implements IProductoService {
           "mensaje_producto_no_existente", null, Locale.getDefault()));
       }
       carritoCompraService.eliminarItem(i);
+      this.quitarProductoDeFavoritos(i);
       producto.setEliminado(true);
       if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
         photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
@@ -1279,6 +1281,17 @@ public class ProductoServiceImpl implements IProductoService {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     productoFavoritoRepository.deleteByClienteAndProducto(cliente, producto);
+    logger.warn(messageSource.getMessage(
+            "mensaje_producto_favorito_quitado",
+            new Object[] {producto},
+            Locale.getDefault()));
+  }
+
+  @Override
+  @Transactional
+  public void quitarProductoDeFavoritos(long idProducto) {
+    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+    productoFavoritoRepository.deleteAllByProducto(producto);
     logger.warn(messageSource.getMessage(
             "mensaje_producto_favorito_quitado",
             new Object[] {producto},

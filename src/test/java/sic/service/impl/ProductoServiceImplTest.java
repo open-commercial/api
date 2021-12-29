@@ -890,7 +890,7 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldTestQuitarProductoDeFavoritos() {
+  void shouldTestQuitarProductoDeFavoritosPorUsuario() {
     Cliente cliente = new Cliente();
     cliente.setIdCliente(1L);
     cliente.setNombreFiscal("San Wuchito");
@@ -903,6 +903,18 @@ class ProductoServiceImplTest {
     verify(productoFavoritoRepository).deleteByClienteAndProducto(cliente, producto);
     verify(messageSource)
         .getMessage(eq("mensaje_producto_favorito_quitado"), eq(new Object[] {producto}), eq(Locale.getDefault()));
+  }
+
+  @Test
+  void shouldTestQuitarProductoDeFavoritos() {
+    Producto producto = new Producto();
+    producto.setDescripcion("Producto Test");
+    producto.setIdProducto(1L);
+    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
+    productoService.quitarProductoDeFavoritos(1L);
+    verify(productoFavoritoRepository).deleteAllByProducto(producto);
+    verify(messageSource)
+            .getMessage(eq("mensaje_producto_favorito_quitado"), eq(new Object[] {producto}), eq(Locale.getDefault()));
   }
 
   @Test
