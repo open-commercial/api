@@ -463,6 +463,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
+      this.quitarProductoDeFavoritos(productoPersistido.getIdProducto());
     }
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
