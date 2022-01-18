@@ -1559,7 +1559,7 @@ public class NotaServiceImpl implements INotaService {
     Page<NotaCredito> notaAnterior =
         notaCreditoRepository.findAll(
             builder, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "fecha")));
-    return notaAnterior.getContent().get(0).getCae() == 0L;
+    return !notaAnterior.getContent().isEmpty() && notaAnterior.getContent().get(0).getCae() == 0L;
   }
 
   @Override
