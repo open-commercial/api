@@ -106,6 +106,7 @@ public class SucursalServiceImpl implements ISucursalService {
           messageSource.getMessage("mensaje_sucursal_duplicado_nombre", null, Locale.getDefault()));
     }
     // ID Fiscal
+    /* Momentaneamente se anula la validación por ID fiscal duplicado
     sucursalDuplicada = this.getSucursalPorIdFiscal(sucursal.getIdFiscal());
     if (operacion == TipoDeOperacion.ALTA
         && sucursalDuplicada != null
@@ -119,7 +120,7 @@ public class SucursalServiceImpl implements ISucursalService {
         && sucursal.getIdFiscal() != null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_sucursal_duplicado_cuip", null, Locale.getDefault()));
-    }
+    }*/
     if (sucursal.getUbicacion() != null
       && sucursal.getUbicacion().getLocalidad() == null) {
       throw new BusinessServiceException(messageSource.getMessage(

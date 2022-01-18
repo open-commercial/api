@@ -172,6 +172,7 @@ class SucursalServiceImplTest {
     sucursalDuplicada.setNombre("Otro nombre");
     sucursalDuplicada.setIdSucursal(2L);
     when(sucursalRepository.findByNombreIsAndEliminadaOrderByNombreAsc("Sucursal Test", false)).thenReturn(null);
+    /* Momentaneamente se anula la validación por ID fiscal duplicado
     when(sucursalRepository.findByIdFiscalAndEliminada(123L, false)).thenReturn(sucursalDuplicada);
     assertThrows(
             BusinessServiceException.class,
@@ -188,6 +189,7 @@ class SucursalServiceImplTest {
                     eq("mensaje_sucursal_duplicado_cuip"),
                     any(),
                     eq(Locale.getDefault()));
+    */
     when(sucursalRepository.findByIdFiscalAndEliminada(123L, false)).thenReturn(null);
     Ubicacion ubicacion = new Ubicacion();
     sucursal.setUbicacion(ubicacion);
