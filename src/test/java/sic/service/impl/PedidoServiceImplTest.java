@@ -162,14 +162,16 @@ class PedidoServiceImplTest {
     usuarioPedido.setIdUsuario(1L);
     usuarioPedido.setRoles(roles);
     pedido.setUsuario(usuarioPedido);
+    pedido.setDescuentoPorcentaje(BigDecimal.ONE);
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
     assertThrows(
             BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
-    verify(messageSource).getMessage(eq("mensaje_no_se_puede_guardar_pedido_usuario_cliente_iguales"), any(), any());
+    verify(messageSource).getMessage(eq("mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales"), any(), any());
     Cliente clienteDeUsuario = new Cliente();
     clienteDeUsuario.setIdCliente(2L);
     clienteDeUsuario.setNombreFiscal("nombre fiscal");
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(clienteDeUsuario);
+    pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());

@@ -167,10 +167,11 @@ public class PedidoServiceImpl implements IPedidoService {
   @Transactional
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
     Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(pedido.getUsuario().getIdUsuario());
-    if (pedido.getCliente().equals(clienteDeUsuario) && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR)) {
+    if (pedido.getCliente().equals(clienteDeUsuario) && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
+              pedido.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
       throw new BusinessServiceException(
               messageSource.getMessage(
-                      "mensaje_no_se_puede_guardar_pedido_usuario_cliente_iguales", null, Locale.getDefault()));
+                      "mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
     }
     if (pedido.getFecha() == null) {
       pedido.setFecha(LocalDateTime.now());

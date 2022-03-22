@@ -310,6 +310,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+      facturas.forEach(f -> {
+        Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(f.getUsuario().getIdUsuario());
+        if (f.getCliente().equals(clienteDeUsuario) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
+                f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
+          throw
+                  new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
+        }
+      });
       pedido.setEstado(EstadoPedido.CERRADO);
       pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
       this.calcularValoresFacturasVentaAndActualizarStock(facturas);
