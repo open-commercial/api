@@ -3,6 +3,8 @@ package sic.service;
 import java.util.List;
 import sic.modelo.Sucursal;
 import sic.modelo.TipoDeOperacion;
+import sic.modelo.Ubicacion;
+import sic.modelo.dto.NuevaSucursalDTO;
 
 public interface ISucursalService {
 
@@ -22,7 +24,7 @@ public interface ISucursalService {
 
   List<Sucursal> getSucusales(boolean puntoDeRetiro);
 
-  Sucursal guardar(Sucursal sucursal);
+  Sucursal guardar(NuevaSucursalDTO nuevaSucursal, Ubicacion ubicacion, byte[] imagen);
 
   String guardarLogo(long idSucursal, byte[] imagen);
 }
