@@ -179,9 +179,11 @@ public class SucursalServiceImpl implements ISucursalService {
 
   @Override
   @Transactional
-  public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida) {
+  public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida, byte[] imagen) {
     customValidator.validar(sucursalParaActualizar);
-    if (sucursalPersistida.getLogo() != null
+    if (imagen != null)  {
+      this.guardarLogo(sucursalPersistida.getIdSucursal(), imagen);
+    } else if (sucursalPersistida.getLogo() != null
             && !sucursalPersistida.getLogo().isEmpty()
             && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
       photoVideoUploader.borrarImagen(

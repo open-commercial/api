@@ -12,7 +12,7 @@ public interface ISucursalService {
 
   Sucursal getSucursalPredeterminada();
 
-  void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida);
+  void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida, byte[] imagen);
 
   void eliminar(Long idSucursal);
 

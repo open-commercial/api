@@ -71,7 +71,7 @@ public class SucursalController {
     } else {
       sucursalParaActualizar.setUbicacion(sucursalPersistida.getUbicacion());
     }
-    sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida);
+    sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, sucursalDTO.getImagen());
   }
 
   @DeleteMapping("/sucursales/{idSucursales}")
@@ -80,9 +80,4 @@ public class SucursalController {
     sucursalService.eliminar(idSucursales);
   }
 
-  @PostMapping("/sucursales/{idSucursal}/logo")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public String uploadLogo(@PathVariable long idSucursal, @RequestBody byte[] imagen) {
-    return sucursalService.guardarLogo(idSucursal, imagen);
-  }
 }

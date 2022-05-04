@@ -24,6 +24,7 @@ public class SucursalDTO {
   private UbicacionDTO ubicacion;
   private String detalleUbicacion;
   private String logo;
+  private byte[] imagen;
   private boolean eliminada;
 
 }
