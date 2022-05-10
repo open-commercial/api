@@ -126,7 +126,6 @@ class SucursalServiceImplTest {
     configuracionSucursal.setPredeterminada(false);
     sucursal.setConfiguracionSucursal(configuracionSucursal);
     sucursalService.eliminar(1L);
-    verify(configuracionSucursalService).eliminar(configuracionSucursal);
     verify(sucursalRepository).save(sucursal);
   }
 

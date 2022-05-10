@@ -205,11 +205,10 @@ public class SucursalServiceImpl implements ISucursalService {
               "mensaje_sucursal_no_se_puede_eliminar_predeterminada", null, Locale.getDefault()));
     }
     sucursal.setEliminada(true);
-    sucursal.setUbicacion(null);
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
-    configuracionSucursalService.eliminar(sucursal.getConfiguracionSucursal());
+    productoService.eliminarCantidadesDeSucursal(sucursal);
     sucursalRepository.save(sucursal);
   }
 

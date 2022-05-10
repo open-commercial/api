@@ -897,6 +897,19 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
+  public void eliminarCantidadesDeSucursal(Sucursal sucursal) {
+    List<Producto> productos =
+            productoRepository.findAllByEliminado(false);
+
+    CantidadEnSucursal cantidadAuxiliar = new CantidadEnSucursal();
+    cantidadAuxiliar.setSucursal(sucursal);
+
+    productos.forEach(producto -> producto.getCantidadProducto().getCantidadEnSucursales().remove(cantidadAuxiliar));
+    this.productoRepository.saveAll(productos);
+  }
+
+  @Override
+  @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(
