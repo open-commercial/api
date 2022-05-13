@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
 
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Sucursal;
+import sic.modelo.Ubicacion;
+import sic.modelo.dto.NuevaSucursalDTO;
 import sic.service.*;
 import sic.modelo.TipoDeOperacion;
 import sic.repository.SucursalRepository;
@@ -145,27 +148,42 @@ public class SucursalServiceImpl implements ISucursalService {
 
   @Override
   @Transactional
-  public Sucursal guardar(Sucursal sucursal) {
-    customValidator.validar(sucursal);
-    if (sucursal.getUbicacion() != null && sucursal.getUbicacion().getIdLocalidad() != null) {
-      sucursal
-          .getUbicacion()
-          .setLocalidad(
-              ubicacionService.getLocalidadPorId(sucursal.getUbicacion().getIdLocalidad()));
+  public Sucursal guardar(NuevaSucursalDTO nuevaSucursal, Ubicacion ubicacion, byte[] logo) {
+    customValidator.validar(nuevaSucursal);
+    Sucursal sucursalParaAlta = new Sucursal();
+    sucursalParaAlta.setNombre(nuevaSucursal.getNombre());
+    sucursalParaAlta.setLema(nuevaSucursal.getLema());
+    sucursalParaAlta.setCategoriaIVA(nuevaSucursal.getCategoriaIVA());
+    sucursalParaAlta.setIdFiscal(nuevaSucursal.getIdFiscal());
+    sucursalParaAlta.setIngresosBrutos(nuevaSucursal.getIngresosBrutos());
+    sucursalParaAlta.setFechaInicioActividad(nuevaSucursal.getFechaInicioActividad());
+    sucursalParaAlta.setEmail(nuevaSucursal.getEmail());
+    sucursalParaAlta.setTelefono(nuevaSucursal.getTelefono());
+    sucursalParaAlta.setUbicacion(ubicacion);
+    if (sucursalParaAlta.getUbicacion() != null && sucursalParaAlta.getUbicacion().getIdLocalidad() != null) {
+      sucursalParaAlta
+              .getUbicacion()
+              .setLocalidad(
+                      ubicacionService.getLocalidadPorId(sucursalParaAlta.getUbicacion().getIdLocalidad()));
     }
-    this.crearConfiguracionSucursal(sucursal);
-    validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursal);
-    sucursal = sucursalRepository.save(sucursal);
-    this.productoService.guardarCantidadesDeSucursalNueva(sucursal);
-    logger.warn("La Sucursal {} se guardó correctamente.", sucursal);
-    return sucursal;
+    this.crearConfiguracionSucursal(sucursalParaAlta);
+    validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursalParaAlta);
+    sucursalParaAlta = sucursalRepository.save(sucursalParaAlta);
+    this.productoService.guardarCantidadesDeSucursalNueva(sucursalParaAlta);
+    logger.warn("La Sucursal {} se guardó correctamente.", nuevaSucursal);
+    if (logo != null)
+      sucursalParaAlta.setLogo(
+              this.guardarLogo(sucursalParaAlta.getIdSucursal(), logo));
+    return sucursalParaAlta;
   }
 
   @Override
   @Transactional
-  public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida) {
+  public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida, byte[] imagen) {
     customValidator.validar(sucursalParaActualizar);
-    if (sucursalPersistida.getLogo() != null
+    if (imagen != null)  {
+      sucursalParaActualizar.setLogo(this.guardarLogo(sucursalPersistida.getIdSucursal(), imagen));
+    } else if (sucursalPersistida.getLogo() != null
             && !sucursalPersistida.getLogo().isEmpty()
             && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
       photoVideoUploader.borrarImagen(
@@ -187,11 +205,10 @@ public class SucursalServiceImpl implements ISucursalService {
               "mensaje_sucursal_no_se_puede_eliminar_predeterminada", null, Locale.getDefault()));
     }
     sucursal.setEliminada(true);
-    sucursal.setUbicacion(null);
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
       photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
-    configuracionSucursalService.eliminar(sucursal.getConfiguracionSucursal());
+    productoService.eliminarCantidadesDeSucursal(sucursal);
     sucursalRepository.save(sucursal);
   }
 

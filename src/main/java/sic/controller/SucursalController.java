@@ -8,6 +8,7 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Sucursal;
 import sic.modelo.Rol;
 import sic.modelo.Ubicacion;
+import sic.modelo.dto.NuevaSucursalDTO;
 import sic.modelo.dto.SucursalDTO;
 import sic.service.ISucursalService;
 import sic.service.IUbicacionService;
@@ -40,13 +41,12 @@ public class SucursalController {
 
   @PostMapping("/sucursales")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public Sucursal guardar(@RequestBody SucursalDTO sucursalDTO) {
-    Sucursal sucursal = modelMapper.map(sucursalDTO, Sucursal.class);
-    sucursal.setUbicacion(null);
-    if (sucursalDTO.getUbicacion() != null) {
-      sucursal.setUbicacion(modelMapper.map(sucursalDTO.getUbicacion(), Ubicacion.class));
+  public Sucursal guardar(@RequestBody NuevaSucursalDTO nuevaSucursal) {
+    Ubicacion ubicacion = new Ubicacion();
+    if (nuevaSucursal.getUbicacion() != null) {
+      ubicacion = modelMapper.map(nuevaSucursal.getUbicacion(), Ubicacion.class);
     }
-    return sucursalService.guardar(sucursal);
+    return sucursalService.guardar(nuevaSucursal, ubicacion, nuevaSucursal.getImagen());
   }
 
   @PutMapping("/sucursales")
@@ -71,7 +71,7 @@ public class SucursalController {
     } else {
       sucursalParaActualizar.setUbicacion(sucursalPersistida.getUbicacion());
     }
-    sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida);
+    sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, sucursalDTO.getImagen());
   }
 
   @DeleteMapping("/sucursales/{idSucursales}")
@@ -80,9 +80,4 @@ public class SucursalController {
     sucursalService.eliminar(idSucursales);
   }
 
-  @PostMapping("/sucursales/{idSucursal}/logo")
-  @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
-  public String uploadLogo(@PathVariable long idSucursal, @RequestBody byte[] imagen) {
-    return sucursalService.guardarLogo(idSucursal, imagen);
-  }
 }
