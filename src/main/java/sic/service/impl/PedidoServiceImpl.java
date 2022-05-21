@@ -661,7 +661,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Scheduled(cron = "0 0/1 * * * ?")
   @Transactional
   public void cancelarPedidosAbiertos() {
-    logger.warn(
+    logger.info(
             messageSource.getMessage(
                     "mensaje_cron_job_cancelar_pedidos", null, Locale.getDefault()));
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
