@@ -254,7 +254,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Scheduled(cron = "30 0 0 * * *") // Todos los dias a las 00:00:30
   public void cerrarCajas() {
-    logger.warn("Cierre automático de Cajas a las {}", LocalDateTime.now());
+    logger.info("Cierre automático de Cajas a las {}", LocalDateTime.now());
     List<Sucursal> sucursales = this.sucursalService.getSucusales(false);
     sucursales.stream()
         .map(sucursal -> this.getUltimaCaja(sucursal.getIdSucursal()))
