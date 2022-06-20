@@ -25,7 +25,6 @@ import sic.modelo.dto.*;
 import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
 import sic.service.*;
-
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
@@ -34,7 +33,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Service
-public class MercadoPagoServiceImpl implements IMercadoPagoService {
+public class MercadoPagoServiceImpl implements IPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccesToken;
@@ -86,7 +85,7 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
   }
 
   @Override
-  public MercadoPagoPreferenceDTO crearNuevaPreference(
+  public List<String> getNuevaPreferenceParams(
       long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
     customValidator.validar(nuevaOrdenDeCompra);
     Sucursal sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
@@ -213,9 +212,11 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
       if (nuevaOrdenDeCompra.getMovimiento() == Movimiento.PEDIDO && pedido != null) {
         pedidoService.eliminar(pedido.getIdPedido());
       }
-      this.logExceptionMercadoPago(ex);
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
     }
-    return new MercadoPagoPreferenceDTO(preference.getId(), preference.getInitPoint());
+    return Arrays.asList(preference.getId(), preference.getInitPoint());
   }
 
   @Override
@@ -309,7 +310,9 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
             messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault()));
       }
     } catch (MPException ex) {
-      this.logExceptionMercadoPago(ex);
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
     }
     catch (GeneralSecurityException e) {
       throw new ServiceException(
@@ -419,13 +422,6 @@ public class MercadoPagoServiceImpl implements IMercadoPagoService {
                 .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
                 .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty();
-  }
-
-  @Override
-  public void logExceptionMercadoPago(MPException ex) {
-    throw new BusinessServiceException(
-        messageSource.getMessage(
-            "mensaje_pago_error", new Object[] {ex.getMessage()}, Locale.getDefault()));
   }
 
   private void procesarMensajeNoAprobado(Payment payment) {
