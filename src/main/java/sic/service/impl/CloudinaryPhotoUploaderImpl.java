@@ -9,9 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import sic.service.IPhotoVideoUploader;
+import sic.service.IPhotoUploader;
 import sic.exception.ServiceException;
-
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
@@ -24,16 +23,17 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
+public class CloudinaryPhotoUploaderImpl implements IPhotoUploader {
 
   @Value("${CLOUDINARY_URL}")
   private String cloudinaryUrl;
+
   private static final String CLOUDINARY_PATTERN = "^https:\\/\\/res.cloudinary.com\\/.*";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   
   @Autowired
-  public PhotoVideoUploaderImpl(MessageSource messageSource) {
+  public CloudinaryPhotoUploaderImpl(MessageSource messageSource) {
     this.messageSource = messageSource;
   }
 
@@ -56,7 +56,7 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
                       "transformation",
                       new Transformation().crop("fit").width(800).height(600)));
       urlImagen = uploadResult.get("secure_url").toString();
-      logger.warn("La imagen {} se guardó correctamente.", nombreImagen);
+      logger.info("La imagen {} se guardó correctamente.", nombreImagen);
       Files.delete(path);
       return urlImagen;
     } catch (IOException ex) {
@@ -70,7 +70,7 @@ public class PhotoVideoUploaderImpl implements IPhotoVideoUploader {
     try {
       Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
       cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
-      logger.warn("La imagen {} se eliminó correctamente.", publicId);
+      logger.info("La imagen {} se eliminó correctamente.", publicId);
     } catch (IOException ex) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_al_borrar_imagen", null, Locale.getDefault()),

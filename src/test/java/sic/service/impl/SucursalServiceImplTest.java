@@ -10,7 +10,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevaSucursalDTO;
-import sic.modelo.dto.UbicacionDTO;
 import sic.repository.SucursalRepository;
 import sic.util.CustomValidator;
 
@@ -33,7 +32,7 @@ class SucursalServiceImplTest {
   @MockBean SucursalRepository sucursalRepository;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean PhotoVideoUploaderImpl photoVideoUploader;
+  @MockBean CloudinaryPhotoUploaderImpl photoUploader;
   @MockBean ProductoServiceImpl productoService;
   @MockBean MessageSource messageSource;
   @Autowired SucursalServiceImpl sucursalService;
@@ -97,7 +96,7 @@ class SucursalServiceImplTest {
     sucursalPersistida.setUbicacion(ubicacion);
     sucursalPersistida.setLogo("Logo");
     sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, null);
-    verify(photoVideoUploader).borrarImagen("Sucursal1");
+    verify(photoUploader).borrarImagen("Sucursal1");
     verify(sucursalRepository).save(sucursalParaActualizar);
   }
 

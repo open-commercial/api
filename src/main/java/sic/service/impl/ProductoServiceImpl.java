@@ -57,7 +57,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
-  private final IPhotoVideoUploader photoVideoUploader;
+  private final IPhotoUploader photoUploader;
   private final ISucursalService sucursalService;
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
@@ -80,7 +80,7 @@ public class ProductoServiceImpl implements IProductoService {
     IProveedorService proveedorService,
     IMedidaService medidaService,
     ICarritoCompraService carritoCompraService,
-    IPhotoVideoUploader photoVideoUploader,
+    IPhotoUploader photoUploader,
     ISucursalService sucursalService,
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
@@ -95,7 +95,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
     this.carritoCompraService = carritoCompraService;
-    this.photoVideoUploader = photoVideoUploader;
+    this.photoUploader = photoUploader;
     this.sucursalService = sucursalService;
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
@@ -456,7 +456,7 @@ public class ProductoServiceImpl implements IProductoService {
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
             && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())) {
-      photoVideoUploader.borrarImagen(
+      photoUploader.borrarImagen(
               Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
@@ -468,7 +468,7 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
-    photoVideoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
+    photoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
         messageSource.getMessage(
@@ -763,7 +763,7 @@ public class ProductoServiceImpl implements IProductoService {
       this.quitarProductoDeFavoritos(i);
       producto.setEliminado(true);
       if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
-        photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
+        photoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
       }
       productos.add(producto);
     }
@@ -915,7 +915,7 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
     String urlImagen =
-        photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+        photoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
     return urlImagen;
   }

@@ -5,8 +5,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
-
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,7 @@ public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;
   private final IConfiguracionSucursalService configuracionSucursalService;
-  private final IPhotoVideoUploader photoVideoUploader;
+  private final IPhotoUploader photoUploader;
   private final IUbicacionService ubicacionService;
   private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -40,14 +38,14 @@ public class SucursalServiceImpl implements ISucursalService {
     SucursalRepository sucursalRepository,
     IConfiguracionSucursalService configuracionSucursalService,
     IUbicacionService ubicacionService,
-    IPhotoVideoUploader photoVideoUploader,
+    IPhotoUploader photoUploader,
     IProductoService productoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.sucursalRepository = sucursalRepository;
     this.configuracionSucursalService = configuracionSucursalService;
     this.ubicacionService = ubicacionService;
-    this.photoVideoUploader = photoVideoUploader;
+    this.photoUploader = photoUploader;
     this.productoService = productoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -186,12 +184,12 @@ public class SucursalServiceImpl implements ISucursalService {
     } else if (sucursalPersistida.getLogo() != null
             && !sucursalPersistida.getLogo().isEmpty()
             && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
-      photoVideoUploader.borrarImagen(
+      photoUploader.borrarImagen(
               Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
     }
     sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
-    photoVideoUploader.isUrlValida(sucursalParaActualizar.getLogo());
+    photoUploader.isUrlValida(sucursalParaActualizar.getLogo());
     sucursalRepository.save(sucursalParaActualizar);
   }
 
@@ -206,7 +204,7 @@ public class SucursalServiceImpl implements ISucursalService {
     }
     sucursal.setEliminada(true);
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
-      photoVideoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
+      photoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
     productoService.eliminarCantidadesDeSucursal(sucursal);
     sucursalRepository.save(sucursal);
@@ -217,6 +215,6 @@ public class SucursalServiceImpl implements ISucursalService {
     if (imagen.length > 1024000L)
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
-    return photoVideoUploader.subirImagen(Sucursal.class.getSimpleName() + idSucursal, imagen);
+    return photoUploader.subirImagen(Sucursal.class.getSimpleName() + idSucursal, imagen);
   }
 }
