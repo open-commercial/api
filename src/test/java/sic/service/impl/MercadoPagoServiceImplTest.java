@@ -48,7 +48,7 @@ class MercadoPagoServiceImplTest {
   @MockBean MessageSource messageSource;
 
   @Autowired EncryptUtils encryptUtils;
-  @Autowired MercadoPagoServiceImpl mercadoPagoService;
+  @Autowired IPagoService pagoService;
 
   @Test
   void shouldCrearNuevaPreference() {
@@ -90,7 +90,7 @@ class MercadoPagoServiceImplTest {
                     .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
                     .monto(BigDecimal.TEN)
                     .build();
-    var preferenceNuevaOrden = mercadoPagoService.getNuevaPreferenceParams(1L, nuevaOrdenDePagoDTO, "localhost");
+    var preferenceNuevaOrden = pagoService.getNuevaPreferenceParams(1L, nuevaOrdenDePagoDTO, "localhost");
     var mercadoPagoPreferenceDTO = new MercadoPagoPreferenceDTO(preferenceNuevaOrden.get(0), preferenceNuevaOrden.get(1));
     assertNotNull(mercadoPagoPreferenceDTO);
     assertNotNull(mercadoPagoPreferenceDTO.getId());
@@ -110,7 +110,7 @@ class MercadoPagoServiceImplTest {
     assertThrows(
         BusinessServiceException.class,
         () ->
-            mercadoPagoService.getNuevaPreferenceParams(2L, ordenDePagoConUbicacionEnvio, "localhost"));
+            pagoService.getNuevaPreferenceParams(2L, ordenDePagoConUbicacionEnvio, "localhost"));
     verify(messageSource).getMessage(eq("mensaje_preference_cliente_sin_email"), any(), any());
     var ordenDePagoPedido =
             NuevaOrdenDePagoDTO.builder()
@@ -126,7 +126,7 @@ class MercadoPagoServiceImplTest {
     pedido.setFechaVencimiento(LocalDateTime.now());
     when(pedidoService.guardar(any(), any())).thenReturn(pedido);
     when(carritoCompraService.calcularTotal(1L)).thenReturn(new BigDecimal("1000.00"));
-    var preferenceOrdenPagoPedido = mercadoPagoService.getNuevaPreferenceParams(1L, ordenDePagoPedido, "localhost");
+    var preferenceOrdenPagoPedido = pagoService.getNuevaPreferenceParams(1L, ordenDePagoPedido, "localhost");
     var mercadoPagoPreference = new MercadoPagoPreferenceDTO(preferenceOrdenPagoPedido.get(0), preferenceOrdenPagoPedido.get(1));
     var idProducto = new long[]{1L, 2L};
     var cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
@@ -174,7 +174,7 @@ class MercadoPagoServiceImplTest {
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
     when(pedidoService.guardar(pedido, null)).thenReturn(pedido);
-    mercadoPagoService.crearComprobantePorNotificacion("26800675");
+    pagoService.crearComprobantePorNotificacion("26800675");
     verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyString());
     verify(clienteService, times(1)).getClientePorIdUsuario(anyLong());
     verify(sucursalService, times(1)).getSucursalPorId(any());
