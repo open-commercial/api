@@ -17,12 +17,12 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.exception.BusinessServiceException;
-import sic.service.ICorreoElectronicoService;
+import sic.service.IEmailService;
 import java.util.Locale;
 import java.util.Properties;
 
 @Service
-public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
+public class GmailEmailServiceImpl implements IEmailService {
 
   @Value("${SIC_MAIL_ENV}")
   private String mailEnv;
@@ -37,7 +37,7 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   private final MessageSource messageSource;
 
   @Autowired
-  public CorreoElectronicoServiceImpl(MessageSource messageSource) {
+  public GmailEmailServiceImpl(MessageSource messageSource) {
     this.messageSource = messageSource;
   }
 

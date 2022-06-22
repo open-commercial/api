@@ -39,7 +39,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final FacturaVentaRepository facturaVentaRepository;
   private final IAfipService afipService;
   private final IReciboService reciboService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private final IPedidoService pedidoService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
@@ -61,7 +61,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       FacturaVentaRepository facturaVentaRepository,
       IAfipService afipService,
       IReciboService reciboService,
-      ICorreoElectronicoService correoElectronicoService,
+      IEmailService emailService,
       IPedidoService pedidoService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
@@ -74,7 +74,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.afipService = afipService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
@@ -574,14 +574,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             messageSource.getMessage(
                 "mensaje_correo_factura_sin_pedido", null, Locale.getDefault());
       }
-      correoElectronicoService.enviarEmail(
+      emailService.enviarEmail(
           facturaVenta.getCliente().getEmail(),
           "",
           "Su Factura de Compra",
           bodyEmail,
           this.getReporteFacturaVenta(factura),
           "Reporte.pdf");
-      logger.warn(
+      logger.info(
           "El mail de la factura serie {} nro {} se envió.",
           factura.getNumSerie(),
           factura.getNumFactura());

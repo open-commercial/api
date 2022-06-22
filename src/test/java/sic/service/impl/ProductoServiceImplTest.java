@@ -3,13 +3,11 @@ package sic.service.impl;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.verify;
-
 import com.querydsl.core.BooleanBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,8 +30,8 @@ import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
+import sic.service.IEmailService;
 import sic.util.CustomValidator;
-
 import javax.persistence.EntityNotFoundException;
 
 @ExtendWith(SpringExtension.class)
@@ -49,7 +47,7 @@ class ProductoServiceImplTest {
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ClienteServiceImpl clienteService;
   @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
+  @MockBean IEmailService emailService;
   @MockBean ProductoRepository productoRepository;
   @MockBean ProductoFavoritoRepository productoFavoritoRepository;
   @MockBean MessageSource messageSource;
@@ -517,7 +515,7 @@ class ProductoServiceImplTest {
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
     productoService.getListaDePreciosEnPdf(criteria, 1L);
     productoService.getListaDePreciosEnXls(criteria, 1L);
-    verify(correoElectronicoService, times(2))
+    verify(emailService, times(2))
         .enviarEmail(
             eq("correo@gmail.com"), eq(""), eq("Listado de productos"), eq(""), any(), any());
   }

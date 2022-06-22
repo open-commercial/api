@@ -29,7 +29,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -38,12 +38,12 @@ public class RegistracionServiceImpl implements IRegistracionService {
   public RegistracionServiceImpl(
       IUsuarioService usuarioService,
       IClienteService clienteService,
-      ICorreoElectronicoService correoElectronicoService,
+      IEmailService emailService,
       MessageSource messageSource,
       CustomValidator customValidator) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -81,7 +81,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     nuevoCliente.setMontoCompraMinima(BigDecimal.ZERO);
     nuevoCliente.setPuedeComprarAPlazo(false);
     clienteService.guardar(nuevoCliente);
-    correoElectronicoService.enviarEmail(
+    emailService.enviarEmail(
         nuevoUsuario.getEmail(),
         this.emailUsername,
         "Registración de cuenta nueva",

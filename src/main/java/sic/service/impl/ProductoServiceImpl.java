@@ -63,7 +63,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
   private final IUsuarioService usuarioService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String FORMATO_XLSX = "xlsx";
   private static final String FORMATO_PDF = "pdf";
@@ -86,7 +86,7 @@ public class ProductoServiceImpl implements IProductoService {
     IPedidoService pedidoService,
     IClienteService clienteService,
     IUsuarioService usuarioService,
-    ICorreoElectronicoService correoElectronicoService,
+    IEmailService emailService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -101,7 +101,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.pedidoService = pedidoService;
     this.clienteService = clienteService;
     this.usuarioService = usuarioService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -1131,7 +1131,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato) {
-    correoElectronicoService.enviarEmail(
+    emailService.enviarEmail(
             mailTo,
             "",
             "Listado de productos",

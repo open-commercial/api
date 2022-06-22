@@ -1,6 +1,6 @@
 package sic.service;
 
-public interface ICorreoElectronicoService {
+public interface IEmailService {
 
   void enviarEmail(
       String toEmail,

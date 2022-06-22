@@ -46,7 +46,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProductoService productoService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
@@ -63,7 +63,7 @@ public class PedidoServiceImpl implements IPedidoService {
     IUsuarioService usuarioService,
     IClienteService clienteService,
     IProductoService productoService,
-    ICorreoElectronicoService correoElectronicoService,
+    IEmailService emailService,
     IReciboService reciboService,
     ICuentaCorrienteService cuentaCorrienteService,
     ModelMapper modelMapper,
@@ -74,7 +74,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.productoService = productoService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
@@ -213,7 +213,7 @@ public class PedidoServiceImpl implements IPedidoService {
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
-      correoElectronicoService.enviarEmail(
+      emailService.enviarEmail(
           emailCliente,
           "",
           "Nuevo Pedido Ingresado",

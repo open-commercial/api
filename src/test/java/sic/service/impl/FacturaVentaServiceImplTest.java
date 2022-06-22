@@ -18,6 +18,7 @@ import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
+import sic.service.IEmailService;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
@@ -46,7 +47,7 @@ class FacturaVentaServiceImplTest {
   @MockBean ClienteServiceImpl clienteService;
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
-  @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
+  @MockBean IEmailService emailService;
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean TransportistaServiceImpl transportistaService;
   @MockBean MessageSource messageSource;
@@ -650,7 +651,7 @@ class FacturaVentaServiceImplTest {
     facturaVenta.setPedido(pedido);
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
-    verify(correoElectronicoService, times(3))
+    verify(emailService, times(3))
         .enviarEmail(
             eq(facturaVenta.getCliente().getEmail()),
             eq(""),

@@ -44,7 +44,7 @@ class MercadoPagoServiceImplTest {
   @MockBean IUsuarioService usuarioService;
   @MockBean IPedidoService pedidoService;
   @MockBean IProductoService productoService;
-  @MockBean ICorreoElectronicoService correoElectronicoService;
+  @MockBean IEmailService emailService;
   @MockBean MessageSource messageSource;
 
   @Autowired EncryptUtils encryptUtils;

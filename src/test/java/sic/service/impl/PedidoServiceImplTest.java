@@ -18,6 +18,7 @@ import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
+import sic.service.IEmailService;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
@@ -39,7 +40,7 @@ class PedidoServiceImplTest {
   @MockBean UsuarioServiceImpl usuarioService;
   @MockBean ClienteServiceImpl clienteService;
   @MockBean ProductoServiceImpl productoService;
-  @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
+  @MockBean IEmailService emailService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
   @MockBean ReciboServiceImpl reciboService;
