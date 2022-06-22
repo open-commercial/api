@@ -8,9 +8,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.ServiceException;
-
+import sic.service.IPhotoUploader;
 import java.util.Locale;
-
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,15 +24,15 @@ class CloudinaryPhotoUploaderImplTest {
   MessageSource messageSource;
 
   @Autowired
-  CloudinaryPhotoUploaderImpl cloudinaryPhotoUploader;
+  IPhotoUploader photoUploader;
 
   @Test
   void shouldNotValidarUrl() {
-    assertThrows(ServiceException.class, () -> cloudinaryPhotoUploader.isUrlValida(""));
+    assertThrows(ServiceException.class, () -> photoUploader.isUrlValida(""));
     assertThrows(
         ServiceException.class,
         () ->
-            cloudinaryPhotoUploader.isUrlValida(
+            photoUploader.isUrlValida(
                 "http://res.cloudinary.com/hcpi6qoun/image/upload/v1608594469/Producto2.jpg"));
     verify(messageSource, times(2))
         .getMessage(eq("mensaje_url_imagen_no_valida"), any(), eq(Locale.getDefault()));
