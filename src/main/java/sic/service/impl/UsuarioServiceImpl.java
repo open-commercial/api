@@ -37,7 +37,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private final UsuarioRepository usuarioRepository;
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
@@ -49,13 +49,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
     UsuarioRepository usuarioRepository,
     ISucursalService sucursalService,
     IClienteService clienteService,
-    ICorreoElectronicoService correoElectronicoService,
+    IEmailService emailService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.usuarioRepository = usuarioRepository;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -305,7 +305,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
     this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getIdUsuario());
-    correoElectronicoService.enviarEmail(
+    emailService.enviarEmail(
         usuario.getEmail(),
         "",
         "Recuperación de contraseña",

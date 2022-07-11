@@ -97,6 +97,8 @@ public interface IProductoService {
 
   void guardarCantidadesDeSucursalNueva(Sucursal sucursal);
 
+  void eliminarCantidadesDeSucursal(Sucursal sucursal);
+
   String subirImagenProducto(long idProducto, byte[] imagen);
 
   Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina);

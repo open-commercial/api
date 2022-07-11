@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +21,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -46,11 +44,11 @@ class MercadoPagoServiceImplTest {
   @MockBean IUsuarioService usuarioService;
   @MockBean IPedidoService pedidoService;
   @MockBean IProductoService productoService;
-  @MockBean ICorreoElectronicoService correoElectronicoService;
+  @MockBean IEmailService emailService;
   @MockBean MessageSource messageSource;
 
   @Autowired EncryptUtils encryptUtils;
-  @Autowired MercadoPagoServiceImpl mercadoPagoService;
+  @Autowired IPagoService pagoService;
 
   @Test
   void shouldCrearNuevaPreference() {
@@ -83,44 +81,44 @@ class MercadoPagoServiceImplTest {
     itemCarritoCompras.add(itemCarritoCompra2);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     when(carritoCompraService.getItemsDelCarritoPorUsuario(usuario)).thenReturn(itemCarritoCompras);
-    RenglonPedido renglonPedido = new RenglonPedido();
+    var renglonPedido = new RenglonPedido();
     when(pedidoService.calcularRenglonPedido(anyLong(), any())).thenReturn(renglonPedido);
-    NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO =
-        NuevaOrdenDePagoDTO.builder()
-            .movimiento(Movimiento.DEPOSITO)
-            .idSucursal(1L)
-            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-            .monto(BigDecimal.TEN)
-            .build();
-    MercadoPagoPreferenceDTO mercadoPagoPreferenceDTO =
-        mercadoPagoService.crearNuevaPreference(1L, nuevaOrdenDePagoDTO, "localhost");
+    var nuevaOrdenDePagoDTO =
+            NuevaOrdenDePagoDTO.builder()
+                    .movimiento(Movimiento.DEPOSITO)
+                    .idSucursal(1L)
+                    .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+                    .monto(BigDecimal.TEN)
+                    .build();
+    var preferenceNuevaOrden = pagoService.getNuevaPreferenceParams(1L, nuevaOrdenDePagoDTO, "localhost");
+    var mercadoPagoPreferenceDTO = new MercadoPagoPreferenceDTO(preferenceNuevaOrden.get(0), preferenceNuevaOrden.get(1));
     assertNotNull(mercadoPagoPreferenceDTO);
     assertNotNull(mercadoPagoPreferenceDTO.getId());
     assertNotEquals("", mercadoPagoPreferenceDTO.getId());
     assertNotNull(mercadoPagoPreferenceDTO.getInitPoint());
     assertNotEquals("", mercadoPagoPreferenceDTO.getInitPoint());
-    NuevaOrdenDePagoDTO ordenDePagoConUbicacionEnvio =
-        NuevaOrdenDePagoDTO.builder()
-            .idSucursal(1L)
-            .movimiento(Movimiento.DEPOSITO)
-            .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
-            .monto(BigDecimal.TEN)
-            .build();
+    var ordenDePagoConUbicacionEnvio =
+            NuevaOrdenDePagoDTO.builder()
+                    .idSucursal(1L)
+                    .movimiento(Movimiento.DEPOSITO)
+                    .tipoDeEnvio(TipoDeEnvio.USAR_UBICACION_ENVIO)
+                    .monto(BigDecimal.TEN)
+                    .build();
     when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
     cliente.setEmail(null);
     when(clienteService.getClientePorIdUsuario(2L)).thenReturn(cliente);
     assertThrows(
         BusinessServiceException.class,
         () ->
-            mercadoPagoService.crearNuevaPreference(2L, ordenDePagoConUbicacionEnvio, "localhost"));
+            pagoService.getNuevaPreferenceParams(2L, ordenDePagoConUbicacionEnvio, "localhost"));
     verify(messageSource).getMessage(eq("mensaje_preference_cliente_sin_email"), any(), any());
-    NuevaOrdenDePagoDTO ordenDePagoPedido =
-        NuevaOrdenDePagoDTO.builder()
-            .movimiento(Movimiento.PEDIDO)
-            .idSucursal(1L)
-            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-            .monto(BigDecimal.TEN)
-            .build();
+    var ordenDePagoPedido =
+            NuevaOrdenDePagoDTO.builder()
+                    .movimiento(Movimiento.PEDIDO)
+                    .idSucursal(1L)
+                    .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+                    .monto(BigDecimal.TEN)
+                    .build();
     cliente.setEmail("test@test.com");
     when(clienteService.getClientePorIdUsuario(anyLong())).thenReturn(cliente);
     Pedido pedido = new Pedido();
@@ -128,11 +126,11 @@ class MercadoPagoServiceImplTest {
     pedido.setFechaVencimiento(LocalDateTime.now());
     when(pedidoService.guardar(any(), any())).thenReturn(pedido);
     when(carritoCompraService.calcularTotal(1L)).thenReturn(new BigDecimal("1000.00"));
-    MercadoPagoPreferenceDTO mercadoPagoPreference =
-        mercadoPagoService.crearNuevaPreference(1L, ordenDePagoPedido, "localhost");
-    long[] idProducto = new long[]{1L, 2L};
-    BigDecimal[] cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
-    ProductosParaVerificarStockDTO productosParaVerificarStockDTO =
+    var preferenceOrdenPagoPedido = pagoService.getNuevaPreferenceParams(1L, ordenDePagoPedido, "localhost");
+    var mercadoPagoPreference = new MercadoPagoPreferenceDTO(preferenceOrdenPagoPedido.get(0), preferenceOrdenPagoPedido.get(1));
+    var idProducto = new long[]{1L, 2L};
+    var cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
+    var productosParaVerificarStockDTO =
             ProductosParaVerificarStockDTO.builder().idProducto(idProducto).cantidad(cantidad).build();
     verify(productoService).getProductosSinStockDisponible(productosParaVerificarStockDTO);
     assertNotNull(mercadoPagoPreference.getId());
@@ -176,7 +174,7 @@ class MercadoPagoServiceImplTest {
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
     when(pedidoService.guardar(pedido, null)).thenReturn(pedido);
-    mercadoPagoService.crearComprobantePorNotificacion("26800675");
+    pagoService.crearComprobantePorNotificacion("26800675");
     verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyString());
     verify(clienteService, times(1)).getClientePorIdUsuario(anyLong());
     verify(sucursalService, times(1)).getSucursalPorId(any());

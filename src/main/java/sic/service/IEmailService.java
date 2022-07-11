@@ -3,7 +3,7 @@ package sic.service;
 import sic.modelo.EnvioDeCorreoGrupal;
 import sic.modelo.dto.EnvioDeCorreoGrupalDTO;
 
-public interface ICorreoElectronicoService {
+public interface IEmailService {
 
   void enviarEmail(
       String[] toEmail,

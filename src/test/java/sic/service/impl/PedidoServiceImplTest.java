@@ -18,6 +18,7 @@ import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
+import sic.service.IEmailService;
 import sic.util.CustomValidator;
 
 import java.math.BigDecimal;
@@ -39,7 +40,7 @@ class PedidoServiceImplTest {
   @MockBean UsuarioServiceImpl usuarioService;
   @MockBean ClienteServiceImpl clienteService;
   @MockBean ProductoServiceImpl productoService;
-  @MockBean CorreoElectronicoServiceImpl correoElectronicoService;
+  @MockBean IEmailService emailService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
   @MockBean ReciboServiceImpl reciboService;
@@ -156,6 +157,22 @@ class PedidoServiceImplTest {
     configuracionSucursal.setVencimientoCorto(1L);
     sucursal.setConfiguracionSucursal(configuracionSucursal);
     pedido.setSucursal(sucursal);
+    Usuario usuarioPedido = new Usuario();
+    List<Rol> roles = new ArrayList<>();
+    roles.add(Rol.VENDEDOR);
+    usuarioPedido.setIdUsuario(1L);
+    usuarioPedido.setRoles(roles);
+    pedido.setUsuario(usuarioPedido);
+    pedido.setDescuentoPorcentaje(BigDecimal.ONE);
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
+    assertThrows(
+            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(eq("mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales"), any(), any());
+    Cliente clienteDeUsuario = new Cliente();
+    clienteDeUsuario.setIdCliente(2L);
+    clienteDeUsuario.setNombreFiscal("nombre fiscal");
+    when(clienteService.getClientePorIdUsuario(1L)).thenReturn(clienteDeUsuario);
+    pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());

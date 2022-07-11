@@ -22,17 +22,17 @@ import sic.modelo.Rol;
 import sic.modelo.Usuario;
 import sic.modelo.dto.EnvioDeCorreoGrupalDTO;
 import sic.repository.EnvioDeCorreoGrupalRepository;
-import sic.service.ICorreoElectronicoService;
 import sic.service.IUsuarioService;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import sic.service.IEmailService;
 import java.util.Locale;
 import java.util.Properties;
 
 @Service
-public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
+public class GmailEmailServiceImpl implements IEmailService {
 
   @Value("${SIC_MAIL_ENV}")
   private String mailEnv;
@@ -49,8 +49,8 @@ public class CorreoElectronicoServiceImpl implements ICorreoElectronicoService {
   private final IUsuarioService usuarioService;
 
   @Autowired
-  public CorreoElectronicoServiceImpl(MessageSource messageSource, EnvioDeCorreoGrupalRepository envioDeCorreoGrupalRepository,
-                                      IUsuarioService usuarioService) {
+  public GmailEmailServiceImpl(MessageSource messageSource, EnvioDeCorreoGrupalRepository envioDeCorreoGrupalRepository,
+            IUsuarioService usuarioService) {
     this.messageSource = messageSource;
     this.envioDeCorreoGrupalRepository = envioDeCorreoGrupalRepository;
     this.usuarioService = usuarioService;

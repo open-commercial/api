@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Se necesita este config file, porque el application.properties es solo usado por @SpringBootTest -->
+<configuration>
+    <logger name="*" level="INFO" />
+</configuration>

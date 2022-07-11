@@ -39,7 +39,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final FacturaVentaRepository facturaVentaRepository;
   private final IAfipService afipService;
   private final IReciboService reciboService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private final IPedidoService pedidoService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
@@ -61,7 +61,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       FacturaVentaRepository facturaVentaRepository,
       IAfipService afipService,
       IReciboService reciboService,
-      ICorreoElectronicoService correoElectronicoService,
+      IEmailService emailService,
       IPedidoService pedidoService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
@@ -74,7 +74,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.afipService = afipService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
@@ -310,6 +310,16 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
     if (idPedido != null) {
       Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+      facturas.forEach(f -> {
+        Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(f.getUsuario().getIdUsuario());
+        if (f.getCliente().equals(clienteDeUsuario) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
+                f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
+          throw
+                  new BusinessServiceException(
+                  messageSource.getMessage(
+                          "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
+        }
+      });
       pedido.setEstado(EstadoPedido.CERRADO);
       pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
       this.calcularValoresFacturasVentaAndActualizarStock(facturas);
@@ -564,14 +574,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             messageSource.getMessage(
                 "mensaje_correo_factura_sin_pedido", null, Locale.getDefault());
       }
-      correoElectronicoService.enviarEmail(
+      emailService.enviarEmail(
           facturaVenta.getCliente().getEmail(),
           "",
           "Su Factura de Compra",
           bodyEmail,
           this.getReporteFacturaVenta(factura),
           "Reporte.pdf");
-      logger.warn(
+      logger.info(
           "El mail de la factura serie {} nro {} se envió.",
           factura.getNumSerie(),
           factura.getNumFactura());

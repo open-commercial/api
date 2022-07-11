@@ -9,7 +9,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
 import sic.modelo.*;
+import sic.modelo.dto.NuevaSucursalDTO;
 import sic.repository.SucursalRepository;
+import sic.service.IPhotoUploader;
 import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
@@ -31,10 +33,9 @@ class SucursalServiceImplTest {
   @MockBean SucursalRepository sucursalRepository;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean PhotoVideoUploaderImpl photoVideoUploader;
+  @MockBean IPhotoUploader photoUploader;
   @MockBean ProductoServiceImpl productoService;
   @MockBean MessageSource messageSource;
-
   @Autowired SucursalServiceImpl sucursalService;
 
   @Test
@@ -45,6 +46,12 @@ class SucursalServiceImplTest {
 
   @Test
   void shouldGuardarSucursal() {
+    NuevaSucursalDTO nuevaSucursalDTO =
+            NuevaSucursalDTO.builder()
+                    .nombre("Sucursal para guardar")
+                    .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+                    .email("sucursal@delaempresa.com")
+                    .build();
     Sucursal sucursal = new Sucursal();
     sucursal.setNombre("Sucursal para guardar");
     sucursal.setCategoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO);
@@ -57,7 +64,7 @@ class SucursalServiceImplTest {
     sucursal.setUbicacion(ubicacion);
     when(ubicacionService.getLocalidadPorId(1L)).thenReturn(localidad);
     when(sucursalRepository.save(sucursal)).thenReturn(sucursal);
-    sucursalService.guardar(sucursal);
+    sucursalService.guardar(nuevaSucursalDTO, ubicacion, null);
     verify(sucursalRepository).save(sucursal);
     verify(productoService).guardarCantidadesDeSucursalNueva(sucursal);
   }
@@ -89,8 +96,8 @@ class SucursalServiceImplTest {
     ubicacion.setLocalidad(localidad);
     sucursalPersistida.setUbicacion(ubicacion);
     sucursalPersistida.setLogo("Logo");
-    sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida);
-    verify(photoVideoUploader).borrarImagen("Sucursal1");
+    sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, null);
+    verify(photoUploader).borrarImagen("Sucursal1");
     verify(sucursalRepository).save(sucursalParaActualizar);
   }
 
@@ -119,7 +126,6 @@ class SucursalServiceImplTest {
     configuracionSucursal.setPredeterminada(false);
     sucursal.setConfiguracionSucursal(configuracionSucursal);
     sucursalService.eliminar(1L);
-    verify(configuracionSucursalService).eliminar(configuracionSucursal);
     verify(sucursalRepository).save(sucursal);
   }
 

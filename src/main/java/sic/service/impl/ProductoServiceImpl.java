@@ -59,13 +59,13 @@ public class ProductoServiceImpl implements IProductoService {
   private final IProveedorService proveedorService;
   private final IMedidaService medidaService;
   private final ICarritoCompraService carritoCompraService;
-  private final IPhotoVideoUploader photoVideoUploader;
+  private final IPhotoUploader photoUploader;
   private final ISucursalService sucursalService;
   private final ITraspasoService traspasoService;
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
   private final IUsuarioService usuarioService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String FORMATO_XLSX = "xlsx";
   private static final String FORMATO_PDF = "pdf";
@@ -82,13 +82,13 @@ public class ProductoServiceImpl implements IProductoService {
     IProveedorService proveedorService,
     IMedidaService medidaService,
     ICarritoCompraService carritoCompraService,
-    IPhotoVideoUploader photoVideoUploader,
+    IPhotoUploader photoUploader,
     ISucursalService sucursalService,
     ITraspasoService traspasoService,
     IPedidoService pedidoService,
     IClienteService clienteService,
     IUsuarioService usuarioService,
-    ICorreoElectronicoService correoElectronicoService,
+    IEmailService emailService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.productoRepository = productoRepository;
@@ -97,13 +97,13 @@ public class ProductoServiceImpl implements IProductoService {
     this.proveedorService = proveedorService;
     this.medidaService = medidaService;
     this.carritoCompraService = carritoCompraService;
-    this.photoVideoUploader = photoVideoUploader;
+    this.photoUploader = photoUploader;
     this.sucursalService = sucursalService;
     this.traspasoService = traspasoService;
     this.pedidoService = pedidoService;
     this.clienteService = clienteService;
     this.usuarioService = usuarioService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -458,7 +458,7 @@ public class ProductoServiceImpl implements IProductoService {
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
             && (productoPorActualizar.getUrlImagen() == null
             || productoPorActualizar.getUrlImagen().isEmpty())) {
-      photoVideoUploader.borrarImagen(
+      photoUploader.borrarImagen(
               Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
@@ -470,7 +470,7 @@ public class ProductoServiceImpl implements IProductoService {
     //se setea siempre en false momentaniamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
-    photoVideoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
+    photoUploader.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
         messageSource.getMessage(
@@ -765,7 +765,7 @@ public class ProductoServiceImpl implements IProductoService {
       this.quitarProductoDeFavoritos(i);
       producto.setEliminado(true);
       if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
-        photoVideoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
+        photoUploader.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
       }
       productos.add(producto);
     }
@@ -899,12 +899,25 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
+  public void eliminarCantidadesDeSucursal(Sucursal sucursal) {
+    List<Producto> productos =
+            productoRepository.findAllByEliminado(false);
+
+    CantidadEnSucursal cantidadAuxiliar = new CantidadEnSucursal();
+    cantidadAuxiliar.setSucursal(sucursal);
+
+    productos.forEach(producto -> producto.getCantidadProducto().getCantidadEnSucursales().remove(cantidadAuxiliar));
+    this.productoRepository.saveAll(productos);
+  }
+
+  @Override
+  @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
     String urlImagen =
-        photoVideoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+        photoUploader.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
     return urlImagen;
   }
@@ -1121,7 +1134,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Async
   @Override
   public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato, String mensaje) {
-    correoElectronicoService.enviarEmail(
+    emailService.enviarEmail(
             mailTo,
             "",
             "Listado de productos",
@@ -1147,7 +1160,7 @@ public class ProductoServiceImpl implements IProductoService {
   public void enviarCatalogoParaViajantes() {
     logger.warn(
             messageSource.getMessage(
-                    "mensaje_producto_reporte_catalogo", new Object[] {Rol.ADMINISTRADOR}, Locale.getDefault()));
+                    "mensaje_producto_reporte_catalogo", new Object[] {Rol.VIAJANTE}, Locale.getDefault()));
     this.enviarListaDeProductosParaUsuariosSegunRol(Rol.ADMINISTRADOR, BusquedaProductoCriteria.builder().listarSoloParaCatalogo(true).build(), FORMATO_PDF);
   }
 

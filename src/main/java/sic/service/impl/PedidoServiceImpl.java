@@ -46,7 +46,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProductoService productoService;
-  private final ICorreoElectronicoService correoElectronicoService;
+  private final IEmailService emailService;
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
@@ -63,7 +63,7 @@ public class PedidoServiceImpl implements IPedidoService {
     IUsuarioService usuarioService,
     IClienteService clienteService,
     IProductoService productoService,
-    ICorreoElectronicoService correoElectronicoService,
+    IEmailService emailService,
     IReciboService reciboService,
     ICuentaCorrienteService cuentaCorrienteService,
     ModelMapper modelMapper,
@@ -74,7 +74,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.productoService = productoService;
-    this.correoElectronicoService = correoElectronicoService;
+    this.emailService = emailService;
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
@@ -166,6 +166,13 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
+    Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(pedido.getUsuario().getIdUsuario());
+    if (pedido.getCliente().equals(clienteDeUsuario) && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
+              pedido.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
+    }
     if (pedido.getFecha() == null) {
       pedido.setFecha(LocalDateTime.now());
     }
@@ -206,7 +213,7 @@ public class PedidoServiceImpl implements IPedidoService {
     logger.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
-      correoElectronicoService.enviarEmail(
+      emailService.enviarEmail(
           emailCliente,
           "",
           "Nuevo Pedido Ingresado",
@@ -654,7 +661,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Scheduled(cron = "0 0/1 * * * ?")
   @Transactional
   public void cancelarPedidosAbiertos() {
-    logger.warn(
+    logger.info(
             messageSource.getMessage(
                     "mensaje_cron_job_cancelar_pedidos", null, Locale.getDefault()));
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);

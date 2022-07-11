@@ -20,6 +20,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
+import sic.model.*;
 import sic.model.Caja;
 import sic.model.CantidadEnSucursal;
 import sic.model.Cliente;
@@ -140,17 +141,25 @@ class AppIntegrationTest {
     credencial.setHabilitado(true);
     restTemplate.put(apiPrefix + "/usuarios", credencial);
     this.iniciarSesionComoAdministrador();
-    Sucursal sucursal =
-        Sucursal.builder()
-            .nombre("FirstOfAll")
-            .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
-            .email("support@globocorporation.com")
-            .idFiscal(20311023188L)
-            .ubicacion(Ubicacion.builder().idLocalidad(1L).idProvincia(1L).build())
-            .build();
+    NuevaSucursal nuevaSucursal =
+            NuevaSucursal.builder()
+                    .nombre("FirstOfAll")
+                    .categoriaIVA(CategoriaIVA.RESPONSABLE_INSCRIPTO)
+                    .email("support@globocorporation.com")
+                    .idFiscal(20311023188L)
+                    .ubicacion(UbicacionDTO.builder().idLocalidad(1L).idProvincia(1L).build())
+                    .build();
     Sucursal sucursalRecuperada =
-        restTemplate.postForObject(apiPrefix + "/sucursales", sucursal, Sucursal.class);
-    assertEquals(sucursal, sucursalRecuperada);
+        restTemplate.postForObject(apiPrefix + "/sucursales", nuevaSucursal, Sucursal.class);
+    assertEquals(nuevaSucursal.getNombre(), sucursalRecuperada.getNombre());
+    assertEquals(nuevaSucursal.getLema(), sucursalRecuperada.getLema());
+    assertEquals(nuevaSucursal.getCategoriaIVA(), sucursalRecuperada.getCategoriaIVA());
+    assertEquals(nuevaSucursal.getIdFiscal(), sucursalRecuperada.getIdFiscal());
+    assertEquals(0l, sucursalRecuperada.getIngresosBrutos());
+    assertEquals(nuevaSucursal.getFechaInicioActividad(), sucursalRecuperada.getFechaInicioActividad());
+    assertEquals(nuevaSucursal.getEmail(), sucursalRecuperada.getEmail());
+    assertEquals(nuevaSucursal.getTelefono(), sucursalRecuperada.getTelefono());
+    assertEquals(nuevaSucursal.getUbicacion().getIdLocalidad(), sucursalRecuperada.getUbicacion().getIdLocalidad());
     ConfiguracionSucursal configuracionSucursal =
         restTemplate.getForObject(
             apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),

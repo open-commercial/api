@@ -56,7 +56,7 @@ public class NotaServiceImpl implements INotaService {
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IMercadoPagoService mercadoPagoService;
+  private final IPagoService pagoService;
   private final IAfipService afipService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -81,7 +81,7 @@ public class NotaServiceImpl implements INotaService {
     IProductoService productoService,
     ISucursalService sucursalService,
     ICuentaCorrienteService cuentaCorrienteService,
-    IMercadoPagoService mercadoPagoService,
+    IPagoService pagoService,
     IAfipService afipService,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -97,7 +97,7 @@ public class NotaServiceImpl implements INotaService {
     this.sucursalService = sucursalService;
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.mercadoPagoService = mercadoPagoService;
+    this.pagoService = pagoService;
     this.afipService = afipService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -1054,7 +1054,7 @@ public class NotaServiceImpl implements INotaService {
     if (notaDebito.getRecibo() != null
         && notaDebito.getRecibo().getIdPagoMercadoPago() != null
         && !notaDebito.getRecibo().getIdPagoMercadoPago().isEmpty()) {
-      mercadoPagoService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
+      pagoService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
     }
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
     logger.warn("La Nota {} se guardó correctamente.", notaDebito);

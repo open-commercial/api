@@ -1,0 +1,23 @@
+[ req ]
+prompt = no
+default_bits = 2048
+default_keyfile = empresa_private.key
+encrypt_key = no
+distinguished_name = req_distinguished_name
+ 
+string_mask = utf8only
+ 
+req_extensions = v3_req
+ 
+[ req_distinguished_name ]
+O=NOMBRE EMPRESA SRL
+L=Corrientes
+ST=Corrientes
+C=AR
+CN=NOMBRE FANTASIA EMPRESA
+serialNumber=CUIT 30111111115
+ 
+[ v3_req ]
+ 
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment

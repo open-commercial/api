@@ -27,10 +27,10 @@
         <modelmapper.version>2.4.2</modelmapper.version>
         <dom4j.version>1.6.1</dom4j.version>
         <jasperreports.version>6.17.0</jasperreports.version>
-        <apache-poi.version>3.10.1</apache-poi.version>
+        <apache-poi.version>3.17</apache-poi.version>
         <jjwt.version>0.9.1</jjwt.version>
         <bouncycastle-bcmail.version>1.46</bouncycastle-bcmail.version>
-        <commons-io.version>2.6</commons-io.version>
+        <commons-io.version>2.7</commons-io.version>
         <messaging.saaj.version>1.5.2</messaging.saaj.version>
         <cloudinary.version>1.21.0</cloudinary.version>
         <aws-java-sdk.version>1.11.155</aws-java-sdk.version>

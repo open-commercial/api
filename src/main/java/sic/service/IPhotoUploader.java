@@ -1,6 +1,6 @@
 package sic.service;
 
-public interface IPhotoVideoUploader {
+public interface IPhotoUploader {
 
   String subirImagen(String nombreImagen, byte[] imagen);
 
