@@ -16,6 +16,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import sic.controller.Views;
 import sic.modelo.dto.UbicacionDTO;
 
@@ -32,6 +35,7 @@ import sic.modelo.dto.UbicacionDTO;
     property = "idPedido",
     scope = Pedido.class)
 @JsonIgnoreProperties({"usuario", "sucursal"})
+@Audited
 public class Pedido implements Serializable {
 
   @Id
@@ -53,6 +57,7 @@ public class Pedido implements Serializable {
   @ManyToOne
   @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
   @NotNull(message = "{mensaje_pedido_sucursal_vacia}")
+  @NotAudited
   private Sucursal sucursal;
 
   @Embedded
@@ -67,21 +72,28 @@ public class Pedido implements Serializable {
   @ManyToOne
   @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
   @NotNull(message = "{mensaje_pedido_cliente_vacio}")
+  //@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+  @NotAudited
   private Cliente cliente;
 
   @ManyToOne
   @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
   @NotNull(message = "{mensaje_pedido_usuario_vacio}")
+  @NotAudited
+  //@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
   private Usuario usuario;
 
   @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
   @JsonProperty(access = Access.WRITE_ONLY)
+  @NotAudited
+  //@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
   private List<Factura> facturas;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "id_Pedido")
   @JsonProperty(access = Access.WRITE_ONLY)
   @NotEmpty(message = "{mensaje_pedido_renglones_vacios}")
+  //@NotAudited
   private List<RenglonPedido> renglones;
 
   @Column(precision = 25, scale = 15)

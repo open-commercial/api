@@ -5,11 +5,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
 public interface PedidoRepository
-    extends PagingAndSortingRepository<Pedido, Long>, QuerydslPredicateExecutor<Pedido> {
+    extends PagingAndSortingRepository<Pedido, Long>, QuerydslPredicateExecutor<Pedido>, RevisionRepository<Pedido, Long, Long> {
 
   Pedido findByNroPedidoAndSucursalAndEliminado(
       long nroPedido, Sucursal sucursal, boolean eliminado);

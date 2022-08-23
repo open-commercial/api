@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.envers.Audited;
 import sic.controller.Views;
 
 @Entity
@@ -21,6 +22,7 @@ import sic.controller.Views;
 @NoArgsConstructor
 @ToString
 @JsonView(Views.Comprador.class)
+@Audited
 public class RenglonPedido implements Serializable {
 
   @Id
