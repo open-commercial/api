@@ -47,6 +47,10 @@ public interface IPedidoService {
 
   List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
 
+  List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, long[] idProductoItem, BigDecimal[] cantidad);
+
+  RenglonPedido actualizarCantidadRenglonPedido(RenglonPedido renglonPedido, BigDecimal cantidadNueva);
+
   Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
 
   long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
@@ -56,4 +60,5 @@ public interface IPedidoService {
   void actualizarCantidadReservadaDeProductosPorCambioDeEstado(Pedido pedido);
 
   void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
+
 }

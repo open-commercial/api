@@ -16,6 +16,7 @@ import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.IEmailService;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class})
+        classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class})
 class PedidoServiceImplTest {
 
   @MockBean PedidoRepository pedidoRepository;
@@ -48,6 +49,44 @@ class PedidoServiceImplTest {
   @MockBean ModelMapper modelMapper;
 
   @Autowired PedidoServiceImpl pedidoService;
+
+  private Producto construirProducto() {
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCodigo("1");
+    producto.setDescripcion("Cinta adhesiva doble faz 3M");
+    producto.setMedida(new Medida());
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("89.35"));
+    producto.getPrecioProducto().setGananciaPorcentaje(new BigDecimal("38.74"));
+    producto.getPrecioProducto().setGananciaNeto(new BigDecimal("34.614"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("123.964"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
+    producto.getPrecioProducto().setIvaNeto(new BigDecimal("26.032"));
+    producto.getPrecioProducto().setPrecioLista(new BigDecimal("150"));
+    producto.getPrecioProducto().setPorcentajeBonificacionPrecio(new BigDecimal("10"));
+    producto.getPrecioProducto().setPrecioBonificado(new BigDecimal("135"));
+    producto.getPrecioProducto().setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+    producto.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto.getCantidadProducto().setCantMinima(new BigDecimal("5"));
+    producto.setFechaAlta(LocalDateTime.now());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
+    Sucursal sucursal = new Sucursal();
+    Rubro rubro = new Rubro();
+    Proveedor proveedor = new Proveedor();
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    cantidadEnSucursal.setSucursal(sucursal);
+    producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+    producto.getCantidadProducto().setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
+    producto.setRubro(rubro);
+    producto.setProveedor(proveedor);
+    return producto;
+  }
 
   @Test
   void shouldCancelarPedidoAbierto() {
@@ -110,7 +149,7 @@ class PedidoServiceImplTest {
     nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO2);
     BigDecimal[] idsProductoEsperado = new BigDecimal[] {BigDecimal.TEN, BigDecimal.ONE};
     BigDecimal[] idsProductoResultado =
-        pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedido);
+            pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedido);
     assertEquals(idsProductoEsperado.length, idsProductoResultado.length);
     assertEquals(idsProductoEsperado[0], idsProductoResultado[0]);
     assertEquals(idsProductoEsperado[1], idsProductoResultado[1]);
@@ -174,7 +213,7 @@ class PedidoServiceImplTest {
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(clienteDeUsuario);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
     assertThrows(
-        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
     UbicacionDTO ubicacionDTO = new UbicacionDTO();
     pedido.setDetalleEnvio(ubicacionDTO);
@@ -184,7 +223,7 @@ class PedidoServiceImplTest {
     faltantes.add(productoFaltante);
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(faltantes);
     assertThrows(
-        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_sin_stock"), any(), any());
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(new ArrayList<>());
     Pedido pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>());
@@ -220,20 +259,20 @@ class PedidoServiceImplTest {
     Sucursal sucursal = new Sucursal();
     pedido.setSucursal(sucursal);
     assertThrows(
-        BusinessServiceException.class,
-        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+            BusinessServiceException.class,
+            () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
     verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
     pedido.setEstado(EstadoPedido.ABIERTO);
     when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
-        .thenReturn(true);
+            .thenReturn(true);
     assertThrows(
-        BusinessServiceException.class,
-        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+            BusinessServiceException.class,
+            () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
     when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
-        .thenReturn(false);
+            .thenReturn(false);
     assertThrows(
-        BusinessServiceException.class,
-        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido));
+            BusinessServiceException.class,
+            () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, pedido));
     verify(messageSource).getMessage(eq("mensaje_pedido_duplicado"), any(), any());
     verify(messageSource).getMessage(eq("mensaje_pedido_no_existente"), any(), any());
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
@@ -249,13 +288,13 @@ class PedidoServiceImplTest {
     faltantes.add(faltante);
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(faltantes);
     assertThrows(
-        BusinessServiceException.class,
-        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+            BusinessServiceException.class,
+            () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
     pedido.setDetalleEnvio(new UbicacionDTO());
     assertThrows(
-        BusinessServiceException.class,
-        () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
+            BusinessServiceException.class,
+            () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
     verify(messageSource).getMessage(eq("mensaje_pedido_sin_stock"), any(), any());
   }
 
@@ -277,62 +316,62 @@ class PedidoServiceImplTest {
   @Test
   void shouldTestBusquedaDePedidos() {
     BusquedaPedidoCriteria busquedaReciboCriteria =
-        BusquedaPedidoCriteria.builder()
-            .fechaDesde(LocalDateTime.MIN)
-            .fechaHasta(LocalDateTime.MIN)
-            .idCliente(2L)
-            .idUsuario(3L)
-            .idViajante(5L)
-            .nroPedido(123L)
-            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-            .idProducto(1L)
-            .idSucursal(7L)
-            .build();
+            BusquedaPedidoCriteria.builder()
+                    .fechaDesde(LocalDateTime.MIN)
+                    .fechaHasta(LocalDateTime.MIN)
+                    .idCliente(2L)
+                    .idUsuario(3L)
+                    .idViajante(5L)
+                    .nroPedido(123L)
+                    .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+                    .idProducto(1L)
+                    .idSucursal(7L)
+                    .build();
     Usuario usuario = new Usuario();
     List<Rol> roles = new ArrayList<>();
     roles.add(Rol.COMPRADOR);
     usuario.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     String builder =
-        "pedido.sucursal.idSucursal = 7 && pedido.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
-            + "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 "
-            + "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 "
-            + "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
+            "pedido.sucursal.idSucursal = 7 && pedido.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+                    + "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 "
+                    + "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 "
+                    + "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
     assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
     busquedaReciboCriteria =
-        BusquedaPedidoCriteria.builder()
-            .fechaDesde(LocalDateTime.MIN)
-            .idCliente(2L)
-            .idUsuario(3L)
-            .idViajante(5L)
-            .nroPedido(123L)
-            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-            .idProducto(1L)
-            .idSucursal(7L)
-            .build();
+            BusquedaPedidoCriteria.builder()
+                    .fechaDesde(LocalDateTime.MIN)
+                    .idCliente(2L)
+                    .idUsuario(3L)
+                    .idViajante(5L)
+                    .nroPedido(123L)
+                    .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+                    .idProducto(1L)
+                    .idSucursal(7L)
+                    .build();
     builder =
-        "pedido.sucursal.idSucursal = 7 && pedido.fecha > -999999999-01-01T00:00 " +
-                "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 " +
-                "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
-                "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 " +
-                "&& pedido.eliminado = false";
+            "pedido.sucursal.idSucursal = 7 && pedido.fecha > -999999999-01-01T00:00 " +
+                    "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 " +
+                    "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
+                    "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 " +
+                    "&& pedido.eliminado = false";
     assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
     busquedaReciboCriteria =
-        BusquedaPedidoCriteria.builder()
-            .fechaHasta(LocalDateTime.MIN)
-            .idCliente(2L)
-            .idUsuario(3L)
-            .idViajante(5L)
-            .nroPedido(123L)
-            .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
-            .idProducto(1L)
-            .idSucursal(7L)
-            .build();
+            BusquedaPedidoCriteria.builder()
+                    .fechaHasta(LocalDateTime.MIN)
+                    .idCliente(2L)
+                    .idUsuario(3L)
+                    .idViajante(5L)
+                    .nroPedido(123L)
+                    .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
+                    .idProducto(1L)
+                    .idSucursal(7L)
+                    .build();
     builder =
-        "pedido.sucursal.idSucursal = 7 && pedido.fecha < -999999999-01-01T23:59:59.999999999 " +
-                "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 " +
-                "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
-                "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
+            "pedido.sucursal.idSucursal = 7 && pedido.fecha < -999999999-01-01T23:59:59.999999999 " +
+                    "&& pedido.cliente.idCliente = 2 && pedido.usuario.idUsuario = 3 " +
+                    "&& pedido.cliente.viajante.idUsuario = 5 && pedido.nroPedido = 123 " +
+                    "&& pedido.tipoDeEnvio = RETIRO_EN_SUCURSAL && any(pedido.renglones).idProductoItem = 1 && pedido.eliminado = false";
     assertEquals(builder, pedidoService.getBuilderPedido(busquedaReciboCriteria, 1L).toString());
   }
 
@@ -412,5 +451,46 @@ class PedidoServiceImplTest {
             () -> pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido));
     verify(messageSource)
             .getMessage(eq("mensaje_producto_error_actualizar_cantidad_reservada"), any(), any());
+  }
+
+  @Test
+  void shouldActualizarRenglonesPedido() {
+    Producto productoUno = this.construirProducto();
+    Producto productoDos = this.construirProducto();
+    productoDos.setIdProducto(2L);
+    Producto productoTres = this.construirProducto();
+    productoTres.setIdProducto(3L);
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoUno);
+    when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(productoDos);
+    when(productoService.getProductoNoEliminadoPorId(3L)).thenReturn(productoTres);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido1 = new RenglonPedido();
+    renglonPedido1.setIdRenglonPedido(1L);
+    renglonPedido1.setIdProductoItem(1L);
+    renglonPedido1.setCantidad(BigDecimal.TEN);
+    RenglonPedido renglonPedido2 = new RenglonPedido();
+    renglonPedido2.setIdRenglonPedido(2L);
+    renglonPedido2.setIdProductoItem(2L);
+    renglonPedido2.setCantidad(BigDecimal.ONE);
+    renglones.add(renglonPedido1);
+    renglones.add(renglonPedido2);
+    long[] idsProductos = {1L, 3L};
+    BigDecimal[] cantidades = {BigDecimal.ONE, BigDecimal.TEN};
+    pedidoService.actualizarRenglonesPedido(renglones, idsProductos, cantidades);
+    assertEquals(1L, renglones.get(0).getIdProductoItem());
+    assertEquals(3L, renglones.get(1).getIdProductoItem());
+    assertEquals(BigDecimal.ONE, renglones.get(0).getCantidad());
+    assertEquals(1L, renglones.get(0).getIdProductoItem());
+    assertEquals(BigDecimal.TEN, renglones.get(1).getCantidad());
+    assertEquals(3L, renglones.get(1).getIdProductoItem());
+  }
+
+  @Test
+  void shouldActualizarRenglon() {
+    Producto productoUno = this.construirProducto();
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoUno);
+    RenglonPedido renglonPedido1 = pedidoService.calcularRenglonPedido(productoUno.getIdProducto(), BigDecimal.TEN);
+    pedidoService.actualizarCantidadRenglonPedido(renglonPedido1, BigDecimal.ONE);
+    assertEquals(BigDecimal.ONE, renglonPedido1.getCantidad());
   }
 }
