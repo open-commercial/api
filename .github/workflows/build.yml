@@ -8,8 +8,8 @@ on:
     types: [ opened, synchronize, reopened ]
 
 jobs:
-  build-analyze:
-    name: Build & Analyze
+  build-analyze-deploy:
+    name: Build, analyze, dockerize and deploy
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -51,12 +51,6 @@ jobs:
           SIC_CLOUDINARY_ENV: "testing"
           SIC_MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=sic-api:sic-api
-
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: build-analyze
-    steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
