@@ -1,13 +1,15 @@
-name: Build
+name: Open Commercial CI
+
 on:
   push:
     branches:
       - master
   pull_request:
     types: [ opened, synchronize, reopened ]
+
 jobs:
-  build:
-    name: Build
+  build-analyze:
+    name: Build & Analyze
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -49,6 +51,11 @@ jobs:
           SIC_CLOUDINARY_ENV: "testing"
           SIC_MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=sic-api:sic-api
+
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
