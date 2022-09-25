@@ -12,7 +12,7 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.CantidadProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
@@ -124,13 +124,13 @@ class PedidoServiceImplTest {
 
   @Test
   void shouldGetArrayDeIdProducto() {
-    List<NuevoRenglonPedidoDTO> nuevosRenglonesPedido = new ArrayList<>();
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO1 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO1.setIdProductoItem(1L);
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO2 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO2.setIdProductoItem(5L);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO1);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO2);
+    List<CantidadProductoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    CantidadProductoDTO cantidadProductoDTO1 = new CantidadProductoDTO();
+    cantidadProductoDTO1.setIdProductoItem(1L);
+    CantidadProductoDTO cantidadProductoDTO2 = new CantidadProductoDTO();
+    cantidadProductoDTO2.setIdProductoItem(5L);
+    nuevosRenglonesPedido.add(cantidadProductoDTO1);
+    nuevosRenglonesPedido.add(cantidadProductoDTO2);
     long[] idsProductoEsperado = new long[] {1L, 5L};
     long[] idsProductoResultado = pedidoService.getArrayDeIdProducto(nuevosRenglonesPedido);
     assertEquals(idsProductoEsperado.length, idsProductoResultado.length);
@@ -140,13 +140,13 @@ class PedidoServiceImplTest {
 
   @Test
   void shouldGetArrayDeCantidadesProducto() {
-    List<NuevoRenglonPedidoDTO> nuevosRenglonesPedido = new ArrayList<>();
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO1 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO1.setCantidad(BigDecimal.TEN);
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO2 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO2.setCantidad(BigDecimal.ONE);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO1);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO2);
+    List<CantidadProductoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    CantidadProductoDTO cantidadProductoDTO1 = new CantidadProductoDTO();
+    cantidadProductoDTO1.setCantidad(BigDecimal.TEN);
+    CantidadProductoDTO cantidadProductoDTO2 = new CantidadProductoDTO();
+    cantidadProductoDTO2.setCantidad(BigDecimal.ONE);
+    nuevosRenglonesPedido.add(cantidadProductoDTO1);
+    nuevosRenglonesPedido.add(cantidadProductoDTO2);
     BigDecimal[] idsProductoEsperado = new BigDecimal[] {BigDecimal.TEN, BigDecimal.ONE};
     BigDecimal[] idsProductoResultado =
             pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedido);
@@ -427,11 +427,8 @@ class PedidoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.TEN);
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
-    List<RenglonPedido> renglonesAnterioresPedido = new ArrayList<>();
-    RenglonPedido renglonAnteriorPedido = new RenglonPedido();
-    renglonAnteriorPedido.setIdProductoItem(5L);
-    renglonAnteriorPedido.setCantidad(BigDecimal.ONE);
-    renglonesAnterioresPedido.add(renglonAnteriorPedido);
+    List<CantidadProductoDTO> renglonesAnterioresPedido = new ArrayList<>();
+    renglonesAnterioresPedido.add(CantidadProductoDTO.builder().idProductoItem(5L).cantidad(BigDecimal.ONE).build());
     pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido);
     verify(productoService).quitarCantidadReservada(5L, BigDecimal.ONE);
     verify(productoService).agregarCantidadReservada(1L, BigDecimal.TEN);
@@ -441,11 +438,8 @@ class PedidoServiceImplTest {
   void shouldThrowsServiceExceptionActualizarCantidadReservadaDeProductosPorModificacion() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CANCELADO);
-    List<RenglonPedido> renglonesAnterioresPedido = new ArrayList<>();
-    RenglonPedido renglonAnteriorPedido = new RenglonPedido();
-    renglonAnteriorPedido.setIdProductoItem(5L);
-    renglonAnteriorPedido.setCantidad(BigDecimal.ONE);
-    renglonesAnterioresPedido.add(renglonAnteriorPedido);
+    List<CantidadProductoDTO> renglonesAnterioresPedido = new ArrayList<>();
+    renglonesAnterioresPedido.add(CantidadProductoDTO.builder().idProductoItem(5L).cantidad(BigDecimal.ONE).build());
     assertThrows(
             ServiceException.class,
             () -> pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido));
@@ -474,9 +468,16 @@ class PedidoServiceImplTest {
     renglonPedido2.setCantidad(BigDecimal.ONE);
     renglones.add(renglonPedido1);
     renglones.add(renglonPedido2);
-    long[] idsProductos = {1L, 3L};
-    BigDecimal[] cantidades = {BigDecimal.ONE, BigDecimal.TEN};
-    pedidoService.actualizarRenglonesPedido(renglones, idsProductos, cantidades);
+    List<CantidadProductoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    CantidadProductoDTO cantidadProductoDTO = new CantidadProductoDTO();
+    cantidadProductoDTO.setIdProductoItem(1L);
+    cantidadProductoDTO.setCantidad(BigDecimal.ONE);
+    nuevosRenglonesPedido.add(cantidadProductoDTO);
+    CantidadProductoDTO nuevoRenglonPedido2DTO = new CantidadProductoDTO();
+    nuevoRenglonPedido2DTO.setIdProductoItem(3L);
+    nuevoRenglonPedido2DTO.setCantidad(BigDecimal.TEN);
+    nuevosRenglonesPedido.add(nuevoRenglonPedido2DTO);
+    pedidoService.actualizarRenglonesPedido(renglones, nuevosRenglonesPedido);
     assertEquals(1L, renglones.get(0).getIdProductoItem());
     assertEquals(3L, renglones.get(1).getIdProductoItem());
     assertEquals(BigDecimal.ONE, renglones.get(0).getCantidad());

@@ -503,7 +503,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void devolverStockPedido(
-      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen) {
+          Pedido pedido, TipoDeOperacion tipoDeOperacion, List<CantidadProductoDTO> renglonesAnteriores, Long idSucursalOrigen) {
     if (tipoDeOperacion == TipoDeOperacion.ACTUALIZACION
         && pedido.getEstado() == EstadoPedido.ABIERTO
         && renglonesAnteriores != null

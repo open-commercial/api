@@ -891,14 +891,14 @@ class AppIntegrationTest {
     Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("13.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("12.000000000000000"), productoDos.getCantidadTotalEnSucursales());
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    List<CantidadProductoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder()
+        CantidadProductoDTO.builder()
             .idProductoItem(1L)
             .cantidad(new BigDecimal("5.000000000000000"))
             .build());
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder()
+        CantidadProductoDTO.builder()
             .idProductoItem(2L)
             .cantidad(new BigDecimal("2.000000000000000"))
             .build());
@@ -967,6 +967,10 @@ class AppIntegrationTest {
   @Order(9)
   void testEscenarioModificacionPedido() {
     this.iniciarSesionComoAdministrador();
+
+    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
+
+
     BusquedaPedidoCriteria criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
     HttpEntity<BusquedaPedidoCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
@@ -987,17 +991,17 @@ class AppIntegrationTest {
                 sic.model.RenglonPedido[].class));
     assertNotNull(renglonesPedidos);
     assertEquals(2, renglonesPedidos.size());
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    List<CantidadProductoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidos.forEach(
         renglonPedido ->
             renglonesPedidoDTO.add(
-                NuevoRenglonPedidoDTO.builder()
+                CantidadProductoDTO.builder()
                     .idProductoItem(renglonPedido.getIdProductoItem())
                     .cantidad(renglonPedido.getCantidad())
                     .build()));
     renglonesPedidoDTO.get(1).setCantidad(new BigDecimal("3"));
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
+        CantidadProductoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
     PedidoDTO pedidoDTO =
         PedidoDTO.builder()
             .idPedido(pedidosRecuperados.get(0).getIdPedido())
@@ -1009,7 +1013,7 @@ class AppIntegrationTest {
             .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
             .build();
     restTemplate.put(apiPrefix + "/pedidos", pedidoDTO);
-    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
+    productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("9.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("3.000000000000000"), productoDos.getCantidadReservada());
     criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();

@@ -391,7 +391,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen, List<Recibo> recibos) {
+  public void actualizar(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores, Long idSucursalOrigen, List<Recibo> recibos) {
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
@@ -636,26 +636,26 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, long[] idProductoItem, BigDecimal[] cantidad) {
+  public List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, List<CantidadProductoDTO> nuevosRenglones) {
     List<RenglonPedido> renglonesParaAgregar = new ArrayList<>();
     List<Long> idsProductos = new ArrayList<>();
-    for (long id : idProductoItem) {
-      idsProductos.add(id);
-    }
+    nuevosRenglones.forEach(renglon -> idsProductos.add(renglon.getIdProductoItem()));
     renglonesDelPedido.forEach(renglonPedido -> {// marca para eliminar los renglones seteando la cantidad a cero
       if (!idsProductos.contains(renglonPedido.getIdProductoItem())){
         renglonPedido.setIdProductoItem(0);
-      } else {
-        for (int i=0; i < idProductoItem.length; i++) {
-          if (renglonPedido.getIdProductoItem() == idProductoItem[i]) {
-            this.actualizarCantidadRenglonPedido(renglonPedido, cantidad[i]); //modifica la cantidad del producto
-          } else {
-            renglonesParaAgregar.add(this.calcularRenglonPedido(idProductoItem[i], cantidad[i])); // Agrega a la colección auxiliar
-          }
-        }
-      }
-    });
+      }});
     renglonesDelPedido.removeIf(renglonPedido -> renglonPedido.getIdProductoItem() == 0); //elimina los renglones
+    nuevosRenglones.forEach(nuevoRenglon -> {
+      renglonesDelPedido.stream().filter(renglonPedido -> nuevoRenglon.getIdProductoItem() == renglonPedido.getIdProductoItem())
+              .forEach(renglonPedido -> {
+                this.actualizarCantidadRenglonPedido(renglonPedido, nuevoRenglon.getCantidad());
+                nuevoRenglon.setIdProductoItem(0L);
+              });
+    });
+    nuevosRenglones.removeIf(nuevoRenglon -> nuevoRenglon.getIdProductoItem() == 0);
+    nuevosRenglones.forEach(nuevoRenglon -> {
+      renglonesParaAgregar.add(this.calcularRenglonPedido(nuevoRenglon.getIdProductoItem(), nuevoRenglon.getCantidad()));
+    });
     renglonesDelPedido.addAll(renglonesParaAgregar);
     return renglonesDelPedido;
   }
@@ -738,7 +738,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+  public long[] getArrayDeIdProducto(List<CantidadProductoDTO> nuevosRenglones) {
     long[] idProductoItem = new long[nuevosRenglones.size()];
     for (int i = 0; i < nuevosRenglones.size(); ++i) {
       idProductoItem[i] = nuevosRenglones.get(i).getIdProductoItem();
@@ -747,7 +747,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+  public BigDecimal[] getArrayDeCantidadesProducto(List<CantidadProductoDTO> nuevosRenglones) {
     BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
     for (int i = 0; i < nuevosRenglones.size(); ++i) {
       cantidades[i] = nuevosRenglones.get(i).getCantidad();
@@ -768,7 +768,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<RenglonPedido> renglonesAnteriores) {
+  public void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores) {
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       renglonesAnteriores.forEach(renglonPedido -> productoService.quitarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
       pedido.getRenglones().forEach(renglonPedido ->

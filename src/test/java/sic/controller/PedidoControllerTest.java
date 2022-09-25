@@ -6,7 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.*;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.CantidadProductoDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.service.impl.PedidoServiceImpl;
 
@@ -34,11 +34,11 @@ class PedidoControllerTest {
 
   @Test
   void shouldCalcularRenglonesPedido() {
-    List<NuevoRenglonPedidoDTO> nuevoRenglonPedido = new ArrayList<>();
+    List<CantidadProductoDTO> nuevoRenglonPedido = new ArrayList<>();
     nuevoRenglonPedido.add(
-        NuevoRenglonPedidoDTO.builder().idProductoItem(1L).cantidad(BigDecimal.TEN).build());
+        CantidadProductoDTO.builder().idProductoItem(1L).cantidad(BigDecimal.TEN).build());
     nuevoRenglonPedido.add(
-        NuevoRenglonPedidoDTO.builder().idProductoItem(2L).cantidad(BigDecimal.ONE).build());
+        CantidadProductoDTO.builder().idProductoItem(2L).cantidad(BigDecimal.ONE).build());
     List<RenglonPedido> renglones = new ArrayList<>();
     long[] idsProducto = {1L, 2L};
     BigDecimal[] cantidades = {BigDecimal.TEN, BigDecimal.ONE};

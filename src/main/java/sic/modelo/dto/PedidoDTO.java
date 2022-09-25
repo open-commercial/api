@@ -20,7 +20,7 @@ public class PedidoDTO {
   private String observaciones;
   private Long idCliente;
   private TipoDeEnvio tipoDeEnvio;
-  private List<NuevoRenglonPedidoDTO> renglones;
+  private List<CantidadProductoDTO> renglones;
   private Long[] idsFormaDePago;
   private BigDecimal[] montos;
   private BigDecimal recargoPorcentaje;
