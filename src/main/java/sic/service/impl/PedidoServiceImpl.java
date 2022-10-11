@@ -18,10 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.history.Revision;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -637,8 +635,8 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, List<CantidadProductoDTO> nuevosRenglones) {
-    List<RenglonPedido> renglonesParaAgregar = new ArrayList<>();
-    List<Long> idsProductos = new ArrayList<>();
+    var renglonesParaAgregar = new ArrayList<RenglonPedido>();
+    var idsProductos = new ArrayList<Long>();
     nuevosRenglones.forEach(renglon -> idsProductos.add(renglon.getIdProductoItem()));
     renglonesDelPedido.forEach(renglonPedido -> {// marca para eliminar los renglones seteando la cantidad a cero
       if (!idsProductos.contains(renglonPedido.getIdProductoItem())){
@@ -778,4 +776,39 @@ public class PedidoServiceImpl implements IPedidoService {
               messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada", null, Locale.getDefault()));
     }
   }
+
+  @Override
+  public Page<ChangeDTO> getChanges(long idPedido, Pageable page) {
+    var revisions = pedidoRepository.findRevisions(idPedido, page);
+    var changes = new ArrayList<ChangeDTO>();
+            revisions.forEach(revision -> {
+              var pedido  = revision.getEntity();
+              changes.add(ChangeDTO.builder()
+                      .idUSuario(pedido.getUsuario().getIdUsuario())
+                      .nombreUsuario(pedido.getNombreUsuario())
+                      .fecha(revision.getRevisionInstant().isPresent() ? revision.getRevisionInstant().get() : null)
+                      .revisionNumber(revision.getRequiredRevisionNumber())
+                      .build());
+    });
+    return new PageImpl<>(changes, page, changes.size());
+  }
+
+  @Override
+  public Pedido getRevisionPedido(long idPedido) {
+
+  }
+
+  /*
+  /cajas/revisions/{idCaja}
+/cajas/{idCaja}/revision/{revisionNumber}
+
+/pedidos/{id}/revision/{revisionNumber}/reporte
+
+/pedidos/{id}/reporte/{revicionNumber}
+
+ /revisions/pedidos/{idPedido}
+
+ /revisions/pedidos/{idPedido}/{revisionNumber}/
+
+   */
 }

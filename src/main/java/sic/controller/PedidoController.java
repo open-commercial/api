@@ -140,15 +140,15 @@ public class PedidoController {
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
-    @GetMapping("/pedidos/{idPedido}/reporte")
-    public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);        
-        headers.add("content-disposition", "inline; filename=Pedido.pdf");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = pedidoService.getReportePedido(idPedido);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-    }
+  @GetMapping("/pedidos/{idPedido}/reporte")
+  public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_PDF);
+      headers.add("content-disposition", "inline; filename=Pedido.pdf");
+      headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+      byte[] reportePDF = pedidoService.getReportePedido(idPedido);
+      return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
 
   @PostMapping("/pedidos/calculo-pedido")
   public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {

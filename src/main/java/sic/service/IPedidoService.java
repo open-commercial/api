@@ -5,9 +5,11 @@ import java.util.List;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.CantidadProductoDTO;
+import sic.modelo.dto.ChangeDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 
@@ -60,5 +62,9 @@ public interface IPedidoService {
   void actualizarCantidadReservadaDeProductosPorCambioDeEstado(Pedido pedido);
 
   void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores);
+
+  Page<ChangeDTO> getChanges(long idPedido, Pageable page);
+
+  Pedido getRevisionPedido(long idPedido);
 
 }
