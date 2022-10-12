@@ -7,7 +7,7 @@ import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.CantidadProductoDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 
@@ -19,7 +19,7 @@ public interface IPedidoService {
 
   Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal);
 
-  void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursal, List<Recibo> recibos);
+  void actualizar(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores, Long idSucursal, List<Recibo> recibos);
 
   void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
@@ -49,11 +49,15 @@ public interface IPedidoService {
 
   Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
 
-  long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
+  long[] getArrayDeIdProducto(List<CantidadProductoDTO> nuevosRenglones);
 
-  BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones);
+  BigDecimal[] getArrayDeCantidadesProducto(List<CantidadProductoDTO> nuevosRenglones);
 
   void actualizarCantidadReservadaDeProductosPorCambioDeEstado(Pedido pedido);
 
-  void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<RenglonPedido> renglonesAnteriores);
+  void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores);
+
+  List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, List<CantidadProductoDTO> renglonesParaActualizar);
+
+  RenglonPedido actualizarCantidadRenglonPedido(RenglonPedido renglonPedido, BigDecimal cantidadNueva);
 }

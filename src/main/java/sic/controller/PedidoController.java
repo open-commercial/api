@@ -17,7 +17,7 @@ import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 import sic.modelo.dto.PedidoDTO;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.CantidadProductoDTO;
 import sic.service.*;
 
 @RestController
@@ -62,7 +62,7 @@ public class PedidoController {
   @PostMapping("/pedidos/renglones/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonPedido> calcularRenglonesPedido(
-      @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+      @RequestBody List<CantidadProductoDTO> nuevosRenglonesPedidoDTO) {
     return pedidoService.calcularRenglonesPedido(
         pedidoService.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
         pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
@@ -79,14 +79,10 @@ public class PedidoController {
       pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
     if (pedidoDTO.getDescuentoPorcentaje() != null)
       pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
-    List<RenglonPedido> renglonesAnteriores = new ArrayList<>(pedido.getRenglones());
-    pedido.getRenglones().clear();
-    pedido
-        .getRenglones()
-        .addAll(
-            pedidoService.calcularRenglonesPedido(
-                pedidoService.getArrayDeIdProducto(pedidoDTO.getRenglones()),
-                pedidoService.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
+    List<CantidadProductoDTO> renglonesAnteriores = new ArrayList<>();
+    pedido.getRenglones().forEach(renglonPedido -> renglonesAnteriores.add(CantidadProductoDTO.builder()
+            .idProductoItem(renglonPedido.getIdProductoItem()).cantidad(renglonPedido.getCantidad()).build()));
+    pedido.setRenglones(this.pedidoService.actualizarRenglonesPedido(pedido.getRenglones(), pedidoDTO.getRenglones()));
     pedidoService.actualizar(
         pedido,
         renglonesAnteriores,

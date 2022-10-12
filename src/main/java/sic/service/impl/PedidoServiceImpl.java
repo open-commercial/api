@@ -391,7 +391,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  public void actualizar(Pedido pedido, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen, List<Recibo> recibos) {
+  public void actualizar(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores, Long idSucursalOrigen, List<Recibo> recibos) {
     //de los renglones, sacar ids y cantidades, array de nuevosResultadosPedido
     BigDecimal[] importesDeRenglones = new BigDecimal[pedido.getRenglones().size()];
     int i = 0;
@@ -676,7 +676,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public long[] getArrayDeIdProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+  public long[] getArrayDeIdProducto(List<CantidadProductoDTO> nuevosRenglones) {
     long[] idProductoItem = new long[nuevosRenglones.size()];
     for (int i = 0; i < nuevosRenglones.size(); ++i) {
       idProductoItem[i] = nuevosRenglones.get(i).getIdProductoItem();
@@ -685,7 +685,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public BigDecimal[] getArrayDeCantidadesProducto(List<NuevoRenglonPedidoDTO> nuevosRenglones) {
+  public BigDecimal[] getArrayDeCantidadesProducto(List<CantidadProductoDTO> nuevosRenglones) {
     BigDecimal[] cantidades = new BigDecimal[nuevosRenglones.size()];
     for (int i = 0; i < nuevosRenglones.size(); ++i) {
       cantidades[i] = nuevosRenglones.get(i).getCantidad();
@@ -706,7 +706,7 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<RenglonPedido> renglonesAnteriores) {
+  public void actualizarCantidadReservadaDeProductosPorModificacion(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores) {
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       renglonesAnteriores.forEach(renglonPedido -> productoService.quitarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
       pedido.getRenglones().forEach(renglonPedido ->
@@ -715,5 +715,67 @@ public class PedidoServiceImpl implements IPedidoService {
       throw new ServiceException(
               messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada", null, Locale.getDefault()));
     }
+  }
+
+  @Override
+  public List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, List<CantidadProductoDTO> nuevosRenglones) {
+    List<RenglonPedido> renglonesParaAgregar = new ArrayList<>();
+    List<Long> idsProductos = new ArrayList<>();
+    nuevosRenglones.forEach(renglon -> idsProductos.add(renglon.getIdProductoItem()));
+    renglonesDelPedido.forEach(renglonPedido -> {// marca para eliminar los renglones seteando la cantidad a cero
+      if (!idsProductos.contains(renglonPedido.getIdProductoItem())){
+        renglonPedido.setIdProductoItem(0);
+      }});
+    renglonesDelPedido.removeIf(renglonPedido -> renglonPedido.getIdProductoItem() == 0); //elimina los renglones
+    nuevosRenglones.forEach(nuevoRenglon -> {
+      renglonesDelPedido.stream().filter(renglonPedido -> nuevoRenglon.getIdProductoItem() == renglonPedido.getIdProductoItem())
+              .forEach(renglonPedido -> {
+                this.actualizarCantidadRenglonPedido(renglonPedido, nuevoRenglon.getCantidad());
+                nuevoRenglon.setIdProductoItem(0L);
+              });
+    });
+    nuevosRenglones.removeIf(nuevoRenglon -> nuevoRenglon.getIdProductoItem() == 0);
+    nuevosRenglones.forEach(nuevoRenglon -> {
+      renglonesParaAgregar.add(this.calcularRenglonPedido(nuevoRenglon.getIdProductoItem(), nuevoRenglon.getCantidad()));
+    });
+    renglonesDelPedido.addAll(renglonesParaAgregar);
+    return renglonesDelPedido;
+  }
+
+  @Override
+  public RenglonPedido actualizarCantidadRenglonPedido(RenglonPedido renglonPedido, BigDecimal cantidad) {
+    if (cantidad.compareTo(BigDecimal.ZERO) <= 0) {
+      throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_producto_cantidad_igual_menor_cero", null, Locale.getDefault()));
+    }
+    Producto producto = productoService.getProductoNoEliminadoPorId(renglonPedido.getIdProductoItem());
+    renglonPedido.setCantidad(cantidad);
+    renglonPedido.setPrecioUnitario(producto.getPrecioProducto().getPrecioLista());
+    if (producto.getPrecioProducto().isOferta()
+            && renglonPedido.getCantidad().compareTo(producto.getCantidadProducto().getCantMinima()) >= 0
+            && producto.getPrecioProducto().getPorcentajeBonificacionOferta() != null) {
+      renglonPedido.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionOferta());
+      renglonPedido.setBonificacionNeta(
+              CalculosComprobante.calcularProporcion(
+                      renglonPedido.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionOferta()));
+    } else if (renglonPedido.getCantidad().compareTo(producto.getCantidadProducto().getCantMinima()) >= 0) {
+      renglonPedido.setBonificacionPorcentaje(producto.getPrecioProducto().getPorcentajeBonificacionPrecio());
+      renglonPedido.setBonificacionNeta(
+              CalculosComprobante.calcularProporcion(
+                      renglonPedido.getPrecioUnitario(), producto.getPrecioProducto().getPorcentajeBonificacionPrecio()));
+    } else {
+      renglonPedido.setBonificacionPorcentaje(BigDecimal.ZERO);
+      renglonPedido.setBonificacionNeta(BigDecimal.ZERO);
+    }
+    renglonPedido.setImporteAnterior(
+            CalculosComprobante.calcularImporte(
+                    renglonPedido.getCantidad(), producto.getPrecioProducto().getPrecioLista(), BigDecimal.ZERO));
+    renglonPedido.setImporte(
+            CalculosComprobante.calcularImporte(
+                    renglonPedido.getCantidad(),
+                    producto.getPrecioProducto().getPrecioLista(),
+                    renglonPedido.getBonificacionNeta()));
+    return renglonPedido;
   }
 }

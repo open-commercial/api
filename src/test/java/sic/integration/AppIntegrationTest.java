@@ -45,8 +45,6 @@ import sic.modelo.RenglonFactura;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
@@ -850,14 +848,14 @@ class AppIntegrationTest {
     Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("13.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("12.000000000000000"), productoDos.getCantidadTotalEnSucursales());
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    List<CantidadProductoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder()
+        CantidadProductoDTO.builder()
             .idProductoItem(1L)
             .cantidad(new BigDecimal("5.000000000000000"))
             .build());
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder()
+        CantidadProductoDTO.builder()
             .idProductoItem(2L)
             .cantidad(new BigDecimal("2.000000000000000"))
             .build());
@@ -946,17 +944,17 @@ class AppIntegrationTest {
                 sic.model.RenglonPedido[].class));
     assertNotNull(renglonesPedidos);
     assertEquals(2, renglonesPedidos.size());
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    List<CantidadProductoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidos.forEach(
         renglonPedido ->
             renglonesPedidoDTO.add(
-                NuevoRenglonPedidoDTO.builder()
+                CantidadProductoDTO.builder()
                     .idProductoItem(renglonPedido.getIdProductoItem())
                     .cantidad(renglonPedido.getCantidad())
                     .build()));
     renglonesPedidoDTO.get(1).setCantidad(new BigDecimal("3"));
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
+        CantidadProductoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
     PedidoDTO pedidoDTO =
         PedidoDTO.builder()
             .idPedido(pedidosRecuperados.get(0).getIdPedido())

@@ -22,10 +22,7 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.NuevoProductoDTO;
-import sic.modelo.dto.ProductoFaltanteDTO;
-import sic.modelo.dto.ProductosParaActualizarDTO;
-import sic.modelo.dto.ProductosParaVerificarStockDTO;
+import sic.modelo.dto.*;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.ProductoFavoritoRepository;
@@ -635,10 +632,8 @@ class ProductoServiceImplTest {
     Sucursal sucursal = new Sucursal();
     sucursal.setIdSucursal(1L);
     pedido.setSucursal(sucursal);
-    List<RenglonPedido> renglonesAnteriores = new ArrayList<>();
-    RenglonPedido renglonPedidoAnterior = new RenglonPedido();
-    renglonPedidoAnterior.setIdProductoItem(1L);
-    renglonesAnteriores.add(renglonPedido);
+    List<CantidadProductoDTO> renglonesAnteriores = new ArrayList<>();
+    renglonesAnteriores.add(CantidadProductoDTO.builder().idProductoItem(1L).build());
     productoService.devolverStockPedido(
         pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, 1L);
     verify(messageSource)
