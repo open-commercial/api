@@ -146,6 +146,8 @@ public class ClienteController {
         || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
         || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
       clientePorActualizar.setPuedeComprarAPlazo(clienteDTO.isPuedeComprarAPlazo());
+    } else {
+      clientePorActualizar.setPuedeComprarAPlazo(clientePersistido.isPuedeComprarAPlazo());
     }
     Ubicacion ubicacion;
     if (clienteDTO.getUbicacionFacturacion() != null) {
