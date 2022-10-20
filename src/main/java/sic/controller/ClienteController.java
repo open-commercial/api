@@ -90,10 +90,12 @@ public class ClienteController {
         cliente.setCredencial(usuarioCredencial);
       }
     }
-    if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+    if (nuevoCliente.getPuedeComprarAPlazo() != null && (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
         || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
-        || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
-      cliente.setPuedeComprarAPlazo(nuevoCliente.isPuedeComprarAPlazo());
+        || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
+      cliente.setPuedeComprarAPlazo(nuevoCliente.getPuedeComprarAPlazo());
+    } else {
+      cliente.setPuedeComprarAPlazo(false);
     }
     cliente.setUbicacionFacturacion(null);
     if (nuevoCliente.getUbicacionFacturacion() != null) {
@@ -142,10 +144,10 @@ public class ClienteController {
     } else {
       clientePorActualizar.setCredencial(clientePersistido.getCredencial());
     }
-    if (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
-        || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
-        || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)) {
-      clientePorActualizar.setPuedeComprarAPlazo(clienteDTO.isPuedeComprarAPlazo());
+    if (clienteDTO.getPuedeComprarAPlazo() != null && (usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+            || usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)
+            || usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR))) {
+      clientePorActualizar.setPuedeComprarAPlazo(clienteDTO.getPuedeComprarAPlazo());
     } else {
       clientePorActualizar.setPuedeComprarAPlazo(clientePersistido.isPuedeComprarAPlazo());
     }
