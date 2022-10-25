@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -179,13 +180,16 @@ public class SucursalServiceImpl implements ISucursalService {
   @Transactional
   public void actualizar(Sucursal sucursalParaActualizar, Sucursal sucursalPersistida, byte[] imagen) {
     customValidator.validar(sucursalParaActualizar);
-    if (imagen != null)  {
-      sucursalParaActualizar.setLogo(this.guardarLogo(sucursalPersistida.getIdSucursal(), imagen));
-    } else if (sucursalPersistida.getLogo() != null
-            && !sucursalPersistida.getLogo().isEmpty()
-            && (sucursalParaActualizar.getLogo() == null || sucursalParaActualizar.getLogo().isEmpty())) {
-      photoUploader.borrarImagen(
-              Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
+    if (imagen != null) {
+      if (imagen.length == 0) {
+        if (sucursalPersistida.getLogo() != null
+                && !sucursalPersistida.getLogo().isEmpty()) {
+          photoUploader.borrarImagen(
+                  Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
+        }
+      } else if (!Arrays.equals(sucursalPersistida.getLogo().getBytes(), imagen)) {
+        sucursalParaActualizar.setLogo(this.guardarLogo(sucursalPersistida.getIdSucursal(), imagen));
+      }
     }
     sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);

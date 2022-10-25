@@ -454,8 +454,7 @@ public class ProductoServiceImpl implements IProductoService {
     customValidator.validar(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
-            && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())) {
+            && (imagen != null && imagen.length == 0)) {
       photoUploader.borrarImagen(
               Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     }
@@ -475,7 +474,7 @@ public class ProductoServiceImpl implements IProductoService {
             "mensaje_producto_actualizado",
             new Object[] {productoPorActualizar},
             Locale.getDefault()));
-    if (imagen != null) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
+    if (imagen != null && imagen.length > 0) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
   }
 
   private void calcularPrecioBonificado(Producto producto) {
