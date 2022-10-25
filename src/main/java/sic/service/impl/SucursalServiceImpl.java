@@ -186,8 +186,9 @@ public class SucursalServiceImpl implements ISucursalService {
                 && !sucursalPersistida.getLogo().isEmpty()) {
           photoUploader.borrarImagen(
                   Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
+          sucursalParaActualizar.setLogo(null);
         }
-      } else if (!Arrays.equals(sucursalPersistida.getLogo().getBytes(), imagen)) {
+      } else {
         sucursalParaActualizar.setLogo(this.guardarLogo(sucursalPersistida.getIdSucursal(), imagen));
       }
     }
