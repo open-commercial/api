@@ -457,6 +457,8 @@ public class ProductoServiceImpl implements IProductoService {
             && (imagen != null && imagen.length == 0)) {
       photoUploader.borrarImagen(
               Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+    } else {
+      productoPorActualizar.setUrlImagen(productoPersistido.getUrlImagen());
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
