@@ -154,4 +154,9 @@ public class PedidoController {
   public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
     return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
   }
+
+  @GetMapping("/pedidos/{idPedido}/changes")
+  public String getSnapshots(@PathVariable long idPedido) {
+    return pedidoService.getPedidoChanges(idPedido);
+  }
 }

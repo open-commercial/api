@@ -60,4 +60,6 @@ public interface IPedidoService {
   List<RenglonPedido> actualizarRenglonesPedido(List<RenglonPedido> renglonesDelPedido, List<CantidadProductoDTO> renglonesParaActualizar);
 
   RenglonPedido actualizarCantidadRenglonPedido(RenglonPedido renglonPedido, BigDecimal cantidadNueva);
+
+  String getPedidoChanges(long idPedido);
 }

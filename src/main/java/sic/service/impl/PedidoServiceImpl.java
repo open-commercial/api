@@ -13,6 +13,9 @@ import javax.swing.ImageIcon;
 
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import org.javers.core.Changes;
+import org.javers.core.Javers;
+import org.javers.repository.jql.QueryBuilder;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +52,8 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IEmailService emailService;
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
+
+  private final Javers javers;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -66,6 +71,7 @@ public class PedidoServiceImpl implements IPedidoService {
     IEmailService emailService,
     IReciboService reciboService,
     ICuentaCorrienteService cuentaCorrienteService,
+    Javers javers,
     ModelMapper modelMapper,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -77,6 +83,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.emailService = emailService;
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
+    this.javers = javers;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -777,5 +784,12 @@ public class PedidoServiceImpl implements IPedidoService {
                     producto.getPrecioProducto().getPrecioLista(),
                     renglonPedido.getBonificacionNeta()));
     return renglonPedido;
+  }
+
+  @Override
+  public String getPedidoChanges(long idPedido) {
+    QueryBuilder queryBuilder = QueryBuilder.byInstance(this.getPedidoNoEliminadoPorId(idPedido));
+    Changes changes = javers.findChanges(queryBuilder.build());
+    return javers.getJsonConverter().toJson(changes);
   }
 }

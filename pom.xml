@@ -172,6 +172,11 @@
             <artifactId>gson</artifactId>
             <version>${google-gson.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.javers</groupId>
+            <artifactId>javers-spring-boot-starter-sql</artifactId>
+            <version>6.7.1</version>
+        </dependency>
     </dependencies>
 
     <build>
