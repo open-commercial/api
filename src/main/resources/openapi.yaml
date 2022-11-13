@@ -1,0 +1,118 @@
+openapi: 3.0.2
+info:
+  title: Open-Comercial SIC API
+  description: "SIC API"
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: petros.stergioulas94@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1-SNAPSHOT
+externalDocs:
+  description: Find out more about Open-Comercial
+  url: <URL>
+servers:
+- url: <URL>
+tags:
+- name: usuarios
+  description: Operations about user
+  externalDocs:
+    description: Find out more about  Open-Comercial
+    url: http://swagger.io
+paths:
+  /usuarios:
+    post:
+      parameters:
+        - in: header
+          name: authorizationHeader
+          required: true
+          schema:
+            type: string
+      tags:
+      - usuarios
+      summary: Create user
+      description: Create user functionality
+      operationId: guardar
+      requestBody:
+        description: Created user object
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UsuarioDTO'
+        required: true
+      responses:
+        default:
+          description: successful operation
+          content: {}
+      x-codegen-request-body-name: body
+  /usuarios/{idUsuario}:
+    get:
+      tags:
+      - usuarios
+      summary: Get user by ID
+      operationId: getUsuarioPorId
+      parameters:
+      - name: idUsuario
+        in: path
+        description: 'The name that needs to be fetched. Use user1 for testing. '
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioDTO'
+        404:
+          description: User not found
+          content: {}
+    delete:
+      tags:
+      - usuarios
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: eliminar
+      parameters:
+      - name: idUsuario
+        in: path
+        description: The name that needs to be deleted
+        required: true
+        schema:
+          type: string
+      responses:
+        201:
+          description: operation successful
+          content: {}
+        400:
+          description: Invalid username supplied
+          content: {}
+        404:
+          description: User not found
+          content: {}
+components:
+  schemas:
+    UsuarioDTO:
+      type: object
+      properties:
+        idUsuario:
+          type: integer
+          format: int64
+        username:
+          type: string
+        password:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+        apellido:
+          type: string
+        phone:
+          type: string
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
