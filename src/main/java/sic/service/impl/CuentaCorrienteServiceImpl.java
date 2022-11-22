@@ -489,8 +489,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
-    ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
-    InputStream isFileReport =
+    var classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
+    var isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
@@ -606,7 +606,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     List<CuentaCorrienteCliente> cuentaCorrienteClientes = this.buscarCuentasCorrienteClienteParaReporte(criteria, idUsuarioLoggedIn);
     JasperReport jasperDesign;
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/ListaClientes.jrxml");
+      var classLoader = PedidoServiceImpl.class.getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaClientes.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
               "mensaje_error_reporte", null, Locale.getDefault()), ex);
