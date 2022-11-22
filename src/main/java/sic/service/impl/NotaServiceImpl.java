@@ -13,6 +13,7 @@ import javax.swing.ImageIcon;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -1140,7 +1141,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public byte[] getReporteNota(Nota nota) {
-    ClassLoader classLoader = NotaServiceImpl.class.getClassLoader();
+    var classLoader = this.getClass().getClassLoader();
     InputStream isFileReport;
     JRBeanCollectionDataSource ds;
     Map<String, Object> params = new HashMap<>();

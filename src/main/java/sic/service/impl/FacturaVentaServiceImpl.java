@@ -497,7 +497,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     JasperReport jasperDesign;
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/FacturaVenta.jrxml");
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
               "mensaje_error_reporte", null, Locale.getDefault()), ex);
