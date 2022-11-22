@@ -606,7 +606,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     List<CuentaCorrienteCliente> cuentaCorrienteClientes = this.buscarCuentasCorrienteClienteParaReporte(criteria, idUsuarioLoggedIn);
     JasperReport jasperDesign;
     try {
-      var classLoader = PedidoServiceImpl.class.getClassLoader();
+      var classLoader = this.getClass().getClassLoader();
       var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaClientes.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
