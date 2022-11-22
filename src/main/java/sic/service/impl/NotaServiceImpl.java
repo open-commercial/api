@@ -1141,7 +1141,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public byte[] getReporteNota(Nota nota) {
-    var classLoader = NotaServiceImpl.class.getClassLoader();
+    var classLoader = this.getClass().getClassLoader();
     InputStream isFileReport;
     JRBeanCollectionDataSource ds;
     Map<String, Object> params = new HashMap<>();

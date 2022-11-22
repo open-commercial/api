@@ -489,7 +489,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
-    var classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
+    var classLoader = this.getClass().getClassLoader();
     var isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
     JRBeanCollectionDataSource ds =

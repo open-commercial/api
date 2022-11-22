@@ -413,7 +413,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
           renglones.put(renglonTraspaso.getIdProducto(), renglonReporteTraspasoDTO);
         }
       }));
-    var classLoader = TraspasoServiceImpl.class.getClassLoader();
+    var classLoader = this.getClass().getClassLoader();
     var isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones.values());

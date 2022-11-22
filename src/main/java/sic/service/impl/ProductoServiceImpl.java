@@ -1158,7 +1158,7 @@ public class ProductoServiceImpl implements IProductoService {
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
     JasperReport jasperDesign;
     try {
-      var classLoader = PedidoServiceImpl.class.getClassLoader();
+      var classLoader = this.getClass().getClassLoader();
       var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {

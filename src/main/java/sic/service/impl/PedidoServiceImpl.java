@@ -563,7 +563,7 @@ public class PedidoServiceImpl implements IPedidoService {
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
     JasperReport jasperDesign;
     try {
-      var classLoader = PedidoServiceImpl.class.getClassLoader();
+      var classLoader = this.getClass().getClassLoader();
       var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
