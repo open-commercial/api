@@ -327,12 +327,12 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
                       messageSource.getMessage(
                               "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
     }
-    for (FacturaVenta f : facturas) {
-      FacturaVenta facturaGuardada =
-              facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
+    facturas.forEach(f -> {
+      var facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
       this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
       facturasProcesadas.add(facturaGuardada);
-    }
+      logger.info("La Factura {} se guardó correctamente.", facturaGuardada);
+    });
     List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
     pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
     List<TipoDeComprobante> tiposAutorizables =
