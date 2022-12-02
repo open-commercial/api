@@ -88,7 +88,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   public FacturaVenta construirFacturaVenta(
-      NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario) {
+      NuevaFacturaVentaDTO nuevaFacturaVentaDTO, long idPedido, Long idUsuario) {
     FacturaVenta fv = new FacturaVenta();
     Sucursal sucursal;
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
@@ -178,27 +178,19 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         || rolesDeUsuario.contains(Rol.VENDEDOR)) {
       Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
       Cliente cliente = clienteService.getClienteNoEliminadoPorId(idCliente);
+      TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
       if (CategoriaIVA.discriminaIVA(sucursal.getCategoriaIVA())) {
         if (CategoriaIVA.discriminaIVA(cliente.getCategoriaIVA())) {
-          TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
           tiposPermitidos[0] = TipoDeComprobante.FACTURA_A;
-          tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-          tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
-          return tiposPermitidos;
         } else {
-          TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
           tiposPermitidos[0] = TipoDeComprobante.FACTURA_B;
-          tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-          tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
-          return tiposPermitidos;
         }
       } else {
-        TipoDeComprobante[] tiposPermitidos = new TipoDeComprobante[3];
         tiposPermitidos[0] = TipoDeComprobante.FACTURA_C;
-        tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
-        tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
-        return tiposPermitidos;
       }
+      tiposPermitidos[1] = TipoDeComprobante.FACTURA_X;
+      tiposPermitidos[2] = TipoDeComprobante.PRESUPUESTO;
+      return tiposPermitidos;
     } else if (rolesDeUsuario.contains(Rol.VIAJANTE) || rolesDeUsuario.contains(Rol.COMPRADOR)) {
       return new TipoDeComprobante[] {TipoDeComprobante.PEDIDO};
     }
@@ -305,51 +297,44 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   @Transactional
   public List<FacturaVenta> guardar(
-      List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos) {
+          List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos) {
     facturas.forEach(customValidator::validar);
     List<FacturaVenta> facturasProcesadas = new ArrayList<>();
-    if (idPedido != null) {
-      Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
-      facturas.forEach(f -> {
-        Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(f.getUsuario().getIdUsuario());
-        if (f.getCliente().equals(clienteDeUsuario) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
-                f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
-          throw
-                  new BusinessServiceException(
-                  messageSource.getMessage(
-                          "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
-        }
-      });
-      pedido.setEstado(EstadoPedido.CERRADO);
-      pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
-      this.calcularValoresFacturasVentaAndActualizarStock(facturas);
-      facturas.forEach(f -> f.setPedido(pedido));
-      for (FacturaVenta f : facturas) {
-        FacturaVenta facturaGuardada =
-            facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
-        facturasProcesadas.add(facturaGuardada);
-        if (recibos != null) {
-          recibos.forEach(reciboService::guardar);
-        }
+    Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+    facturas.forEach(f -> {
+      if (f.getCliente().equals(pedido.getCliente()) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
+              f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
+        throw
+                new BusinessServiceException(
+                        messageSource.getMessage(
+                                "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
       }
-      List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
-      pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
-      facturasProcesadas.forEach(f -> logger.warn("La Factura {} se guardó correctamente.", f));
-    } else {
-      this.calcularValoresFacturasVentaAndActualizarStock(facturas);
-      facturasProcesadas = new ArrayList<>();
-      for (FacturaVenta f : facturas) {
-        FacturaVenta facturaGuardada;
-        facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
-        this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
-        facturasProcesadas.add(facturaGuardada);
-        logger.warn("La Factura {} se guardó correctamente.", facturaGuardada);
-        if (recibos != null) {
-          recibos.forEach(reciboService::guardar);
-        }
-      }
+    });
+    pedido.setEstado(EstadoPedido.CERRADO);
+    pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
+    this.calcularValoresFacturasVenta(facturas);
+    facturas.forEach(f -> f.setPedido(pedido));
+    BigDecimal totalFacturas = facturas.stream()
+            .map(Factura::getTotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    if (recibos != null) {
+      recibos.forEach(reciboService::guardar);
     }
+    if (!pedido.getCliente().isPuedeComprarAPlazo()
+            && totalFacturas.compareTo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente())) > -1) {
+      throw
+              new BusinessServiceException(
+                      messageSource.getMessage(
+                              "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+    }
+    facturas.forEach(f -> {
+      var facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
+      this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
+      facturasProcesadas.add(facturaGuardada);
+      logger.info("La Factura {} se guardó correctamente.", facturaGuardada);
+    });
+    List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
+    pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
     List<TipoDeComprobante> tiposAutorizables =
         Arrays.asList(
             TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
@@ -371,7 +356,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     return facturaService.procesarFactura(factura);
   }
 
-  private void calcularValoresFacturasVentaAndActualizarStock(List<FacturaVenta> facturas) {
+  private void calcularValoresFacturasVenta(List<FacturaVenta> facturas) {
     facturas.forEach(facturaService::calcularValoresFactura);
   }
 
@@ -540,20 +525,19 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     List<TipoDeComprobante> tiposPermitidosParaEnviar =
         Arrays.asList(
             TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    if (factura instanceof FacturaVenta) {
+    if (factura instanceof FacturaVenta facturaVenta) {
       if (tiposPermitidosParaEnviar.contains(factura.getTipoComprobante())
           && factura.getCae() == 0L) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_correo_factura_sin_cae", null, Locale.getDefault()));
       }
-      FacturaVenta facturaVenta = (FacturaVenta) factura;
       if (facturaVenta.getCliente().getEmail() == null
           || facturaVenta.getCliente().getEmail().isEmpty()) {
         throw new BusinessServiceException(
             messageSource.getMessage(
                 "mensaje_correo_cliente_sin_email", null, Locale.getDefault()));
       }
-      String bodyEmail = "";
+      String bodyEmail;
       if (facturaVenta.getPedido() != null) {
         if (facturaVenta.getPedido().getTipoDeEnvio().equals(TipoDeEnvio.RETIRO_EN_SUCURSAL)) {
           bodyEmail =

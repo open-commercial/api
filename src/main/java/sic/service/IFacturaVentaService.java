@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface IFacturaVentaService {
 
-  FacturaVenta construirFacturaVenta(NuevaFacturaVentaDTO nuevaFacturaVentaDTO, Long idPedido, Long idUsuario);
+  FacturaVenta construirFacturaVenta(NuevaFacturaVentaDTO nuevaFacturaVentaDTO, long idPedido, Long idUsuario);
 
   TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario);
 
@@ -21,7 +21,7 @@ public interface IFacturaVentaService {
   Page<FacturaVenta> buscarFacturaVenta(
       BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
-  List<FacturaVenta> guardar(List<FacturaVenta> facturas, Long idPedido, List<Recibo> recibos);
+  List<FacturaVenta> guardar(List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos);
 
   FacturaVenta autorizarFacturaVenta(FacturaVenta fv);
 
