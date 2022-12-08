@@ -80,7 +80,8 @@ public class GastoServiceImpl implements IGastoService {
         this.getPageable(criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido()));
   }
 
-  private Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+  @Override
+  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
     String ordenDefault = "fecha";
     if(pagina == null) pagina = 0;
     if (ordenarPor == null || sentido == null) {
@@ -101,7 +102,8 @@ public class GastoServiceImpl implements IGastoService {
     }
   }
 
-  private BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {
+  @Override
+  public BooleanBuilder getBuilder(BusquedaGastoCriteria criteria) {
     QGasto qGasto = QGasto.gasto;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getConcepto() != null) {
@@ -113,13 +115,15 @@ public class GastoServiceImpl implements IGastoService {
       builder.or(rsPredicate);
     }
     if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
-      criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
       if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
+        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         builder.and(qGasto.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
       } else if (criteria.getFechaDesde() != null) {
+        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         builder.and(qGasto.fecha.after(criteria.getFechaDesde()));
       } else if (criteria.getFechaHasta() != null) {
+        criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         builder.and(qGasto.fecha.before(criteria.getFechaHasta()));
       }
     }
@@ -128,8 +132,10 @@ public class GastoServiceImpl implements IGastoService {
     if (criteria.getNroGasto() != null) builder.and(qGasto.nroGasto.eq(criteria.getNroGasto()));
     if (criteria.getIdUsuario() != null)
       builder.and(qGasto.usuario.idUsuario.eq(criteria.getIdUsuario()));
-    builder.and(
-        qGasto.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qGasto.eliminado.eq(false)));
+    if (criteria.getIdSucursal() != null) {
+      builder.and(
+              qGasto.sucursal.idSucursal.eq(criteria.getIdSucursal()).and(qGasto.eliminado.eq(false)));
+    }
     return builder;
   }
 
