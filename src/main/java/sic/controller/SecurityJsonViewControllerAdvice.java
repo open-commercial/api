@@ -1,6 +1,5 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
@@ -17,6 +16,8 @@ import java.util.List;
 public class SecurityJsonViewControllerAdvice extends AbstractMappingJacksonResponseBodyAdvice {
 
   private final IAuthService authService;
+  private static final String AUTHORIZATION_HEADER = "Authorization";
+  private static final String ROLES_CLAIM = "roles";
 
   @Autowired
   public SecurityJsonViewControllerAdvice(IAuthService authService) {
@@ -31,10 +32,10 @@ public class SecurityJsonViewControllerAdvice extends AbstractMappingJacksonResp
       ServerHttpRequest serverHttpRequest,
       ServerHttpResponse serverHttpResponse) {
 
-    List<String> headers = serverHttpRequest.getHeaders().get("Authorization");
+    var headers = serverHttpRequest.getHeaders().get(AUTHORIZATION_HEADER);
     if (headers != null && !headers.isEmpty()) {
-      Claims claims = authService.getClaimsDelToken(headers.get(0));
-      List rolesDelUsuario = claims.get("roles", List.class);
+      var claims = authService.getClaimsDelToken(headers.get(0));
+      var rolesDelUsuario = claims.get(ROLES_CLAIM, List.class);
       if (rolesDelUsuario != null && !rolesDelUsuario.isEmpty()) {
         if (rolesDelUsuario.contains(Rol.ADMINISTRADOR.name())) {
           mappingJacksonValue.setSerializationView(Views.Administrador.class);
