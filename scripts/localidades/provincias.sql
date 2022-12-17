@@ -24,4 +24,7 @@ INSERT INTO provincia (idProvincia, nombre) VALUES
     (74,'San Luis'),
     (90,'Tucumán');
 
+--Default values para codigoPostal, costoEnvo y envioGratuito
 ALTER TABLE localidad MODIFY COLUMN codigoPostal varchar(255) NOT NULL DEFAULT 0;
+ALTER TABLE localidad MODIFY COLUMN costoEnvio DECIMAL(25,15) NOT NULL DEFAULT 0;
+ALTER TABLE localidad MODIFY COLUMN envioGratuito BIT(1) NOT NULL DEFAULT 0;
