@@ -13,7 +13,6 @@ import javax.swing.ImageIcon;
 
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -1053,8 +1052,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
     if (notaDebito.getRecibo() != null
-        && notaDebito.getRecibo().getIdPagoMercadoPago() != null
-        && !notaDebito.getRecibo().getIdPagoMercadoPago().isEmpty()) {
+        && notaDebito.getRecibo().getIdPagoMercadoPago() != null) {
       pagoService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
     }
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);

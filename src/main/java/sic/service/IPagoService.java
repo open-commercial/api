@@ -8,7 +8,7 @@ public interface IPagoService {
     List<String> getNuevaPreferenceParams(
             long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin);
 
-    void crearComprobantePorNotificacion(String idPayment);
+    void crearComprobantePorNotificacion(long idPayment);
 
-    void devolverPago(String idPayment);
+    void devolverPago(long idPayment);
 }
