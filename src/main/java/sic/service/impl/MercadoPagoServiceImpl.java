@@ -214,7 +214,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
               .paymentMethods(paymentMethods)
               .binaryMode(true)
               .expires(true)
-              .dateOfExpiration(pedido.getFechaVencimiento().plusSeconds(-30).atOffset(OffsetDateTime.now().getOffset()))
+              .dateOfExpiration(pedido.getFechaVencimiento().plusSeconds(30).atOffset(OffsetDateTime.now().getOffset()))
               .build() :
               PreferenceRequest.builder()
               .externalReference(stringJson)
