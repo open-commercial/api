@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import com.mercadopago.resources.Payment;
+import com.mercadopago.resources.payment.Payment;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import sic.modelo.*;
@@ -15,7 +15,7 @@ public interface IReciboService {
 
   Recibo getReciboNoEliminadoPorId(long idRecibo);
 
-  Optional<Recibo> getReciboPorIdMercadoPago(String idPagoMercadoPago);
+  Optional<Recibo> getReciboPorIdMercadoPago(long idPagoMercadoPago);
 
   Page<Recibo> buscarRecibos(BusquedaReciboCriteria criteria);
 

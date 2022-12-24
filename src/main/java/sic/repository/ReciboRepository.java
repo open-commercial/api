@@ -18,7 +18,7 @@ public interface ReciboRepository
         ReciboRepositoryCustom {
 
   Optional<Recibo> findReciboByIdPagoMercadoPagoAndEliminado(
-      String idPagoMercadoPago, boolean eliminado);
+      long idPagoMercadoPago, boolean eliminado);
 
   Recibo findTopBySucursalAndNumSerieOrderByNumReciboDesc(Sucursal sucursal, long serie);
 
