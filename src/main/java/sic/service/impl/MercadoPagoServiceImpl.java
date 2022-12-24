@@ -52,7 +52,11 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
   private static final String STRING_ID_USUARIO = "idUsuario";
   private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
-          new String[] {"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
+          new String[]{"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
+  private static final String APPROVED = "approved";
+  private static final String REFUNDED = "refunded";
+  private static final String REJECTED = "rejected";
+  private static final String PENDING = "pending";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -271,7 +275,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
         var movimiento = Movimiento.valueOf(convertedObject.get("movimiento").getAsString());
         long idPedido;
         switch (payment.getStatus()) {
-          case "approved":
+          case APPROVED:
             if (reciboMP.isPresent()) {
               logger.warn(
                   messageSource.getMessage(
@@ -294,7 +298,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
               }
             }
             break;
-          case "refunded":
+          case REFUNDED:
             if (reciboMP.isEmpty())
               throw new EntityNotFoundException(
                   messageSource.getMessage(
@@ -313,7 +317,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
                       Locale.getDefault()));
             }
             break;
-          case "rejected":
+          case REJECTED:
             logger.error(
                 messageSource.getMessage(
                     "mensaje_pago_rechazado", new Object[] {payment}, Locale.getDefault()));
@@ -346,7 +350,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
     try {
       var paymentClient = new PaymentClient();
       var payment = paymentClient.get(idPayment);
-      if (payment.getStatus().equals("approved")) {
+      if (payment.getStatus().equals(APPROVED)) {
         MercadoPagoConfig.setAccessToken(mercadoPagoAccesToken);
         PaymentRefundClient refund = new PaymentRefundClient();
         refund.refund(idPayment);
@@ -361,14 +365,14 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private void crearReciboDePago(
       Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
-      case "approved":
+      case APPROVED:
         logger.warn(
             messageSource.getMessage(
                 "mensaje_pago_aprobado", new Object[] {payment}, Locale.getDefault()));
         reciboService.guardar(
             reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment));
         break;
-      case "pending":
+      case PENDING:
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
           logger.warn(
               messageSource.getMessage(
