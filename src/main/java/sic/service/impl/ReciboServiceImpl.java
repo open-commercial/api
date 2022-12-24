@@ -261,7 +261,7 @@ public class ReciboServiceImpl implements IReciboService {
     nuevoRecibo.setCliente(cliente);
     nuevoRecibo.setFecha(LocalDateTime.now());
     nuevoRecibo.setConcepto("Pago en MercadoPago (" + payment.getPaymentMethodId() + ")");
-    nuevoRecibo.setMonto(payment.getNetAmount());
+    nuevoRecibo.setMonto(payment.getTransactionAmount());
     nuevoRecibo.setIdPagoMercadoPago(payment.getId());
     return nuevoRecibo;
   }

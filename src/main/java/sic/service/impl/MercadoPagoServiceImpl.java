@@ -35,7 +35,7 @@ import java.util.*;
 public class MercadoPagoServiceImpl implements IPagoService {
 
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
-  private String mercadoPagoAccesToken;
+  private String mercadoPagoAccessToken;
 
   @Value("${SIC_MAIL_USERNAME}")
   private String emailUsername;
@@ -100,7 +100,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
           messageSource.getMessage(
               "mensaje_preference_cliente_sin_email", null, Locale.getDefault()));
     }
-    MercadoPagoConfig.setAccessToken(mercadoPagoAccesToken);
+    MercadoPagoConfig.setAccessToken(mercadoPagoAccessToken);
     Preference preference;
     var client = new PreferenceClient();
     PreferenceBackUrlsRequest backUrls;
@@ -247,7 +247,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
   public void crearComprobantePorNotificacion(long idPayment) {
     Payment payment;
     try {
-      MercadoPagoConfig.setAccessToken(mercadoPagoAccesToken);
+      MercadoPagoConfig.setAccessToken(mercadoPagoAccessToken);
       var paymentClient = new PaymentClient();
       payment = paymentClient.get(idPayment);
       if (payment.getId() != null && payment.getExternalReference() != null) {
@@ -351,7 +351,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
       var paymentClient = new PaymentClient();
       var payment = paymentClient.get(idPayment);
       if (payment.getStatus().equals(APPROVED)) {
-        MercadoPagoConfig.setAccessToken(mercadoPagoAccesToken);
+        MercadoPagoConfig.setAccessToken(mercadoPagoAccessToken);
         PaymentRefundClient refund = new PaymentRefundClient();
         refund.refund(idPayment);
       }
