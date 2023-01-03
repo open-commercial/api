@@ -321,7 +321,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       recibos.forEach(reciboService::guardar);
     }
     if (!pedido.getCliente().isPuedeComprarAPlazo()
-            && totalFacturas.compareTo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente())) > -1) {
+            && totalFacturas.compareTo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente())) > 0) {
       throw
               new BusinessServiceException(
                       messageSource.getMessage(
