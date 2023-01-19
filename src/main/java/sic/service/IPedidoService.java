@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
 import sic.modelo.dto.CantidadProductoDTO;
+import sic.modelo.dto.ChangeDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 
@@ -61,5 +62,5 @@ public interface IPedidoService {
 
   RenglonPedido actualizarCantidadRenglonPedido(RenglonPedido renglonPedido, BigDecimal cantidadNueva);
 
-  String getPedidoChanges(long idPedido);
+  List<ChangeDTO> getPedidoChanges(long idPedido);
 }

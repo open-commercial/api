@@ -15,7 +15,12 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
+import org.javers.core.diff.Change;
+import org.javers.core.diff.changetype.PropertyChange;
+import org.javers.core.diff.changetype.ValueChange;
+import org.javers.core.diff.changetype.container.ListChange;
 import org.javers.repository.jql.QueryBuilder;
+import org.javers.spring.annotation.JaversAuditable;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +58,8 @@ public class PedidoServiceImpl implements IPedidoService {
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
 
+  private final IAuthService authService;
+
   private final Javers javers;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -72,6 +79,7 @@ public class PedidoServiceImpl implements IPedidoService {
     IReciboService reciboService,
     ICuentaCorrienteService cuentaCorrienteService,
     Javers javers,
+    IAuthService authService,
     ModelMapper modelMapper,
     MessageSource messageSource,
     CustomValidator customValidator) {
@@ -84,6 +92,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.javers = javers;
+    this.authService = authService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -172,6 +181,7 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
+  @JaversAuditable
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
     Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(pedido.getUsuario().getIdUsuario());
     if (pedido.getCliente().equals(clienteDeUsuario) && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
@@ -234,6 +244,7 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
+    javers.commit(String.valueOf(authService.getActiveUserId()), pedido);
     return pedido;
   }
 
@@ -432,6 +443,7 @@ public class PedidoServiceImpl implements IPedidoService {
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, idSucursalOrigen);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
+    javers.commit(String.valueOf(authService.getActiveUserId()), pedido);
     this.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnteriores);
   }
 
@@ -787,9 +799,42 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public String getPedidoChanges(long idPedido) {
+  public List<ChangeDTO> getPedidoChanges(long idPedido) {
     QueryBuilder queryBuilder = QueryBuilder.byInstance(this.getPedidoNoEliminadoPorId(idPedido));
     Changes changes = javers.findChanges(queryBuilder.build());
-    return javers.getJsonConverter().toJson(changes);
+    return this.getChangesDTO(changes);
+  }
+
+  private List<ChangeDTO> getChangesDTO(Changes changes) {
+    var changesDTO = new ArrayList<ChangeDTO>();
+    changes.groupByCommit().forEach(changeByCommit -> {
+      Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changeByCommit.getCommit().getAuthor()));
+      changesDTO.add(ChangeDTO.builder()
+                      .date(changeByCommit.getCommit().getCommitDate())
+                      .usuarioDTO(UsuarioDTO.builder()
+                              .nombre(usuarioAuthor.getNombre())
+                              .build())
+                      .changes(this.getValuesChangesDTO(changeByCommit.get()))
+              .build());
+    });
+    return changesDTO;
+  }
+
+  private List<ValueChangeDTO> getValuesChangesDTO(List<Change> changes) {
+    var ValuesChanges = new ArrayList<ValueChangeDTO>();
+    changes.forEach(change -> {
+      switch (change.getClass().getName()) { // mirar los grupos, en general son 3 grupos que sus subgrupos se llaman diferente, hacer por cada caso
+        //va a quedar medio feo pero es peor que nada de momento
+
+      };
+      //var asdn = change.getc instanceof ValueChange ? ((ValueChange)change) : ((ListChange)change);
+//      var valueChange = ((change.getClass().)change);
+//      ValuesChanges.add(ValueChangeDTO.builder()
+//                      .propertyName(valueChange.getPropertyName())
+//                      .beforeValue(valueChange.getLeft().toString())
+//                      .afterValue(valueChange.getRight().toString())
+//              .build());
+    });
+    return ValuesChanges;
   }
 }

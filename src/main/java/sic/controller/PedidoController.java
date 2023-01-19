@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
+import sic.modelo.dto.ChangeDTO;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
 import sic.modelo.Resultados;
 import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.CantidadProductoDTO;
 import sic.service.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -156,7 +159,8 @@ public class PedidoController {
   }
 
   @GetMapping("/pedidos/{idPedido}/changes")
-  public String getSnapshots(@PathVariable long idPedido) {
+  public List<ChangeDTO> getSnapshots(@PathVariable long idPedido, HttpServletRequest request) {
+    authService.setActiveUserToken(request.getHeader("Authorization"));
     return pedidoService.getPedidoChanges(idPedido);
   }
 }

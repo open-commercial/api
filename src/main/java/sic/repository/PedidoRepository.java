@@ -9,7 +9,7 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
-@JaversSpringDataAuditable
+//@JaversSpringDataAuditable
 public interface PedidoRepository
     extends PagingAndSortingRepository<Pedido, Long>, QuerydslPredicateExecutor<Pedido> {
 
