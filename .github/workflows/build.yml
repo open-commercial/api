@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-  #pull_request:
-  #  types: [ opened, synchronize, reopened ]
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   build-analyze-deploy:
@@ -52,15 +52,19 @@ jobs:
           SIC_MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=sic-api:sic-api
       - name: Set up QEMU
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/setup-buildx-action@v2
       - name: Login to DockerHub
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push Docker image
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/build-push-action@v3
         with:
           context: .
