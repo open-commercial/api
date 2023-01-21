@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -27,7 +26,7 @@ public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;
   private final IConfiguracionSucursalService configuracionSucursalService;
-  private final IPhotoUploader photoUploader;
+  private final IImageUploaderService imageUploaderService;
   private final IUbicacionService ubicacionService;
   private final IProductoService productoService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -39,14 +38,14 @@ public class SucursalServiceImpl implements ISucursalService {
     SucursalRepository sucursalRepository,
     IConfiguracionSucursalService configuracionSucursalService,
     IUbicacionService ubicacionService,
-    IPhotoUploader photoUploader,
+    IImageUploaderService imageUploaderService,
     IProductoService productoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.sucursalRepository = sucursalRepository;
     this.configuracionSucursalService = configuracionSucursalService;
     this.ubicacionService = ubicacionService;
-    this.photoUploader = photoUploader;
+    this.imageUploaderService = imageUploaderService;
     this.productoService = productoService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
@@ -184,7 +183,7 @@ public class SucursalServiceImpl implements ISucursalService {
       if (imagen.length == 0) {
         if (sucursalPersistida.getLogo() != null
                 && !sucursalPersistida.getLogo().isEmpty()) {
-          photoUploader.borrarImagen(
+          imageUploaderService.borrarImagen(
                   Sucursal.class.getSimpleName() + sucursalPersistida.getIdSucursal());
           sucursalParaActualizar.setLogo(null);
         }
@@ -194,7 +193,7 @@ public class SucursalServiceImpl implements ISucursalService {
     }
     sucursalParaActualizar.setConfiguracionSucursal(sucursalPersistida.getConfiguracionSucursal());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, sucursalParaActualizar);
-    photoUploader.isUrlValida(sucursalParaActualizar.getLogo());
+    imageUploaderService.isUrlValida(sucursalParaActualizar.getLogo());
     sucursalRepository.save(sucursalParaActualizar);
   }
 
@@ -209,7 +208,7 @@ public class SucursalServiceImpl implements ISucursalService {
     }
     sucursal.setEliminada(true);
     if (sucursal.getLogo() != null && !sucursal.getLogo().isEmpty()) {
-      photoUploader.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
+      imageUploaderService.borrarImagen(Sucursal.class.getSimpleName() + sucursal.getIdSucursal());
     }
     productoService.eliminarCantidadesDeSucursal(sucursal);
     sucursalRepository.save(sucursal);
@@ -220,6 +219,6 @@ public class SucursalServiceImpl implements ISucursalService {
     if (imagen.length > 1024000L)
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
-    return photoUploader.subirImagen(Sucursal.class.getSimpleName() + idSucursal, imagen);
+    return imageUploaderService.subirImagen(Sucursal.class.getSimpleName() + idSucursal, imagen);
   }
 }

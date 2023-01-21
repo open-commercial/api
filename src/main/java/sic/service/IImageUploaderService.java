@@ -1,6 +1,8 @@
 package sic.service;
 
-public interface IPhotoUploader {
+public interface IImageUploaderService {
+
+  boolean isServicioDeshabilitado();
 
   String subirImagen(String nombreImagen, byte[] imagen);
 

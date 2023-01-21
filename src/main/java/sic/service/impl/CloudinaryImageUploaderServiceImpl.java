@@ -9,21 +9,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import sic.service.IPhotoUploader;
+import sic.service.IImageUploaderService;
 import sic.exception.ServiceException;
 import javax.imageio.ImageIO;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Locale;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class CloudinaryPhotoUploaderImpl implements IPhotoUploader {
+public class CloudinaryImageUploaderServiceImpl implements IImageUploaderService {
+
+  @Value("#{new Boolean('${CLOUDINARY_ENABLED}')}")
+  private boolean cloudinaryEnabled;
 
   @Value("${CLOUDINARY_URL}")
   private String cloudinaryUrl;
@@ -33,29 +33,35 @@ public class CloudinaryPhotoUploaderImpl implements IPhotoUploader {
   private final MessageSource messageSource;
   
   @Autowired
-  public CloudinaryPhotoUploaderImpl(MessageSource messageSource) {
+  public CloudinaryImageUploaderServiceImpl(MessageSource messageSource) {
     this.messageSource = messageSource;
   }
 
   @Override
+  public boolean isServicioDeshabilitado() {
+    if (cloudinaryEnabled && cloudinaryUrl != null && !cloudinaryUrl.equals("")) {
+      return false;
+    }
+    logger.warn("El servicio de Cloudinary se encuentra deshabilitado");
+    return true;
+  }
+
+  @Override
   public String subirImagen(String nombreImagen, byte[] imagen) {
-    String urlImagen;
+    if (isServicioDeshabilitado()) return null;
     try {
-      Path path = Files.createTempFile("imagen-file", ".jpg");
-      File file = path.toFile();
+      var path = Files.createTempFile("imagen-file", ".jpg");
+      var file = path.toFile();
       Files.write(path, imagen);
-      Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
-      Map uploadResult =
-          cloudinary
-              .uploader()
-              .upload(
-                  file,
-                  ObjectUtils.asMap(
-                      "public_id",
-                      nombreImagen,
-                      "transformation",
-                      new Transformation().crop("fit").width(800).height(600)));
-      urlImagen = uploadResult.get("secure_url").toString();
+      var cloudinary = new Cloudinary(cloudinaryUrl);
+      var uploadResult = cloudinary.uploader()
+              .upload(file,
+                      ObjectUtils.asMap("public_id", nombreImagen, "transformation",
+                              new Transformation<>()
+                                      .crop("fit")
+                                      .width(800)
+                                      .height(600)));
+      var urlImagen = uploadResult.get("secure_url").toString();
       logger.info("La imagen {} se guardó correctamente.", nombreImagen);
       Files.delete(path);
       return urlImagen;
@@ -67,8 +73,9 @@ public class CloudinaryPhotoUploaderImpl implements IPhotoUploader {
 
   @Override
   public void borrarImagen(String publicId) {
+    if (isServicioDeshabilitado()) return;
     try {
-      Cloudinary cloudinary = new Cloudinary(cloudinaryUrl);
+      var cloudinary = new Cloudinary(cloudinaryUrl);
       cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
       logger.info("La imagen {} se eliminó correctamente.", publicId);
     } catch (IOException ex) {
@@ -80,6 +87,7 @@ public class CloudinaryPhotoUploaderImpl implements IPhotoUploader {
 
   @Override
   public void isUrlValida(String url) {
+    if (isServicioDeshabilitado()) return;
     if (url != null) {
       if (url.isEmpty()) {
         throw new ServiceException(
