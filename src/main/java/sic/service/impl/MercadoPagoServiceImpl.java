@@ -37,8 +37,8 @@ public class MercadoPagoServiceImpl implements IPagoService {
   @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccessToken;
 
-  @Value("${SIC_MAIL_USERNAME}")
-  private String emailUsername;
+  @Value("${GMAIL_USERNAME}")
+  private String gmailUsername;
 
   private final IReciboService reciboService;
   private final IClienteService clienteService;

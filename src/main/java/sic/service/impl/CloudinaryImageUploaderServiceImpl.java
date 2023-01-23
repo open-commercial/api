@@ -39,7 +39,7 @@ public class CloudinaryImageUploaderServiceImpl implements IImageUploaderService
 
   @Override
   public boolean isServicioDeshabilitado() {
-    if (cloudinaryEnabled && cloudinaryUrl != null && !cloudinaryUrl.equals("")) {
+    if (cloudinaryEnabled && cloudinaryUrl != null && !cloudinaryUrl.isEmpty()) {
       return false;
     }
     logger.warn("El servicio de Cloudinary se encuentra deshabilitado");

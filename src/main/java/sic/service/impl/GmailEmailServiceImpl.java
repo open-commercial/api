@@ -24,14 +24,14 @@ import java.util.Properties;
 @Service
 public class GmailEmailServiceImpl implements IEmailService {
 
-  @Value("${SIC_MAIL_ENV}")
-  private String mailEnv;
+  @Value("#{new Boolean('${GMAIL_ENABLED}')}")
+  private boolean gmailEnabled;
 
-  @Value("${SIC_MAIL_USERNAME}")
-  private String emailUsername;
+  @Value("${GMAIL_USERNAME}")
+  private String gmailUsername;
 
-  @Value("${SIC_MAIL_PASSWORD}")
-  private String emailPassword;
+  @Value("${GMAIL_PASSWORD}")
+  private String gmailPassword;
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
@@ -42,48 +42,48 @@ public class GmailEmailServiceImpl implements IEmailService {
   }
 
   @Override
+  public boolean isServicioDeshabilitado() {
+    if (gmailEnabled
+            && gmailUsername != null && !gmailUsername.isEmpty()
+            && gmailPassword != null && !gmailPassword.isEmpty()) {
+      return false;
+    }
+    logger.warn("El servicio de GMail se encuentra deshabilitado");
+    return true;
+  }
+
+  @Override
   @Async
-  public void enviarEmail(
-      String toEmail,
-      String bcc,
-      String subject,
-      String mensaje,
-      byte[] byteArray,
-      String attachmentDescription) {
-    if (mailEnv.equals("production")
-        && !emailUsername.isEmpty()
-        && !emailPassword.isEmpty()) {
-      Properties props = new Properties();
-      props.put("mail.smtp.host", "smtp.gmail.com");
-      props.put("mail.smtp.port", "587");
-      props.put("mail.smtp.auth", "true");
-      props.put("mail.smtp.starttls.enable", "true");
-      try {
-        Authenticator auth =
-            new Authenticator() {
-              @Override
-              protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(emailUsername, emailPassword);
-              }
-            };
-        MimeMessage message = new MimeMessage(Session.getInstance(props, auth));
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(emailUsername);
-        helper.setTo(toEmail);
-        if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
-        helper.setSubject(subject);
-        helper.setText(mensaje);
-        if (byteArray != null) {
-          ByteArrayDataSource bds = new ByteArrayDataSource(byteArray, "application/pdf");
-          helper.addAttachment(attachmentDescription, bds);
+  public void enviarEmail(String toEmail, String bcc, String subject, String mensaje,
+                          byte[] byteArray, String attachmentDescription) {
+    if (isServicioDeshabilitado()) return;
+    var props = new Properties();
+    props.put("mail.smtp.host", "smtp.gmail.com");
+    props.put("mail.smtp.port", "587");
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.starttls.enable", "true");
+    try {
+      var auth = new Authenticator() {
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+          return new PasswordAuthentication(gmailUsername, gmailPassword);
         }
-        Transport.send(helper.getMimeMessage());
-      } catch (MessagingException | MailException ex) {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_correo_error", null, Locale.getDefault()), ex);
+      };
+      var message = new MimeMessage(Session.getInstance(props, auth));
+      var helper = new MimeMessageHelper(message, true);
+      helper.setFrom(gmailUsername);
+      helper.setTo(toEmail);
+      if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
+      helper.setSubject(subject);
+      helper.setText(mensaje);
+      if (byteArray != null) {
+        var byteArrayDataSource = new ByteArrayDataSource(byteArray, "application/pdf");
+        helper.addAttachment(attachmentDescription, byteArrayDataSource);
       }
-    } else {
-      logger.error("Mail environment = {}, el mail NO se envió.", mailEnv);
+      Transport.send(helper.getMimeMessage());
+    } catch (MessagingException | MailException ex) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_correo_error", null, Locale.getDefault()), ex);
     }
   }
 }
