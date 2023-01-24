@@ -47,8 +47,7 @@ jobs:
           GMAIL_PASSWORD: "testpassword"
           RECAPTCHA_SECRET_KEY: ""
           RECAPTCHA_TEST_KEY: "111111"
-          CLOUDINARY_ENABLED: "false"
-          CLOUDINARY_URL: "cloudinary://*:*-*@*"
+          CLOUDINARY_URL: ""
           MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=sic-api:sic-api
       - name: Set up QEMU

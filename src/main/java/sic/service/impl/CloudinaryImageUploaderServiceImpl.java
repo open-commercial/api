@@ -22,12 +22,10 @@ import java.util.regex.Pattern;
 @Service
 public class CloudinaryImageUploaderServiceImpl implements IImageUploaderService {
 
-  @Value("#{new Boolean('${CLOUDINARY_ENABLED}')}")
-  private boolean cloudinaryEnabled;
-
   @Value("${CLOUDINARY_URL}")
   private String cloudinaryUrl;
 
+  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de Cloudinary no se encuentra configurado";
   private static final String CLOUDINARY_PATTERN = "^https:\\/\\/res.cloudinary.com\\/.*";
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
@@ -38,17 +36,13 @@ public class CloudinaryImageUploaderServiceImpl implements IImageUploaderService
   }
 
   @Override
-  public boolean isServicioDeshabilitado() {
-    if (cloudinaryEnabled && cloudinaryUrl != null && !cloudinaryUrl.isEmpty()) {
-      return false;
-    }
-    logger.warn("El servicio de Cloudinary se encuentra deshabilitado");
-    return true;
+  public boolean isServicioConfigurado() {
+    return cloudinaryUrl != null && !cloudinaryUrl.isEmpty();
   }
 
   @Override
   public String subirImagen(String nombreImagen, byte[] imagen) {
-    if (isServicioDeshabilitado()) return null;
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     try {
       var path = Files.createTempFile("imagen-file", ".jpg");
       var file = path.toFile();
@@ -73,7 +67,7 @@ public class CloudinaryImageUploaderServiceImpl implements IImageUploaderService
 
   @Override
   public void borrarImagen(String publicId) {
-    if (isServicioDeshabilitado()) return;
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     try {
       var cloudinary = new Cloudinary(cloudinaryUrl);
       cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
@@ -87,7 +81,7 @@ public class CloudinaryImageUploaderServiceImpl implements IImageUploaderService
 
   @Override
   public void isUrlValida(String url) {
-    if (isServicioDeshabilitado()) return;
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     if (url != null) {
       if (url.isEmpty()) {
         throw new ServiceException(
