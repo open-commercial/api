@@ -1,7 +1,5 @@
 package sic.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -17,6 +15,7 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.service.IEmailService;
 import java.util.Locale;
 import java.util.Properties;
@@ -24,16 +23,13 @@ import java.util.Properties;
 @Service
 public class GmailEmailServiceImpl implements IEmailService {
 
-  @Value("#{new Boolean('${GMAIL_ENABLED}')}")
-  private boolean gmailEnabled;
-
   @Value("${GMAIL_USERNAME}")
   private String gmailUsername;
 
   @Value("${GMAIL_PASSWORD}")
   private String gmailPassword;
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de GMail no se encuentra configurado";
   private final MessageSource messageSource;
 
   @Autowired
@@ -42,21 +38,16 @@ public class GmailEmailServiceImpl implements IEmailService {
   }
 
   @Override
-  public boolean isServicioDeshabilitado() {
-    if (gmailEnabled
-            && gmailUsername != null && !gmailUsername.isEmpty()
-            && gmailPassword != null && !gmailPassword.isEmpty()) {
-      return false;
-    }
-    logger.warn("El servicio de GMail se encuentra deshabilitado");
-    return true;
+  public boolean isServicioConfigurado() {
+    return gmailUsername != null && !gmailUsername.isEmpty()
+            && gmailPassword != null && !gmailPassword.isEmpty();
   }
 
   @Override
   @Async
   public void enviarEmail(String toEmail, String bcc, String subject, String mensaje,
                           byte[] byteArray, String attachmentDescription) {
-    if (isServicioDeshabilitado()) return;
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     var props = new Properties();
     props.put("mail.smtp.host", "smtp.gmail.com");
     props.put("mail.smtp.port", "587");

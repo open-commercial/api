@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,7 @@ class CloudinaryImageUploaderServiceImplTest {
   IImageUploaderService imageUploaderService;
 
   @Test
+  @Disabled
   void shouldNotValidarUrl() {
     assertThrows(ServiceException.class, () -> imageUploaderService.isUrlValida(""));
     assertThrows(

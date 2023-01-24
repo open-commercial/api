@@ -455,8 +455,7 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
             && (imagen != null && imagen.length == 0)) {
-      imageUploaderService.borrarImagen(
-              Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+      imageUploaderService.borrarImagen(Producto.class.getSimpleName() + productoPersistido.getIdProducto());
     } else {
       productoPorActualizar.setUrlImagen(productoPersistido.getUrlImagen());
     }
@@ -466,10 +465,9 @@ public class ProductoServiceImpl implements IProductoService {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
       this.quitarProductoDeFavoritos(productoPersistido.getIdProducto());
     }
-    //se setea siempre en false momentaniamente
+    //se setea siempre en false momentaneamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
-    imageUploaderService.isUrlValida(productoPorActualizar.getUrlImagen());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
     logger.warn(
         messageSource.getMessage(
@@ -915,8 +913,7 @@ public class ProductoServiceImpl implements IProductoService {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_error_tamanio_no_valido", null, Locale.getDefault()));
-    String urlImagen =
-        imageUploaderService.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
+    var urlImagen = imageUploaderService.subirImagen(Producto.class.getSimpleName() + idProducto, imagen);
     productoRepository.actualizarUrlImagen(idProducto, urlImagen);
     return urlImagen;
   }

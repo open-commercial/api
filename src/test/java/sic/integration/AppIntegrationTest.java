@@ -44,15 +44,11 @@ import sic.modelo.*;
 import sic.modelo.RenglonFactura;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -749,7 +745,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Dar de alta un producto")
   @Order(6)
-  void testEscenarioAltaDeProductoConImagen() throws IOException {
+  void testEscenarioAltaDeProducto() throws IOException {
     this.iniciarSesionComoAdministrador();
     List<Medida> medidas =
         Arrays.asList(restTemplate.getForObject(apiPrefix + "/medidas", Medida[].class));
