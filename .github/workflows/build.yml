@@ -49,7 +49,7 @@ jobs:
           RECAPTCHA_TEST_KEY: "111111"
           CLOUDINARY_ENABLED: "false"
           CLOUDINARY_URL: "cloudinary://*:*-*@*"
-          SIC_MERCADOPAGO_ACCESS_TOKEN: ""
+          MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=sic-api:sic-api
       - name: Set up QEMU
         if: ${{ github.ref == 'refs/heads/master' }}

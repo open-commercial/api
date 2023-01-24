@@ -29,12 +29,16 @@ import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Arrays;
 
 @Service
 public class MercadoPagoServiceImpl implements IPagoService {
 
-  @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
+  @Value("${MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccessToken;
 
   @Value("${GMAIL_USERNAME}")
@@ -50,6 +54,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private final IProductoService productoService;
   private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
+  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de Mercado Pago no se encuentra configurado";
   private static final String STRING_ID_USUARIO = "idUsuario";
   private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
           new String[]{"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
@@ -88,8 +93,14 @@ public class MercadoPagoServiceImpl implements IPagoService {
   }
 
   @Override
+  public boolean isServicioConfigurado() {
+    return mercadoPagoAccessToken != null && !mercadoPagoAccessToken.isEmpty();
+  }
+
+  @Override
   public List<String> getNuevaPreferenceParams(
       long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     customValidator.validar(nuevaOrdenDeCompra);
     var sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
     var usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
@@ -245,6 +256,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
 
   @Override
   public void crearComprobantePorNotificacion(long idPayment) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     Payment payment;
     try {
       MercadoPagoConfig.setAccessToken(mercadoPagoAccessToken);
@@ -347,6 +359,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
 
   @Override
   public void devolverPago(long idPayment) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     try {
       var paymentClient = new PaymentClient();
       var payment = paymentClient.get(idPayment);

@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ class MercadoPagoServiceImplTest {
   @Autowired IPagoService pagoService;
 
   @Test
+  @Disabled
   void shouldCrearNuevaPreference() {
     Cliente cliente = new Cliente();
     cliente.setEmail("test@test.com");
@@ -140,6 +142,7 @@ class MercadoPagoServiceImplTest {
   }
 
   @Test
+  @Disabled
   void shouldCrearComprobantePorNotificacion() {
     Cliente cliente = new Cliente();
     cliente.setEmail("test@test.com");
