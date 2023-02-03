@@ -14,11 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.ChangeDTO;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.dto.*;
 import sic.modelo.Resultados;
-import sic.modelo.dto.PedidoDTO;
-import sic.modelo.dto.CantidadProductoDTO;
 import sic.service.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -72,7 +69,8 @@ public class PedidoController {
   }
 
   @PutMapping("/pedidos")
-  public void actualizar(@RequestBody PedidoDTO pedidoDTO) {
+  public void actualizar(@RequestBody PedidoDTO pedidoDTO, HttpServletRequest request) {
+    authService.setActiveUserToken(request.getHeader("Authorization"));
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
     pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
@@ -101,7 +99,9 @@ public class PedidoController {
 
   @PostMapping("/pedidos")
   public Pedido guardar(@RequestBody PedidoDTO pedidoDTO,
-                        @RequestHeader("Authorization") String authorizationHeader) {
+                        @RequestHeader("Authorization") String authorizationHeader,
+                        HttpServletRequest request) {
+    authService.setActiveUserToken(request.getHeader("Authorization"));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(pedidoDTO.getObservaciones());
@@ -139,7 +139,8 @@ public class PedidoController {
 
   @PutMapping("/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public void cancelar(@PathVariable long idPedido) {
+  public void cancelar(@PathVariable long idPedido, HttpServletRequest request) {
+    authService.setActiveUserToken(request.getHeader("Authorization"));
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
@@ -159,8 +160,8 @@ public class PedidoController {
   }
 
   @GetMapping("/pedidos/{idPedido}/changes")
-  public List<ChangeDTO> getSnapshots(@PathVariable long idPedido, HttpServletRequest request) {
-    authService.setActiveUserToken(request.getHeader("Authorization"));
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public List<ChangeDTO> getChanges(@PathVariable long idPedido, HttpServletRequest request) {
     return pedidoService.getPedidoChanges(idPedido);
   }
 }

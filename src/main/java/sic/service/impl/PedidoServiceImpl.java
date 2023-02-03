@@ -16,9 +16,11 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.core.diff.Change;
-import org.javers.core.diff.changetype.PropertyChange;
-import org.javers.core.diff.changetype.ValueChange;
+import org.javers.core.diff.changetype.*;
+import org.javers.core.diff.changetype.container.CollectionChange;
+import org.javers.core.diff.changetype.container.ElementValueChange;
 import org.javers.core.diff.changetype.container.ListChange;
+import org.javers.core.diff.changetype.container.ValueAddOrRemove;
 import org.javers.repository.jql.QueryBuilder;
 import org.javers.spring.annotation.JaversAuditable;
 import org.modelmapper.ModelMapper;
@@ -244,7 +246,9 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
-    javers.commit(String.valueOf(authService.getActiveUserId()), pedido);
+    Map<String, String> properties = new HashMap<>();
+    properties.put("TipoDeOperacion", TipoDeOperacion.ALTA.name());
+    javers.commit(String.valueOf(authService.getActiveUserId()), pedido, properties);
     return pedido;
   }
 
@@ -443,7 +447,9 @@ public class PedidoServiceImpl implements IPedidoService {
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, idSucursalOrigen);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
-    javers.commit(String.valueOf(authService.getActiveUserId()), pedido);
+    Map<String, String> properties = new HashMap<>();
+    properties.put("TipoDeOperacion", TipoDeOperacion.ACTUALIZACION.name());
+    javers.commit(String.valueOf(authService.getActiveUserId()), pedido, properties);
     this.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnteriores);
   }
 
@@ -811,30 +817,88 @@ public class PedidoServiceImpl implements IPedidoService {
       Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changeByCommit.getCommit().getAuthor()));
       changesDTO.add(ChangeDTO.builder()
                       .date(changeByCommit.getCommit().getCommitDate())
-                      .usuarioDTO(UsuarioDTO.builder()
-                              .nombre(usuarioAuthor.getNombre())
-                              .build())
+                      .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
                       .changes(this.getValuesChangesDTO(changeByCommit.get()))
+                      .tipoDeOperacion(changeByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
               .build());
     });
     return changesDTO;
   }
 
-  private List<ValueChangeDTO> getValuesChangesDTO(List<Change> changes) {
-    var ValuesChanges = new ArrayList<ValueChangeDTO>();
+  private HashMap<String, List<ValueChangeDTO>> getValuesChangesDTO(List<Change> changes) {
+    var valuesChanges = new HashMap<String, List<ValueChangeDTO>>();
     changes.forEach(change -> {
-      switch (change.getClass().getName()) { // mirar los grupos, en general son 3 grupos que sus subgrupos se llaman diferente, hacer por cada caso
-        //va a quedar medio feo pero es peor que nada de momento
-
-      };
-      //var asdn = change.getc instanceof ValueChange ? ((ValueChange)change) : ((ListChange)change);
-//      var valueChange = ((change.getClass().)change);
-//      ValuesChanges.add(ValueChangeDTO.builder()
-//                      .propertyName(valueChange.getPropertyName())
-//                      .beforeValue(valueChange.getLeft().toString())
-//                      .afterValue(valueChange.getRight().toString())
-//              .build());
+      switch (change.getClass().getSimpleName()) {
+        case "ValueChange" -> {
+          var valueChange = (ValueChange) change;
+          valuesChanges.put(valueChange.getPropertyName(), Collections.singletonList(ValueChangeDTO.builder()
+                  .afterValue(valueChange.getRight() == null ? "" : valueChange.getRight().toString())
+                  .beforeValue(valueChange.getLeft() == null ? "" : valueChange.getLeft().toString())
+                  .propertyName(valueChange.getPropertyName())
+                  .build()));
+        }
+        case "ObjectRemoved" -> {
+          var objectRemoved = (ObjectRemoved) change;
+          valuesChanges.put(objectRemoved.getAffectedObject().getClass().getSimpleName() +
+                  objectRemoved.getAffectedGlobalId(), Collections.singletonList(ValueChangeDTO.builder()
+                  .propertyName(objectRemoved.getAffectedObject().getClass().getSimpleName())
+                  .build()));
+        }
+        case "ReferenceChange" -> {
+          var referenceChange = (ReferenceChange) change;
+          valuesChanges.put(referenceChange.getPropertyName(), Collections.singletonList(ValueChangeDTO.builder()
+                  .afterValue(referenceChange.getRight() == null ? "" : referenceChange.getRight().toString())
+                  .beforeValue(referenceChange.getLeft() == null ? "" : referenceChange.getLeft().toString())
+                  .propertyName(referenceChange.getPropertyName())
+                  .build()));
+        }
+        case "CollectionChange" -> {
+          var collectionChange = (CollectionChange) change;
+          valuesChanges.put(collectionChange.getPropertyName(), Collections.singletonList(ValueChangeDTO.builder()
+                  .afterValue(collectionChange.getRight() == null ? "" : collectionChange.getRight().toString())
+                  .beforeValue(collectionChange.getLeft() == null ? "" : collectionChange.getLeft().toString())
+                  .propertyName(collectionChange.getPropertyName())
+                  .build()));
+        }
+        case "ListChange" -> {
+          var listChange = (ListChange) change;
+          var listOfChanges = new ArrayList<ValueChangeDTO>();
+          listChange.getChanges().forEach(element ->
+                  {
+                    if (element instanceof ElementValueChange elementValueChange) {
+                      listOfChanges.add(ValueChangeDTO.builder()
+                              .afterValue(elementValueChange.getRightValue() == null ? "" : elementValueChange.getRightValue().toString())
+                              .beforeValue(elementValueChange.getLeftValue() == null ? "" : elementValueChange.getLeftValue().toString())
+                              //.propertyName(elementValueChange.)
+                              .build());
+                    }
+                    if (element instanceof ValueAddOrRemove elementValueChange) {
+                      listOfChanges.add(ValueChangeDTO.builder()
+                              .afterValue(elementValueChange.getValue().toString())
+                              .build());
+                    }
+                  }
+          );
+          valuesChanges.put(listChange.getPropertyName(), listOfChanges);
+        }
+        case "InitialValueChange" -> {
+          var initialValueChange = (InitialValueChange) change;
+          valuesChanges.put(initialValueChange.getAffectedObject().getClass().getSimpleName() +
+                  initialValueChange.getAffectedGlobalId(), Collections.singletonList(ValueChangeDTO.builder()
+                  .propertyName(initialValueChange.getAffectedObject().getClass().getSimpleName())
+                  .build()));
+        }
+        case "NewObject" -> {
+          var newObject = (NewObject) change;
+          valuesChanges.put(newObject.getAffectedObject().getClass().getSimpleName() +
+                  newObject.getAffectedGlobalId(), Collections.singletonList(ValueChangeDTO.builder()
+                  .propertyName(newObject.getAffectedObject().getClass().getSimpleName())
+                  .build()));
+        }
+        default -> throw new ServiceException(
+                messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()));
+      }
     });
-    return ValuesChanges;
+    return valuesChanges;
   }
 }
