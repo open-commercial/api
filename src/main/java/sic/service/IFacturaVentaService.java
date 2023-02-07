@@ -52,7 +52,12 @@ public interface IFacturaVentaService {
   void agregarRenglonesEnFacturaSinIVA(
       FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 
+  List<FacturaVenta> buscarFacturaVentaParaReporte(BusquedaFacturaVentaCriteria criteria);
+
   BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria);
 
   List<FacturaVenta> getFacturasVentaPorId(long[] idFactura);
+
+  byte[] getReporteComprobantes(List<FacturaVenta> facturaVentas, String formato);
+
 }

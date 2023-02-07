@@ -53,7 +53,7 @@ public interface IFacturaService {
 
   Resultados calcularResultadosFactura(NuevosResultadosComprobanteDTO nuevosResultadosComprobante);
 
-  Pageable getPageable(Integer pagina, String ordenarPor, String sentido);
+  Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int pageSize);
 
   void calcularValoresFactura(Factura factura);
 

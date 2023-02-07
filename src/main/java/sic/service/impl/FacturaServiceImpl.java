@@ -102,24 +102,21 @@ public class FacturaServiceImpl implements IFacturaService {
   }
 
   @Override
-  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido) {
+  public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, int pageSize) {
     if (pagina == null) pagina = 0;
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
       return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+          pagina, pageSize, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      return switch (sentido) {
+        case "ASC" -> PageRequest.of(
+                pagina, pageSize, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(
+                pagina, pageSize, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(
+                pagina, pageSize, Sort.by(Sort.Direction.DESC, ordenDefault));
+      };
     }
   }
 

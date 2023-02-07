@@ -3,6 +3,9 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +29,7 @@ import sic.util.CustomValidator;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -51,6 +55,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final MessageSource messageSource;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
+
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String NRO_SERIE = "nroSerie";
   private static final String NRO_FACTURA = "nroFactura";
   private final CustomValidator customValidator;
@@ -228,7 +234,21 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
         facturaService.getPageable(
             (criteria.getPagina() == null || criteria.getPagina() < 0) ? 0 : criteria.getPagina(),
             criteria.getOrdenarPor(),
-            criteria.getSentido()));
+            criteria.getSentido(), TAMANIO_PAGINA_DEFAULT));
+  }
+
+  @Override
+  public List<FacturaVenta> buscarFacturaVentaParaReporte(BusquedaFacturaVentaCriteria criteria) {
+    criteria.setPagina(0);
+    return facturaVentaRepository
+            .findAll(
+                    this.getBuilderVenta(criteria),
+                    facturaService.getPageable(
+                            criteria.getPagina(),
+                            criteria.getOrdenarPor(),
+                            criteria.getSentido(),
+                            Integer.MAX_VALUE))
+            .getContent();
   }
 
   @Override
@@ -496,6 +516,62 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
+  }
+
+  @Override
+  public byte[] getReporteComprobantes(List<FacturaVenta> facturaVentas, String formato) {
+    Map<String, Object> params = new HashMap<>();
+    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(facturaVentas);
+    JasperReport jasperDesign;
+    try {
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaComprobantes.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
+    switch (formato != null ? formato : "xlsx") {
+      case "xlsx":
+        try {
+          return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
+        } catch (JRException ex) {
+          throw new ServiceException(messageSource.getMessage(
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
+        }
+      case "pdf":
+        try {
+          return JasperExportManager.exportReportToPdf(
+                  JasperFillManager.fillReport(jasperDesign, params, ds));
+        } catch (JRException ex) {
+          throw new ServiceException(messageSource.getMessage(
+                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
+        }
+      default:
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_formato_no_valido", null, Locale.getDefault()));
+    }
+  }
+
+  private byte[] xlsReportToArray(JasperPrint jasperPrint) {
+    byte[] bytes = null;
+    try {
+      JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
+      ByteArrayOutputStream out = new ByteArrayOutputStream();
+      SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput =
+              new SimpleOutputStreamExporterOutput(out);
+      jasperXlsxExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
+      jasperXlsxExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
+      jasperXlsxExportMgr.exportReport();
+      bytes = out.toByteArray();
+      out.close();
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    } catch (IOException ex) {
+      logger.error(ex.getMessage());
+    }
+    return bytes;
   }
 
   @Override

@@ -31,6 +31,8 @@ public class FacturaVentaController {
   private final MessageSource messageSource;
   private static final String CLAIM_ID_USUARIO = "idUsuario";
 
+  private static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
+
   @Autowired
   public FacturaVentaController(
       IFacturaVentaService facturaVentaService,
@@ -138,6 +140,31 @@ public class FacturaVentaController {
         facturaVentaService.getReporteFacturaVenta(
             facturaService.getFacturaNoEliminadaPorId(idFactura));
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
+
+  @PostMapping("/facturas/ventas/busqueda/criteria/reporte")
+  public ResponseEntity<byte[]> getReporteFacturaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
+                                                       @RequestParam(required = false) String formato) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+    switch (formato != null ? formato : "xlsx") {
+      case "xlsx" -> {
+        headers.setContentType(new MediaType("application", "vnd.ms-excel"));
+        headers.set(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaComprobantes.xlsx");
+        byte[] reporteXls =
+                facturaVentaService.getReporteComprobantes(facturaVentaService.buscarFacturaVentaParaReporte(criteria), formato);
+        headers.setContentLength(reporteXls.length);
+        return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
+      }
+      case "pdf" -> {
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.add(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaComprobantes.pdf");
+        byte[] reportePDF = facturaVentaService.getReporteComprobantes(facturaVentaService.buscarFacturaVentaParaReporte(criteria), formato);
+        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+      }
+      default -> throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_formato_no_valido", null, Locale.getDefault()));
+    }
   }
 
   @GetMapping("/facturas/ventas/renglones/pedidos/{idPedido}")

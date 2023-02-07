@@ -32,6 +32,8 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
+  private static final int TAMANIO_PAGINA_DEFAULT = 25;
+
   @Autowired
   @Lazy
   public FacturaCompraServiceImpl(
@@ -90,7 +92,7 @@ public class FacturaCompraServiceImpl implements IFacturaCompraService {
         facturaService.getPageable(
             (criteria.getPagina() == null || criteria.getPagina() < 0) ? 0 : criteria.getPagina(),
             criteria.getOrdenarPor(),
-            criteria.getSentido()));
+            criteria.getSentido(), TAMANIO_PAGINA_DEFAULT));
   }
 
   @Override
