@@ -842,7 +842,7 @@ public class ProductoServiceImpl implements IProductoService {
         p.setFechaUltimaModificacion(LocalDateTime.now());
         if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
                 && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
-                >= 0) {
+                > 0) {
           p.getPrecioProducto().setOferta(true);
           p.getPrecioProducto().setPorcentajeBonificacionOferta(
                   productosParaActualizarDTO.getPorcentajeBonificacionOferta());
