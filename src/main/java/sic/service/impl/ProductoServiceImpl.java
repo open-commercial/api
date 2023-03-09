@@ -1131,6 +1131,15 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
+  public byte[] getListaDePreciosEnPdf(long[] idProductos) {
+    var productos = new ArrayList<Producto>();
+    for (long idProducto : idProductos) {
+      productos.add(this.getProductoNoEliminadoPorId(idProducto));
+    }
+    return this.getListaDePrecios(productos, FORMATO_PDF);
+  }
+
+  @Override
   public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato) {
     emailService.enviarEmail(
             mailTo,

@@ -8,6 +8,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -137,6 +141,18 @@ public class ProductoController {
       default -> throw new BusinessServiceException(messageSource.getMessage(
               "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
+  }
+
+  @GetMapping("/productos/reporte")
+  public ResponseEntity<byte[]> getListaProductosSeleccionados(
+          @RequestParam long[] idProducto) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_PDF);
+    headers.add("content-disposition", "inline; filename=ProductList.pdf");
+    headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+    byte[] reportePDF =
+            productoService.getListaDePreciosEnPdf(idProducto);
+    return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
   @DeleteMapping("/productos")
