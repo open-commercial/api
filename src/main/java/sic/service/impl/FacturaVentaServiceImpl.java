@@ -296,11 +296,10 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   @Transactional
-  public List<FacturaVenta> guardar(
-          List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos) {
+  public List<FacturaVenta> guardar(List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos) {
     facturas.forEach(customValidator::validar);
-    List<FacturaVenta> facturasProcesadas = new ArrayList<>();
-    Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+    var facturasProcesadas = new ArrayList<FacturaVenta>();
+    var pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
     facturas.forEach(f -> {
       if (f.getCliente().equals(pedido.getCliente()) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
               f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
@@ -314,7 +313,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
     this.calcularValoresFacturasVenta(facturas);
     facturas.forEach(f -> f.setPedido(pedido));
-    BigDecimal totalFacturas = facturas.stream()
+    var totalFacturas = facturas.stream()
             .map(Factura::getTotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     if (recibos != null) {
@@ -333,14 +332,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       facturasProcesadas.add(facturaGuardada);
       logger.info("La Factura {} se guardó correctamente.", facturaGuardada);
     });
-    List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
+    var facturasParaRelacionarAlPedido = new ArrayList<Factura>(facturasProcesadas);
     pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
-    List<TipoDeComprobante> tiposAutorizables =
-        Arrays.asList(
-            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    facturasProcesadas.stream()
-        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
-        .forEach(this::autorizarFacturaVenta);
+    if (pedido.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada()) {
+      var tiposAutorizables = Arrays.asList(TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+      facturasProcesadas.stream()
+              .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+              .forEach(this::autorizarFacturaVenta);
+    }
     return facturasProcesadas;
   }
 
@@ -363,30 +362,28 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   @Transactional
   public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
-    List<TipoDeComprobante> tiposAutorizables =
-        Arrays.asList(
-            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    var tiposAutorizables = Arrays.asList(TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
     if (!tiposAutorizables.contains(fv.getTipoComprobante())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
-    ComprobanteAFIP comprobante =
-        ComprobanteAFIP.builder()
-            .idComprobante(fv.getIdFactura())
-            .fecha(fv.getFecha())
-            .tipoComprobante(fv.getTipoComprobante())
-            .cae(fv.getCae())
-            .vencimientoCAE(fv.getVencimientoCae())
-            .numSerieAfip(fv.getNumSerieAfip())
-            .numFacturaAfip(fv.getNumFacturaAfip())
-            .sucursal(fv.getSucursal())
-            .cliente(fv.getClienteEmbedded())
-            .subtotalBruto(fv.getSubTotalBruto())
-            .iva105neto(fv.getIva105Neto())
-            .iva21neto(fv.getIva21Neto())
-            .montoNoGravado(BigDecimal.ZERO)
-            .total(fv.getTotal())
-            .build();
+    var comprobante =
+            ComprobanteAFIP.builder()
+                    .idComprobante(fv.getIdFactura())
+                    .fecha(fv.getFecha())
+                    .tipoComprobante(fv.getTipoComprobante())
+                    .cae(fv.getCae())
+                    .vencimientoCAE(fv.getVencimientoCae())
+                    .numSerieAfip(fv.getNumSerieAfip())
+                    .numFacturaAfip(fv.getNumFacturaAfip())
+                    .sucursal(fv.getSucursal())
+                    .cliente(fv.getClienteEmbedded())
+                    .subtotalBruto(fv.getSubTotalBruto())
+                    .iva105neto(fv.getIva105Neto())
+                    .iva21neto(fv.getIva21Neto())
+                    .montoNoGravado(BigDecimal.ZERO)
+                    .total(fv.getTotal())
+                    .build();
     afipService.autorizar(comprobante);
     fv.setCae(comprobante.getCae());
     fv.setVencimientoCae(comprobante.getVencimientoCAE());

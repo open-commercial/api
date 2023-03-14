@@ -417,7 +417,9 @@ public class MercadoPagoServiceImpl implements IPagoService {
     var notaGuardada =
         notaService.guardarNotaDebito(
             notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuarioCliente));
-    notaService.autorizarNota(notaGuardada);
+    if (notaGuardada.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada()) {
+      notaService.autorizarNota(notaGuardada);
+    }
   }
 
   private Pedido crearPedidoPorPreference(

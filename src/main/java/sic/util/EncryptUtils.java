@@ -2,7 +2,6 @@ package sic.util;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
@@ -13,10 +12,10 @@ import java.security.*;
 @Component
 public class EncryptUtils {
 
-  @Value("${SIC_AES_PRIVATE_KEY}")
+  @Value("${AES_PRIVATE_KEY}")
   private String privateKey;
 
-  @Value("${SIC_AES_INIT_VECTOR}")
+  @Value("${AES_INIT_VECTOR}")
   private String initVector;
 
   public String encryptWhitAES(String valorParaEncriptar) throws GeneralSecurityException {

@@ -41,7 +41,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SIC_AFIP_ENV: "testing"
+          AFIP_WS_AUTH_URI: ""
+          AFIP_WS_FE_URI=: ""
           GMAIL_USERNAME: ""
           GMAIL_PASSWORD: ""
           RECAPTCHA_SECRET_KEY: ""

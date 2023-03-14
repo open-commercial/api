@@ -1064,36 +1064,32 @@ public class NotaServiceImpl implements INotaService {
   @Transactional
   public Nota autorizarNota(Nota nota) {
     if (nota.getMovimiento().equals(Movimiento.VENTA)) {
-      BigDecimal montoNoGravado =
-          (nota instanceof NotaDebito) ? ((NotaDebito) nota).getMontoNoGravado() : BigDecimal.ZERO;
-      Cliente cliente;
+      var montoNoGravado = (nota instanceof NotaDebito notaDebito) ? notaDebito.getMontoNoGravado() : BigDecimal.ZERO;
       if (nota instanceof NotaCredito) {
         if (nota.getFacturaVenta() != null && nota.getFacturaVenta().getCae() == 0L) {
           throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_nota_factura_relacionada_sin_CAE", null, Locale.getDefault()));
+                  messageSource.getMessage(
+                          "mensaje_nota_factura_relacionada_sin_CAE", null, Locale.getDefault()));
         }
-        cliente = nota.getCliente();
-      } else {
-        cliente = nota.getCliente();
       }
-      ComprobanteAFIP comprobante =
-          ComprobanteAFIP.builder()
-              .idComprobante(nota.getIdNota())
-              .fecha(nota.getFecha())
-              .tipoComprobante(nota.getTipoComprobante())
-              .cae(nota.getCae())
-              .vencimientoCAE(nota.getVencimientoCae())
-              .numSerieAfip(nota.getNumSerieAfip())
-              .numFacturaAfip(nota.getNumNotaAfip())
-              .sucursal(nota.getSucursal())
-              .cliente(clienteService.crearClienteEmbedded(cliente))
-              .subtotalBruto(nota.getSubTotalBruto())
-              .iva105neto(nota.getIva105Neto())
-              .iva21neto(nota.getIva21Neto())
-              .montoNoGravado(montoNoGravado)
-              .total(nota.getTotal())
-              .build();
+      var cliente = nota.getCliente();
+      var comprobante =
+              ComprobanteAFIP.builder()
+                      .idComprobante(nota.getIdNota())
+                      .fecha(nota.getFecha())
+                      .tipoComprobante(nota.getTipoComprobante())
+                      .cae(nota.getCae())
+                      .vencimientoCAE(nota.getVencimientoCae())
+                      .numSerieAfip(nota.getNumSerieAfip())
+                      .numFacturaAfip(nota.getNumNotaAfip())
+                      .sucursal(nota.getSucursal())
+                      .cliente(clienteService.crearClienteEmbedded(cliente))
+                      .subtotalBruto(nota.getSubTotalBruto())
+                      .iva105neto(nota.getIva105Neto())
+                      .iva21neto(nota.getIva21Neto())
+                      .montoNoGravado(montoNoGravado)
+                      .total(nota.getTotal())
+                      .build();
       afipService.autorizar(comprobante);
       nota.setCae(comprobante.getCae());
       nota.setVencimientoCae(comprobante.getVencimientoCAE());
@@ -1101,30 +1097,23 @@ public class NotaServiceImpl implements INotaService {
       nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
     } else {
       throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
+              messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
     return nota;
   }
 
   @Override
   public TipoDeComprobante getTipoDeNotaCreditoSegunFactura(TipoDeComprobante tipo) {
-    switch (tipo) {
-      case FACTURA_A:
-        return TipoDeComprobante.NOTA_CREDITO_A;
-      case FACTURA_B:
-        return TipoDeComprobante.NOTA_CREDITO_B;
-      case FACTURA_C:
-        return TipoDeComprobante.NOTA_CREDITO_C;
-      case FACTURA_X:
-        return TipoDeComprobante.NOTA_CREDITO_X;
-      case FACTURA_Y:
-        return TipoDeComprobante.NOTA_CREDITO_Y;
-      case PRESUPUESTO:
-        return TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
-      default:
-        throw new ServiceException(
-            messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
-    }
+    return switch (tipo) {
+      case FACTURA_A -> TipoDeComprobante.NOTA_CREDITO_A;
+      case FACTURA_B -> TipoDeComprobante.NOTA_CREDITO_B;
+      case FACTURA_C -> TipoDeComprobante.NOTA_CREDITO_C;
+      case FACTURA_X -> TipoDeComprobante.NOTA_CREDITO_X;
+      case FACTURA_Y -> TipoDeComprobante.NOTA_CREDITO_Y;
+      case PRESUPUESTO -> TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO;
+      default -> throw new ServiceException(
+              messageSource.getMessage("mensaje_nota_tipo_no_valido", null, Locale.getDefault()));
+    };
   }
 
   private void actualizarStock(
@@ -1377,32 +1366,28 @@ public class NotaServiceImpl implements INotaService {
     RenglonNotaDebito renglonNota = new RenglonNotaDebito();
     renglonNota.setDescripcion("Gasto Administrativo");
     switch (tipoDeComprobante) {
-      case NOTA_DEBITO_A:
-      case NOTA_DEBITO_B:
-      case NOTA_DEBITO_PRESUPUESTO:
+      case NOTA_DEBITO_A, NOTA_DEBITO_B, NOTA_DEBITO_PRESUPUESTO -> {
         renglonNota.setMonto(
-            monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
+                monto.multiply(CIEN).divide(new BigDecimal("121"), 15, RoundingMode.HALF_UP));
         renglonNota.setIvaPorcentaje(IVA_21);
         renglonNota.setIvaNeto(
-            renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
-        break;
-      case NOTA_DEBITO_C:
-      case NOTA_DEBITO_X:
+                renglonNota.getMonto().multiply(IVA_21.divide(CIEN, 15, RoundingMode.HALF_UP)));
+      }
+      case NOTA_DEBITO_C, NOTA_DEBITO_X -> {
         renglonNota.setMonto(monto);
         renglonNota.setIvaPorcentaje(BigDecimal.ZERO);
         renglonNota.setIvaNeto(BigDecimal.ZERO);
-        break;
-      case NOTA_DEBITO_Y:
+      }
+      case NOTA_DEBITO_Y -> {
         renglonNota.setMonto(
-            monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
+                monto.multiply(CIEN).divide(new BigDecimal("110.5"), 15, RoundingMode.HALF_UP));
         renglonNota.setIvaPorcentaje(IVA_105);
         renglonNota.setIvaNeto(
-            renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
-        break;
-      default:
-        throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
+                renglonNota.getMonto().multiply(IVA_105.divide(CIEN, 15, RoundingMode.HALF_UP)));
+      }
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage(
+                      "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
     renglonNota.setImporteBruto(renglonNota.getMonto());
     renglonNota.setImporteNeto(renglonNota.getIvaNeto().add(renglonNota.getImporteBruto()));

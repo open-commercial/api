@@ -110,10 +110,6 @@ public class AfipServiceImpl implements IAfipService {
 
   @Override
   public void autorizar(ComprobanteAFIP comprobante) {
-    if (!comprobante.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
-    }
     if (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_A
         && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_B
         && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_C
