@@ -813,13 +813,16 @@ public class PedidoServiceImpl implements IPedidoService {
 
   private List<ChangeDTO> getChangesDTO(Changes changes) {
     var changesDTO = new ArrayList<ChangeDTO>();
+    final var nombreDeClase = changes.get(0).getAffectedGlobalId().getTypeName()
+            .substring(changes.get(0).getAffectedGlobalId().getTypeName().lastIndexOf(".") + 1);
     changes.groupByCommit().forEach(changeByCommit -> {
       Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changeByCommit.getCommit().getAuthor()));
       changesDTO.add(ChangeDTO.builder()
-                      .date(changeByCommit.getCommit().getCommitDate())
-                      .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
-                      .changes(this.getValuesChangesDTO(changeByCommit.get()))
-                      .tipoDeOperacion(changeByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
+              .nombreDeClase(nombreDeClase)
+              .date(changeByCommit.getCommit().getCommitDate())
+              .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
+              .changes(this.getValuesChangesDTO(changeByCommit.get()))
+              .tipoDeOperacion(changeByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
               .build());
     });
     return changesDTO;
@@ -862,24 +865,11 @@ public class PedidoServiceImpl implements IPedidoService {
         }
         case "ListChange" -> {
           var listChange = (ListChange) change;
-          var listOfChanges = new ArrayList<ValueChangeDTO>();
-          listChange.getChanges().forEach(element ->
-                  {
-                    if (element instanceof ElementValueChange elementValueChange) {
-                      listOfChanges.add(ValueChangeDTO.builder()
-                              .afterValue(elementValueChange.getRightValue() == null ? "" : elementValueChange.getRightValue().toString())
-                              .beforeValue(elementValueChange.getLeftValue() == null ? "" : elementValueChange.getLeftValue().toString())
-                              //.propertyName(elementValueChange.)
-                              .build());
-                    }
-                    if (element instanceof ValueAddOrRemove elementValueChange) {
-                      listOfChanges.add(ValueChangeDTO.builder()
-                              .afterValue(elementValueChange.getValue().toString())
-                              .build());
-                    }
-                  }
-          );
-          valuesChanges.put(listChange.getPropertyName(), listOfChanges);
+          valuesChanges.put(listChange.getPropertyName(), Collections.singletonList(ValueChangeDTO.builder()
+                  .afterValue(String.valueOf(listChange.getRightSize()))
+                  .beforeValue(String.valueOf(listChange.getLeftSize()))
+                  .propertyName(listChange.getPropertyName())
+                  .build()));
         }
         case "InitialValueChange" -> {
           var initialValueChange = (InitialValueChange) change;

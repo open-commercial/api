@@ -15,8 +15,7 @@ import sic.controller.Views;
 @JsonView(Views.Encargado.class)
 public class ValueChangeDTO {
 
-    String propertyName; // renglon producto
-    String beforeValue; // poxi 4
-    String afterValue; // poxi 2
-    String prettyPrint;
+    String propertyName;
+    String beforeValue;
+    String afterValue;
 }
