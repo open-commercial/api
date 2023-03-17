@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import sic.controller.Views;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 
 @Data
@@ -22,6 +21,6 @@ public class CommitDTO {
     LocalDateTime fecha;
     String usuario;
     String tipoDeOperacion;
-    HashMap<String, List<CambioDTO>> cambios;
+    List<CambioDTO> cambios;
 
 }

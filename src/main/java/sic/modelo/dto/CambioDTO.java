@@ -17,5 +17,5 @@ public class CambioDTO {
 
     String atributo;
     String valorAnterior;
-    String valorActual;
+    String valorSiguiente;
 }

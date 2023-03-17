@@ -826,65 +826,59 @@ public class PedidoServiceImpl implements IPedidoService {
     return changesDTO;
   }
 
-  private HashMap<String, List<CambioDTO>> getValuesChangesDTO(List<Change> changes) {
-    var valuesChanges = new HashMap<String, List<CambioDTO>>();
+  private List<CambioDTO> getValuesChangesDTO(List<Change> changes) {
+    var valuesChanges = new ArrayList<CambioDTO>();
     changes.forEach(change -> {
       switch (change.getClass().getSimpleName()) {
         case "ValueChange" -> {
           var valueChange = (ValueChange) change;
-          valuesChanges.put(valueChange.getPropertyName(), Collections.singletonList(CambioDTO.builder()
-                  .valorActual(valueChange.getRight() == null ? "" : valueChange.getRight().toString())
+          valuesChanges.add(CambioDTO.builder()
+                  .valorSiguiente(valueChange.getRight() == null ? "" : valueChange.getRight().toString())
                   .valorAnterior(valueChange.getLeft() == null ? "" : valueChange.getLeft().toString())
                   .atributo(valueChange.getPropertyName())
-                  .build()));
+                  .build());
         }
         case "ObjectRemoved" -> {
           var objectRemoved = (ObjectRemoved) change;
-          valuesChanges.put(objectRemoved.getAffectedObject().getClass().getSimpleName() +
-                  objectRemoved.getAffectedGlobalId(), Collections.singletonList(CambioDTO.builder()
+          valuesChanges.add(CambioDTO.builder()
                   .atributo(objectRemoved.getAffectedObject().getClass().getSimpleName())
-                  .build()));
+                  .build());
         }
         case "ReferenceChange" -> {
           var referenceChange = (ReferenceChange) change;
-          valuesChanges.put(referenceChange.getPropertyName(), Collections.singletonList(CambioDTO.builder()
-                  .valorActual(referenceChange.getRight() == null ? "" : referenceChange.getRight().toString())
+          valuesChanges.add(CambioDTO.builder()
+                  .valorSiguiente(referenceChange.getRight() == null ? "" : referenceChange.getRight().toString())
                   .valorAnterior(referenceChange.getLeft() == null ? "" : referenceChange.getLeft().toString())
                   .atributo(referenceChange.getPropertyName())
-                  .build()));
+                  .build());
         }
         case "CollectionChange" -> {
           var collectionChange = (CollectionChange) change;
-          valuesChanges.put(collectionChange.getPropertyName(), Collections.singletonList(CambioDTO.builder()
-                  .valorActual(collectionChange.getRight() == null ? "" : collectionChange.getRight().toString())
+          valuesChanges.add(CambioDTO.builder()
+                  .valorSiguiente(collectionChange.getRight() == null ? "" : collectionChange.getRight().toString())
                   .valorAnterior(collectionChange.getLeft() == null ? "" : collectionChange.getLeft().toString())
                   .atributo(collectionChange.getPropertyName())
-                  .build()));
+                  .build());
         }
         case "ListChange" -> {
           var listChange = (ListChange) change;
-          valuesChanges.put(listChange.getPropertyName(), Collections.singletonList(CambioDTO.builder()
-                  .valorActual(String.valueOf(listChange.getRightSize()))
+          valuesChanges.add(CambioDTO.builder()
+                  .valorSiguiente(String.valueOf(listChange.getRightSize()))
                   .valorAnterior(String.valueOf(listChange.getLeftSize()))
                   .atributo(listChange.getPropertyName())
-                  .build()));
+                  .build());
         }
         case "InitialValueChange" -> {
           var initialValueChange = (InitialValueChange) change;
-          valuesChanges.put(initialValueChange.getAffectedObject().getClass().getSimpleName() +
-                  initialValueChange.getAffectedGlobalId(), Collections.singletonList(CambioDTO.builder()
-                  .atributo(initialValueChange.getAffectedObject().getClass().getSimpleName())
-                  .build()));
+          valuesChanges.add(CambioDTO.builder()
+                  .atributo(initialValueChange.getPropertyName())
+                  .valorAnterior("")
+                  .valorSiguiente(initialValueChange.getRight().toString())
+                  .build());
         }
-        case "NewObject" -> {
-          var newObject = (NewObject) change;
-          valuesChanges.put(newObject.getAffectedObject().getClass().getSimpleName() +
-                  newObject.getAffectedGlobalId(), Collections.singletonList(CambioDTO.builder()
-                  .atributo(newObject.getAffectedObject().getClass().getSimpleName())
-                  .build()));
+        default -> {
+          break;
         }
-        default -> throw new ServiceException(
-                messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()));
       }
     });
     return valuesChanges;
