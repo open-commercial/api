@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Cliente;
-import sic.modelo.Usuario;
+import sic.entity.Cliente;
+import sic.entity.Usuario;
 
 import java.util.List;
 

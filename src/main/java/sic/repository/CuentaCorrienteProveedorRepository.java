@@ -4,9 +4,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.CuentaCorrienteProveedor;
-import sic.modelo.Sucursal;
-import sic.modelo.Proveedor;
+import sic.entity.CuentaCorrienteProveedor;
+import sic.entity.Proveedor;
 
 public interface CuentaCorrienteProveedorRepository
     extends CuentaCorrienteRepository<CuentaCorrienteProveedor>,

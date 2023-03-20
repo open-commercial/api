@@ -17,10 +17,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import sic.domain.Movimiento;
+import sic.domain.TipoDeEnvio;
+import sic.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.dto.NuevaOrdenDePagoDTO;
+import sic.dto.ProductosParaVerificarStockDTO;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.modelo.*;
-import sic.modelo.dto.*;
 import sic.util.CustomValidator;
 import sic.util.EncryptUtils;
 import sic.service.*;
@@ -89,7 +93,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
 
   @Override
   public List<String> getNuevaPreferenceParams(
-      long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+          long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
     customValidator.validar(nuevaOrdenDeCompra);
     var sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
     var usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
@@ -363,7 +367,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
   }
 
   private void crearReciboDePago(
-      Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
+          Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case APPROVED:
         logger.warn(

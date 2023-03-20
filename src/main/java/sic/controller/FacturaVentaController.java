@@ -10,11 +10,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.dto.NuevaFacturaVentaDTO;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.entity.criteria.BusquedaFacturaVentaCriteria;
+import sic.dto.NuevaFacturaVentaDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;

@@ -5,11 +5,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.Sucursal;
-import sic.modelo.Rol;
-import sic.modelo.Ubicacion;
-import sic.modelo.dto.NuevaSucursalDTO;
-import sic.modelo.dto.SucursalDTO;
+import sic.entity.Sucursal;
+import sic.domain.Rol;
+import sic.entity.Ubicacion;
+import sic.dto.NuevaSucursalDTO;
+import sic.dto.SucursalDTO;
 import sic.service.ISucursalService;
 import sic.service.IUbicacionService;
 

@@ -6,7 +6,7 @@ import javax.persistence.PersistenceContext;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import sic.modelo.QProducto;
+import sic.entity.QProducto;
 import sic.repository.ProductoRepositoryCustom;
 
 public class ProductoRepositoryImpl implements ProductoRepositoryCustom {

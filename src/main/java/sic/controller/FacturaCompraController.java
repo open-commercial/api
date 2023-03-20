@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
-import sic.modelo.dto.NuevaFacturaCompraDTO;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaFacturaCompraCriteria;
+import sic.dto.NuevaFacturaCompraDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;

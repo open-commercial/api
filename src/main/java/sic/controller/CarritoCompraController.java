@@ -7,11 +7,11 @@ import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-import sic.modelo.ItemCarritoCompra;
-import sic.modelo.Pedido;
-import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDePagoDTO;
-import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.entity.ItemCarritoCompra;
+import sic.entity.Pedido;
+import sic.dto.CarritoCompraDTO;
+import sic.dto.NuevaOrdenDePagoDTO;
+import sic.dto.ProductoFaltanteDTO;
 import sic.service.*;
 
 @RestController

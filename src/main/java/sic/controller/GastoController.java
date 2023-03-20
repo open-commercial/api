@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.criteria.BusquedaGastoCriteria;
-import sic.modelo.Gasto;
-import sic.modelo.Rol;
-import sic.modelo.dto.NuevoGastoDTO;
+import sic.entity.criteria.BusquedaGastoCriteria;
+import sic.entity.Gasto;
+import sic.domain.Rol;
+import sic.dto.NuevoGastoDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;

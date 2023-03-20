@@ -8,8 +8,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaGastoCriteria;
+import sic.domain.EstadoCaja;
+import sic.entity.FormaDePago;
+import sic.entity.Gasto;
+import sic.entity.QGasto;
+import sic.entity.Sucursal;
+import sic.entity.criteria.BusquedaGastoCriteria;
 import sic.service.IGastoService;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -152,7 +156,7 @@ public class GastoServiceImpl implements IGastoService {
 
   @Override
   public List<Gasto> getGastosEntreFechasYFormaDePago(
-    Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
+          Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     return gastoRepository.getGastosEntreFechasPorFormaDePago(
         sucursal.getIdSucursal(), formaDePago.getIdFormaDePago(), desde, hasta);
   }

@@ -1,8 +1,11 @@
 package sic.service;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaUsuarioCriteria;
+import sic.domain.Credencial;
+import sic.domain.Rol;
+import sic.domain.TipoDeOperacion;
+import sic.entity.Usuario;
+import sic.entity.criteria.BusquedaUsuarioCriteria;
 
 public interface IUsuarioService {
 

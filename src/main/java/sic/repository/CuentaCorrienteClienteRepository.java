@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Cliente;
-import sic.modelo.CuentaCorrienteCliente;
+import sic.entity.Cliente;
+import sic.entity.CuentaCorrienteCliente;
 
 import java.math.BigDecimal;
 

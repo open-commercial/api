@@ -11,12 +11,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.NotaCredito;
-import sic.modelo.NotaDebito;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
-import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
-import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
+import sic.entity.NotaCredito;
+import sic.entity.NotaDebito;
+import sic.domain.Rol;
+import sic.entity.Usuario;
+import sic.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.dto.NuevaNotaDebitoSinReciboDTO;
 import sic.service.*;
 
 import javax.crypto.SecretKey;

@@ -7,8 +7,8 @@ import javax.persistence.PersistenceContext;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
-import sic.modelo.QFacturaCompra;
-import sic.modelo.TipoDeComprobante;
+import sic.entity.QFacturaCompra;
+import sic.domain.TipoDeComprobante;
 import sic.repository.FacturaCompraRepositoryCustom;
 
 @Repository

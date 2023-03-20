@@ -5,9 +5,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.*;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.entity.Pedido;
+import sic.entity.RenglonPedido;
+import sic.domain.Resultados;
+import sic.dto.NuevoRenglonPedidoDTO;
+import sic.dto.NuevosResultadosComprobanteDTO;
 import sic.service.impl.PedidoServiceImpl;
 
 import java.math.BigDecimal;

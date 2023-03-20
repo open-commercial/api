@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -12,12 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Sucursal;
-import sic.modelo.Ubicacion;
-import sic.modelo.dto.NuevaSucursalDTO;
+import sic.entity.ConfiguracionSucursal;
+import sic.entity.Sucursal;
+import sic.entity.Ubicacion;
+import sic.dto.NuevaSucursalDTO;
 import sic.service.*;
-import sic.modelo.TipoDeOperacion;
+import sic.domain.TipoDeOperacion;
 import sic.repository.SucursalRepository;
 import sic.exception.BusinessServiceException;
 import sic.util.CustomValidator;

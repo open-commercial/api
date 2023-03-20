@@ -7,7 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Usuario;
+import sic.entity.Usuario;
 import sic.repository.UsuarioRepository;
 import sic.util.CustomValidator;
 

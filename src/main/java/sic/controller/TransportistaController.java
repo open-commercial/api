@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaTransportistaCriteria;
-import sic.modelo.dto.TransportistaDTO;
+import sic.domain.Rol;
+import sic.entity.Transportista;
+import sic.entity.Ubicacion;
+import sic.entity.criteria.BusquedaTransportistaCriteria;
+import sic.dto.TransportistaDTO;
 import sic.service.ITransportistaService;
 import sic.service.IUbicacionService;
 

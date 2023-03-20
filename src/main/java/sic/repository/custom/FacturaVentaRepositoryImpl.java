@@ -3,11 +3,12 @@ package sic.repository.custom;
 import java.math.BigDecimal;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
+import sic.entity.QFacturaVenta;
+import sic.entity.QRenglonFactura;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
-import sic.modelo.*;
+import sic.domain.TipoDeComprobante;
 import sic.repository.FacturaVentaRepositoryCustom;
 
 @Repository

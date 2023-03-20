@@ -1,8 +1,8 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.CategoriaIVA;
-import sic.modelo.ConfiguracionSucursal;
+import sic.domain.CategoriaIVA;
+import sic.entity.ConfiguracionSucursal;
 
 import java.time.LocalDateTime;
 

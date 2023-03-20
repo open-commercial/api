@@ -1,9 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +13,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.domain.EstadoPedido;
+import sic.domain.TipoDeOperacion;
+import sic.dto.*;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaTraspasoCriteria;
-import sic.modelo.dto.*;
+import sic.entity.criteria.BusquedaTraspasoCriteria;
 import sic.repository.RenglonTraspasoRepository;
 import sic.repository.TraspasoRepository;
 import sic.service.*;
@@ -28,7 +28,6 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -414,8 +413,14 @@ public class TraspasoServiceImpl implements ITraspasoService {
         }
       }));
     var classLoader = this.getClass().getClassLoader();
-    var isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
+    JasperReport jasperDesign;
+    try {
+      var isFileReport = classLoader.getResourceAsStream("report/Traspasos.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones.values());
     Map<String, Object> params = new HashMap<>();
     params.put("FechaDesde", criteria.getFechaDesde());
@@ -433,7 +438,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
     }
     try {
       return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+          JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);

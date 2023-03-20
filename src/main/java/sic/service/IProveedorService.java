@@ -3,9 +3,9 @@ package sic.service;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.TipoDeOperacion;
-import sic.modelo.criteria.BusquedaProveedorCriteria;
-import sic.modelo.Proveedor;
+import sic.domain.TipoDeOperacion;
+import sic.entity.criteria.BusquedaProveedorCriteria;
+import sic.entity.Proveedor;
 
 public interface IProveedorService {
 

@@ -1,9 +1,12 @@
 package sic.service;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaLocalidadCriteria;
-import sic.modelo.dto.LocalidadesParaActualizarDTO;
+import sic.entity.Localidad;
+import sic.entity.Provincia;
+import sic.domain.TipoDeOperacion;
+import sic.entity.Ubicacion;
+import sic.entity.criteria.BusquedaLocalidadCriteria;
+import sic.dto.LocalidadesParaActualizarDTO;
 
 import java.util.List;
 

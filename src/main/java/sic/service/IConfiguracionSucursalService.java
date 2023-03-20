@@ -1,6 +1,6 @@
 package sic.service;
 
-import sic.modelo.ConfiguracionSucursal;
+import sic.entity.ConfiguracionSucursal;
 
 public interface IConfiguracionSucursalService {
 

@@ -8,8 +8,8 @@ import java.util.Optional;
 import com.mercadopago.resources.payment.Payment;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaReciboCriteria;
 
 public interface IReciboService {
 
@@ -36,7 +36,7 @@ public interface IReciboService {
       LocalDateTime fecha);
 
   Recibo construirReciboPorPayment(
-      Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment);
+          Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment);
 
   long getSiguienteNumeroRecibo(long idSucursal, long serie);
 
@@ -51,7 +51,7 @@ public interface IReciboService {
       long idSucursal, long idFormaDePago, LocalDateTime desde, LocalDateTime hasta);
 
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
-    LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Sucursal sucursal);
+          LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Sucursal sucursal);
 
   BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
       long idSucursal, LocalDateTime desde, LocalDateTime hasta);

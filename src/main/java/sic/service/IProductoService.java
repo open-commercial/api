@@ -3,21 +3,23 @@ package sic.service;
 import java.math.BigDecimal;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.*;
+import sic.domain.Movimiento;
+import sic.domain.TipoDeOperacion;
+import sic.dto.*;
+import sic.entity.*;
 import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
-import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.*;
-import sic.modelo.embeddable.CantidadProductoEmbeddable;
-import sic.modelo.embeddable.PrecioProductoEmbeddable;
+import sic.entity.criteria.BusquedaProductoCriteria;
+import sic.entity.embeddable.CantidadProductoEmbeddable;
+import sic.entity.embeddable.PrecioProductoEmbeddable;
 
 public interface IProductoService {
 
   void actualizar(Producto productoPorActualizar, Producto productoPersistido, byte[] imagen);
 
   void devolverStockPedido(
-      Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen);
+          Pedido pedido, TipoDeOperacion tipoDeOperacion, List<RenglonPedido> renglonesAnteriores, Long idSucursalOrigen);
 
   void actualizarStockPedido(Pedido pedido, TipoDeOperacion tipoDeOperacion);
 

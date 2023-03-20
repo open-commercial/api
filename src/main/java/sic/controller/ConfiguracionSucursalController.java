@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.ConfiguracionSucursal;
-import sic.modelo.Rol;
-import sic.modelo.dto.ConfiguracionSucursalDTO;
+import sic.entity.ConfiguracionSucursal;
+import sic.domain.Rol;
+import sic.dto.ConfiguracionSucursalDTO;
 import sic.service.IConfiguracionSucursalService;
 import sic.service.ISucursalService;
 

@@ -2,7 +2,7 @@ package sic.repository;
 
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Traspaso;
+import sic.entity.Traspaso;
 
 import java.util.List;
 

@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Provincia;
+import sic.entity.Provincia;
 
 public interface ProvinciaRepository extends PagingAndSortingRepository<Provincia, Long> {
     

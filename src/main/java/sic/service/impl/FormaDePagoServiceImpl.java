@@ -8,8 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.FormaDePago;
-import sic.modelo.FormaDePagoEnum;
+import sic.domain.FormaDePago;
 import sic.service.IFormaDePagoService;
 import sic.repository.FormaDePagoRepository;
 
@@ -27,18 +26,18 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public List<FormaDePago> getFormasDePago() {
+  public List<sic.entity.FormaDePago> getFormasDePago() {
     return formaDePagoRepository.findAllByOrderByNombreAsc();
   }
 
   @Override
-  public List<FormaDePago> getFormasDePagoNoEliminadas() {
+  public List<sic.entity.FormaDePago> getFormasDePagoNoEliminadas() {
     return formaDePagoRepository.findAllByAndEliminadaOrderByNombreAsc(false);
   }
 
   @Override
-  public FormaDePago getFormasDePagoNoEliminadoPorId(long idFormaDePago) {
-    Optional<FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
+  public sic.entity.FormaDePago getFormasDePagoNoEliminadoPorId(long idFormaDePago) {
+    Optional<sic.entity.FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
     if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
       return formaDePago.get();
     } else {
@@ -48,8 +47,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormasDePagoPorId(long idFormaDePago) {
-    Optional<FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
+  public sic.entity.FormaDePago getFormasDePagoPorId(long idFormaDePago) {
+    Optional<sic.entity.FormaDePago> formaDePago = formaDePagoRepository.findById(idFormaDePago);
     if (formaDePago.isPresent()) {
       return formaDePago.get();
     } else {
@@ -59,8 +58,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormaDePagoPorNombre(FormaDePagoEnum formaDePagoEnum) {
-    Optional<FormaDePago> formaDePago =
+  public sic.entity.FormaDePago getFormaDePagoPorNombre(FormaDePago formaDePagoEnum) {
+    Optional<sic.entity.FormaDePago> formaDePago =
         formaDePagoRepository.findByNombreAndEliminada(formaDePagoEnum.toString(), false);
     if (formaDePago.isPresent() && !formaDePago.get().isEliminada()) {
       return formaDePago.get();
@@ -71,8 +70,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
   }
 
   @Override
-  public FormaDePago getFormaDePagoPredeterminada() {
-    Optional<FormaDePago> formaDePago =
+  public sic.entity.FormaDePago getFormaDePagoPredeterminada() {
+    Optional<sic.entity.FormaDePago> formaDePago =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
     if (formaDePago.isPresent()) {
       return formaDePago.get();
@@ -85,8 +84,8 @@ public class FormaDePagoServiceImpl implements IFormaDePagoService {
 
   @Override
   @Transactional
-  public void setFormaDePagoPredeterminada(FormaDePago formaDePago) {
-    Optional<FormaDePago> formaPredeterminadaAnterior =
+  public void setFormaDePagoPredeterminada(sic.entity.FormaDePago formaDePago) {
+    Optional<sic.entity.FormaDePago> formaPredeterminadaAnterior =
         formaDePagoRepository.findByAndPredeterminadoAndEliminada(true, false);
     if (formaPredeterminadaAnterior.isPresent()) {
       formaPredeterminadaAnterior.get().setPredeterminado(false);

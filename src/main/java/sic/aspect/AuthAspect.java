@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sic.exception.ForbiddenException;
-import sic.modelo.Rol;
+import sic.domain.Rol;
 import sic.service.IAuthService;
 
 import javax.servlet.http.HttpServletRequest;

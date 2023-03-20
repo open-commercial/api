@@ -3,12 +3,12 @@ package sic.service;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.Pedido;
-import sic.modelo.RenglonTraspaso;
-import sic.modelo.Traspaso;
-import sic.modelo.criteria.BusquedaTraspasoCriteria;
-import sic.modelo.dto.NuevoTraspasoDTO;
-import sic.modelo.dto.NuevoTraspasoDePedidoDTO;
+import sic.entity.Pedido;
+import sic.entity.RenglonTraspaso;
+import sic.entity.Traspaso;
+import sic.entity.criteria.BusquedaTraspasoCriteria;
+import sic.dto.NuevoTraspasoDTO;
+import sic.dto.NuevoTraspasoDePedidoDTO;
 
 import java.util.List;
 

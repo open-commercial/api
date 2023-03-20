@@ -12,9 +12,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +25,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaNotaCriteria;
-import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
-import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
-import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
-import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
+import sic.domain.*;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaNotaCriteria;
+import sic.dto.NuevaNotaCreditoDeFacturaDTO;
+import sic.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.dto.NuevaNotaDebitoSinReciboDTO;
 import sic.repository.NotaCreditoRepository;
 import sic.repository.NotaDebitoRepository;
 import sic.service.*;
@@ -1144,15 +1143,22 @@ public class NotaServiceImpl implements INotaService {
     JRBeanCollectionDataSource ds;
     Map<String, Object> params = new HashMap<>();
     if (nota instanceof NotaCredito) {
-      isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/NotaCredito.jasper");
+      isFileReport = classLoader.getResourceAsStream("report/NotaCredito.jrxml");
       List<RenglonNotaCredito> renglones = this.getRenglonesDeNotaCredito(nota.getIdNota());
       ds = new JRBeanCollectionDataSource(renglones);
       params.put("notaCredito", nota);
     } else {
-      isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/NotaDebito.jasper");
+      isFileReport = classLoader.getResourceAsStream("report/NotaDebito.jrxml");
       List<RenglonNotaDebito> renglones = this.getRenglonesDeNotaDebito(nota.getIdNota());
       ds = new JRBeanCollectionDataSource(renglones);
       params.put("notaDebito", nota);
+    }
+    JasperReport jasperDesign;
+    try {
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
     }
     ConfiguracionSucursal configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
@@ -1196,8 +1202,7 @@ public class NotaServiceImpl implements INotaService {
       }
     }
     try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+      return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       logger.error(ex.getMessage());
       throw new ServiceException(

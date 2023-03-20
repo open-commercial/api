@@ -29,9 +29,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
-import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.domain.TipoDeComprobante;
+import sic.domain.TipoDeOperacion;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaCuentaCorrienteClienteCriteria;
+import sic.entity.criteria.BusquedaCuentaCorrienteProveedorCriteria;
 import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
@@ -490,11 +494,16 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
-    var classLoader = this.getClass().getClassLoader();
-    var isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
+  public byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
+    JasperReport jasperDesign;
+    try {
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("report/CuentaCorriente.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
             this.getRenglonesCuentaCorrienteParaReporte(
@@ -514,7 +523,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     switch (formato) {
       case "xlsx" -> {
         try {
-          return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+          return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(
                   messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -523,7 +532,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       case "pdf" -> {
         try {
           return JasperExportManager.exportReportToPdf(
-                  JasperFillManager.fillReport(isFileReport, params, ds));
+                  JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(
                   messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -610,7 +619,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaClientes.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/ListaClientes.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

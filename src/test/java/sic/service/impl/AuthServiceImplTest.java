@@ -10,7 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.RestTemplate;
-import sic.modelo.TokenAccesoExcluido;
+import sic.entity.TokenAccesoExcluido;
 import sic.repository.TokenAccesoExcluidoRepository;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;

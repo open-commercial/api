@@ -6,10 +6,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaLocalidadCriteria;
-import sic.modelo.dto.LocalidadDTO;
-import sic.modelo.dto.LocalidadesParaActualizarDTO;
+import sic.entity.Localidad;
+import sic.entity.Provincia;
+import sic.domain.Rol;
+import sic.entity.Ubicacion;
+import sic.entity.criteria.BusquedaLocalidadCriteria;
+import sic.dto.LocalidadDTO;
+import sic.dto.LocalidadesParaActualizarDTO;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 

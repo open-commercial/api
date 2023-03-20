@@ -3,7 +3,7 @@ package sic.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.*;
+import sic.domain.CategoriaIVA;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

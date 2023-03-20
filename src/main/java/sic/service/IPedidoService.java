@@ -5,11 +5,12 @@ import java.util.List;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.modelo.Resultados;
+import sic.domain.Resultados;
+import sic.domain.TipoDeOperacion;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaPedidoCriteria;
+import sic.dto.NuevoRenglonPedidoDTO;
+import sic.dto.NuevosResultadosComprobanteDTO;
 
 public interface IPedidoService {
 

@@ -3,7 +3,7 @@ package sic.repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.CuentaCorriente;
+import sic.entity.CuentaCorriente;
 
 public interface CuentaCorrienteRepository<T extends CuentaCorriente> extends PagingAndSortingRepository<T, Long> {
 

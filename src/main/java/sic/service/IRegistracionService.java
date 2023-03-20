@@ -1,6 +1,6 @@
 package sic.service;
 
-import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
+import sic.dto.RegistracionClienteAndUsuarioDTO;
 
 public interface IRegistracionService {
 

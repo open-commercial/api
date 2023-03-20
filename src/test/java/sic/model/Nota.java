@@ -8,8 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import sic.modelo.Movimiento;
-import sic.modelo.TipoDeComprobante;
+import sic.domain.Movimiento;
+import sic.domain.TipoDeComprobante;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -25,11 +25,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.modelo.Resultados;
-import sic.modelo.dto.*;
+import sic.domain.*;
+import sic.dto.NuevoRenglonPedidoDTO;
+import sic.dto.ProductosParaVerificarStockDTO;
+import sic.dto.UbicacionDTO;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaPedidoCriteria;
+import sic.dto.NuevosResultadosComprobanteDTO;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
 import sic.repository.PedidoRepository;
@@ -564,7 +566,7 @@ public class PedidoServiceImpl implements IPedidoService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/Pedido.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

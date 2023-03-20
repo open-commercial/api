@@ -3,9 +3,10 @@ package sic.service;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
-import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
+import sic.domain.TipoDeOperacion;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaCuentaCorrienteClienteCriteria;
+import sic.entity.criteria.BusquedaCuentaCorrienteProveedorCriteria;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -51,7 +52,7 @@ public interface ICuentaCorrienteService {
   void asentarEnCuentaCorriente(Remito remito, TipoDeOperacion tipo);
 
   byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, String formato);
+          CuentaCorrienteCliente cuentaCorrienteCliente, String formato);
 
   List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente);
 

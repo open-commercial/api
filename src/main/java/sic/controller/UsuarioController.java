@@ -10,10 +10,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
-import sic.modelo.criteria.BusquedaUsuarioCriteria;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
-import sic.modelo.dto.UsuarioDTO;
+import sic.entity.criteria.BusquedaUsuarioCriteria;
+import sic.domain.Rol;
+import sic.entity.Usuario;
+import sic.dto.UsuarioDTO;
 import sic.service.IAuthService;
 import sic.service.IUsuarioService;
 

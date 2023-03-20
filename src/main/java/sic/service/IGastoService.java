@@ -7,10 +7,10 @@ import java.util.List;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.criteria.BusquedaGastoCriteria;
-import sic.modelo.Sucursal;
-import sic.modelo.FormaDePago;
-import sic.modelo.Gasto;
+import sic.entity.criteria.BusquedaGastoCriteria;
+import sic.entity.Sucursal;
+import sic.entity.FormaDePago;
+import sic.entity.Gasto;
 
 public interface IGastoService {
 

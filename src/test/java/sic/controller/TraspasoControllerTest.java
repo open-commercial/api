@@ -10,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Rol;
-import sic.modelo.Traspaso;
-import sic.modelo.criteria.BusquedaTraspasoCriteria;
-import sic.modelo.dto.NuevoTraspasoDTO;
+import sic.domain.Rol;
+import sic.entity.Traspaso;
+import sic.entity.criteria.BusquedaTraspasoCriteria;
+import sic.dto.NuevoTraspasoDTO;
 import sic.service.impl.AuthServiceImpl;
 import sic.service.impl.TraspasoServiceImpl;
 

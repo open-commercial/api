@@ -1,9 +1,8 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.CategoriaIVA;
+import sic.domain.CategoriaIVA;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 

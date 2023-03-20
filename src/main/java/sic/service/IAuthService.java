@@ -1,7 +1,7 @@
 package sic.service;
 
 import io.jsonwebtoken.Claims;
-import sic.modelo.Rol;
+import sic.domain.Rol;
 import java.util.List;
 
 public interface IAuthService {

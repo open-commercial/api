@@ -17,10 +17,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import sic.modelo.Cliente;
-import sic.modelo.Ubicacion;
-import sic.modelo.dto.ClienteDTO;
-import sic.modelo.dto.UbicacionDTO;
+import sic.entity.Cliente;
+import sic.entity.Ubicacion;
+import sic.dto.ClienteDTO;
+import sic.dto.UbicacionDTO;
 import sic.service.impl.AfipWebServiceSOAPClient;
 
 import java.io.IOException;

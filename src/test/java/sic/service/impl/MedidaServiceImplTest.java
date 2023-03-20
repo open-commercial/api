@@ -13,9 +13,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Medida;
+import sic.entity.Medida;
 import sic.exception.BusinessServiceException;
-import sic.modelo.TipoDeOperacion;
+import sic.domain.TipoDeOperacion;
 import sic.repository.MedidaRepository;
 import sic.util.CustomValidator;
 

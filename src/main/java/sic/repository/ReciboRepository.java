@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Sucursal;
-import sic.modelo.Recibo;
+import sic.entity.Sucursal;
+import sic.entity.Recibo;
 
 public interface ReciboRepository
     extends PagingAndSortingRepository<Recibo, Long>,

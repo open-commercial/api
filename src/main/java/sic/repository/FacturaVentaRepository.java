@@ -4,7 +4,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.*;
+import sic.entity.FacturaVenta;
+import sic.entity.Remito;
+import sic.domain.TipoDeComprobante;
 
 import java.util.List;
 

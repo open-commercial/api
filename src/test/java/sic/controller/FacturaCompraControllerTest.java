@@ -9,10 +9,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
-import sic.modelo.dto.NuevaFacturaCompraDTO;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaFacturaCompraCriteria;
+import sic.dto.NuevaFacturaCompraDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 import sic.service.impl.*;
 
 import javax.crypto.SecretKey;

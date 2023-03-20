@@ -2,10 +2,10 @@ package sic.service;
 
 import java.util.List;
 
-import sic.modelo.TipoDeOperacion;
-import sic.modelo.criteria.BusquedaTransportistaCriteria;
+import sic.domain.TipoDeOperacion;
+import sic.entity.criteria.BusquedaTransportistaCriteria;
 import org.springframework.data.domain.Page;
-import sic.modelo.Transportista;
+import sic.entity.Transportista;
 
 public interface ITransportistaService {
 

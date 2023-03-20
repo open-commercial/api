@@ -7,8 +7,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.CategoriaIVA;
-import sic.modelo.Proveedor;
+import sic.domain.CategoriaIVA;
+import sic.entity.Proveedor;
 import sic.repository.ProveedorRepository;
 import sic.util.CustomValidator;
 

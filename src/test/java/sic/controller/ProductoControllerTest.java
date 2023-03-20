@@ -11,11 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.*;
-import sic.modelo.dto.CantidadEnSucursalDTO;
-import sic.modelo.dto.ProductoDTO;
-import sic.modelo.embeddable.CantidadProductoEmbeddable;
-import sic.modelo.embeddable.PrecioProductoEmbeddable;
+import sic.domain.Rol;
+import sic.entity.*;
+import sic.dto.CantidadEnSucursalDTO;
+import sic.dto.ProductoDTO;
+import sic.entity.embeddable.CantidadProductoEmbeddable;
+import sic.entity.embeddable.PrecioProductoEmbeddable;
 import sic.service.impl.*;
 
 import javax.crypto.SecretKey;

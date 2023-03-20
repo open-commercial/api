@@ -16,9 +16,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.dto.CarritoCompraDTO;
+import sic.dto.NuevaOrdenDePagoDTO;
+import sic.dto.ProductoFaltanteDTO;
+import sic.dto.ProductosParaVerificarStockDTO;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
-import sic.modelo.*;
-import sic.modelo.dto.*;
 import sic.repository.CarritoCompraRepository;
 import sic.service.*;
 

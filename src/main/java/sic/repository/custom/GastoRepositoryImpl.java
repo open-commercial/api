@@ -2,7 +2,7 @@ package sic.repository.custom;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import sic.modelo.QGasto;
+import sic.entity.QGasto;
 import sic.repository.GastoRepositoryCustom;
 
 import javax.persistence.EntityManager;

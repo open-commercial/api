@@ -1,11 +1,10 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.CategoriaIVA;
-import sic.modelo.RenglonFactura;
-import sic.modelo.TipoDeComprobante;
+import sic.domain.CategoriaIVA;
+import sic.entity.RenglonFactura;
+import sic.domain.TipoDeComprobante;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
 package sic.util;
 
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

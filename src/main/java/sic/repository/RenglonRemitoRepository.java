@@ -3,7 +3,7 @@ package sic.repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.RenglonRemito;
+import sic.entity.RenglonRemito;
 
 import java.util.List;
 

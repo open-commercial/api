@@ -3,7 +3,7 @@ package sic.repository;
 import java.util.List;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Proveedor;
+import sic.entity.Proveedor;
 
 public interface ProveedorRepository
     extends PagingAndSortingRepository<Proveedor, Long>, QuerydslPredicateExecutor<Proveedor> {

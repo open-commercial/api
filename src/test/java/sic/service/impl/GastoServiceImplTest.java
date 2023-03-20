@@ -7,7 +7,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.criteria.BusquedaGastoCriteria;
+import sic.entity.criteria.BusquedaGastoCriteria;
 import sic.repository.GastoRepository;
 import sic.service.ICajaService;
 import sic.service.ISucursalService;
@@ -15,7 +15,6 @@ import sic.service.ISucursalService;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {GastoServiceImpl.class, MessageSource.class})

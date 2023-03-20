@@ -7,11 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.CategoriaIVA;
-import sic.modelo.Cliente;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
-import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
+import sic.domain.CategoriaIVA;
+import sic.entity.Cliente;
+import sic.domain.Rol;
+import sic.entity.Usuario;
+import sic.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.*;
 import sic.util.CustomValidator;
 

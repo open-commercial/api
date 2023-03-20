@@ -1,6 +1,6 @@
 package sic.service;
 
-import sic.modelo.dto.NuevaOrdenDePagoDTO;
+import sic.dto.NuevaOrdenDePagoDTO;
 import java.util.List;
 
 public interface IPagoService {

@@ -5,10 +5,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Resultados;
-import sic.modelo.Sucursal;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.domain.Resultados;
+import sic.entity.Sucursal;
+import sic.domain.TipoDeComprobante;
+import sic.dto.NuevosResultadosComprobanteDTO;
 import sic.service.impl.FacturaServiceImpl;
 import sic.service.impl.SucursalServiceImpl;
 

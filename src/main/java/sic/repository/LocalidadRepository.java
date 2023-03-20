@@ -5,8 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Localidad;
-import sic.modelo.Provincia;
+import sic.entity.Localidad;
+import sic.entity.Provincia;
 
 public interface LocalidadRepository
     extends PagingAndSortingRepository<Localidad, Long>, QuerydslPredicateExecutor<Localidad> {

@@ -8,7 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Rubro;
+import sic.entity.Rubro;
 import sic.repository.RubroRepository;
 import sic.util.CustomValidator;
 import static org.junit.jupiter.api.Assertions.assertThrows;

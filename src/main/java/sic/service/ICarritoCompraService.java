@@ -4,12 +4,12 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.ItemCarritoCompra;
-import sic.modelo.Pedido;
-import sic.modelo.Usuario;
-import sic.modelo.dto.CarritoCompraDTO;
-import sic.modelo.dto.NuevaOrdenDePagoDTO;
-import sic.modelo.dto.ProductoFaltanteDTO;
+import sic.entity.ItemCarritoCompra;
+import sic.entity.Pedido;
+import sic.entity.Usuario;
+import sic.dto.CarritoCompraDTO;
+import sic.dto.NuevaOrdenDePagoDTO;
+import sic.dto.ProductoFaltanteDTO;
 
 public interface ICarritoCompraService {
 

@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.data.domain.Page;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaCajaCriteria;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaCajaCriteria;
 
 public interface ICajaService {
 
@@ -42,7 +42,7 @@ public interface ICajaService {
   BigDecimal getSaldoRealCajas(BusquedaCajaCriteria criteria);
 
   List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(
-      Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
+          Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta);
 
   void reabrirCaja(long idCaja, BigDecimal saldoInicial);
 

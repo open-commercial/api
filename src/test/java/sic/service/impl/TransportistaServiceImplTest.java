@@ -8,9 +8,9 @@ import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.exception.BusinessServiceException;
-import sic.modelo.Localidad;
-import sic.modelo.Transportista;
-import sic.modelo.Ubicacion;
+import sic.entity.Localidad;
+import sic.entity.Transportista;
+import sic.entity.Ubicacion;
 import sic.repository.TransportistaRepository;
 import sic.util.CustomValidator;
 

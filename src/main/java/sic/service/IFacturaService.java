@@ -2,13 +2,15 @@ package sic.service;
 
 import java.math.BigDecimal;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.*;
+import sic.domain.Movimiento;
+import sic.domain.Resultados;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
 import java.util.List;
 import java.util.Map;
 
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.modelo.Resultados;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.dto.NuevosResultadosComprobanteDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 
 public interface IFacturaService {
 
@@ -39,7 +41,7 @@ public interface IFacturaService {
       BigDecimal descuentoPorcentaje);
 
   BigDecimal calcularPrecioUnitario(
-      Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
+          Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
   RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,

@@ -11,7 +11,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
-import sic.modelo.*;
+import sic.domain.EstadoPedido;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.domain.TipoDeOperacion;
+import sic.dto.*;
+import sic.entity.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,10 +37,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.*;
-import sic.modelo.embeddable.CantidadProductoEmbeddable;
-import sic.modelo.embeddable.PrecioProductoEmbeddable;
+import sic.entity.criteria.BusquedaProductoCriteria;
+import sic.entity.embeddable.CantidadProductoEmbeddable;
+import sic.entity.embeddable.PrecioProductoEmbeddable;
 import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
 import sic.service.*;
@@ -370,7 +374,7 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   @Transactional
   public Producto guardar(
-      NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+          NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
     customValidator.validar(nuevoProductoDTO);
     if (nuevoProductoDTO.getCodigo() == null) nuevoProductoDTO.setCodigo("");
     Producto producto = new Producto();
@@ -605,7 +609,7 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void actualizarStockNotaCredito(
-      Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento) {
+          Map<Long, BigDecimal> idsYCantidades, Long idSucursal, TipoDeOperacion operacion, Movimiento movimiento) {
     idsYCantidades.forEach(
         (idProducto, cantidad) -> {
           Optional<Producto> producto = productoRepository.findById(idProducto);
@@ -1159,7 +1163,7 @@ public class ProductoServiceImpl implements IProductoService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/ListaPreciosProductos.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

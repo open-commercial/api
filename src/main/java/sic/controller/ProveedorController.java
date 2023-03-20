@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaProveedorCriteria;
-import sic.modelo.dto.ProveedorDTO;
+import sic.entity.Proveedor;
+import sic.domain.Rol;
+import sic.entity.Ubicacion;
+import sic.entity.criteria.BusquedaProveedorCriteria;
+import sic.dto.ProveedorDTO;
 import sic.service.IProveedorService;
 import sic.service.IUbicacionService;
 

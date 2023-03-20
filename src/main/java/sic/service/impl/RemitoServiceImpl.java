@@ -13,11 +13,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.domain.TipoDeOperacion;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaRemitoCriteria;
-import sic.modelo.dto.NuevoRemitoDTO;
+import sic.entity.criteria.BusquedaRemitoCriteria;
+import sic.dto.NuevoRemitoDTO;
 import sic.repository.RemitoRepository;
 import sic.repository.RenglonRemitoRepository;
 import sic.service.*;
@@ -297,7 +298,7 @@ public class RemitoServiceImpl implements IRemitoService {
         JasperReport jasperDesign;
         try {
             var classLoader = this.getClass().getClassLoader();
-            var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Remito.jrxml");
+            var isFileReport = classLoader.getResourceAsStream("report/Remito.jrxml");
             jasperDesign = JasperCompileManager.compileReport(isFileReport);
         } catch (JRException ex) {
             throw new ServiceException(messageSource.getMessage(

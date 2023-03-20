@@ -2,9 +2,11 @@ package sic.service;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.dto.NuevaFacturaVentaDTO;
+import sic.domain.ComprobanteAFIP;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaFacturaVentaCriteria;
+import sic.dto.NuevaFacturaVentaDTO;
 
 import java.math.BigDecimal;
 import java.util.List;

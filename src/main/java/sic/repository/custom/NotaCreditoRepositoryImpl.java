@@ -3,8 +3,8 @@ package sic.repository.custom;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import org.springframework.stereotype.Repository;
-import sic.modelo.QNotaCredito;
-import sic.modelo.TipoDeComprobante;
+import sic.entity.QNotaCredito;
+import sic.domain.TipoDeComprobante;
 import sic.repository.NotaCreditoRepositoryCustom;
 
 import javax.persistence.EntityManager;

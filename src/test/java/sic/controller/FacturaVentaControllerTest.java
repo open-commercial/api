@@ -13,11 +13,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.dto.NuevaFacturaVentaDTO;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.entity.criteria.BusquedaFacturaVentaCriteria;
+import sic.dto.NuevaFacturaVentaDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 import sic.service.impl.*;
 
 import javax.crypto.SecretKey;

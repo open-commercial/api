@@ -6,9 +6,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.Rol;
-import sic.modelo.Rubro;
-import sic.modelo.dto.RubroDTO;
+import sic.domain.Rol;
+import sic.entity.Rubro;
+import sic.dto.RubroDTO;
 import sic.service.IRubroService;
 
 @RestController

@@ -10,9 +10,11 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaProductoCriteria;
-import sic.modelo.dto.*;
+import sic.domain.Movimiento;
+import sic.domain.Rol;
+import sic.dto.*;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaProductoCriteria;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 

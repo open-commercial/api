@@ -3,8 +3,11 @@ package sic.service.impl;
 import afip.wsfe.wsdl.*;
 import org.springframework.context.MessageSource;
 import org.xml.sax.SAXException;
-import sic.modelo.*;
-import sic.modelo.embeddable.ClienteEmbeddable;
+import sic.domain.CategoriaIVA;
+import sic.domain.ComprobanteAFIP;
+import sic.domain.TipoDeComprobante;
+import sic.entity.*;
+import sic.entity.embeddable.ClienteEmbeddable;
 import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
 

@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Cliente;
-import sic.modelo.Producto;
-import sic.modelo.ProductoFavorito;
+import sic.entity.Cliente;
+import sic.entity.Producto;
+import sic.entity.ProductoFavorito;
 
 import java.util.List;
 

@@ -23,8 +23,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaReciboCriteria;
+import sic.domain.EstadoCaja;
+import sic.domain.FormaDePago;
+import sic.domain.Movimiento;
+import sic.domain.TipoDeOperacion;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaReciboCriteria;
 import sic.repository.ReciboRepository;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
@@ -236,7 +240,7 @@ public class ReciboServiceImpl implements IReciboService {
             Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
             recibo.setSucursal(sucursal);
             recibo.setFecha(fecha);
-            FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
+            sic.entity.FormaDePago fdp = formaDePagoService.getFormasDePagoNoEliminadoPorId(k);
             recibo.setFormaDePago(fdp);
             recibo.setMonto(v);
             recibo.setNumSerie(
@@ -252,11 +256,11 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public Recibo construirReciboPorPayment(
-      Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment) {
+          Sucursal sucursal, Usuario usuario, Cliente cliente, Payment payment) {
     Recibo nuevoRecibo = new Recibo();
     nuevoRecibo.setSucursal(sucursal);
     nuevoRecibo.setFormaDePago(
-        formaDePagoService.getFormaDePagoPorNombre(FormaDePagoEnum.MERCADO_PAGO));
+        formaDePagoService.getFormaDePagoPorNombre(FormaDePago.MERCADO_PAGO));
     nuevoRecibo.setUsuario(usuario);
     nuevoRecibo.setCliente(cliente);
     nuevoRecibo.setFecha(LocalDateTime.now());
@@ -300,7 +304,7 @@ public class ReciboServiceImpl implements IReciboService {
 
   @Override
   public List<Recibo> getRecibosEntreFechasPorFormaDePago(
-    LocalDateTime desde, LocalDateTime hasta, FormaDePago formaDePago, Sucursal sucursal) {
+          LocalDateTime desde, LocalDateTime hasta, sic.entity.FormaDePago formaDePago, Sucursal sucursal) {
     return reciboRepository.getRecibosEntreFechasPorFormaDePago(
         sucursal.getIdSucursal(), formaDePago.getIdFormaDePago(), desde, hasta);
 
@@ -326,7 +330,7 @@ public class ReciboServiceImpl implements IReciboService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/Recibo.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

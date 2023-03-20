@@ -1,10 +1,10 @@
 package sic.service;
 
 import java.util.List;
-import sic.modelo.Sucursal;
-import sic.modelo.TipoDeOperacion;
-import sic.modelo.Ubicacion;
-import sic.modelo.dto.NuevaSucursalDTO;
+import sic.entity.Sucursal;
+import sic.domain.TipoDeOperacion;
+import sic.entity.Ubicacion;
+import sic.dto.NuevaSucursalDTO;
 
 public interface ISucursalService {
 

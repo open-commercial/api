@@ -5,7 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Transportista;
+import sic.entity.Transportista;
 import sic.service.impl.TransportistaServiceImpl;
 
 import java.util.ArrayList;

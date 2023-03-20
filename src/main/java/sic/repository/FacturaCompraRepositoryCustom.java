@@ -3,7 +3,7 @@ package sic.repository;
 import java.math.BigDecimal;
 
 import com.querydsl.core.BooleanBuilder;
-import sic.modelo.TipoDeComprobante;
+import sic.domain.TipoDeComprobante;
 
 public interface FacturaCompraRepositoryCustom {
 

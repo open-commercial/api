@@ -7,11 +7,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Rol;
-import sic.modelo.Usuario;
+import sic.domain.Rol;
+import sic.entity.Usuario;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 public interface UsuarioRepository

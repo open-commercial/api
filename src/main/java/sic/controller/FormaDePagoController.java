@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.FormaDePago;
-import sic.modelo.Rol;
+import sic.entity.FormaDePago;
+import sic.domain.Rol;
 import sic.service.IFormaDePagoService;
 
 @RestController

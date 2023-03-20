@@ -1,9 +1,11 @@
 package sic.service;
 
-import sic.modelo.*;
+import sic.entity.Cliente;
+import sic.domain.TipoDeOperacion;
+import sic.entity.Usuario;
 import org.springframework.data.domain.Page;
-import sic.modelo.criteria.BusquedaClienteCriteria;
-import sic.modelo.embeddable.ClienteEmbeddable;
+import sic.entity.criteria.BusquedaClienteCriteria;
+import sic.entity.embeddable.ClienteEmbeddable;
 
 public interface IClienteService {
 

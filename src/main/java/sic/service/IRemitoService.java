@@ -3,9 +3,11 @@ package sic.service;
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaRemitoCriteria;
-import sic.modelo.dto.NuevoRemitoDTO;
+import sic.entity.FacturaVenta;
+import sic.entity.Remito;
+import sic.entity.RenglonRemito;
+import sic.entity.criteria.BusquedaRemitoCriteria;
+import sic.dto.NuevoRemitoDTO;
 
 import java.util.List;
 

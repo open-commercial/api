@@ -1,7 +1,7 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.EstadoCaja;
+import sic.domain.EstadoCaja;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

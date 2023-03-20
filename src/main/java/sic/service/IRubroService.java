@@ -2,8 +2,8 @@ package sic.service;
 
 import java.util.List;
 
-import sic.modelo.Rubro;
-import sic.modelo.TipoDeOperacion;
+import sic.entity.Rubro;
+import sic.domain.TipoDeOperacion;
 
 public interface IRubroService {
 

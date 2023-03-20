@@ -11,11 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.BusinessServiceException;
-import sic.modelo.RenglonTraspaso;
-import sic.modelo.Rol;
-import sic.modelo.Traspaso;
-import sic.modelo.criteria.BusquedaTraspasoCriteria;
-import sic.modelo.dto.NuevoTraspasoDTO;
+import sic.entity.RenglonTraspaso;
+import sic.domain.Rol;
+import sic.entity.Traspaso;
+import sic.entity.criteria.BusquedaTraspasoCriteria;
+import sic.dto.NuevoTraspasoDTO;
 import sic.service.IAuthService;
 import sic.service.ITraspasoService;
 

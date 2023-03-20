@@ -1,10 +1,8 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.Rol;
+import sic.domain.Rol;
 
-import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 
 @Data

@@ -1,7 +1,7 @@
 package sic.repository;
 
 import com.querydsl.core.BooleanBuilder;
-import sic.modelo.TipoDeComprobante;
+import sic.domain.TipoDeComprobante;
 
 import java.math.BigDecimal;
 

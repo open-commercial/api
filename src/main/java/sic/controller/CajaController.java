@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaCajaCriteria;
+import sic.entity.Caja;
+import sic.entity.MovimientoCaja;
+import sic.domain.Rol;
+import sic.entity.criteria.BusquedaCajaCriteria;
 import sic.service.*;
 
 @RestController

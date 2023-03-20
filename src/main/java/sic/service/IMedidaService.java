@@ -1,8 +1,8 @@
 package sic.service;
 
-import sic.modelo.TipoDeOperacion;
+import sic.domain.TipoDeOperacion;
 import java.util.List;
-import sic.modelo.Medida;
+import sic.entity.Medida;
 
 public interface IMedidaService {
 

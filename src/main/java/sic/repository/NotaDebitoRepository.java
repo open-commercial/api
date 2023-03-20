@@ -3,7 +3,9 @@ package sic.repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.*;
+import sic.entity.NotaDebito;
+import sic.entity.Recibo;
+import sic.domain.TipoDeComprobante;
 
 public interface NotaDebitoRepository
     extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom, QuerydslPredicateExecutor<NotaDebito> {

@@ -6,9 +6,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.Medida;
-import sic.modelo.Rol;
-import sic.modelo.dto.MedidaDTO;
+import sic.entity.Medida;
+import sic.domain.Rol;
+import sic.dto.MedidaDTO;
 import sic.service.IMedidaService;
 
 @RestController

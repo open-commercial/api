@@ -13,12 +13,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import sic.domain.*;
+import sic.entity.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
-import sic.modelo.dto.NuevaFacturaVentaDTO;
-import sic.modelo.dto.NuevoRenglonFacturaDTO;
+import sic.entity.criteria.BusquedaFacturaVentaCriteria;
+import sic.dto.NuevaFacturaVentaDTO;
+import sic.dto.NuevoRenglonFacturaDTO;
 import sic.repository.FacturaVentaRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
@@ -483,7 +484,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/FacturaVenta.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

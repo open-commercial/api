@@ -2,7 +2,7 @@ package sic.repository;
 
 import java.util.List;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Rubro;
+import sic.entity.Rubro;
 
 public interface RubroRepository extends PagingAndSortingRepository<Rubro, Long> {
 

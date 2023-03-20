@@ -3,7 +3,7 @@ package sic.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import sic.modelo.TipoDeComprobante;
+import sic.domain.TipoDeComprobante;
 
 import java.math.BigDecimal;
 

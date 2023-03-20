@@ -1,6 +1,6 @@
 package sic.aspect;
 
-import sic.modelo.Rol;
+import sic.domain.Rol;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

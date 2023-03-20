@@ -3,7 +3,10 @@ package sic.repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.*;
+import sic.entity.FacturaCompra;
+import sic.entity.FacturaVenta;
+import sic.entity.NotaCredito;
+import sic.domain.TipoDeComprobante;
 import java.util.List;
 
 public interface NotaCreditoRepository

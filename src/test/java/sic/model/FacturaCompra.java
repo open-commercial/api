@@ -1,10 +1,9 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.TipoDeComprobante;
-import sic.modelo.RenglonFactura;
+import sic.domain.TipoDeComprobante;
+import sic.entity.RenglonFactura;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

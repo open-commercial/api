@@ -2,7 +2,7 @@ package sic.repository;
 
 import java.util.List;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.Medida;
+import sic.entity.Medida;
 
 public interface MedidaRepository extends PagingAndSortingRepository<Medida, Long> {
 

@@ -2,9 +2,9 @@ package sic.service;
 
 import afip.wsfe.wsdl.FEAuthRequest;
 import afip.wsfe.wsdl.FECAERequest;
-import sic.modelo.ComprobanteAFIP;
-import sic.modelo.Sucursal;
-import sic.modelo.TipoDeComprobante;
+import sic.domain.ComprobanteAFIP;
+import sic.entity.Sucursal;
+import sic.domain.TipoDeComprobante;
 
 public interface IAfipService {
 

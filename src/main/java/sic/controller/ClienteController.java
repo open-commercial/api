@@ -7,10 +7,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.entity.Cliente;
+import sic.domain.Rol;
+import sic.entity.Ubicacion;
+import sic.entity.Usuario;
 import sic.exception.ForbiddenException;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaClienteCriteria;
-import sic.modelo.dto.ClienteDTO;
+import sic.entity.criteria.BusquedaClienteCriteria;
+import sic.dto.ClienteDTO;
 import sic.service.*;
 
 import java.math.BigDecimal;

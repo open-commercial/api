@@ -1,9 +1,9 @@
 package sic.model;
 
 import lombok.*;
-import sic.modelo.Cliente;
-import sic.modelo.EstadoPedido;
-import sic.modelo.TipoDeEnvio;
+import sic.entity.Cliente;
+import sic.domain.EstadoPedido;
+import sic.domain.TipoDeEnvio;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

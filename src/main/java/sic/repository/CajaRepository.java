@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.Caja;
+import sic.entity.Caja;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,19 +26,19 @@ public interface CajaRepository
 
   @Query(
       "SELECT c FROM Caja c "
-          + "WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.ABIERTA "
+          + "WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false AND c.estado = sic.domain.EstadoCaja.ABIERTA "
           + "ORDER BY c.idCaja DESC")
   Caja isUltimaCajaAbierta(@Param("idSucursal") long idSucursal);
 
   @Query(
       "SELECT c FROM Caja c "
-          + "WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false AND c.estado = sic.modelo.EstadoCaja.CERRADA "
+          + "WHERE c.sucursal.idSucursal = :idSucursal AND c.eliminada = false AND c.estado = sic.domain.EstadoCaja.CERRADA "
           + "AND :fecha BETWEEN c.fechaApertura AND c.fechaCierre")
   Caja encontrarCajaCerradaQueContengaFechaEntreFechaAperturaYFechaCierre(
       @Param("idSucursal") long idSucursal, @Param("fecha") LocalDateTime fecha);
 
   @Modifying
   @Query(
-      "UPDATE Caja c SET c.saldoSistema = c.saldoSistema + :monto WHERE c.idCaja = :idCaja AND c.estado = sic.modelo.EstadoCaja.CERRADA")
+      "UPDATE Caja c SET c.saldoSistema = c.saldoSistema + :monto WHERE c.idCaja = :idCaja AND c.estado = sic.domain.EstadoCaja.CERRADA")
   int actualizarSaldoSistema(@Param("idCaja") long idCaja, @Param("monto") BigDecimal monto);
 }

@@ -9,8 +9,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
-import sic.modelo.ItemCarritoCompra;
-import sic.modelo.Usuario;
+import sic.entity.ItemCarritoCompra;
+import sic.entity.Usuario;
 
 public interface CarritoCompraRepository
     extends PagingAndSortingRepository<ItemCarritoCompra, Long> {

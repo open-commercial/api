@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
-import sic.modelo.FormaDePago;
+import sic.entity.FormaDePago;
 
 public interface FormaDePagoRepository extends PagingAndSortingRepository<FormaDePago, Long> {
 

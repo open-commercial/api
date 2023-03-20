@@ -12,9 +12,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaNotaCriteria;
-import sic.modelo.dto.*;
+import sic.domain.Rol;
+import sic.domain.TipoDeComprobante;
+import sic.dto.NuevaNotaCreditoDeFacturaDTO;
+import sic.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.dto.NuevaNotaDebitoSinReciboDTO;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaNotaCriteria;
 import sic.service.*;
 
 @RestController

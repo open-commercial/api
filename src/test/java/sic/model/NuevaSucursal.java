@@ -2,8 +2,8 @@ package sic.model;
 
 import lombok.Builder;
 import lombok.Data;
-import sic.modelo.CategoriaIVA;
-import sic.modelo.dto.UbicacionDTO;
+import sic.domain.CategoriaIVA;
+import sic.dto.UbicacionDTO;
 
 import java.time.LocalDateTime;
 

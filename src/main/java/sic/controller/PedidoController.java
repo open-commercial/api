@@ -12,12 +12,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.modelo.Resultados;
-import sic.modelo.dto.PedidoDTO;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.domain.Resultados;
+import sic.domain.Rol;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaPedidoCriteria;
+import sic.dto.NuevosResultadosComprobanteDTO;
+import sic.dto.PedidoDTO;
+import sic.dto.NuevoRenglonPedidoDTO;
 import sic.service.*;
 
 @RestController

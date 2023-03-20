@@ -6,8 +6,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.context.MessageSource;
-import sic.modelo.*;
-import sic.modelo.criteria.BusquedaCajaCriteria;
+import sic.domain.EstadoCaja;
+import sic.entity.*;
+import sic.entity.criteria.BusquedaCajaCriteria;
 import sic.service.*;
 import javax.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
@@ -368,7 +369,7 @@ public class CajaServiceImpl implements ICajaService {
 
   @Override
   public List<MovimientoCaja> getMovimientosPorFormaDePagoEntreFechas(
-    Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
+          Sucursal sucursal, FormaDePago formaDePago, LocalDateTime desde, LocalDateTime hasta) {
     List<MovimientoCaja> movimientos = new ArrayList<>();
     gastoService
         .getGastosEntreFechasYFormaDePago(sucursal, formaDePago, desde, hasta)
