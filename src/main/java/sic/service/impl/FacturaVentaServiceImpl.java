@@ -303,10 +303,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     facturas.forEach(f -> {
       if (f.getCliente().equals(pedido.getCliente()) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
               f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
-        throw
-                new BusinessServiceException(
-                        messageSource.getMessage(
-                                "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
       }
     });
     pedido.setEstado(EstadoPedido.CERRADO);
@@ -321,10 +320,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     if (!pedido.getCliente().isPuedeComprarAPlazo()
             && totalFacturas.compareTo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente())) > 0) {
-      throw
-              new BusinessServiceException(
-                      messageSource.getMessage(
-                              "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
     }
     facturas.forEach(f -> {
       var facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
@@ -334,7 +332,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     });
     var facturasParaRelacionarAlPedido = new ArrayList<Factura>(facturasProcesadas);
     pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
-    if (pedido.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada()) {
+    var facturaElectronicaHabilitada = pedido.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada();
+    if (facturaElectronicaHabilitada) {
       var tiposAutorizables = Arrays.asList(TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
       facturasProcesadas.stream()
               .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
