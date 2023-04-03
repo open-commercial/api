@@ -17,6 +17,7 @@ import java.util.List;
 @JsonView(Views.Encargado.class)
 public class CommitDTO {
 
+    String idCommit;
     String nombreDeClase;
     LocalDateTime fecha;
     String usuario;

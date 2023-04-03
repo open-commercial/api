@@ -16,6 +16,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import org.javers.core.metamodel.annotation.DiffIgnore;
 import sic.controller.Views;
 import sic.modelo.dto.UbicacionDTO;
 
@@ -78,6 +79,7 @@ public class Pedido implements Serializable {
   @JsonProperty(access = Access.WRITE_ONLY)
   private List<Factura> facturas;
 
+  //@DiffIgnore
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
   @JoinColumn(name = "id_Pedido")
   @JsonProperty(access = Access.WRITE_ONLY)

@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import com.google.gson.internal.LinkedTreeMap;
 import com.querydsl.core.BooleanBuilder;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -15,6 +16,8 @@ import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
+import org.javers.core.commit.Commit;
+import org.javers.core.commit.CommitId;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.changetype.*;
 import org.javers.core.diff.changetype.container.CollectionChange;
@@ -246,6 +249,8 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     Map<String, String> properties = new HashMap<>();
     properties.put("TipoDeOperacion", TipoDeOperacion.ALTA.name());
+    Commit commitRenglones = javers.commit(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
+    properties.put("idCommitRenglones", commitRenglones.getId().value());
     javers.commit(String.valueOf(authService.getActiveUserId()), pedido, properties);
     return pedido;
   }
@@ -447,6 +452,8 @@ public class PedidoServiceImpl implements IPedidoService {
     pedidoRepository.save(pedido);
     Map<String, String> properties = new HashMap<>();
     properties.put("TipoDeOperacion", TipoDeOperacion.ACTUALIZACION.name());
+    Commit commitRenglones = javers.commit(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
+    properties.put("idCommitRenglones", commitRenglones.getId().value());
     javers.commit(String.valueOf(authService.getActiveUserId()), pedido, properties);
     this.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnteriores);
   }
@@ -803,10 +810,23 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<CommitDTO> getPedidoChanges(long idPedido) {
-    QueryBuilder queryBuilder = QueryBuilder.byInstance(this.getPedidoNoEliminadoPorId(idPedido));
+  public List<CommitDTO> getCambiosPedido(long idPedido) {
+    QueryBuilder queryBuilder = QueryBuilder.byInstance(this.getPedidoNoEliminadoPorId(idPedido))
+            .withChildValueObjects(true);
     Changes changes = javers.findChanges(queryBuilder.build());
     return this.getChangesDTO(changes);
+  }
+
+  @Override
+  public List<CommitDTO> getCambiosRenglonesPedido(long idCommitPedido) {
+    var query = QueryBuilder.byClass(Pedido.class).withCommitId(BigDecimal.valueOf(idCommitPedido));
+    var changesPedido = javers.findChanges(query.build()).groupByCommit();
+    if (changesPedido.isEmpty()) throw new ServiceException(
+            messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada", null, Locale.getDefault())); //cambiar mensaje
+    var idCommitRenglones = changesPedido.get(changesPedido.size() - 1).getCommit().getProperties().get("idCommitRenglones");
+    query = QueryBuilder.anyDomainObject().withCommitId(CommitId.valueOf(idCommitRenglones));
+    Changes changesRenglones = javers.findChanges(query.build());
+    return this.getChangesDTO(changesRenglones);
   }
 
   private List<CommitDTO> getChangesDTO(Changes changes) {
@@ -816,6 +836,7 @@ public class PedidoServiceImpl implements IPedidoService {
     changes.groupByCommit().forEach(changeByCommit -> {
       Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changeByCommit.getCommit().getAuthor()));
       changesDTO.add(CommitDTO.builder()
+              .idCommit(changeByCommit.getCommit().getId().value())
               .nombreDeClase(nombreDeClase)
               .fecha(changeByCommit.getCommit().getCommitDate())
               .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
@@ -861,12 +882,20 @@ public class PedidoServiceImpl implements IPedidoService {
                   .build());
         }
         case "ListChange" -> {
-          var listChange = (ListChange) change;
-          valuesChanges.add(CambioDTO.builder()
-                  .valorSiguiente(String.valueOf(listChange.getRightSize()))
-                  .valorAnterior(String.valueOf(listChange.getLeftSize()))
-                  .atributo(listChange.getPropertyName())
-                  .build());
+          var listChange = (ListChange) change; // agregar datos renglones
+          var mapRight = (LinkedTreeMap)listChange.getRight().get(0);
+          var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
+                  (LinkedTreeMap)listChange.getLeft().get(0) : new LinkedTreeMap<>();
+          var keySet = mapRight.keySet();
+          keySet.stream().forEach(key -> {
+            var valorSiguiente = mapRight.get(key);
+            var valorAnterior = mapLeft.get(key);
+            valuesChanges.add(CambioDTO.builder()
+                    .valorSiguiente(valorSiguiente.toString())
+                    .valorAnterior(valorAnterior != null ? valorAnterior.toString() : "")
+                    .atributo(key.toString())
+                    .build());
+          });
         }
         case "InitialValueChange" -> {
           var initialValueChange = (InitialValueChange) change;

@@ -159,9 +159,15 @@ public class PedidoController {
     return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
   }
 
-  @GetMapping("/pedidos/{idPedido}/changes")
+  @GetMapping("/pedidos/{idPedido}/cambios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<CommitDTO> getChanges(@PathVariable long idPedido, HttpServletRequest request) {
-    return pedidoService.getPedidoChanges(idPedido);
+  public List<CommitDTO> getCambios(@PathVariable long idPedido, HttpServletRequest request) {
+    return pedidoService.getCambiosPedido(idPedido);
+  }
+
+  @GetMapping("/pedidos/commit/{idCommitPedido}/renglones") // traer el grupo de todos los commits de pedidos, juntos, y el commit del pedido
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public List<CommitDTO> getCambiosRenglones(@PathVariable long idCommitPedido) {
+    return pedidoService.getCambiosRenglonesPedido(idCommitPedido);
   }
 }

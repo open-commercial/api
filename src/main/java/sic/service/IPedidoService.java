@@ -62,5 +62,7 @@ public interface IPedidoService {
 
   RenglonPedido actualizarCantidadRenglonPedido(RenglonPedido renglonPedido, BigDecimal cantidadNueva);
 
-  List<CommitDTO> getPedidoChanges(long idPedido);
+  List<CommitDTO> getCambiosPedido(long idPedido);
+
+  List<CommitDTO> getCambiosRenglonesPedido(long idCommitPedido);
 }
