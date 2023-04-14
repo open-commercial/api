@@ -72,54 +72,47 @@ public class AfipTaxationServiceImpl implements ITaxationService {
     }
     FECAESolicitar fecaeSolicitud = new FECAESolicitar();
     FEAuthRequest feAuthRequest = this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
-    if (feAuthRequest != null) {
-      fecaeSolicitud.setAuth(feAuthRequest);
-      int nroPuntoDeVentaAfip =
-          comprobante.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip();
-      int siguienteNroComprobante =
-          this.getSiguienteNroComprobante(
-              feAuthRequest, comprobante.getTipoComprobante(), nroPuntoDeVentaAfip);
-      fecaeSolicitud.setFeCAEReq(
-          this.transformComprobanteToFECAERequest(
-              comprobante, siguienteNroComprobante, nroPuntoDeVentaAfip));
-      try {
-        FECAEResponse response = afipWebServiceSOAPClient.solicitarCAE(fecaeSolicitud);
-        String msjError = "";
-        // errores generales de la request
-        if (response.getErrors() != null) {
-          msjError =
-              response.getErrors().getErr().get(0).getCode()
-                  + "-"
-                  + response.getErrors().getErr().get(0).getMsg();
-          logger.error(msjError);
-          throw new BusinessServiceException(msjError);
-        }
-        // errores particulares de cada comprobante
-        if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {
-          msjError +=
-              response
-                  .getFeDetResp()
-                  .getFECAEDetResponse()
-                  .get(0)
-                  .getObservaciones()
-                  .getObs()
-                  .get(0)
-                  .getMsg();
-          logger.error(msjError);
-          throw new BusinessServiceException(msjError);
-        }
-        long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
-        comprobante.setCae(cae);
-        String fechaVencimientoCaeResponse =
-            response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto();
-        comprobante.setVencimientoCAE(
-            LocalDate.parse(fechaVencimientoCaeResponse, DateTimeFormatter.BASIC_ISO_DATE));
-        comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
-        comprobante.setNumFacturaAfip(siguienteNroComprobante);
-      } catch (WebServiceClientException | IOException ex) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
+    fecaeSolicitud.setAuth(feAuthRequest);
+    int nroPuntoDeVentaAfip = comprobante.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip();
+    int siguienteNroComprobante =
+        this.getSiguienteNroComprobante(feAuthRequest, comprobante.getTipoComprobante(), nroPuntoDeVentaAfip);
+    fecaeSolicitud.setFeCAEReq(
+        this.transformComprobanteToFECAERequest(comprobante, siguienteNroComprobante, nroPuntoDeVentaAfip));
+    try {
+      FECAEResponse response = afipWebServiceSOAPClient.solicitarCAE(fecaeSolicitud);
+      String msjError = "";
+      // errores generales de la request
+      if (response.getErrors() != null) {
+        msjError =
+            response.getErrors().getErr().get(0).getCode()
+                + "-"
+                + response.getErrors().getErr().get(0).getMsg();
+        logger.error(msjError);
+        throw new BusinessServiceException(msjError);
       }
+      // errores particulares de cada comprobante
+      if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {
+        msjError +=
+            response
+                .getFeDetResp()
+                .getFECAEDetResponse()
+                .get(0)
+                .getObservaciones()
+                .getObs()
+                .get(0)
+                .getMsg();
+        logger.error(msjError);
+        throw new BusinessServiceException(msjError);
+      }
+      long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
+      comprobante.setCae(cae);
+      String fechaVencimientoCaeResponse = response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto();
+      comprobante.setVencimientoCAE(LocalDate.parse(fechaVencimientoCaeResponse, DateTimeFormatter.BASIC_ISO_DATE));
+      comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
+      comprobante.setNumFacturaAfip(siguienteNroComprobante);
+    } catch (WebServiceClientException | IOException ex) {
+      throw new BusinessServiceException(messageSource.getMessage(
+              MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
     }
   }
 
