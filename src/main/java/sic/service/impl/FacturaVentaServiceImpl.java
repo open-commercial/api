@@ -37,7 +37,7 @@ import java.util.*;
 public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   private final FacturaVentaRepository facturaVentaRepository;
-  private final IAfipService afipService;
+  private final ITaxationService taxationService;
   private final IReciboService reciboService;
   private final IEmailService emailService;
   private final IPedidoService pedidoService;
@@ -59,7 +59,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Lazy
   public FacturaVentaServiceImpl(
       FacturaVentaRepository facturaVentaRepository,
-      IAfipService afipService,
+      ITaxationService taxationService,
       IReciboService reciboService,
       IEmailService emailService,
       IPedidoService pedidoService,
@@ -73,7 +73,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       CustomValidator customValidator) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
-    this.afipService = afipService;
+    this.taxationService = taxationService;
     this.emailService = emailService;
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
@@ -383,7 +383,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
                     .montoNoGravado(BigDecimal.ZERO)
                     .total(fv.getTotal())
                     .build();
-    afipService.autorizar(comprobante);
+    taxationService.autorizar(comprobante);
     fv.setCae(comprobante.getCae());
     fv.setVencimientoCae(comprobante.getVencimientoCAE());
     fv.setNumSerieAfip(comprobante.getNumSerieAfip());

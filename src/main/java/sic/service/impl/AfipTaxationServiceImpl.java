@@ -29,7 +29,7 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 
 @Service
-public class AfipServiceImpl implements IAfipService {
+public class AfipTaxationServiceImpl implements ITaxationService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
   private final IConfiguracionSucursalService configuracionSucursalService;
@@ -41,66 +41,13 @@ public class AfipServiceImpl implements IAfipService {
   private static final String MENSAJE_COMPROBANTEAFIP_INVALIDO = "mensaje_comprobanteAFIP_invalido";
 
   @Autowired
-  public AfipServiceImpl(
+  public AfipTaxationServiceImpl(
       AfipWebServiceSOAPClient afipWebServiceSOAPClient,
       IConfiguracionSucursalService configuracionSucursalService,
       MessageSource messageSource) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
     this.configuracionSucursalService = configuracionSucursalService;
     this.messageSource = messageSource;
-  }
-
-  @Override
-  public FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
-    FEAuthRequest feAuthRequest = new FEAuthRequest();
-    ConfiguracionSucursal configuracionSucursal = sucursal.getConfiguracionSucursal();
-    LocalDateTime fechaVencimientoToken = configuracionSucursal.getFechaVencimientoTokenWSAA();
-    if (fechaVencimientoToken != null && fechaVencimientoToken.isAfter(LocalDateTime.now())) {
-      feAuthRequest.setToken(configuracionSucursal.getTokenWSAA());
-      feAuthRequest.setSign(configuracionSucursal.getSignTokenWSAA());
-      feAuthRequest.setCuit(sucursal.getIdFiscal());
-      return feAuthRequest;
-    } else {
-      byte[] p12file = configuracionSucursal.getCertificadoAfip();
-      if (p12file.length == 0) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_sucursal_certificado_vacio", null, Locale.getDefault()));
-      } else {
-        String p12signer = configuracionSucursal.getFirmanteCertificadoAfip();
-        String p12pass = configuracionSucursal.getPasswordCertificadoAfip();
-        long ticketTimeInHours = 12L; // siempre devuelve por 12hs
-        byte[] loginTicketRequestXmlCms =
-            afipWebServiceSOAPClient.crearCMS(
-                p12file, p12pass, p12signer, afipNombreServicio, ticketTimeInHours);
-        LoginCms loginCms = new LoginCms();
-        loginCms.setIn0(Base64.getEncoder().encodeToString(loginTicketRequestXmlCms));
-        try {
-          String loginTicketResponse = afipWebServiceSOAPClient.loginCMS(loginCms);
-          Reader tokenReader = new StringReader(loginTicketResponse);
-          var saxReader = new SAXReader(false);
-          saxReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-          Document tokenDoc = saxReader.read(tokenReader);
-          String tokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/token");
-          String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
-          feAuthRequest.setToken(tokenWSAA);
-          feAuthRequest.setSign(signTokenWSAA);
-          feAuthRequest.setCuit(sucursal.getIdFiscal());
-          configuracionSucursal.setTokenWSAA(tokenWSAA);
-          configuracionSucursal.setSignTokenWSAA(signTokenWSAA);
-          String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
-          String expirationTime = tokenDoc.valueOf("/loginTicketResponse/header/expirationTime");
-          configuracionSucursal.setFechaGeneracionTokenWSAA(
-              LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-          configuracionSucursal.setFechaVencimientoTokenWSAA(
-              LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
-          configuracionSucursalService.actualizar(configuracionSucursal);
-          return feAuthRequest;
-        } catch (DocumentException | IOException | WebServiceClientException | SAXException ex) {
-          throw new ServiceException(
-                  messageSource.getMessage(MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
-        }
-      }
-    }
   }
 
   @Override
@@ -124,8 +71,7 @@ public class AfipServiceImpl implements IAfipService {
               "mensaje_comprobanteAFIP_autorizado", null, Locale.getDefault()));
     }
     FECAESolicitar fecaeSolicitud = new FECAESolicitar();
-    FEAuthRequest feAuthRequest =
-        this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
+    FEAuthRequest feAuthRequest = this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
     if (feAuthRequest != null) {
       fecaeSolicitud.setAuth(feAuthRequest);
       int nroPuntoDeVentaAfip =
@@ -177,8 +123,59 @@ public class AfipServiceImpl implements IAfipService {
     }
   }
 
-  @Override
-  public int getSiguienteNroComprobante(FEAuthRequest feAuthRequest, TipoDeComprobante tipo, int nroPuntoDeVentaAfip) {
+  private FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
+    FEAuthRequest feAuthRequest = new FEAuthRequest();
+    ConfiguracionSucursal configuracionSucursal = sucursal.getConfiguracionSucursal();
+    LocalDateTime fechaVencimientoToken = configuracionSucursal.getFechaVencimientoTokenWSAA();
+    if (fechaVencimientoToken != null && fechaVencimientoToken.isAfter(LocalDateTime.now())) {
+      feAuthRequest.setToken(configuracionSucursal.getTokenWSAA());
+      feAuthRequest.setSign(configuracionSucursal.getSignTokenWSAA());
+      feAuthRequest.setCuit(sucursal.getIdFiscal());
+      return feAuthRequest;
+    } else {
+      byte[] p12file = configuracionSucursal.getCertificadoAfip();
+      if (p12file.length == 0) {
+        throw new BusinessServiceException(messageSource.getMessage(
+                "mensaje_sucursal_certificado_vacio", null, Locale.getDefault()));
+      } else {
+        String p12signer = configuracionSucursal.getFirmanteCertificadoAfip();
+        String p12pass = configuracionSucursal.getPasswordCertificadoAfip();
+        long ticketTimeInHours = 12L; // siempre devuelve por 12hs
+        byte[] loginTicketRequestXmlCms =
+                afipWebServiceSOAPClient.crearCMS(
+                        p12file, p12pass, p12signer, afipNombreServicio, ticketTimeInHours);
+        LoginCms loginCms = new LoginCms();
+        loginCms.setIn0(Base64.getEncoder().encodeToString(loginTicketRequestXmlCms));
+        try {
+          String loginTicketResponse = afipWebServiceSOAPClient.loginCMS(loginCms);
+          Reader tokenReader = new StringReader(loginTicketResponse);
+          var saxReader = new SAXReader(false);
+          saxReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+          Document tokenDoc = saxReader.read(tokenReader);
+          String tokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/token");
+          String signTokenWSAA = tokenDoc.valueOf("/loginTicketResponse/credentials/sign");
+          feAuthRequest.setToken(tokenWSAA);
+          feAuthRequest.setSign(signTokenWSAA);
+          feAuthRequest.setCuit(sucursal.getIdFiscal());
+          configuracionSucursal.setTokenWSAA(tokenWSAA);
+          configuracionSucursal.setSignTokenWSAA(signTokenWSAA);
+          String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
+          String expirationTime = tokenDoc.valueOf("/loginTicketResponse/header/expirationTime");
+          configuracionSucursal.setFechaGeneracionTokenWSAA(
+                  LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+          configuracionSucursal.setFechaVencimientoTokenWSAA(
+                  LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+          configuracionSucursalService.actualizar(configuracionSucursal);
+          return feAuthRequest;
+        } catch (DocumentException | IOException | WebServiceClientException | SAXException ex) {
+          throw new ServiceException(
+                  messageSource.getMessage(MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
+        }
+      }
+    }
+  }
+
+  private int getSiguienteNroComprobante(FEAuthRequest feAuthRequest, TipoDeComprobante tipo, int nroPuntoDeVentaAfip) {
     FECompUltimoAutorizado solicitud = new FECompUltimoAutorizado();
     solicitud.setAuth(feAuthRequest);
     switch (tipo) {
@@ -205,8 +202,7 @@ public class AfipServiceImpl implements IAfipService {
     }
   }
 
-  @Override
-  public FECAERequest transformComprobanteToFECAERequest(ComprobanteAFIP comprobante, int siguienteNroComprobante, int nroPuntoDeVentaAfip) {
+  private FECAERequest transformComprobanteToFECAERequest(ComprobanteAFIP comprobante, int siguienteNroComprobante, int nroPuntoDeVentaAfip) {
     FECAERequest fecaeRequest = new FECAERequest();
     FECAECabRequest cabecera = new FECAECabRequest();
     FECAEDetRequest detalle = new FECAEDetRequest();

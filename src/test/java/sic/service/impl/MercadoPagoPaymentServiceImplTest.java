@@ -29,13 +29,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
     classes = {
-      MercadoPagoServiceImpl.class,
+      MercadoPagoPaymentServiceImpl.class,
       EncryptUtils.class,
       MessageSource.class,
       CustomValidator.class
     })
 @TestPropertySource(locations = "classpath:application.properties")
-class MercadoPagoServiceImplTest {
+class MercadoPagoPaymentServiceImplTest {
 
   @MockBean IReciboService reciboService;
   @MockBean IClienteService clienteService;
@@ -49,7 +49,7 @@ class MercadoPagoServiceImplTest {
   @MockBean MessageSource messageSource;
 
   @Autowired EncryptUtils encryptUtils;
-  @Autowired IPagoService pagoService;
+  @Autowired IPaymentService paymentService;
 
   @Test
   @Disabled
@@ -92,7 +92,7 @@ class MercadoPagoServiceImplTest {
                     .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
                     .monto(BigDecimal.TEN)
                     .build();
-    var preferenceNuevaOrden = pagoService.getNuevaPreferenceParams(1L, nuevaOrdenDePagoDTO, "localhost");
+    var preferenceNuevaOrden = paymentService.getNuevaPreferenceParams(1L, nuevaOrdenDePagoDTO, "localhost");
     var mercadoPagoPreferenceDTO = new MercadoPagoPreferenceDTO(preferenceNuevaOrden.get(0), preferenceNuevaOrden.get(1));
     assertNotNull(mercadoPagoPreferenceDTO);
     assertNotNull(mercadoPagoPreferenceDTO.getId());
@@ -112,7 +112,7 @@ class MercadoPagoServiceImplTest {
     assertThrows(
         BusinessServiceException.class,
         () ->
-            pagoService.getNuevaPreferenceParams(2L, ordenDePagoConUbicacionEnvio, "localhost"));
+            paymentService.getNuevaPreferenceParams(2L, ordenDePagoConUbicacionEnvio, "localhost"));
     verify(messageSource).getMessage(eq("mensaje_preference_cliente_sin_email"), any(), any());
     var ordenDePagoPedido =
             NuevaOrdenDePagoDTO.builder()
@@ -128,7 +128,7 @@ class MercadoPagoServiceImplTest {
     pedido.setFechaVencimiento(LocalDateTime.now());
     when(pedidoService.guardar(any(), any())).thenReturn(pedido);
     when(carritoCompraService.calcularTotal(1L)).thenReturn(new BigDecimal("1000.00"));
-    var preferenceOrdenPagoPedido = pagoService.getNuevaPreferenceParams(1L, ordenDePagoPedido, "localhost");
+    var preferenceOrdenPagoPedido = paymentService.getNuevaPreferenceParams(1L, ordenDePagoPedido, "localhost");
     var mercadoPagoPreference = new MercadoPagoPreferenceDTO(preferenceOrdenPagoPedido.get(0), preferenceOrdenPagoPedido.get(1));
     var idProducto = new long[]{1L, 2L};
     var cantidad = new BigDecimal[]{BigDecimal.ONE, BigDecimal.TEN};
@@ -177,7 +177,7 @@ class MercadoPagoServiceImplTest {
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
     when(pedidoService.guardar(pedido, null)).thenReturn(pedido);
-    pagoService.crearComprobantePorNotificacion(26800675L);
+    paymentService.crearComprobantePorNotificacion(26800675L);
     verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyLong());
     verify(clienteService, times(1)).getClientePorIdUsuario(anyLong());
     verify(sucursalService, times(1)).getSucursalPorId(any());

@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.Arrays;
 
 @Service
-public class MercadoPagoServiceImpl implements IPagoService {
+public class MercadoPagoPaymentServiceImpl implements IPaymentService {
 
   @Value("${MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccessToken;
@@ -51,10 +51,13 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private final IProductoService productoService;
   private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
+  private static final String MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO = "mensaje_preference_tipo_de_movimiento_no_soportado";
+  private static final String MENSAJE_PAGO_ERROR = "mensaje_pago_error";
   private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de Mercado Pago no se encuentra configurado";
   private static final String STRING_ID_USUARIO = "idUsuario";
-  private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
-          new String[]{"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
+  private static final String[] MEDIOS_DE_PAGO_NO_PERMITIDOS = new String[] {
+          "rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"
+  };
   private static final String APPROVED = "approved";
   private static final String REFUNDED = "refunded";
   private static final String REJECTED = "rejected";
@@ -64,7 +67,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private final CustomValidator customValidator;
 
   @Autowired
-  public MercadoPagoServiceImpl(
+  public MercadoPagoPaymentServiceImpl(
     IReciboService reciboService,
     IClienteService clienteService,
     INotaService notaService,
@@ -95,8 +98,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
   }
 
   @Override
-  public List<String> getNuevaPreferenceParams(
-      long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+  public List<String> getNuevaPreferenceParams(long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
     if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     customValidator.validar(nuevaOrdenDeCompra);
     var sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
@@ -189,8 +191,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
                 .build();
       }
       default -> throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
     }
     var jsonObject = JsonParser.parseString(stringJson).getAsJsonObject();
     try {
@@ -207,7 +208,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
             .build();
     var excludedPaymentMethods = new ArrayList<PreferencePaymentMethodRequest>();
     if (!clienteDeUsuario.isPuedeComprarAPlazo()) {
-      Arrays.stream(MEDIO_DE_PAGO_NO_PERMITIDOS).toList().forEach(
+      Arrays.stream(MEDIOS_DE_PAGO_NO_PERMITIDOS).toList().forEach(
               medioDePago -> excludedPaymentMethods.add(PreferencePaymentMethodRequest.builder().id(medioDePago).build())
       );
     }
@@ -245,8 +246,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
         pedidoService.eliminar(pedido.getIdPedido());
       }
       throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[]{ex.getMessage()}, Locale.getDefault()));
     }
     return Arrays.asList(preference.getId(), preference.getInitPoint());
   }
@@ -268,14 +268,12 @@ public class MercadoPagoServiceImpl implements IPagoService {
         var idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
         }
         var idSucursal = convertedObject.get("idSucursal");
         if (idSucursal == null) {
           throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
         }
         var cliente = clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
         var sucursal = sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
@@ -297,10 +295,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
                 }
                 case DEPOSITO -> this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                 default -> throw new BusinessServiceException(
-                        messageSource.getMessage(
-                                "mensaje_preference_tipo_de_movimiento_no_soportado",
-                                null,
-                                Locale.getDefault()));
+                        messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
               }
             }
           }
@@ -337,8 +332,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
       }
     } catch (MPException | MPApiException ex) {
       throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[]{ex.getMessage()}, Locale.getDefault()));
     }
     catch (GeneralSecurityException e) {
       throw new ServiceException(
@@ -359,13 +353,11 @@ public class MercadoPagoServiceImpl implements IPagoService {
       }
     } catch (MPApiException | MPException ex) {
       throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_pago_error", new Object[] {ex.getMessage()}, Locale.getDefault()));
+          messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[] {ex.getMessage()}, Locale.getDefault()));
     }
   }
 
-  private void crearReciboDePago(
-      Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
+  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case APPROVED:
         logger.warn(

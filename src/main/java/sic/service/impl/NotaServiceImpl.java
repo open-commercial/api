@@ -55,8 +55,8 @@ public class NotaServiceImpl implements INotaService {
   private final IUsuarioService usuarioService;
   private final IProductoService productoService;
   private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IPagoService pagoService;
-  private final IAfipService afipService;
+  private final IPaymentService paymentService;
+  private final ITaxationService taxationService;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -82,8 +82,8 @@ public class NotaServiceImpl implements INotaService {
     IProductoService productoService,
     ISucursalService sucursalService,
     ICuentaCorrienteService cuentaCorrienteService,
-    IPagoService pagoService,
-    IAfipService afipService,
+    IPaymentService paymentService,
+    ITaxationService taxationService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.notaRepository = notaRepository;
@@ -98,8 +98,8 @@ public class NotaServiceImpl implements INotaService {
     this.sucursalService = sucursalService;
     this.productoService = productoService;
     this.cuentaCorrienteService = cuentaCorrienteService;
-    this.pagoService = pagoService;
-    this.afipService = afipService;
+    this.paymentService = paymentService;
+    this.taxationService = taxationService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -1041,7 +1041,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
     if (notaDebito.getRecibo() != null && notaDebito.getRecibo().getIdPagoMercadoPago() != null) {
-      pagoService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
+      paymentService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
     }
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
     var facturaElectronicaHabilitada = notaDebito.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada();
@@ -1079,7 +1079,7 @@ public class NotaServiceImpl implements INotaService {
                       .montoNoGravado(montoNoGravado)
                       .total(nota.getTotal())
                       .build();
-      afipService.autorizar(comprobante);
+      taxationService.autorizar(comprobante);
       nota.setCae(comprobante.getCae());
       nota.setVencimientoCae(comprobante.getVencimientoCAE());
       nota.setNumSerieAfip(comprobante.getNumSerieAfip());

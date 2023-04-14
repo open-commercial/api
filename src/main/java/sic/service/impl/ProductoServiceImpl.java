@@ -369,17 +369,16 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public Producto guardar(
-      NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
+  public Producto guardar(NuevoProductoDTO nuevoProductoDTO, long idMedida, long idRubro, long idProveedor) {
     customValidator.validar(nuevoProductoDTO);
     if (nuevoProductoDTO.getCodigo() == null) nuevoProductoDTO.setCodigo("");
-    Producto producto = new Producto();
+    var producto = new Producto();
     producto.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
     producto.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
     producto.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     producto.setCodigo(nuevoProductoDTO.getCodigo());
     producto.setDescripcion(nuevoProductoDTO.getDescripcion());
-    Set<CantidadEnSucursal> altaCantidadesEnSucursales = new HashSet<>();
+    var altaCantidadesEnSucursales = new HashSet<CantidadEnSucursal>();
     sucursalService
         .getSucusales(false)
         .forEach(
@@ -436,12 +435,10 @@ public class ProductoServiceImpl implements IProductoService {
     producto.setParaCatalogo(nuevoProductoDTO.isParaCatalogo());
     producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
     producto = productoRepository.save(producto);
-    logger.warn(
-        messageSource.getMessage(
-            "mensaje_producto_guardado", new Object[] {producto}, Locale.getDefault()));
-    if (nuevoProductoDTO.getImagen() != null)
-      producto.setUrlImagen(
-          this.subirImagenProducto(producto.getIdProducto(), nuevoProductoDTO.getImagen()));
+    logger.info(messageSource.getMessage("mensaje_producto_guardado", new Object[] {producto}, Locale.getDefault()));
+    if (nuevoProductoDTO.getImagen() != null) {
+      producto.setUrlImagen(this.subirImagenProducto(producto.getIdProducto(), nuevoProductoDTO.getImagen()));
+    }
     return producto;
   }
 
@@ -469,7 +466,7 @@ public class ProductoServiceImpl implements IProductoService {
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
     productoPorActualizar.setVersion(productoPersistido.getVersion());
     productoPorActualizar = productoRepository.save(productoPorActualizar);
-    logger.warn(
+    logger.info(
         messageSource.getMessage(
             "mensaje_producto_actualizado",
             new Object[] {productoPorActualizar},
