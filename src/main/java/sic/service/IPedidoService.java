@@ -64,5 +64,6 @@ public interface IPedidoService {
 
   List<CommitDTO> getCambiosPedido(long idPedido);
 
-  List<CommitDTO> getCambiosRenglonesPedido(long idCommitPedido);
+  List<List<CommitDTO>> getCambiosRenglonesPedido(long idCommitPedido);
+
 }

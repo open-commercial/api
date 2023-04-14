@@ -14,7 +14,6 @@ import javax.swing.ImageIcon;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.javers.core.Changes;
-import org.javers.core.Javers;
 import org.javers.core.commit.Commit;
 import org.javers.core.commit.CommitId;
 import org.javers.repository.jql.QueryBuilder;
@@ -750,17 +749,13 @@ public class PedidoServiceImpl implements IPedidoService {
         renglonPedido.setIdProductoItem(0);
       }});
     renglonesDelPedido.removeIf(renglonPedido -> renglonPedido.getIdProductoItem() == 0); //elimina los renglones
-    nuevosRenglones.forEach(nuevoRenglon -> {
-      renglonesDelPedido.stream().filter(renglonPedido -> nuevoRenglon.getIdProductoItem() == renglonPedido.getIdProductoItem())
-              .forEach(renglonPedido -> {
-                this.actualizarCantidadRenglonPedido(renglonPedido, nuevoRenglon.getCantidad());
-                nuevoRenglon.setIdProductoItem(0L);
-              });
-    });
+    nuevosRenglones.forEach(nuevoRenglon -> renglonesDelPedido.stream().filter(renglonPedido -> nuevoRenglon.getIdProductoItem() == renglonPedido.getIdProductoItem())
+            .forEach(renglonPedido -> {
+              this.actualizarCantidadRenglonPedido(renglonPedido, nuevoRenglon.getCantidad());
+              nuevoRenglon.setIdProductoItem(0L);
+            }));
     nuevosRenglones.removeIf(nuevoRenglon -> nuevoRenglon.getIdProductoItem() == 0);
-    nuevosRenglones.forEach(nuevoRenglon -> {
-      renglonesParaAgregar.add(this.calcularRenglonPedido(nuevoRenglon.getIdProductoItem(), nuevoRenglon.getCantidad()));
-    });
+    nuevosRenglones.forEach(nuevoRenglon -> renglonesParaAgregar.add(this.calcularRenglonPedido(nuevoRenglon.getIdProductoItem(), nuevoRenglon.getCantidad())));
     renglonesDelPedido.addAll(renglonesParaAgregar);
     return renglonesDelPedido;
   }
@@ -811,15 +806,19 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<CommitDTO> getCambiosRenglonesPedido(long idCommitPedido) {
-    var query = QueryBuilder.byClass(Pedido.class).withCommitId(BigDecimal.valueOf(idCommitPedido));
+  public List<List<CommitDTO>> getCambiosRenglonesPedido(long idPedido) {
+    var query = QueryBuilder.byInstanceId(idPedido, Pedido.class);
     var changesPedido = auditService.getCambios(query.build()).groupByCommit();
-    if (changesPedido.isEmpty()) throw new ServiceException(
-            messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada", null, Locale.getDefault())); //cambiar mensaje
-    var idCommitRenglones = changesPedido.get(changesPedido.size() - 1).getCommit().getProperties().get("idCommitRenglones");
-    query = QueryBuilder.anyDomainObject().withCommitId(CommitId.valueOf(idCommitRenglones));
-    Changes changesRenglones = auditService.getCambios(query.build());
-    return auditService.getCambiosDTO(changesRenglones); // se puede agregar la relación de conocimiento hacia abajo, pasar el idCommitPedido para que el DTO tenga el dato
+    var cambiosRenglones = new ArrayList<List<CommitDTO>>();
+    if (!changesPedido.isEmpty()) {
+      changesPedido.forEach(changesByCommit -> {
+        var idCommitRenglones = changesByCommit.getCommit().getProperties().get("idCommitRenglones");
+        var queryRenglones = QueryBuilder.anyDomainObject().withCommitId(CommitId.valueOf(idCommitRenglones));
+        Changes changesRenglones = auditService.getCambios(queryRenglones.build());
+        cambiosRenglones.add(auditService.getCambiosDTO(changesRenglones, String.valueOf(changesByCommit.getCommit().getId())));
+      });
+    }
+    return cambiosRenglones;
   }
 
 }

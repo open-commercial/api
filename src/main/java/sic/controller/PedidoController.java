@@ -165,9 +165,9 @@ public class PedidoController {
     return pedidoService.getCambiosPedido(idPedido);
   }
 
-  @GetMapping("/pedidos/commit/{idCommitPedido}/renglones") // traer el grupo de todos los commits de pedidos, juntos, y el commit del pedido
+  @GetMapping("/pedidos/{idPedido}/renglones/cambios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<CommitDTO> getCambiosRenglones(@PathVariable long idCommitPedido) {
-    return pedidoService.getCambiosRenglonesPedido(idCommitPedido);
+  public List<List<CommitDTO>> getCambiosRenglones(@PathVariable long idPedido) {
+    return pedidoService.getCambiosRenglonesPedido(idPedido);
   }
 }

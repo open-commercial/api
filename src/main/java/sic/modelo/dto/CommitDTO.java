@@ -23,5 +23,6 @@ public class CommitDTO {
     String usuario;
     String tipoDeOperacion;
     List<CambioDTO> cambios;
+    String idCommitRelacionado;
 
 }

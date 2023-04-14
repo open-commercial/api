@@ -11,8 +11,10 @@ import org.javers.core.diff.changetype.ReferenceChange;
 import org.javers.core.diff.changetype.ValueChange;
 import org.javers.core.diff.changetype.container.CollectionChange;
 import org.javers.core.diff.changetype.container.ListChange;
+import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.JqlQuery;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CambioDTO;
@@ -24,11 +26,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Service
 public class AuditServiceImpl implements IAuditService {
 
-    private IUsuarioService usuarioService;
+    private final IUsuarioService usuarioService;
 
-    private Javers javers;
+    private final Javers javers;
 
     @Autowired
     public AuditServiceImpl(IUsuarioService usuarioService, Javers javers) {
@@ -63,6 +66,13 @@ public class AuditServiceImpl implements IAuditService {
                     .build());
         });
         return changesDTO;
+    }
+
+    @Override
+    public List<CommitDTO> getCambiosDTO(Changes changes, String idCommitRelacionado) {
+        var cambios = this.getCambiosDTO(changes);
+        cambios.forEach(cambio -> cambio.setIdCommitRelacionado(idCommitRelacionado));
+        return cambios;
     }
 
     @Override
@@ -101,20 +111,34 @@ public class AuditServiceImpl implements IAuditService {
                             .build());
                 }
                 case "ListChange" -> {
-                    var listChange = (ListChange) change; // agregar datos renglones
-                    var mapRight = (LinkedTreeMap)listChange.getRight().get(0);
-                    var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
-                            (LinkedTreeMap)listChange.getLeft().get(0) : new LinkedTreeMap<>();
-                    var keySet = mapRight.keySet();
-                    keySet.stream().forEach(key -> {
-                        var valorSiguiente = mapRight.get(key);
-                        var valorAnterior = mapLeft.get(key);
+                    var listChange = (ListChange) change;
+                    if (listChange.getRight().get(0) instanceof InstanceId) {
                         valuesChanges.add(CambioDTO.builder()
-                                .valorSiguiente(valorSiguiente.toString())
-                                .valorAnterior(valorAnterior != null ? valorAnterior.toString() : "")
-                                .atributo(key.toString())
+                                        .atributo(listChange.getPropertyName())
+                                        .valorAnterior(String.valueOf(listChange.getLeft().size()))
+                                        .valorSiguiente(String.valueOf(listChange.getRight().size()))
                                 .build());
-                    });
+                        System.out.println(CambioDTO.builder()
+                                .atributo(listChange.getPropertyName())
+                                .valorAnterior(listChange.getLeft().toString())
+                                .valorSiguiente(listChange.getRight().toString())
+                                .build());
+                    }
+                    if (listChange.getRight().get(0) instanceof LinkedTreeMap) {
+                        var mapRight = (LinkedTreeMap) listChange.getRight().get(0);
+                        var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
+                                (LinkedTreeMap) listChange.getLeft().get(0) : new LinkedTreeMap<>();
+                        var keySet = mapRight.keySet();
+                        keySet.stream().forEach(key -> {
+                            var valorSiguiente = mapRight.get(key);
+                            var valorAnterior = mapLeft.get(key);
+                            valuesChanges.add(CambioDTO.builder()
+                                    .valorSiguiente(valorSiguiente.toString())
+                                    .valorAnterior(valorAnterior != null ? valorAnterior.toString() : "")
+                                    .atributo(key.toString())
+                                    .build());
+                        });
+                    }
                 }
                 case "InitialValueChange" -> {
                     var initialValueChange = (InitialValueChange) change;

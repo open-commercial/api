@@ -17,6 +17,8 @@ public interface IAuditService {
     Commit auditar(String string, Object objeto);
     List<CommitDTO> getCambiosDTO(Changes changes);
 
+    List<CommitDTO> getCambiosDTO(Changes changes, String idCommitRelacionado);
+
     List<CambioDTO> getValoresCambiadosDTO(List<Change> changes);
 
     Changes getCambios(JqlQuery jqlQuery);
