@@ -299,44 +299,27 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina) {
-    if (pagina == null) pagina = 0;
-    var ordenDefault = SortingProducto.DESCRIPCION;
-    if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault.getNombre()));
-    } else {
-      var criterios = new ArrayList<SortingProducto>();
-      ordenarPor.forEach(criterio -> {
-        var sortingBy = SortingProducto.fromValue(criterio);
-        if (sortingBy == null) {
-          throw new BusinessServiceException(
-                  messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
-        }
-        criterios.add(SortingProducto.fromValue(criterio));
-      });
-      var ordenes = new ArrayList<Sort.Order>();
-      switch (sentido) {
-        case "ASC" -> {
-          criterios.forEach(criterio -> {
-            if (criterio == SortingProducto.FECHA_ALTA || criterio == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
-              ordenes.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.ID_PRODUCTO.getNombre()));
-            }
-            ordenes.add(new Sort.Order(Sort.Direction.ASC, criterio.getNombre()));
-          });
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
-        }
-        case "DESC" -> {
-          criterios.forEach(criterio -> {
-            if (criterio == SortingProducto.FECHA_ALTA || criterio == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
-              ordenes.add(new Sort.Order(Sort.Direction.DESC, SortingProducto.ID_PRODUCTO.getNombre()));
-            }
-            ordenes.add(new Sort.Order(Sort.Direction.DESC, criterio.getNombre()));
-          });
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
-        }
-        default -> {
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault.getNombre()));
-        }
+    int numeroDePagina = pagina != null ? pagina : 0;
+    var orden = new ArrayList<Sort.Order>();
+    try {
+      if (ordenarPor != null && sentido != null) {
+        ordenarPor.forEach(nombreOrden -> {
+          var criterio = SortingProducto.fromValue(nombreOrden);
+          if (criterio == null) {
+            throw new BusinessServiceException(
+                    messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
+          }
+          if (criterio == SortingProducto.FECHA_ALTA || criterio == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
+            orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.ID_PRODUCTO.getNombre()));
+          }
+          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.getNombre()));
+        });
+      } else {
+        orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.DESCRIPCION.getNombre()));
       }
+      return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(orden));
+    } catch (IllegalArgumentException illegalArgumentException) {
+      return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
     }
   }
 
