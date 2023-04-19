@@ -67,7 +67,9 @@ public class ProductoServiceImpl implements IProductoService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String FORMATO_XLSX = "xlsx";
   private static final String FORMATO_PDF = "pdf";
-  private static final String URL_PRODUCTO_SIN_IMAGEN = "https://res.cloudinary.com/hf0vu1bg2/image/upload/q_10/f_jpg/v1545616229/assets/sin_imagen.jpg";
+  private static final String MENSAJE_ERROR_REPORTE = "mensaje_error_reporte";
+  private static final String MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO = "mensaje_error_actualizar_stock_producto_eliminado";
+  private static final String PRODUCTO_SIN_IMAGEN = "/producto_sin_imagen.png";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -514,11 +516,7 @@ public class ProductoServiceImpl implements IProductoService {
                   (idSucursalOrigen != null ? idSucursalOrigen : pedido.getSucursal().getIdSucursal()),
                   renglonAnterior.getCantidad());
             } else {
-              logger.warn(
-                  messageSource.getMessage(
-                      "mensaje_error_actualizar_stock_producto_eliminado",
-                      null,
-                      Locale.getDefault()));
+              logger.warn(messageSource.getMessage(MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO,null, Locale.getDefault()));
             }
           });
     }
@@ -563,11 +561,7 @@ public class ProductoServiceImpl implements IProductoService {
                       renglones.getCantidad());
                 }
               } else {
-                logger.warn(
-                    messageSource.getMessage(
-                        "mensaje_error_actualizar_stock_producto_eliminado",
-                        null,
-                        Locale.getDefault()));
+                logger.warn(messageSource.getMessage(MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO,null, Locale.getDefault()));
               }
             });
   }
@@ -589,11 +583,7 @@ public class ProductoServiceImpl implements IProductoService {
               this.agregarStock(producto.get(), idSucursal, cantidad);
             }
           } else {
-            logger.warn(
-                messageSource.getMessage(
-                    "mensaje_error_actualizar_stock_producto_eliminado",
-                    null,
-                    Locale.getDefault()));
+            logger.warn(messageSource.getMessage(MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO,null, Locale.getDefault()));
           }
         });
   }
@@ -626,11 +616,7 @@ public class ProductoServiceImpl implements IProductoService {
                       messageSource.getMessage("mensaje_operacion_no_soportada", null, Locale.getDefault()));
             }
           } else {
-            logger.warn(
-                messageSource.getMessage(
-                    "mensaje_error_actualizar_stock_producto_eliminado",
-                    null,
-                    Locale.getDefault()));
+            logger.warn(messageSource.getMessage(MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO,null, Locale.getDefault()));
           }
         });
   }
@@ -1136,48 +1122,43 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   public byte[] getListaDePrecios(List<Producto> productos, String formato) {
-    Map<String, Object> params = new HashMap<>();
-    Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    var params = new HashMap<String, Object>();
+    var sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
-        params.put(
-                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
-        params.put(
-                "productoSinImagen", new ImageIcon(ImageIO.read(new URL(URL_PRODUCTO_SIN_IMAGEN))).getImage());
+        params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+        params.put("productoSinImagen",
+                new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource(PRODUCTO_SIN_IMAGEN))))
+                .getImage());
       } catch (IOException | NullPointerException ex) {
-        throw new ServiceException(messageSource.getMessage(
-                "mensaje_recurso_no_encontrado", null, Locale.getDefault()), ex);
+        throw new ServiceException(messageSource.getMessage("mensaje_recurso_no_encontrado", null, Locale.getDefault()), ex);
       }
     }
-    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
+    var ds = new JRBeanCollectionDataSource(productos);
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
       var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
     }
     switch (formato) {
-      case "xlsx":
+      case "xlsx" -> {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
-          throw new ServiceException(messageSource.getMessage(
-                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
+          throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
         }
-      case "pdf":
+      }
+      case "pdf" -> {
         try {
-          return JasperExportManager.exportReportToPdf(
-                  JasperFillManager.fillReport(jasperDesign, params, ds));
+          return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
-          throw new ServiceException(messageSource.getMessage(
-                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
+          throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
         }
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_formato_no_valido", null, Locale.getDefault()));
+      }
+      default -> throw new BusinessServiceException(messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -1194,8 +1175,7 @@ public class ProductoServiceImpl implements IProductoService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_reporte", null, Locale.getDefault()), ex);
+      throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
     } catch (IOException ex) {
       logger.error(ex.getMessage());
     }
