@@ -301,26 +301,27 @@ public class ProductoServiceImpl implements IProductoService {
   public Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina) {
     int numeroDePagina = pagina != null ? pagina : 0;
     var orden = new ArrayList<Sort.Order>();
-    try {
-      if (ordenarPor != null && sentido != null) {
-        ordenarPor.forEach(nombreOrden -> {
-          var criterio = SortingProducto.fromValue(nombreOrden);
-          if (criterio == null) {
-            throw new BusinessServiceException(
-                    messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
-          }
-          if (criterio == SortingProducto.FECHA_ALTA || criterio == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
-            orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.ID_PRODUCTO.getNombre()));
-          }
+    if (ordenarPor != null && sentido != null) {
+      ordenarPor.forEach(nombreOrden -> {
+        var criterio = SortingProducto.fromValue(nombreOrden);
+        if (criterio == null) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
+        }
+        if (criterio == SortingProducto.FECHA_ALTA || criterio == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
+          orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.ID_PRODUCTO.getNombre()));
+        }
+        try {
           orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.getNombre()));
-        });
-      } else {
-        orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.DESCRIPCION.getNombre()));
-      }
-      return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(orden));
-    } catch (IllegalArgumentException illegalArgumentException) {
-      return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
+        } catch (IllegalArgumentException illegalArgumentException) {
+          orden.clear();
+          orden.add(new Sort.Order(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
+        }
+      });
+    } else {
+      orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.DESCRIPCION.getNombre()));
     }
+    return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(orden));
   }
 
   @Override
