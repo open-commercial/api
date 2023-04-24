@@ -25,6 +25,7 @@ import sic.service.IUsuarioService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AuditServiceImpl implements IAuditService {
@@ -52,13 +53,10 @@ public class AuditServiceImpl implements IAuditService {
     @Override
     public List<CommitDTO> getCambiosDTO(Changes changes) {
         var changesDTO = new ArrayList<CommitDTO>();
-        final var nombreDeClase = changes.get(0).getAffectedGlobalId().getTypeName()
-                .substring(changes.get(0).getAffectedGlobalId().getTypeName().lastIndexOf(".") + 1);
         changes.groupByCommit().forEach(changeByCommit -> {
             Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changeByCommit.getCommit().getAuthor()));
             changesDTO.add(CommitDTO.builder()
                     .idCommit(changeByCommit.getCommit().getId().value())
-                    .nombreDeClase(nombreDeClase)
                     .fecha(changeByCommit.getCommit().getCommitDate())
                     .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
                     .cambios(this.getValoresCambiadosDTO(changeByCommit.get()))

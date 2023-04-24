@@ -18,11 +18,10 @@ import java.util.List;
 public class CommitDTO {
 
     String idCommit;
-    String nombreDeClase;
+    String idCommitRelacionado;
     LocalDateTime fecha;
     String usuario;
     String tipoDeOperacion;
     List<CambioDTO> cambios;
-    String idCommitRelacionado;
 
 }
