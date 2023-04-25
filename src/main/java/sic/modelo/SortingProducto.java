@@ -1,5 +1,7 @@
 package sic.modelo;
 
+import java.util.Optional;
+
 public enum SortingProducto {
     DESCRIPCION("descripcion"),
     FECHA_ULTIMA_MODIFICACION("fechaUltimaModificacion"),
@@ -20,13 +22,13 @@ public enum SortingProducto {
         this.nombre = nombre;
     }
 
-    public static SortingProducto fromValue(String value) {
+    public static Optional<SortingProducto> fromValue(String value) {
         for (SortingProducto sortingProducto : SortingProducto.values()) {
             if (sortingProducto.nombre.equalsIgnoreCase(value)) {
-                return sortingProducto;
+                return Optional.of(sortingProducto);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public String getNombre() {

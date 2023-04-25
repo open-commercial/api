@@ -301,18 +301,19 @@ public class ProductoServiceImpl implements IProductoService {
   public Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina) {
     int numeroDePagina = pagina != null ? pagina : 0;
     var orden = new ArrayList<Sort.Order>();
-    if (ordenarPor != null && sentido != null) {
+    var existenCriteriosDeOrdenamiento = ordenarPor != null && !ordenarPor.isEmpty();
+    if (existenCriteriosDeOrdenamiento && sentido != null) {
       ordenarPor.forEach(nombreOrden -> {
         var criterio = SortingProducto.fromValue(nombreOrden);
-        if (criterio == null) {
+        if (criterio.isEmpty()) {
           throw new BusinessServiceException(
                   messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
         }
-        if (criterio == SortingProducto.FECHA_ALTA || criterio == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
+        if (criterio.get() == SortingProducto.FECHA_ALTA || criterio.get() == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
           orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.ID_PRODUCTO.getNombre()));
         }
         try {
-          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.getNombre()));
+          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.get().getNombre()));
         } catch (IllegalArgumentException illegalArgumentException) {
           orden.clear();
           orden.add(new Sort.Order(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
