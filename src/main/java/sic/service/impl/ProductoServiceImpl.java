@@ -299,23 +299,30 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina) {
-    if (pagina == null) pagina = 0;
-    String ordenDefault = "descripcion";
-    if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
+    int numeroDePagina = pagina != null ? pagina : 0;
+    var orden = new ArrayList<Sort.Order>();
+    var existenCriteriosDeOrdenamiento = ordenarPor != null && !ordenarPor.isEmpty();
+    if (existenCriteriosDeOrdenamiento && sentido != null) {
+      ordenarPor.forEach(nombreOrden -> {
+        var criterio = SortingProducto.fromValue(nombreOrden);
+        if (criterio.isEmpty()) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
+        }
+        try {
+          if (criterio.get() == SortingProducto.FECHA_ALTA || criterio.get() == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
+            orden.add(new Sort.Order(Sort.Direction.fromString(sentido), SortingProducto.ID_PRODUCTO.getNombre()));
+          }
+          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.get().getNombre()));
+        } catch (IllegalArgumentException illegalArgumentException) {
+          orden.clear();
+          orden.add(new Sort.Order(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
+        }
+      });
     } else {
-      List<Sort.Order> ordenes = new ArrayList<>();
-      switch (sentido) {
-        case "ASC":
-          ordenarPor.forEach(orden -> ordenes.add(new Sort.Order(Sort.Direction.ASC, orden)));
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
-        case "DESC":
-          ordenarPor.forEach(orden -> ordenes.add(new Sort.Order(Sort.Direction.DESC, orden)));
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
-        default:
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.DESCRIPCION.getNombre()));
     }
+    return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(orden));
   }
 
   @Override
