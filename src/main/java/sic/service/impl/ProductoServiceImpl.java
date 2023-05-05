@@ -299,23 +299,30 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public Pageable getPageable(Integer pagina, List<String> ordenarPor, String sentido, int tamanioPagina) {
-    if (pagina == null) pagina = 0;
-    String ordenDefault = "descripcion";
-    if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
+    int numeroDePagina = pagina != null ? pagina : 0;
+    var orden = new ArrayList<Sort.Order>();
+    var existenCriteriosDeOrdenamiento = ordenarPor != null && !ordenarPor.isEmpty();
+    if (existenCriteriosDeOrdenamiento && sentido != null) {
+      ordenarPor.forEach(nombreOrden -> {
+        var criterio = SortingProducto.fromValue(nombreOrden);
+        if (criterio.isEmpty()) {
+          throw new BusinessServiceException(
+                  messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
+        }
+        try {
+          if (criterio.get() == SortingProducto.FECHA_ALTA || criterio.get() == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
+            orden.add(new Sort.Order(Sort.Direction.fromString(sentido), SortingProducto.ID_PRODUCTO.getNombre()));
+          }
+          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.get().getNombre()));
+        } catch (IllegalArgumentException illegalArgumentException) {
+          orden.clear();
+          orden.add(new Sort.Order(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
+        }
+      });
     } else {
-      List<Sort.Order> ordenes = new ArrayList<>();
-      switch (sentido) {
-        case "ASC":
-          ordenarPor.forEach(orden -> ordenes.add(new Sort.Order(Sort.Direction.ASC, orden)));
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
-        case "DESC":
-          ordenarPor.forEach(orden -> ordenes.add(new Sort.Order(Sort.Direction.DESC, orden)));
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(ordenes));
-        default:
-          return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      orden.add(new Sort.Order(Sort.Direction.ASC, SortingProducto.DESCRIPCION.getNombre()));
     }
+    return PageRequest.of(numeroDePagina, tamanioPagina, Sort.by(orden));
   }
 
   @Override
@@ -454,10 +461,11 @@ public class ProductoServiceImpl implements IProductoService {
     customValidator.validar(productoPorActualizar);
     productoPorActualizar.setEliminado(productoPersistido.isEliminado());
     if ((productoPersistido.getUrlImagen() != null && !productoPersistido.getUrlImagen().isEmpty())
-            && (productoPorActualizar.getUrlImagen() == null
-            || productoPorActualizar.getUrlImagen().isEmpty())) {
+            && (imagen != null && imagen.length == 0)) {
       photoUploader.borrarImagen(
               Producto.class.getSimpleName() + productoPersistido.getIdProducto());
+    } else {
+      productoPorActualizar.setUrlImagen(productoPersistido.getUrlImagen());
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, productoPorActualizar);
     this.calcularPrecioBonificado(productoPorActualizar);
@@ -475,7 +483,7 @@ public class ProductoServiceImpl implements IProductoService {
             "mensaje_producto_actualizado",
             new Object[] {productoPorActualizar},
             Locale.getDefault()));
-    if (imagen != null) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
+    if (imagen != null && imagen.length > 0) this.subirImagenProducto(productoPorActualizar.getIdProducto(), imagen);
   }
 
   private void calcularPrecioBonificado(Producto producto) {
@@ -841,7 +849,7 @@ public class ProductoServiceImpl implements IProductoService {
         p.setFechaUltimaModificacion(LocalDateTime.now());
         if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
                 && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
-                >= 0) {
+                > 0) {
           p.getPrecioProducto().setOferta(true);
           p.getPrecioProducto().setPorcentajeBonificacionOferta(
                   productosParaActualizarDTO.getPorcentajeBonificacionOferta());
@@ -1157,7 +1165,9 @@ public class ProductoServiceImpl implements IProductoService {
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(productos);
     JasperReport jasperDesign;
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/ListaPreciosProductos.jrxml");
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
               "mensaje_error_reporte", null, Locale.getDefault()), ex);

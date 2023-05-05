@@ -14,41 +14,42 @@ import sic.modelo.Resultados;
 
 public interface IPedidoService {
 
-  void validarReglasDeNegocio(TipoDeOperacion operacion, Pedido pedido);
+    void validarReglasDeNegocio(TipoDeOperacion operacion, Pedido pedido);
 
-  Pedido getPedidoNoEliminadoPorId(long idPedido);
+    Pedido getPedidoNoEliminadoPorId(long idPedido);
 
-  Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal);
+    Pedido getPedidoPorNumeroAndSucursal(long nroPedido, Sucursal sucursal);
 
   void actualizar(Pedido pedido, List<CantidadProductoDTO> renglonesAnteriores, Long idSucursal, List<Recibo> recibos);
 
-  void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
-  Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
+    void actualizarFacturasDelPedido(Pedido pedido, List<Factura> facturas);
 
-  BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
+    Page<Pedido> buscarPedidos(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
-  long generarNumeroPedido(Sucursal sucursal);
+    BooleanBuilder getBuilderPedido(BusquedaPedidoCriteria criteria, long idUsuarioLoggedIn);
 
-  void cancelar(Pedido pedido);
+    long generarNumeroPedido(Sucursal sucursal);
 
-  void eliminar(long idPedido);
+    void cancelar(Pedido pedido);
 
-  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
+    void eliminar(long idPedido);
 
-  List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(Long idPedido, boolean clonar);
+    List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglon(Long idPedido);
 
-  byte[] getReportePedido(long idPedido);
+    List<RenglonPedido> getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(Long idPedido, boolean clonar);
 
-  Pedido guardar(Pedido pedido, List<Recibo> recibos);
+    byte[] getReportePedido(long idPedido);
 
-  void cambiarFechaDeVencimiento(long idPedido);
+    Pedido guardar(Pedido pedido, List<Recibo> recibos);
 
-  RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad);
+    void cambiarFechaDeVencimiento(long idPedido);
 
-  List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
+    RenglonPedido calcularRenglonPedido(long idProducto, BigDecimal cantidad);
 
-  Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
+    List<RenglonPedido> calcularRenglonesPedido(long[] idProductoItem, BigDecimal[] cantidad);
+
+    Resultados calcularResultadosPedido(NuevosResultadosComprobanteDTO calculoPedido);
 
   long[] getArrayDeIdProducto(List<CantidadProductoDTO> nuevosRenglones);
 

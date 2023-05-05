@@ -2,15 +2,16 @@ package sic.service.impl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import javax.imageio.ImageIO;
-import javax.swing.*;
-
+import javax.swing.ImageIcon;
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
@@ -35,9 +36,12 @@ import sic.repository.CuentaCorrienteClienteRepository;
 import sic.repository.CuentaCorrienteProveedorRepository;
 import sic.repository.CuentaCorrienteRepository;
 import sic.repository.RenglonCuentaCorrienteRepository;
-import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
+import sic.service.IClienteService;
+import sic.service.ICuentaCorrienteService;
+import sic.service.ISucursalService;
+import sic.service.IUsuarioService;
 import sic.util.CustomValidator;
 
 @Service
@@ -58,14 +62,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Autowired
   @Lazy
   public CuentaCorrienteServiceImpl(
-      CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
-      CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
-      CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
-      RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
-      IUsuarioService usuarioService, IClienteService clienteService,
-      ISucursalService sucursalService,
-            CustomValidator customValidator,
-      MessageSource messageSource) {
+          CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository,
+          CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository,
+          CuentaCorrienteProveedorRepository cuentaCorrienteProveedorRepository,
+          RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
+          IUsuarioService usuarioService, IClienteService clienteService,
+          ISucursalService sucursalService, CustomValidator customValidator,
+          MessageSource messageSource) {
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
@@ -489,8 +492,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   @Override
   public byte[] getReporteCuentaCorrienteCliente(
       CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
-    ClassLoader classLoader = CuentaCorrienteServiceImpl.class.getClassLoader();
-    InputStream isFileReport =
+    var classLoader = this.getClass().getClassLoader();
+    var isFileReport =
         classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
     JRBeanCollectionDataSource ds =
         new JRBeanCollectionDataSource(
@@ -509,24 +512,25 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       }
     }
     switch (formato) {
-      case "xlsx":
+      case "xlsx" -> {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(
-              messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
+                  messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
-      case "pdf":
+      }
+      case "pdf" -> {
         try {
           return JasperExportManager.exportReportToPdf(
-              JasperFillManager.fillReport(isFileReport, params, ds));
+                  JasperFillManager.fillReport(isFileReport, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(
-              messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
+                  messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
-      default:
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
+      }
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 
@@ -543,7 +547,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       bytes = out.toByteArray();
       out.close();
     } catch (JRException ex) {
-      logger.error(ex.getMessage());
       throw new ServiceException(messageSource.getMessage(
         "mensaje_error_reporte", null, Locale.getDefault()), ex);
     } catch (IOException ex) {
@@ -559,7 +562,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(
-      Factura factura, boolean eliminado) {
+          Factura factura, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByFacturaAndEliminado(factura, eliminado);
   }
 
@@ -570,13 +573,13 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(
-      Recibo recibo, boolean eliminado) {
+          Recibo recibo, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByReciboAndEliminado(recibo, eliminado);
   }
 
   @Override
   public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(
-      Remito remito, boolean eliminado) {
+          Remito remito, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByRemitoAndEliminado(remito, eliminado);
   }
 
@@ -606,7 +609,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     List<CuentaCorrienteCliente> cuentaCorrienteClientes = this.buscarCuentasCorrienteClienteParaReporte(criteria, idUsuarioLoggedIn);
     JasperReport jasperDesign;
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/ListaClientes.jrxml");
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaClientes.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
               "mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -624,14 +629,15 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     }
     JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(cuentaCorrienteClientes);
     switch (formato) {
-      case "xlsx":
+      case "xlsx" -> {
         try {
           return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(messageSource.getMessage(
                   "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
-      case "pdf":
+      }
+      case "pdf" -> {
         try {
           return JasperExportManager.exportReportToPdf(
                   JasperFillManager.fillReport(jasperDesign, params, ds));
@@ -639,9 +645,9 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           throw new ServiceException(messageSource.getMessage(
                   "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_formato_no_valido", null, Locale.getDefault()));
+      }
+      default -> throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 }

@@ -71,6 +71,7 @@ public class SucursalController {
     } else {
       sucursalParaActualizar.setUbicacion(sucursalPersistida.getUbicacion());
     }
+    if (sucursalPersistida.getLogo() != null) sucursalParaActualizar.setLogo(sucursalPersistida.getLogo());
     sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, sucursalDTO.getImagen());
   }
 
