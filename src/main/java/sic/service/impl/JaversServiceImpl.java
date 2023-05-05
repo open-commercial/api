@@ -25,17 +25,16 @@ import sic.service.IUsuarioService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
-public class AuditServiceImpl implements IAuditService {
+public class JaversServiceImpl implements IAuditService {
 
     private final IUsuarioService usuarioService;
 
     private final Javers javers;
 
     @Autowired
-    public AuditServiceImpl(IUsuarioService usuarioService, Javers javers) {
+    public JaversServiceImpl(IUsuarioService usuarioService, Javers javers) {
         this.usuarioService = usuarioService;
         this.javers = javers;
     }

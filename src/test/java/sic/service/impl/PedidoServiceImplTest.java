@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class, AuditServiceImpl.class})
+    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class})
 class PedidoServiceImplTest {
 
   @MockBean PedidoRepository pedidoRepository;
