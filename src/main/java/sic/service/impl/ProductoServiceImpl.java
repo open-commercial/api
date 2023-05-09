@@ -310,10 +310,10 @@ public class ProductoServiceImpl implements IProductoService {
                   messageSource.getMessage("mensaje_producto_error_sorting_busqueda", null, Locale.getDefault()));
         }
         try {
+          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.get().getNombre()));
           if (criterio.get() == SortingProducto.FECHA_ALTA || criterio.get() == SortingProducto.FECHA_ULTIMA_MODIFICACION) {
             orden.add(new Sort.Order(Sort.Direction.fromString(sentido), SortingProducto.ID_PRODUCTO.getNombre()));
           }
-          orden.add(new Sort.Order(Sort.Direction.fromString(sentido), criterio.get().getNombre()));
         } catch (IllegalArgumentException illegalArgumentException) {
           orden.clear();
           orden.add(new Sort.Order(Sort.Direction.DESC, SortingProducto.DESCRIPCION.getNombre()));
