@@ -3,7 +3,7 @@ package sic.service.impl;
 import com.google.gson.internal.LinkedTreeMap;
 import org.javers.core.Changes;
 import org.javers.core.Javers;
-import org.javers.core.commit.Commit;
+import org.javers.core.commit.CommitId;
 import org.javers.core.diff.Change;
 import org.javers.core.diff.changetype.InitialValueChange;
 import org.javers.core.diff.changetype.ObjectRemoved;
@@ -12,9 +12,10 @@ import org.javers.core.diff.changetype.ValueChange;
 import org.javers.core.diff.changetype.container.CollectionChange;
 import org.javers.core.diff.changetype.container.ListChange;
 import org.javers.core.metamodel.object.InstanceId;
-import org.javers.repository.jql.JqlQuery;
+import org.javers.repository.jql.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CambioDTO;
@@ -30,8 +31,8 @@ import java.util.Map;
 public class JaversServiceImpl implements IAuditService {
 
     private final IUsuarioService usuarioService;
-
     private final Javers javers;
+    private static final String ID_COMMIT_RELACIONADO = "idCommitRelacionado";
 
     @Autowired
     public JaversServiceImpl(IUsuarioService usuarioService, Javers javers) {
@@ -40,40 +41,52 @@ public class JaversServiceImpl implements IAuditService {
     }
 
     @Override
-    public Commit auditar(String string, Object objeto, Map<String, String> propiedades) {
-        return javers.commit(string, objeto, propiedades);
+    @Transactional
+    public String auditar(String idUsuario, Object objeto, Map<String, String> propiedades) {
+        return javers.commit(idUsuario, objeto, propiedades).getId().value();
     }
 
     @Override
-    public Commit auditar(String string, Object objeto) {
-        return javers.commit(string, objeto);
+    public String auditar(String idUsuario, Object objeto) {
+        return javers.commit(idUsuario, objeto).getId().value();
     }
 
     @Override
-    public List<CommitDTO> getCambiosDTO(Changes changes) {
+    public <T> List<CommitDTO> getCambiosDTO(T objeto) {
         var changesDTO = new ArrayList<CommitDTO>();
-        changes.groupByCommit().forEach(changeByCommit -> {
-            Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changeByCommit.getCommit().getAuthor()));
+        this.getChanges(objeto).groupByCommit().forEach(changesByCommit -> {
+            Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changesByCommit.getCommit().getAuthor()));
             changesDTO.add(CommitDTO.builder()
-                    .idCommit(changeByCommit.getCommit().getId().value())
-                    .fecha(changeByCommit.getCommit().getCommitDate())
+                    .idCommit(changesByCommit.getCommit().getId().value())
+                    .idCommitRelacionado(changesByCommit.getCommit().getProperties().get(ID_COMMIT_RELACIONADO))
+                    .fecha(changesByCommit.getCommit().getCommitDate())
                     .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
-                    .cambios(this.getValoresCambiadosDTO(changeByCommit.get()))
-                    .tipoDeOperacion(changeByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
+                    .cambios(this.getValoresCambiadosDTO(changesByCommit.get()))
+                    .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
         });
         return changesDTO;
     }
 
     @Override
-    public List<CommitDTO> getCambiosDTO(Changes changes, String idCommitRelacionado) {
-        var cambios = this.getCambiosDTO(changes);
-        cambios.forEach(cambio -> cambio.setIdCommitRelacionado(idCommitRelacionado));
-        return cambios;
+    public List<CommitDTO> getCambiosDTO(String idCommit) {
+        var changesDTO = new ArrayList<CommitDTO>();
+        var query = QueryBuilder.anyDomainObject().withCommitId(CommitId.valueOf(idCommit)).build();
+        var cambios = javers.findChanges(query).groupByCommit();
+        cambios.forEach(changesByCommit -> {
+            Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changesByCommit.getCommit().getAuthor()));
+            changesDTO.add(CommitDTO.builder()
+                    .idCommit(changesByCommit.getCommit().getId().value())
+                    .fecha(changesByCommit.getCommit().getCommitDate())
+                    .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
+                    .cambios(this.getValoresCambiadosDTO(changesByCommit.get()))
+                    .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
+                    .build());
+        });
+        return changesDTO;
     }
 
-    @Override
-    public List<CambioDTO> getValoresCambiadosDTO(List<Change> changes) {
+    private List<CambioDTO> getValoresCambiadosDTO(List<Change> changes) {
         var valuesChanges = new ArrayList<CambioDTO>();
         changes.forEach(change -> {
             switch (change.getClass().getSimpleName()) {
@@ -111,9 +124,9 @@ public class JaversServiceImpl implements IAuditService {
                     var listChange = (ListChange) change;
                     if (listChange.getRight().get(0) instanceof InstanceId) {
                         valuesChanges.add(CambioDTO.builder()
-                                        .atributo(listChange.getPropertyName())
-                                        .valorAnterior(String.valueOf(listChange.getLeft().size()))
-                                        .valorSiguiente(String.valueOf(listChange.getRight().size()))
+                                .atributo(listChange.getPropertyName())
+                                .valorAnterior(String.valueOf(listChange.getLeft().size()))
+                                .valorSiguiente(String.valueOf(listChange.getRight().size()))
                                 .build());
                         System.out.println(CambioDTO.builder()
                                 .atributo(listChange.getPropertyName())
@@ -153,8 +166,12 @@ public class JaversServiceImpl implements IAuditService {
         return valuesChanges;
     }
 
-    @Override
-    public Changes getCambios(JqlQuery jqlQuery) {
-        return javers.findChanges(jqlQuery);
+    private <T> List<CambioDTO> getCambios(T object) {
+        return this.getValoresCambiadosDTO(this.getChanges(object));
+    }
+
+    private <T> Changes getChanges(T object) {
+        var queryBuilder = QueryBuilder.byInstance(object).build();
+        return javers.findChanges(queryBuilder);
     }
 }

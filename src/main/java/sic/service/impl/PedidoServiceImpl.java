@@ -13,10 +13,6 @@ import javax.swing.ImageIcon;
 
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.javers.core.Changes;
-import org.javers.core.commit.Commit;
-import org.javers.core.commit.CommitId;
-import org.javers.repository.jql.QueryBuilder;
 import org.javers.spring.annotation.JaversAuditable;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -60,6 +56,7 @@ public class PedidoServiceImpl implements IPedidoService {
   private static final BigDecimal CIEN = new BigDecimal("100");
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
+  private static final String ID_COMMIT_RELACIONADO = "idCommitRelacionado";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -241,8 +238,8 @@ public class PedidoServiceImpl implements IPedidoService {
     }
     Map<String, String> properties = new HashMap<>();
     properties.put("TipoDeOperacion", TipoDeOperacion.ALTA.name());
-    Commit commitRenglones = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
-    properties.put("idCommitRenglones", commitRenglones.getId().value());
+    String idCommit = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
+    properties.put(ID_COMMIT_RELACIONADO, idCommit);
     auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido, properties);
     return pedido;
   }
@@ -444,8 +441,8 @@ public class PedidoServiceImpl implements IPedidoService {
     pedidoRepository.save(pedido);
     Map<String, String> properties = new HashMap<>();
     properties.put("TipoDeOperacion", TipoDeOperacion.ACTUALIZACION.name());
-    Commit commitRenglones = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
-    properties.put("idCommitRenglones", commitRenglones.getId().value());
+    String idCommit = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
+    properties.put("idCommitRenglones", idCommit);
     auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido, properties);
     this.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnteriores);
   }
@@ -801,23 +798,18 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<CommitDTO> getCambiosPedido(long idPedido) {
-    QueryBuilder queryBuilder = QueryBuilder.byInstance(this.getPedidoNoEliminadoPorId(idPedido))
-            .withChildValueObjects(true);
-    Changes changes = auditService.getCambios(queryBuilder.build());
-    return auditService.getCambiosDTO(changes);
+    return auditService.getCambiosDTO(this.getPedidoNoEliminadoPorId(idPedido));
   }
 
   @Override
   public List<List<CommitDTO>> getCambiosRenglonesPedido(long idPedido) {
-    var query = QueryBuilder.byInstanceId(idPedido, Pedido.class);
-    var changesPedido = auditService.getCambios(query.build()).groupByCommit();
+    var commitsPedido = auditService.getCambiosDTO(this.getPedidoNoEliminadoPorId(idPedido));
     var cambiosRenglones = new ArrayList<List<CommitDTO>>();
-    if (!changesPedido.isEmpty()) {
-      changesPedido.forEach(changesByCommit -> {
-        var idCommitRenglones = changesByCommit.getCommit().getProperties().get("idCommitRenglones");
-        var queryRenglones = QueryBuilder.anyDomainObject().withCommitId(CommitId.valueOf(idCommitRenglones));
-        Changes changesRenglones = auditService.getCambios(queryRenglones.build());
-        cambiosRenglones.add(auditService.getCambiosDTO(changesRenglones, String.valueOf(changesByCommit.getCommit().getId())));
+    if (!commitsPedido.isEmpty()) {
+      commitsPedido.forEach(commitPedido -> {
+        var idCommitRenglones = commitPedido.getIdCommitRelacionado();
+        var cambios = auditService.getCambiosDTO(idCommitRenglones);
+        cambios.forEach(commitDTO -> cambiosRenglones.add(cambios));
       });
     }
     return cambiosRenglones;

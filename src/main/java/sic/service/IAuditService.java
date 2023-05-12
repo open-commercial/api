@@ -1,25 +1,17 @@
 package sic.service;
 
-import org.javers.core.Changes;
-import org.javers.core.commit.Commit;
-import org.javers.core.diff.Change;
-import org.javers.repository.jql.JqlQuery;
-import sic.modelo.dto.CambioDTO;
 import sic.modelo.dto.CommitDTO;
-
 import java.util.List;
 import java.util.Map;
 
 public interface IAuditService {
 
-    Commit auditar(String string, Object objeto, Map<String, String> propiedades);
+    String auditar(String idUsuario, Object objeto, Map<String, String> propiedades);
 
-    Commit auditar(String string, Object objeto);
-    List<CommitDTO> getCambiosDTO(Changes changes);
+    String auditar(String idUsuario, Object objeto);
 
-    List<CommitDTO> getCambiosDTO(Changes changes, String idCommitRelacionado);
+    <T> List<CommitDTO> getCambiosDTO(T objeto);
 
-    List<CambioDTO> getValoresCambiadosDTO(List<Change> changes);
+    List<CommitDTO> getCambiosDTO(String idCommit);
 
-    Changes getCambios(JqlQuery jqlQuery);
 }

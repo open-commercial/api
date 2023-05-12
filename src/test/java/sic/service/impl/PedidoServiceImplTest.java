@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import org.javers.core.Javers;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -164,7 +163,6 @@ class PedidoServiceImplTest {
   }
 
   @Test
-  @Disabled
   void shouldGuardarPedido() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CANCELADO);
@@ -221,6 +219,7 @@ class PedidoServiceImplTest {
     clienteDeUsuario.setNombreFiscal("nombre fiscal");
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(clienteDeUsuario);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
+    when(auditService.auditar(anyString(),any(),any())).thenReturn("1");
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
