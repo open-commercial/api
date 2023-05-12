@@ -128,14 +128,8 @@ public class JaversServiceImpl implements IAuditService {
                                 .valorAnterior(String.valueOf(listChange.getLeft().size()))
                                 .valorSiguiente(String.valueOf(listChange.getRight().size()))
                                 .build());
-                        System.out.println(CambioDTO.builder()
-                                .atributo(listChange.getPropertyName())
-                                .valorAnterior(listChange.getLeft().toString())
-                                .valorSiguiente(listChange.getRight().toString())
-                                .build());
                     }
-                    if (listChange.getRight().get(0) instanceof LinkedTreeMap) {
-                        var mapRight = (LinkedTreeMap) listChange.getRight().get(0);
+                    if (listChange.getRight().get(0) instanceof LinkedTreeMap mapRight) {
                         var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
                                 (LinkedTreeMap) listChange.getLeft().get(0) : new LinkedTreeMap<>();
                         var keySet = mapRight.keySet();
@@ -143,7 +137,7 @@ public class JaversServiceImpl implements IAuditService {
                             var valorSiguiente = mapRight.get(key);
                             var valorAnterior = mapLeft.get(key);
                             valuesChanges.add(CambioDTO.builder()
-                                    .valorSiguiente(valorSiguiente.toString())
+                                    .valorSiguiente(valorSiguiente != null ? valorSiguiente.toString() : "")
                                     .valorAnterior(valorAnterior != null ? valorAnterior.toString() : "")
                                     .atributo(key.toString())
                                     .build());
@@ -164,10 +158,6 @@ public class JaversServiceImpl implements IAuditService {
             }
         });
         return valuesChanges;
-    }
-
-    private <T> List<CambioDTO> getCambios(T object) {
-        return this.getValoresCambiadosDTO(this.getChanges(object));
     }
 
     private <T> Changes getChanges(T object) {

@@ -114,8 +114,4 @@ public class AppConfig {
     return Clock.systemDefaultZone();
   }
 
-  @Bean
-  public AuthorProvider provideJaversAuthor() {
-    return new MockAuthorProvider();
-  }
 }

@@ -811,7 +811,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un cliente y levantar un pedido con reserva, verificar stock")
+  @DisplayName("Dar de alta un cliente y levantar un pedido con reserva, verificar stock y consultar su historico de cambios")
   @Order(7)
   void testEscenarioAltaClienteYPedido() {
     this.iniciarSesionComoAdministrador();
@@ -916,11 +916,21 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("1768.000000000000000000000000000000"),
         renglonesDelPedido.get(1).getImporte());
+    List<CommitDTO> cambios =
+            Arrays.asList(restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/cambios",
+                    CommitDTO[].class));
+    assertFalse(cambios.isEmpty());
+    assertEquals("2.00", cambios.get(0).getIdCommit());
+    assertEquals("1.00", cambios.get(0).getIdCommitRelacionado());
+    assertEquals("Power Max(dueño)", cambios.get(0).getUsuario());
+    assertEquals("ALTA", cambios.get(0).getTipoDeOperacion());
+    assertEquals(17, cambios.get(0).getCambios().size());
   }
 
   @Test
   @DisplayName(
-      "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando y verificando stock")
+      "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando, verificando stock y su historico de cambios")
   @Order(8)
   void testEscenarioModificacionPedido() {
     this.iniciarSesionComoAdministrador();
@@ -1037,6 +1047,22 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("120279.618000000000000000000000000000"),
         renglonesDelPedido.get(2).getImporte());
+    List<CommitDTO> cambios =
+            Arrays.asList(restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/cambios",
+                    CommitDTO[].class));
+    assertFalse(cambios.isEmpty());
+    assertEquals(2, cambios.size());
+    assertEquals("4.00", cambios.get(0).getIdCommit());
+    assertNull(cambios.get(0).getIdCommitRelacionado());
+    assertEquals("Power Max(dueño)", cambios.get(0).getUsuario());
+    assertEquals("ACTUALIZACION", cambios.get(0).getTipoDeOperacion());
+    assertEquals(8, cambios.get(0).getCambios().size());
+    assertEquals("2.00", cambios.get(1).getIdCommit());
+    assertEquals("1.00", cambios.get(1).getIdCommitRelacionado());
+    assertEquals("Power Max(dueño)", cambios.get(1).getUsuario());
+    assertEquals("ALTA", cambios.get(1).getTipoDeOperacion());
+    assertEquals(17, cambios.get(1).getCambios().size());
   }
 
   @Test

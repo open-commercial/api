@@ -161,7 +161,7 @@ public class PedidoController {
 
   @GetMapping("/pedidos/{idPedido}/cambios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<CommitDTO> getCambios(@PathVariable long idPedido, HttpServletRequest request) {
+  public List<CommitDTO> getCambios(@PathVariable long idPedido) {
     return pedidoService.getCambiosPedido(idPedido);
   }
 
