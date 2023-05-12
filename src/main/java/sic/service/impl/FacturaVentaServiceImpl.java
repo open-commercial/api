@@ -366,8 +366,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
-    var comprobante =
-            ComprobanteAFIP.builder()
+    var comprobanteAutorizableAFIP =
+            ComprobanteAutorizableAFIP.builder()
                     .idComprobante(fv.getIdFactura())
                     .fecha(fv.getFecha())
                     .tipoComprobante(fv.getTipoComprobante())
@@ -383,11 +383,11 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
                     .montoNoGravado(BigDecimal.ZERO)
                     .total(fv.getTotal())
                     .build();
-    taxationService.autorizar(comprobante);
-    fv.setCae(comprobante.getCae());
-    fv.setVencimientoCae(comprobante.getVencimientoCAE());
-    fv.setNumSerieAfip(comprobante.getNumSerieAfip());
-    fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
+    taxationService.autorizar(comprobanteAutorizableAFIP);
+    fv.setCae(comprobanteAutorizableAFIP.getCae());
+    fv.setVencimientoCae(comprobanteAutorizableAFIP.getVencimientoCAE());
+    fv.setNumSerieAfip(comprobanteAutorizableAFIP.getNumSerieAfip());
+    fv.setNumFacturaAfip(comprobanteAutorizableAFIP.getNumFacturaAfip());
     return fv;
   }
 
@@ -495,7 +495,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
+  public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAutorizableAFIP comprobante) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(

@@ -1,8 +1,8 @@
 package sic.service;
 
-import sic.modelo.ComprobanteAFIP;
+import sic.modelo.ComprobanteAutorizable;
 
 public interface ITaxationService {
 
-  void autorizar(ComprobanteAFIP comprobante);
+  void autorizar(ComprobanteAutorizable comprobanteAutorizable);
 }

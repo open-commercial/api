@@ -1062,8 +1062,8 @@ public class NotaServiceImpl implements INotaService {
     } else {
       var cliente = nota.getCliente();
       var montoNoGravado = (nota instanceof NotaDebito notaDebito) ? notaDebito.getMontoNoGravado() : BigDecimal.ZERO;
-      var comprobante =
-              ComprobanteAFIP.builder()
+      var comprobanteAutorizableAFIP =
+              ComprobanteAutorizableAFIP.builder()
                       .idComprobante(nota.getIdNota())
                       .fecha(nota.getFecha())
                       .tipoComprobante(nota.getTipoComprobante())
@@ -1079,11 +1079,11 @@ public class NotaServiceImpl implements INotaService {
                       .montoNoGravado(montoNoGravado)
                       .total(nota.getTotal())
                       .build();
-      taxationService.autorizar(comprobante);
-      nota.setCae(comprobante.getCae());
-      nota.setVencimientoCae(comprobante.getVencimientoCAE());
-      nota.setNumSerieAfip(comprobante.getNumSerieAfip());
-      nota.setNumNotaAfip(comprobante.getNumFacturaAfip());
+      taxationService.autorizar(comprobanteAutorizableAFIP);
+      nota.setCae(comprobanteAutorizableAFIP.getCae());
+      nota.setVencimientoCae(comprobanteAutorizableAFIP.getVencimientoCAE());
+      nota.setNumSerieAfip(comprobanteAutorizableAFIP.getNumSerieAfip());
+      nota.setNumNotaAfip(comprobanteAutorizableAFIP.getNumFacturaAfip());
     }
     return nota;
   }
