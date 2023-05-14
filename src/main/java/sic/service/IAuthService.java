@@ -2,7 +2,6 @@ package sic.service;
 
 import io.jsonwebtoken.Claims;
 import sic.modelo.Rol;
-import sic.modelo.Usuario;
 
 import java.util.List;
 

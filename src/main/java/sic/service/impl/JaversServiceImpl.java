@@ -15,14 +15,12 @@ import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.Usuario;
 import sic.modelo.dto.CambioDTO;
 import sic.modelo.dto.CommitDTO;
 import sic.service.IAuditService;
 import sic.service.IUsuarioService;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +31,12 @@ public class JaversServiceImpl implements IAuditService {
     private final IUsuarioService usuarioService;
     private final Javers javers;
     private static final String ID_COMMIT_RELACIONADO = "idCommitRelacionado";
+    private static final String INITIAL_VALUE_CHANGE = "InitialValueChange";
+    private static final String LIST_CHANGE = "ListChange";
+    private static final String COLLECTION_CHANGE = "CollectionChange";
+    private static final String REFERENCE_CHANGE = "ReferenceChange";
+    private static final String OBJECT_REMOVED = "ObjectRemoved";
+    private static final String VALUE_CHANGE = "ValueChange";
 
     @Autowired
     public JaversServiceImpl(IUsuarioService usuarioService, Javers javers) {
@@ -41,7 +45,6 @@ public class JaversServiceImpl implements IAuditService {
     }
 
     @Override
-    @Transactional
     public String auditar(String idUsuario, Object objeto, Map<String, String> propiedades) {
         return javers.commit(idUsuario, objeto, propiedades).getId().value();
     }
@@ -61,7 +64,7 @@ public class JaversServiceImpl implements IAuditService {
                     .idCommitRelacionado(changesByCommit.getCommit().getProperties().get(ID_COMMIT_RELACIONADO))
                     .fecha(changesByCommit.getCommit().getCommitDate())
                     .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
-                    .cambios(this.getValoresCambiadosDTO(changesByCommit.get()))
+                    .cambios(this.getDetallesCambiosDTO(changesByCommit.get()))
                     .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
         });
@@ -79,18 +82,18 @@ public class JaversServiceImpl implements IAuditService {
                     .idCommit(changesByCommit.getCommit().getId().value())
                     .fecha(changesByCommit.getCommit().getCommitDate())
                     .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
-                    .cambios(this.getValoresCambiadosDTO(changesByCommit.get()))
+                    .cambios(this.getDetallesCambiosDTO(changesByCommit.get()))
                     .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
         });
         return changesDTO;
     }
 
-    private List<CambioDTO> getValoresCambiadosDTO(List<Change> changes) {
+    private List<CambioDTO> getDetallesCambiosDTO(List<Change> changes) {
         var valuesChanges = new ArrayList<CambioDTO>();
         changes.forEach(change -> {
             switch (change.getClass().getSimpleName()) {
-                case "ValueChange" -> {
+                case VALUE_CHANGE -> {
                     var valueChange = (ValueChange) change;
                     valuesChanges.add(CambioDTO.builder()
                             .valorSiguiente(valueChange.getRight() == null ? "" : valueChange.getRight().toString())
@@ -98,13 +101,13 @@ public class JaversServiceImpl implements IAuditService {
                             .atributo(valueChange.getPropertyName())
                             .build());
                 }
-                case "ObjectRemoved" -> {
+                case OBJECT_REMOVED -> {
                     var objectRemoved = (ObjectRemoved) change;
                     valuesChanges.add(CambioDTO.builder()
                             .atributo(objectRemoved.getAffectedObject().getClass().getSimpleName())
                             .build());
                 }
-                case "ReferenceChange" -> {
+                case REFERENCE_CHANGE -> {
                     var referenceChange = (ReferenceChange) change;
                     valuesChanges.add(CambioDTO.builder()
                             .valorSiguiente(referenceChange.getRight() == null ? "" : referenceChange.getRight().toString())
@@ -112,7 +115,7 @@ public class JaversServiceImpl implements IAuditService {
                             .atributo(referenceChange.getPropertyName())
                             .build());
                 }
-                case "CollectionChange" -> {
+                case COLLECTION_CHANGE -> {
                     var collectionChange = (CollectionChange) change;
                     valuesChanges.add(CambioDTO.builder()
                             .valorSiguiente(collectionChange.getRight() == null ? "" : collectionChange.getRight().toString())
@@ -120,7 +123,7 @@ public class JaversServiceImpl implements IAuditService {
                             .atributo(collectionChange.getPropertyName())
                             .build());
                 }
-                case "ListChange" -> {
+                case LIST_CHANGE -> {
                     var listChange = (ListChange) change;
                     if (listChange.getRight().get(0) instanceof InstanceId) {
                         valuesChanges.add(CambioDTO.builder()
@@ -133,7 +136,7 @@ public class JaversServiceImpl implements IAuditService {
                         var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
                                 (LinkedTreeMap) listChange.getLeft().get(0) : new LinkedTreeMap<>();
                         var keySet = mapRight.keySet();
-                        keySet.stream().forEach(key -> {
+                        keySet.forEach(key -> {
                             var valorSiguiente = mapRight.get(key);
                             var valorAnterior = mapLeft.get(key);
                             valuesChanges.add(CambioDTO.builder()
@@ -144,7 +147,7 @@ public class JaversServiceImpl implements IAuditService {
                         });
                     }
                 }
-                case "InitialValueChange" -> {
+                case INITIAL_VALUE_CHANGE -> {
                     var initialValueChange = (InitialValueChange) change;
                     valuesChanges.add(CambioDTO.builder()
                             .atributo(initialValueChange.getPropertyName())

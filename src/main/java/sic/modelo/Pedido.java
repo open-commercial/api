@@ -16,7 +16,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import org.javers.core.metamodel.annotation.DiffIgnore;
 import sic.controller.Views;
 import sic.modelo.dto.UbicacionDTO;
 

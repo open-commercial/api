@@ -173,7 +173,6 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   @Transactional
-  @JaversAuditable
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
     Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(pedido.getUsuario().getIdUsuario());
     if (pedido.getCliente().equals(clienteDeUsuario) && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
