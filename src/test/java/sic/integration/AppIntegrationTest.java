@@ -9,10 +9,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -926,6 +923,16 @@ class AppIntegrationTest {
     assertEquals("Power Max(dueño)", cambios.get(0).getUsuario());
     assertEquals("ALTA", cambios.get(0).getTipoDeOperacion());
     assertEquals(17, cambios.get(0).getCambios().size());
+    Map<String, List<LinkedHashMap<String, String>>> cambiosRenglones =
+            restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones/cambios",
+                    Map.class);
+    assertFalse(cambiosRenglones.isEmpty());
+    assertEquals("1.00", cambiosRenglones.get("1.00").get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get("1.00").get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max(dueño)", cambiosRenglones.get("1.00").get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get("1.00").get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get("1.00").get(0).get("cambios"));
   }
 
   @Test
@@ -1063,6 +1070,21 @@ class AppIntegrationTest {
     assertEquals("Power Max(dueño)", cambios.get(1).getUsuario());
     assertEquals("ALTA", cambios.get(1).getTipoDeOperacion());
     assertEquals(17, cambios.get(1).getCambios().size());
+    Map<String, List<LinkedHashMap<String, String>>> cambiosRenglones =
+            restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones/cambios",
+                    Map.class);
+    assertFalse(cambiosRenglones.isEmpty());
+    assertEquals("1.00", cambiosRenglones.get("1.00").get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get("1.00").get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max(dueño)", cambiosRenglones.get("1.00").get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get("1.00").get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get("1.00").get(0).get("cambios"));
+    assertEquals("3.00", cambiosRenglones.get("3.00").get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get("3.00").get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max(dueño)", cambiosRenglones.get("3.00").get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ACTUALIZACION.name() ,cambiosRenglones.get("3.00").get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get("3.00").get(0).get("cambios"));
   }
 
   @Test
