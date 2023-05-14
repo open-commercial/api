@@ -17,11 +17,11 @@ import java.util.List;
 @JsonView(Views.Encargado.class)
 public class CommitDTO {
 
-    String idCommit;
-    String idCommitRelacionado;
-    LocalDateTime fecha;
-    String usuario;
-    String tipoDeOperacion;
-    List<CambioDTO> cambios;
+    private String idCommit;
+    private String idCommitRelacionado;
+    private LocalDateTime fecha;
+    private String usuario;
+    private String tipoDeOperacion;
+    private List<CambioDTO> cambios;
 
 }

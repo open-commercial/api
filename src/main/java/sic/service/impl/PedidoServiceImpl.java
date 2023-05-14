@@ -235,9 +235,9 @@ public class PedidoServiceImpl implements IPedidoService {
           "Reporte.pdf");
       logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
-    Map<String, String> properties = new HashMap<>();
+    var properties = new HashMap<String, String>();
     properties.put("TipoDeOperacion", TipoDeOperacion.ALTA.name());
-    String idCommit = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
+    var idCommit = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
     properties.put(ID_COMMIT_RELACIONADO, idCommit);
     auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido, properties);
     return pedido;
@@ -438,10 +438,10 @@ public class PedidoServiceImpl implements IPedidoService {
     productoService.devolverStockPedido(pedido, TipoDeOperacion.ACTUALIZACION, renglonesAnteriores, idSucursalOrigen);
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
     pedidoRepository.save(pedido);
-    Map<String, String> properties = new HashMap<>();
+    var properties = new HashMap<String, String>();
     properties.put("TipoDeOperacion", TipoDeOperacion.ACTUALIZACION.name());
-    String idCommit = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
-    properties.put("idCommitRenglones", idCommit);
+    var idCommit = auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido.getRenglones(), properties);
+    properties.put(ID_COMMIT_RELACIONADO, idCommit);
     auditService.auditar(String.valueOf(authService.getActiveUserId()), pedido, properties);
     this.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnteriores);
   }
@@ -801,14 +801,14 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public List<List<CommitDTO>> getCambiosRenglonesPedido(long idPedido) {
+  public HashMap<String, List<CommitDTO>> getCambiosRenglonesPedido(long idPedido) {
     var commitsPedido = auditService.getCambiosDTO(this.getPedidoNoEliminadoPorId(idPedido));
-    var cambiosRenglones = new ArrayList<List<CommitDTO>>();
+    var cambiosRenglones = new HashMap<String, List<CommitDTO>>();
     if (!commitsPedido.isEmpty()) {
       commitsPedido.forEach(commitPedido -> {
         var idCommitRenglones = commitPedido.getIdCommitRelacionado();
         var cambios = auditService.getCambiosDTO(idCommitRenglones);
-        cambios.forEach(commitDTO -> cambiosRenglones.add(cambios));
+        cambios.forEach(commitDTO -> cambiosRenglones.put(idCommitRenglones,cambios));
       });
     }
     return cambiosRenglones;

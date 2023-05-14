@@ -53,9 +53,7 @@ class PedidoServiceImplTest {
   @MockBean  IAuthService authService;
   @MockBean  Javers javers;
   @MockBean  IAuditService auditService;
-
   @Autowired PedidoServiceImpl pedidoService;
-
 
   private Producto construirProducto() {
     Producto producto = new Producto();

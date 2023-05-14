@@ -15,7 +15,7 @@ import sic.controller.Views;
 @JsonView(Views.Encargado.class)
 public class CambioDTO {
 
-    String atributo;
-    String valorAnterior;
-    String valorSiguiente;
+    private String atributo;
+    private String valorAnterior;
+    private String valorSiguiente;
 }

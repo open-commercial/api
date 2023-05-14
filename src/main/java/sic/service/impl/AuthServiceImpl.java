@@ -32,7 +32,7 @@ public class AuthServiceImpl implements IAuthService {
   private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
   private static final String BEARER_TOKEN_PREFIX = "Bearer";
 
-  private long activeUserID;
+  private long activeUserId;
   private final MessageSource messageSource;
 
   @Value("${RECAPTCHA_SECRET_KEY}")
@@ -135,12 +135,12 @@ public class AuthServiceImpl implements IAuthService {
   }
 
   @Override
-  public void setActiveUserToken(String token) {
-     activeUserID = this.getClaimsDelToken(token).get("idUsuario", Integer.class);
+  public void setActiveUserId(String token) {
+     activeUserId = this.getClaimsDelToken(token).get("idUsuario", Integer.class);
   }
 
   @Override
   public long getActiveUserId() {
-    return activeUserID;
+    return activeUserId;
   }
 }

@@ -1,7 +1,9 @@
 package sic.service;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.querydsl.core.BooleanBuilder;
 import org.springframework.data.domain.Page;
@@ -65,6 +67,6 @@ public interface IPedidoService {
 
   List<CommitDTO> getCambiosPedido(long idPedido);
 
-  List<List<CommitDTO>> getCambiosRenglonesPedido(long idCommitPedido);
+  Map<String, List<CommitDTO>> getCambiosRenglonesPedido(long idCommitPedido);
 
 }

@@ -2,7 +2,9 @@ package sic.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -70,7 +72,6 @@ public class PedidoController {
 
   @PutMapping("/pedidos")
   public void actualizar(@RequestBody PedidoDTO pedidoDTO, HttpServletRequest request) {
-    authService.setActiveUserToken(request.getHeader("Authorization"));
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
     pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
@@ -101,7 +102,6 @@ public class PedidoController {
   public Pedido guardar(@RequestBody PedidoDTO pedidoDTO,
                         @RequestHeader("Authorization") String authorizationHeader,
                         HttpServletRequest request) {
-    authService.setActiveUserToken(request.getHeader("Authorization"));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(pedidoDTO.getObservaciones());
@@ -140,7 +140,6 @@ public class PedidoController {
   @PutMapping("/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void cancelar(@PathVariable long idPedido, HttpServletRequest request) {
-    authService.setActiveUserToken(request.getHeader("Authorization"));
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
@@ -167,7 +166,7 @@ public class PedidoController {
 
   @GetMapping("/pedidos/{idPedido}/renglones/cambios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<List<CommitDTO>> getCambiosRenglones(@PathVariable long idPedido) {
+  public Map<String, List<CommitDTO>> getCambiosRenglones(@PathVariable long idPedido) {
     return pedidoService.getCambiosRenglonesPedido(idPedido);
   }
 }

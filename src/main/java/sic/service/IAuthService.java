@@ -21,7 +21,7 @@ public interface IAuthService {
 
   void excluirTokenAcceso(String authorizationHeader);
 
-  void setActiveUserToken(String token);
+  void setActiveUserId(String token);
 
   long getActiveUserId();
 }
