@@ -1054,7 +1054,7 @@ class AppIntegrationTest {
     assertFalse(cambios.isEmpty());
     assertEquals(2, cambios.size());
     assertEquals("4.00", cambios.get(0).getIdCommit());
-    assertNull(cambios.get(0).getIdCommitRelacionado());
+    assertEquals("3.00", cambios.get(0).getIdCommitRelacionado());
     assertEquals("Power Max(dueño)", cambios.get(0).getUsuario());
     assertEquals("ACTUALIZACION", cambios.get(0).getTipoDeOperacion());
     assertEquals(8, cambios.get(0).getCambios().size());
