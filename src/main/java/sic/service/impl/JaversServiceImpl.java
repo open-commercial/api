@@ -9,7 +9,6 @@ import org.javers.core.diff.changetype.InitialValueChange;
 import org.javers.core.diff.changetype.ObjectRemoved;
 import org.javers.core.diff.changetype.ReferenceChange;
 import org.javers.core.diff.changetype.ValueChange;
-import org.javers.core.diff.changetype.container.CollectionChange;
 import org.javers.core.diff.changetype.container.ListChange;
 import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.QueryBuilder;
@@ -116,7 +115,7 @@ public class JaversServiceImpl implements IAuditService {
                             .build());
                 }
                 case COLLECTION_CHANGE -> {
-                    var collectionChange = (CollectionChange) change;
+                    var collectionChange = (ListChange) change;
                     valuesChanges.add(CambioDTO.builder()
                             .valorSiguiente(collectionChange.getRight() == null ? "" : collectionChange.getRight().toString())
                             .valorAnterior(collectionChange.getLeft() == null ? "" : collectionChange.getLeft().toString())
@@ -132,9 +131,9 @@ public class JaversServiceImpl implements IAuditService {
                                 .valorSiguiente(String.valueOf(listChange.getRight().size()))
                                 .build());
                     }
-                    if (listChange.getRight().get(0) instanceof LinkedTreeMap mapRight) {
+                    if (listChange.getRight().get(0) instanceof LinkedTreeMap<?,?> mapRight) {
                         var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
-                                (LinkedTreeMap) listChange.getLeft().get(0) : new LinkedTreeMap<>();
+                                (LinkedTreeMap<?,?>) listChange.getLeft().get(0) : new LinkedTreeMap<>();
                         var keySet = mapRight.keySet();
                         keySet.forEach(key -> {
                             var valorSiguiente = mapRight.get(key);
