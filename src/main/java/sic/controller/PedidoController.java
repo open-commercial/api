@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import io.jsonwebtoken.Claims;
@@ -71,7 +70,7 @@ public class PedidoController {
   }
 
   @PutMapping("/pedidos")
-  public void actualizar(@RequestBody PedidoDTO pedidoDTO, HttpServletRequest request) {
+  public void actualizar(@RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
     pedido.setSucursal(sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal()));
@@ -100,8 +99,7 @@ public class PedidoController {
 
   @PostMapping("/pedidos")
   public Pedido guardar(@RequestBody PedidoDTO pedidoDTO,
-                        @RequestHeader("Authorization") String authorizationHeader,
-                        HttpServletRequest request) {
+                        @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Pedido pedido = new Pedido();
     pedido.setObservaciones(pedidoDTO.getObservaciones());
@@ -139,7 +137,7 @@ public class PedidoController {
 
   @PutMapping("/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public void cancelar(@PathVariable long idPedido, HttpServletRequest request) {
+  public void cancelar(@PathVariable long idPedido) {
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
