@@ -338,10 +338,9 @@ public class MercadoPagoServiceImpl implements IPagoService {
       throw new BusinessServiceException(
               messageSource.getMessage(
                       "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
-    }
-    catch (GeneralSecurityException e) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
+    } catch (GeneralSecurityException e) {
+      logger.error(
+              messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
     }
   }
 
