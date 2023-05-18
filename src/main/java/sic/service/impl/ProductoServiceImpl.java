@@ -1153,14 +1153,14 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void enviarListaDeProductosParaUsuariosSegunRol(Rol rol, BusquedaProductoCriteria criteria, String formato) {
-      Page<Usuario> usuariosParaEnviarReporte = usuarioService.getUsuariosPorRol(rol);
-      byte[] listaDeProductos = this.getListaDePrecios(this.buscarProductosParaReporte(criteria), formato);
-      usuariosParaEnviarReporte.get().filter(usuario -> usuario.getEmail() != null)
-              .forEach(usuario -> {
-                String mensaje =  messageSource.getMessage(
-                        "mensaje_producto_reporte_viajantes", new Object[] {usuario.getApellido() + usuario.getNombre()}, Locale.getDefault());
-                this.enviarListaDeProductosPorEmail(usuario.getEmail(), listaDeProductos, formato, mensaje);
-              });
+    Page<Usuario> usuariosParaEnviarReporte = usuarioService.getUsuariosPorRol(rol);
+    byte[] listaDeProductos = this.getListaDePrecios(this.buscarProductosParaReporte(criteria), formato);
+    usuariosParaEnviarReporte.get().filter(usuario -> usuario.getEmail() != null)
+            .forEach(usuario -> {
+              String mensaje = messageSource.getMessage(
+                      "mensaje_producto_reporte_viajantes", new Object[]{usuario.getApellido() + usuario.getNombre()}, Locale.getDefault());
+              this.enviarListaDeProductosPorEmail(usuario.getEmail(), listaDeProductos, formato, mensaje);
+            });
   }
 
   @Scheduled(cron = "50 0 0 ? * MON") // Todos los lunes 00:00:50
@@ -1168,8 +1168,9 @@ public class ProductoServiceImpl implements IProductoService {
   public void enviarCatalogoParaViajantes() {
     logger.warn(
             messageSource.getMessage(
-                    "mensaje_producto_reporte_catalogo", new Object[] {Rol.VIAJANTE}, Locale.getDefault()));
-    this.enviarListaDeProductosParaUsuariosSegunRol(Rol.ADMINISTRADOR, BusquedaProductoCriteria.builder().listarSoloParaCatalogo(true).build(), FORMATO_PDF);
+                    "mensaje_producto_reporte_catalogo", new Object[]{Rol.VIAJANTE}, Locale.getDefault()));
+    this.enviarListaDeProductosParaUsuariosSegunRol(Rol.VIAJANTE, BusquedaProductoCriteria.builder()
+            .listarSoloParaCatalogo(true).build(), FORMATO_PDF);
   }
 
   public byte[] getListaDePrecios(List<Producto> productos, String formato) {
