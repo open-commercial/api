@@ -17,6 +17,16 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.exception.BusinessServiceException;
+import sic.modelo.EnvioDeCorreoGrupal;
+import sic.modelo.Rol;
+import sic.modelo.Usuario;
+import sic.modelo.dto.EnvioDeCorreoGrupalDTO;
+import sic.repository.EnvioDeCorreoGrupalRepository;
+import sic.service.IUsuarioService;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import sic.service.IEmailService;
 import java.util.Locale;
 import java.util.Properties;
@@ -35,16 +45,21 @@ public class GmailEmailServiceImpl implements IEmailService {
 
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
+  private final EnvioDeCorreoGrupalRepository envioDeCorreoGrupalRepository;
+  private final IUsuarioService usuarioService;
 
   @Autowired
-  public GmailEmailServiceImpl(MessageSource messageSource) {
+  public GmailEmailServiceImpl(MessageSource messageSource, EnvioDeCorreoGrupalRepository envioDeCorreoGrupalRepository,
+            IUsuarioService usuarioService) {
     this.messageSource = messageSource;
+    this.envioDeCorreoGrupalRepository = envioDeCorreoGrupalRepository;
+    this.usuarioService = usuarioService;
   }
 
   @Override
   @Async
   public void enviarEmail(
-      String toEmail,
+      String[] toEmails,
       String bcc,
       String subject,
       String mensaje,
@@ -69,7 +84,7 @@ public class GmailEmailServiceImpl implements IEmailService {
         MimeMessage message = new MimeMessage(Session.getInstance(props, auth));
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setFrom(emailUsername);
-        helper.setTo(toEmail);
+        helper.setTo(toEmails);
         if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
         helper.setSubject(subject);
         helper.setText(mensaje);
@@ -85,5 +100,55 @@ public class GmailEmailServiceImpl implements IEmailService {
     } else {
       logger.error("Mail environment = {}, el mail NO se envió.", mailEnv);
     }
+  }
+
+  @Override
+  @Async
+  public void enviarEmail(
+          String toEmail,
+          String bcc,
+          String subject,
+          String mensaje,
+          byte[] byteArray,
+          String attachmentDescription) {
+    List<String> correosDeUsuarios = new ArrayList<>();
+    correosDeUsuarios.add(toEmail);
+    this.enviarEmail(correosDeUsuarios.toArray(String[]::new), bcc, subject, mensaje, byteArray, attachmentDescription);
+  }
+
+  @Override
+  @Async
+  public EnvioDeCorreoGrupal enviarCorreoGrupal(EnvioDeCorreoGrupalDTO envioDeCorreoGrupalDTO) {
+    EnvioDeCorreoGrupal envioDeCorreoGrupal = this.crearEnvioDeCorreoGrupal(envioDeCorreoGrupalDTO);
+    List<Usuario> usuariosParaEnviarReporte = this.getUsuariosParaEnviaEmail(envioDeCorreoGrupalDTO.getRoles());
+    List<String> correosDeUsuarios = new ArrayList<>();
+    usuariosParaEnviarReporte.stream().filter(usuario -> usuario.getEmail() != null)
+                    .forEach(usuario -> correosDeUsuarios.add(usuario.getEmail()));
+    this.enviarEmail(
+            correosDeUsuarios.toArray(String[]::new),
+            emailUsername,
+            envioDeCorreoGrupalDTO.getAsunto(),
+            envioDeCorreoGrupalDTO.getMensaje(),
+            envioDeCorreoGrupal.getReporteAdjunto(),
+            envioDeCorreoGrupal.getDescripcionAdjunto());
+    return envioDeCorreoGrupalRepository.save(this.crearEnvioDeCorreoGrupal(envioDeCorreoGrupalDTO));
+  }
+
+  private EnvioDeCorreoGrupal crearEnvioDeCorreoGrupal(EnvioDeCorreoGrupalDTO envioDeCorreoGrupalDTO) {
+     return EnvioDeCorreoGrupal.builder()
+             .fecha(LocalDateTime.now())
+             .asunto(envioDeCorreoGrupalDTO.getAsunto())
+             .roles(envioDeCorreoGrupalDTO.getRoles())
+             .mensaje(envioDeCorreoGrupalDTO.getMensaje())
+             .reporteAdjunto(envioDeCorreoGrupalDTO.getReporteAdjunto())
+             .build();
+  }
+
+  private List<Usuario> getUsuariosParaEnviaEmail(List<Rol> roles) {
+    List<Usuario> usuarios = new ArrayList<>();
+    roles.forEach(rol -> {
+      usuarios.addAll(usuarioService.getUsuariosPorRol(rol).getContent());
+    });
+    return usuarios;
   }
 }

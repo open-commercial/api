@@ -85,7 +85,11 @@ public interface IProductoService {
 
   void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal);
 
-  void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato);
+  void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato, String mensaje);
+
+  void enviarListaDeProductosParaUsuariosSegunRol(Rol rol, BusquedaProductoCriteria criteria, String formato);
+
+  void enviarCatalogoParaViajantes();
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 

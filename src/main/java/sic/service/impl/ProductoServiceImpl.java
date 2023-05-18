@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import sic.modelo.*;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.criteria.BusquedaProductoCriteria;
+import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.modelo.dto.*;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
@@ -1126,7 +1128,7 @@ public class ProductoServiceImpl implements IProductoService {
   public void getListaDePreciosEnXls(BusquedaProductoCriteria criteria, long idSucursal) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
     this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
-            this.getListaDePrecios(productos, FORMATO_XLSX), FORMATO_XLSX);
+            this.getListaDePrecios(productos, FORMATO_XLSX), FORMATO_XLSX, "");
   }
 
   @Override
@@ -1134,18 +1136,41 @@ public class ProductoServiceImpl implements IProductoService {
   public void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal) {
     List<Producto> productos = this.buscarProductosParaReporte(criteria);
     this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
-            this.getListaDePrecios(productos, FORMATO_PDF), FORMATO_PDF);
+            this.getListaDePrecios(productos, FORMATO_PDF), FORMATO_PDF, "");
   }
 
+  @Async
   @Override
-  public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato) {
+  public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato, String mensaje) {
     emailService.enviarEmail(
             mailTo,
             "",
             "Listado de productos",
-            "",
+            mensaje,
             listaDeProductos,
             "ListaDeProductos." + formato);
+  }
+
+  @Override
+  public void enviarListaDeProductosParaUsuariosSegunRol(Rol rol, BusquedaProductoCriteria criteria, String formato) {
+    Page<Usuario> usuariosParaEnviarReporte = usuarioService.getUsuariosPorRol(rol);
+    byte[] listaDeProductos = this.getListaDePrecios(this.buscarProductosParaReporte(criteria), formato);
+    usuariosParaEnviarReporte.get().filter(usuario -> usuario.getEmail() != null)
+            .forEach(usuario -> {
+              String mensaje = messageSource.getMessage(
+                      "mensaje_producto_reporte_viajantes", new Object[]{usuario.getApellido() + usuario.getNombre()}, Locale.getDefault());
+              this.enviarListaDeProductosPorEmail(usuario.getEmail(), listaDeProductos, formato, mensaje);
+            });
+  }
+
+  @Scheduled(cron = "50 0 0 ? * MON") // Todos los lunes 00:00:50
+  @Override
+  public void enviarCatalogoParaViajantes() {
+    logger.warn(
+            messageSource.getMessage(
+                    "mensaje_producto_reporte_catalogo", new Object[]{Rol.VIAJANTE}, Locale.getDefault()));
+    this.enviarListaDeProductosParaUsuariosSegunRol(Rol.VIAJANTE, BusquedaProductoCriteria.builder()
+            .listarSoloParaCatalogo(true).build(), FORMATO_PDF);
   }
 
   public byte[] getListaDePrecios(List<Producto> productos, String formato) {
