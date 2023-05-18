@@ -1052,8 +1052,7 @@ public class NotaServiceImpl implements INotaService {
     this.validarCalculosDebito(notaDebito);
     notaDebito = notaDebitoRepository.save(notaDebito);
     if (notaDebito.getRecibo() != null
-        && notaDebito.getRecibo().getIdPagoMercadoPago() != null
-        && !notaDebito.getRecibo().getIdPagoMercadoPago().isEmpty()) {
+        && notaDebito.getRecibo().getIdPagoMercadoPago() != null) {
       pagoService.devolverPago(notaDebito.getRecibo().getIdPagoMercadoPago());
     }
     cuentaCorrienteService.asentarEnCuentaCorriente(notaDebito, TipoDeOperacion.ALTA);
@@ -1140,7 +1139,7 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public byte[] getReporteNota(Nota nota) {
-    ClassLoader classLoader = NotaServiceImpl.class.getClassLoader();
+    var classLoader = this.getClass().getClassLoader();
     InputStream isFileReport;
     JRBeanCollectionDataSource ds;
     Map<String, Object> params = new HashMap<>();

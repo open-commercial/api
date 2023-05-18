@@ -25,8 +25,8 @@ public class PagoController {
 
   @PostMapping("/pagos/mercado-pago/notificacion")
   public void crearComprobantePorNotificacion(
-      @RequestParam(name = "data.id") String id, @RequestParam String type) {
-    if (type.equals("payment")) {
+      @RequestParam long id, @RequestParam String topic) {
+    if (topic.equals("payment")) {
       pagoService.crearComprobantePorNotificacion(id);
     }
   }

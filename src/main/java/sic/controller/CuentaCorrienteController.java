@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.Locale;
-
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -13,11 +12,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
+import sic.modelo.CuentaCorrienteCliente;
+import sic.modelo.CuentaCorrienteProveedor;
+import sic.modelo.RenglonCuentaCorriente;
+import sic.modelo.Rol;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
-import sic.service.*;
 import sic.exception.BusinessServiceException;
+import sic.service.IAuthService;
+import sic.service.IClienteService;
+import sic.service.ICuentaCorrienteService;
+import sic.service.IProveedorService;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -30,7 +35,6 @@ public class CuentaCorrienteController {
   private final MessageSource messageSource;
   private static final String ID_USUARIO = "idUsuario";
   private static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
-
 
   @Autowired
   public CuentaCorrienteController(
@@ -47,12 +51,7 @@ public class CuentaCorrienteController {
   }
 
   @PostMapping("/cuentas-corriente/clientes/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-    Rol.VENDEDOR,
-    Rol.VIAJANTE
-  })
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Page<CuentaCorrienteCliente> buscarCuentasCorrienteCliente(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -62,10 +61,7 @@ public class CuentaCorrienteController {
   }
 
   @PostMapping("/cuentas-corriente/proveedores/busqueda/criteria")
-  @AccesoRolesPermitidos({
-    Rol.ADMINISTRADOR,
-    Rol.ENCARGADO,
-  })
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<CuentaCorrienteProveedor> buscarCuentasCorrienteProveedor(
       @RequestBody BusquedaCuentaCorrienteProveedorCriteria criteria) {
     return cuentaCorrienteService.buscarCuentaCorrienteProveedor(criteria);
@@ -111,41 +107,42 @@ public class CuentaCorrienteController {
 
   @PostMapping("/cuentas-corriente/clientes/reporte/criteria")
   public ResponseEntity<byte[]> getReporteCuentaCorriente(
-    @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
+      @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestParam(required = false) String formato) {
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     switch (formato) {
-      case "xlsx":
+      case "xlsx" -> {
         headers.setContentType(new MediaType("application", "vnd.ms-excel"));
         headers.set(CONTENT_DISPOSITION_HEADER, "attachment; filename=EstadoCuentaCorriente.xlsx");
         byte[] reporteXls =
-            cuentaCorrienteService.getReporteCuentaCorrienteCliente(
-                cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
-                formato);
+                cuentaCorrienteService.getReporteCuentaCorrienteCliente(
+                        cuentaCorrienteService.getCuentaCorrientePorCliente(
+                                clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
+                        formato);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
-      case "pdf":
+      }
+      case "pdf" -> {
         headers.setContentType(MediaType.APPLICATION_PDF);
         headers.add(CONTENT_DISPOSITION_HEADER, "attachment; filename=EstadoCuentaCorriente.pdf");
         byte[] reportePDF =
-            cuentaCorrienteService.getReporteCuentaCorrienteCliente(
-                cuentaCorrienteService.getCuentaCorrientePorCliente(
-                    clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
-                formato);
+                cuentaCorrienteService.getReporteCuentaCorrienteCliente(
+                        cuentaCorrienteService.getCuentaCorrientePorCliente(
+                                clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
+                        formato);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_formato_no_valido", null, Locale.getDefault()));
+      }
+      default -> throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 
   @PostMapping("/cuentas-corriente/lista-clientes/reporte/criteria")
   public ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClientePorCriteria(
-          @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
-          @RequestParam(required = false) String formato,
-          @RequestHeader("Authorization") String authorizationHeader) {
+      @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
+      @RequestParam(required = false) String formato,
+      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");

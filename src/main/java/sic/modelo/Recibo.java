@@ -36,7 +36,7 @@ public class Recibo implements Serializable {
 
   private long numRecibo;
 
-  private String idPagoMercadoPago;
+  private Long idPagoMercadoPago;
 
   @NotNull(message = "{mensaje_recibo_fecha_vacia}")
   @PastOrPresent(message = "{mensaje_recibo_fecha_futura_no_permitida}")

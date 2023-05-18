@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 
-import com.mercadopago.resources.Payment;
+import com.mercadopago.resources.payment.Payment;
 import com.querydsl.core.BooleanBuilder;
 import net.sf.jasperreports.engine.*;
 import org.slf4j.Logger;
@@ -78,7 +78,7 @@ public class ReciboServiceImpl implements IReciboService {
   }
 
   @Override
-  public Optional<Recibo> getReciboPorIdMercadoPago(String idPagoMercadoPago) {
+  public Optional<Recibo> getReciboPorIdMercadoPago(long idPagoMercadoPago) {
     return reciboRepository.findReciboByIdPagoMercadoPagoAndEliminado(idPagoMercadoPago, false);
   }
 
@@ -143,17 +143,14 @@ public class ReciboServiceImpl implements IReciboService {
       return PageRequest.of(
           pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      return switch (sentido) {
+        case "ASC" -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(
+                pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+      };
     }
   }
 
@@ -264,7 +261,7 @@ public class ReciboServiceImpl implements IReciboService {
     nuevoRecibo.setCliente(cliente);
     nuevoRecibo.setFecha(LocalDateTime.now());
     nuevoRecibo.setConcepto("Pago en MercadoPago (" + payment.getPaymentMethodId() + ")");
-    nuevoRecibo.setMonto(new BigDecimal(Float.toString(payment.getTransactionAmount())));
+    nuevoRecibo.setMonto(payment.getTransactionAmount());
     nuevoRecibo.setIdPagoMercadoPago(payment.getId());
     return nuevoRecibo;
   }
@@ -328,7 +325,9 @@ public class ReciboServiceImpl implements IReciboService {
     }
     JasperReport jasperDesign;
     try {
-      jasperDesign = JasperCompileManager.compileReport("src/main/resources/sic/vista/reportes/Recibo.jrxml");
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
               "mensaje_error_reporte", null, Locale.getDefault()), ex);

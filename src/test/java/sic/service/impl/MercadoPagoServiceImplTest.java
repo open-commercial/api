@@ -174,8 +174,8 @@ class MercadoPagoServiceImplTest {
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
     when(pedidoService.guardar(pedido, null)).thenReturn(pedido);
-    pagoService.crearComprobantePorNotificacion("26800675");
-    verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyString());
+    pagoService.crearComprobantePorNotificacion(26800675L);
+    verify(reciboService, times(1)).getReciboPorIdMercadoPago(anyLong());
     verify(clienteService, times(1)).getClientePorIdUsuario(anyLong());
     verify(sucursalService, times(1)).getSucursalPorId(any());
     verify(messageSource, times(1)).getMessage(eq("mensaje_pago_aprobado"), any(), any());
