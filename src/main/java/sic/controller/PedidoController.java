@@ -19,19 +19,17 @@ import sic.modelo.dto.*;
 import sic.modelo.Resultados;
 import sic.service.*;
 
-import javax.servlet.http.HttpServletRequest;
-
 @RestController
 @RequestMapping("/api/v1")
 public class PedidoController {
 
-    private final IPedidoService pedidoService;
-    private final IUsuarioService usuarioService;
-    private final ISucursalService sucursalService;
-    private final IClienteService clienteService;
-    private final IReciboService reciboService;
-    private final IAuthService authService;
-    private static final String ID_USUARIO = "idUsuario";
+  private final IPedidoService pedidoService;
+  private final IUsuarioService usuarioService;
+  private final ISucursalService sucursalService;
+  private final IClienteService clienteService;
+  private final IReciboService reciboService;
+  private final IAuthService authService;
+  private static final String ID_USUARIO = "idUsuario";
 
   @Autowired
   public PedidoController(
@@ -49,21 +47,20 @@ public class PedidoController {
     this.authService = authService;
   }
 
-    @GetMapping("/pedidos/{idPedido}")
-    public Pedido getPedidoPorId(@PathVariable long idPedido) {
-        return pedidoService.getPedidoNoEliminadoPorId(idPedido);
-    }
+  @GetMapping("/pedidos/{idPedido}")
+  public Pedido getPedidoPorId(@PathVariable long idPedido) {
+      return pedidoService.getPedidoNoEliminadoPorId(idPedido);
+  }
 
-    @GetMapping("/pedidos/{idPedido}/renglones")
-    public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido,
-                                                     @RequestParam(required = false) boolean clonar) {
-        return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
-    }
+  @GetMapping("/pedidos/{idPedido}/renglones")
+  public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido,
+                                                   @RequestParam(required = false) boolean clonar) {
+      return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
+  }
 
   @PostMapping("/pedidos/renglones/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public List<RenglonPedido> calcularRenglonesPedido(
-      @RequestBody List<CantidadProductoDTO> nuevosRenglonesPedidoDTO) {
+  public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<CantidadProductoDTO> nuevosRenglonesPedidoDTO) {
     return pedidoService.calcularRenglonesPedido(
         pedidoService.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
         pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
@@ -141,15 +138,15 @@ public class PedidoController {
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
-    @GetMapping("/pedidos/{idPedido}/reporte")
-    public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);        
-        headers.add("content-disposition", "inline; filename=Pedido.pdf");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = pedidoService.getReportePedido(idPedido);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-    }
+  @GetMapping("/pedidos/{idPedido}/reporte")
+  public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_PDF);
+      headers.add("content-disposition", "inline; filename=Pedido.pdf");
+      headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+      byte[] reportePDF = pedidoService.getReportePedido(idPedido);
+      return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
 
   @PostMapping("/pedidos/calculo-pedido")
   public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
