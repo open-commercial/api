@@ -359,30 +359,31 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
 
   private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
-      case APPROVED:
+      case APPROVED -> {
         logger.warn(
-            messageSource.getMessage(
-                "mensaje_pago_aprobado", new Object[] {payment}, Locale.getDefault()));
+                messageSource.getMessage(
+                        "mensaje_pago_aprobado", new Object[]{payment}, Locale.getDefault()));
         reciboService.guardar(
-            reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment));
-        break;
-      case PENDING:
+                reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment));
+      }
+      case PENDING -> {
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
           logger.warn(
-              messageSource.getMessage(
-                  "mensaje_pago_pendiente", new Object[] {payment}, Locale.getDefault()));
+                  messageSource.getMessage(
+                          "mensaje_pago_pendiente", new Object[]{payment}, Locale.getDefault()));
         } else {
           logger.warn(
-              messageSource.getMessage(
-                  "mensaje_pago_no_aprobado", new Object[] {payment}, Locale.getDefault()));
+                  messageSource.getMessage(
+                          "mensaje_pago_no_aprobado", new Object[]{payment}, Locale.getDefault()));
           this.procesarMensajeNoAprobado(payment);
         }
-        break;
-      default:
+      }
+      default -> {
         logger.warn(
-            messageSource.getMessage(
-                "mensaje_pago_no_aprobado", new Object[] {payment}, Locale.getDefault()));
+                messageSource.getMessage(
+                        "mensaje_pago_no_aprobado", new Object[]{payment}, Locale.getDefault()));
         this.procesarMensajeNoAprobado(payment);
+      }
     }
   }
 

@@ -53,8 +53,8 @@ public class AfipTaxationServiceImpl implements ITaxationService {
   @Override
   public void autorizar(ComprobanteAutorizable comprobanteAutorizable) {
     ComprobanteAutorizableAFIP comprobanteAutorizableAFIP;
-    if (comprobanteAutorizable instanceof ComprobanteAutorizableAFIP) {
-      comprobanteAutorizableAFIP = (ComprobanteAutorizableAFIP) comprobanteAutorizable;
+    if (comprobanteAutorizable instanceof ComprobanteAutorizableAFIP c) {
+      comprobanteAutorizableAFIP = c;
     } else {
       throw new ServiceException(messageSource.getMessage(
               "mensaje_no_es_comprobanteAFIP", null, Locale.getDefault()));
