@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class JaversServiceImpl implements IAuditService {
+public class JaversAuditServiceImpl implements IAuditService {
 
     private final IUsuarioService usuarioService;
     private final Javers javers;
@@ -38,7 +38,7 @@ public class JaversServiceImpl implements IAuditService {
     private static final String VALUE_CHANGE = "ValueChange";
 
     @Autowired
-    public JaversServiceImpl(IUsuarioService usuarioService, Javers javers) {
+    public JaversAuditServiceImpl(IUsuarioService usuarioService, Javers javers) {
         this.usuarioService = usuarioService;
         this.javers = javers;
     }

@@ -112,5 +112,4 @@ public class AppConfig {
   public Clock clock() {
     return Clock.systemDefaultZone();
   }
-
 }
