@@ -42,7 +42,7 @@ public interface IFacturaVentaService {
 
   List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
-  boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante);
+  boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAutorizableAFIP comprobante);
 
   void enviarFacturaVentaPorEmail(long idFactura);
 

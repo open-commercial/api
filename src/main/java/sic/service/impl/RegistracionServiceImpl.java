@@ -24,8 +24,8 @@ import java.util.Locale;
 @Transactional
 public class RegistracionServiceImpl implements IRegistracionService {
 
-  @Value("${SIC_MAIL_USERNAME}")
-  private String emailUsername;
+  @Value("${GMAIL_USERNAME}")
+  private String gmailUsername;
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
@@ -83,7 +83,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
     clienteService.guardar(nuevoCliente);
     emailService.enviarEmail(
         nuevoUsuario.getEmail(),
-        this.emailUsername,
+        this.gmailUsername,
         "Registración de cuenta nueva",
         messageSource.getMessage(
             "mensaje_correo_registracion",

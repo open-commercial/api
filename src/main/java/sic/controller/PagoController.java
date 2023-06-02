@@ -6,28 +6,27 @@ import org.springframework.web.bind.annotation.*;
 import sic.modelo.dto.MercadoPagoPreferenceDTO;
 import sic.modelo.dto.NuevaOrdenDePagoDTO;
 import sic.service.IAuthService;
-import sic.service.IPagoService;
+import sic.service.IPaymentService;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/v1")
 public class PagoController {
 
-  private final IPagoService pagoService;
+  private final IPaymentService paymentService;
   private final IAuthService authService;
 
   @Autowired
-  public PagoController(IPagoService pagoService,
+  public PagoController(IPaymentService paymentService,
                         IAuthService authService) {
-    this.pagoService = pagoService;
+    this.paymentService = paymentService;
     this.authService = authService;
   }
 
   @PostMapping("/pagos/mercado-pago/notificacion")
-  public void crearComprobantePorNotificacion(
-      @RequestParam long id, @RequestParam String topic) {
+  public void crearComprobantePorNotificacion(@RequestParam long id, @RequestParam String topic) {
     if (topic.equals("payment")) {
-      pagoService.crearComprobantePorNotificacion(id);
+      paymentService.crearComprobantePorNotificacion(id);
     }
   }
 
@@ -38,8 +37,7 @@ public class PagoController {
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");
-    var preferenceParams = pagoService.getNuevaPreferenceParams(
-            idUsuarioLoggedIn, nuevaOrdenDePagoDTO, origin);
+    var preferenceParams = paymentService.getNuevaPreferenceParams(idUsuarioLoggedIn, nuevaOrdenDePagoDTO, origin);
     return new MercadoPagoPreferenceDTO(preferenceParams.get(0), preferenceParams.get(1));
   }
 }

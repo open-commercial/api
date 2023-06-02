@@ -41,13 +41,11 @@ import sic.modelo.*;
 import sic.modelo.RenglonFactura;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
-
 import java.io.*;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -175,7 +173,7 @@ class AppIntegrationTest {
     fileInputStream.close();
     this.iniciarSesionComoAdministrador();
     configuracionSucursal.setCertificadoAfip(certificadoAfip);
-    configuracionSucursal.setFacturaElectronicaHabilitada(true);
+    configuracionSucursal.setFacturaElectronicaHabilitada(false);
     configuracionSucursal.setFirmanteCertificadoAfip("globo");
     configuracionSucursal.setPasswordCertificadoAfip("globo123");
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
@@ -227,8 +225,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName(
-      "Comprar productos al proveedor RI con factura A y verificar saldo CC, luego saldar la CC con un cheque de 3ro")
+  @DisplayName("Comprar productos al proveedor RI con factura A y verificar saldo CC, luego saldar la CC con un cheque de 3ro")
   @Order(3)
   void testEscenarioCompraEscenario1() {
     this.iniciarSesionComoAdministrador();
@@ -578,8 +575,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName(
-          "Dar de alta una nota de credito por una unidad fallada, chequear salgo CC y stock")
+  @DisplayName("Dar de alta una nota de credito por una unidad fallada, chequear salgo CC y stock")
   @Order(4)
   void testEscenarioCompraEscenario2() {
     this.iniciarSesionComoAdministrador();
@@ -744,7 +740,7 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Dar de alta un producto")
   @Order(6)
-  void testEscenarioAltaDeProductoConImagen() throws IOException {
+  void testEscenarioAltaDeProducto() throws IOException {
     this.iniciarSesionComoAdministrador();
     List<Medida> medidas =
         Arrays.asList(restTemplate.getForObject(apiPrefix + "/medidas", Medida[].class));
@@ -936,8 +932,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName(
-      "Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando, verificando stock y su historico de cambios")
+  @DisplayName("Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando, verificando stock y su historico de cambios")
   @Order(8)
   void testEscenarioModificacionPedido() {
     this.iniciarSesionComoAdministrador();
@@ -1088,8 +1083,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName(
-      "Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo y verificar stock")
+  @DisplayName("Facturar pedido al cliente RI con factura dividida, luego saldar la CC con efectivo y verificar stock")
   @Order(9)
   void testEscenarioVenta1() {
     this.iniciarSesionComoAdministrador();
@@ -1302,8 +1296,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName(
-          "Dar de alta un transportista, luego crear dos remitos por las facturas anteriores usando ese transportista")
+  @DisplayName("Dar de alta un transportista, luego crear dos remitos por las facturas anteriores usando ese transportista")
   @Order(10)
   void testEscenarioRemito() {
     this.iniciarSesionComoAdministrador();

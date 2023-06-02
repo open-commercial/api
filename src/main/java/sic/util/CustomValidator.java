@@ -5,8 +5,10 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.beanvalidation.MessageSourceResourceBundleLocator;
-
-import javax.validation.*;
+import javax.validation.Validator;
+import javax.validation.Validation;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
 @Component

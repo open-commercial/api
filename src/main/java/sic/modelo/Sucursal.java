@@ -66,9 +66,6 @@ public class Sucursal implements Serializable {
   @JoinColumn(name = "idConfiguracionSucursal", referencedColumnName = "idConfiguracionSucursal")
   private ConfiguracionSucursal configuracionSucursal;
 
-  @Pattern(
-      regexp = "^https:\\/\\/res.cloudinary.com\\/.*",
-      message = "{mensaje_url_imagen_no_valida}")
   private String logo;
 
   private boolean eliminada;

@@ -41,7 +41,7 @@ public class AuthServiceImpl implements IAuthService {
   @Value("${RECAPTCHA_TEST_KEY}")
   private String recaptchaTestKey;
 
-  @Value("${SIC_JWT_KEY}")
+  @Value("${API_JWT_KEY}")
   private String jwtSecretKey;
 
   @Autowired

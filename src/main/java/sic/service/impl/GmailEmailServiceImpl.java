@@ -1,7 +1,5 @@
 package sic.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -17,6 +15,7 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import sic.exception.BusinessServiceException;
+import sic.exception.ServiceException;
 import sic.service.IEmailService;
 import java.util.Locale;
 import java.util.Properties;
@@ -24,16 +23,13 @@ import java.util.Properties;
 @Service
 public class GmailEmailServiceImpl implements IEmailService {
 
-  @Value("${SIC_MAIL_ENV}")
-  private String mailEnv;
+  @Value("${GMAIL_USERNAME}")
+  private String gmailUsername;
 
-  @Value("${SIC_MAIL_USERNAME}")
-  private String emailUsername;
+  @Value("${GMAIL_PASSWORD}")
+  private String gmailPassword;
 
-  @Value("${SIC_MAIL_PASSWORD}")
-  private String emailPassword;
-
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de GMail no se encuentra configurado";
   private final MessageSource messageSource;
 
   @Autowired
@@ -42,48 +38,43 @@ public class GmailEmailServiceImpl implements IEmailService {
   }
 
   @Override
+  public boolean isServicioConfigurado() {
+    return gmailUsername != null && !gmailUsername.isEmpty()
+            && gmailPassword != null && !gmailPassword.isEmpty();
+  }
+
+  @Override
   @Async
-  public void enviarEmail(
-      String toEmail,
-      String bcc,
-      String subject,
-      String mensaje,
-      byte[] byteArray,
-      String attachmentDescription) {
-    if (mailEnv.equals("production")
-        && !emailUsername.isEmpty()
-        && !emailPassword.isEmpty()) {
-      Properties props = new Properties();
-      props.put("mail.smtp.host", "smtp.gmail.com");
-      props.put("mail.smtp.port", "587");
-      props.put("mail.smtp.auth", "true");
-      props.put("mail.smtp.starttls.enable", "true");
-      try {
-        Authenticator auth =
-            new Authenticator() {
-              @Override
-              protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(emailUsername, emailPassword);
-              }
-            };
-        MimeMessage message = new MimeMessage(Session.getInstance(props, auth));
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        helper.setFrom(emailUsername);
-        helper.setTo(toEmail);
-        if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
-        helper.setSubject(subject);
-        helper.setText(mensaje);
-        if (byteArray != null) {
-          ByteArrayDataSource bds = new ByteArrayDataSource(byteArray, "application/pdf");
-          helper.addAttachment(attachmentDescription, bds);
+  public void enviarEmail(String toEmail, String bcc, String subject, String mensaje,
+                          byte[] byteArray, String attachmentDescription) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
+    var props = new Properties();
+    props.put("mail.smtp.host", "smtp.gmail.com");
+    props.put("mail.smtp.port", "587");
+    props.put("mail.smtp.auth", "true");
+    props.put("mail.smtp.starttls.enable", "true");
+    try {
+      var auth = new Authenticator() {
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+          return new PasswordAuthentication(gmailUsername, gmailPassword);
         }
-        Transport.send(helper.getMimeMessage());
-      } catch (MessagingException | MailException ex) {
-        throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_correo_error", null, Locale.getDefault()), ex);
+      };
+      var message = new MimeMessage(Session.getInstance(props, auth));
+      var helper = new MimeMessageHelper(message, true);
+      helper.setFrom(gmailUsername);
+      helper.setTo(toEmail);
+      if (bcc != null && !bcc.isEmpty()) helper.setBcc(bcc);
+      helper.setSubject(subject);
+      helper.setText(mensaje);
+      if (byteArray != null) {
+        var byteArrayDataSource = new ByteArrayDataSource(byteArray, "application/pdf");
+        helper.addAttachment(attachmentDescription, byteArrayDataSource);
       }
-    } else {
-      logger.error("Mail environment = {}, el mail NO se envió.", mailEnv);
+      Transport.send(helper.getMimeMessage());
+    } catch (MessagingException | MailException ex) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_correo_error", null, Locale.getDefault()), ex);
     }
   }
 }
