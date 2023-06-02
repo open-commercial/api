@@ -49,11 +49,6 @@ public class JaversAuditServiceImpl implements IAuditService {
     }
 
     @Override
-    public String auditar(String idUsuario, Object objeto) {
-        return javers.commit(idUsuario, objeto).getId().value();
-    }
-
-    @Override
     public <T> List<CommitDTO> getCambiosDTO(T objeto) {
         var changesDTO = new ArrayList<CommitDTO>();
         this.getChanges(objeto).groupByCommit().forEach(changesByCommit -> {
@@ -153,9 +148,6 @@ public class JaversAuditServiceImpl implements IAuditService {
                             .valorAnterior("")
                             .valorSiguiente(initialValueChange.getRight().toString())
                             .build());
-                }
-                default -> {
-                    break;
                 }
             }
         });

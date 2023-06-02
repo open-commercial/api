@@ -8,8 +8,6 @@ public interface IAuditService {
 
     String auditar(String idUsuario, Object objeto, Map<String, String> propiedades);
 
-    String auditar(String idUsuario, Object objeto);
-
     <T> List<CommitDTO> getCambiosDTO(T objeto);
 
     List<CommitDTO> getCambiosDTO(String idCommit);
