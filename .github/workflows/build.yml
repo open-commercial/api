@@ -9,7 +9,7 @@ on:
 
 jobs:
   build-analyze-deploy:
-    name: Build, analyze, dockerize and deploy
+    name: Build, analyze, dockerize, and publish
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
