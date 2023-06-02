@@ -7,7 +7,6 @@ import sic.modelo.*;
 import sic.modelo.embeddable.ClienteEmbeddable;
 import sic.service.*;
 import afip.wsaa.wsdl.LoginCms;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -30,33 +29,101 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 
 @Service
-public class AfipServiceImpl implements IAfipService {
+public class AfipTaxationServiceImpl implements ITaxationService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
   private final IConfiguracionSucursalService configuracionSucursalService;
-  private final IFacturaVentaService facturaVentaService;
-  private final INotaService notaService;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final MessageSource messageSource;
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
   private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(21500);
-  private final MessageSource messageSource;
+  private static final String MENSAJE_AUTORIZACION_ERROR = "mensaje_autorizacion_error";
+  private static final String MENSAJE_COMPROBANTEAFIP_INVALIDO = "mensaje_comprobanteAFIP_invalido";
 
   @Autowired
-  public AfipServiceImpl(
+  public AfipTaxationServiceImpl(
       AfipWebServiceSOAPClient afipWebServiceSOAPClient,
       IConfiguracionSucursalService configuracionSucursalService,
-      IFacturaVentaService facturaVentaService,
-      INotaService notaService,
       MessageSource messageSource) {
     this.afipWebServiceSOAPClient = afipWebServiceSOAPClient;
     this.configuracionSucursalService = configuracionSucursalService;
-    this.notaService = notaService;
-    this.facturaVentaService = facturaVentaService;
     this.messageSource = messageSource;
   }
 
   @Override
-  public FEAuthRequest getFEAuth(String afipNombreServicio, Sucursal sucursal) {
+  public void autorizar(ComprobanteAutorizable comprobanteAutorizable) {
+    ComprobanteAutorizableAFIP comprobanteAutorizableAFIP;
+    if (comprobanteAutorizable instanceof ComprobanteAutorizableAFIP c) {
+      comprobanteAutorizableAFIP = c;
+    } else {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_no_es_comprobanteAFIP", null, Locale.getDefault()));
+    }
+    if (comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.FACTURA_A
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.FACTURA_B
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.FACTURA_C
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_A
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_A
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_B
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_B
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
+        && comprobanteAutorizableAFIP.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
+      throw new BusinessServiceException(messageSource.getMessage(
+              MENSAJE_COMPROBANTEAFIP_INVALIDO,
+              null, Locale.getDefault()));
+    }
+    boolean sinCae = comprobanteAutorizableAFIP.getCae() != 0;
+    if (sinCae) {
+      throw new BusinessServiceException(messageSource.getMessage(
+              "mensaje_comprobanteAFIP_autorizado", null, Locale.getDefault()));
+    }
+    FECAESolicitar fecaeSolicitud = new FECAESolicitar();
+    FEAuthRequest feAuthRequest = this.getFEAuth(comprobanteAutorizableAFIP.getSucursal());
+    fecaeSolicitud.setAuth(feAuthRequest);
+    int nroPuntoDeVentaAfip = comprobanteAutorizableAFIP.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip();
+    int siguienteNroComprobante =
+        this.getSiguienteNroComprobante(feAuthRequest, comprobanteAutorizableAFIP.getTipoComprobante(), nroPuntoDeVentaAfip);
+    fecaeSolicitud.setFeCAEReq(
+        this.transformComprobanteToFECAERequest(comprobanteAutorizableAFIP, siguienteNroComprobante, nroPuntoDeVentaAfip));
+    try {
+      FECAEResponse response = afipWebServiceSOAPClient.solicitarCAE(fecaeSolicitud);
+      String msjError = "";
+      // errores generales de la request
+      if (response.getErrors() != null) {
+        msjError =
+            response.getErrors().getErr().get(0).getCode()
+                + "-"
+                + response.getErrors().getErr().get(0).getMsg();
+        logger.error(msjError);
+        throw new BusinessServiceException(msjError);
+      }
+      // errores particulares de cada comprobante
+      if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {
+        msjError +=
+            response
+                .getFeDetResp()
+                .getFECAEDetResponse()
+                .get(0)
+                .getObservaciones()
+                .getObs()
+                .get(0)
+                .getMsg();
+        logger.error(msjError);
+        throw new BusinessServiceException(msjError);
+      }
+      long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
+      comprobanteAutorizableAFIP.setCae(cae);
+      String fechaVencimientoCaeResponse = response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto();
+      comprobanteAutorizableAFIP.setVencimientoCAE(LocalDate.parse(fechaVencimientoCaeResponse, DateTimeFormatter.BASIC_ISO_DATE));
+      comprobanteAutorizableAFIP.setNumSerieAfip(nroPuntoDeVentaAfip);
+      comprobanteAutorizableAFIP.setNumFacturaAfip(siguienteNroComprobante);
+    } catch (WebServiceClientException | IOException ex) {
+      throw new BusinessServiceException(messageSource.getMessage(
+              MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
+    }
+  }
+
+  private FEAuthRequest getFEAuth(Sucursal sucursal) {
     FEAuthRequest feAuthRequest = new FEAuthRequest();
     ConfiguracionSucursal configuracionSucursal = sucursal.getConfiguracionSucursal();
     LocalDateTime fechaVencimientoToken = configuracionSucursal.getFechaVencimientoTokenWSAA();
@@ -75,8 +142,8 @@ public class AfipServiceImpl implements IAfipService {
         String p12pass = configuracionSucursal.getPasswordCertificadoAfip();
         long ticketTimeInHours = 12L; // siempre devuelve por 12hs
         byte[] loginTicketRequestXmlCms =
-            afipWebServiceSOAPClient.crearCMS(
-                p12file, p12pass, p12signer, afipNombreServicio, ticketTimeInHours);
+                afipWebServiceSOAPClient.crearCMS(
+                        p12file, p12pass, p12signer, WEBSERVICE_FACTURA_ELECTRONICA, ticketTimeInHours);
         LoginCms loginCms = new LoginCms();
         loginCms.setIn0(Base64.getEncoder().encodeToString(loginTicketRequestXmlCms));
         try {
@@ -95,153 +162,34 @@ public class AfipServiceImpl implements IAfipService {
           String generationTime = tokenDoc.valueOf("/loginTicketResponse/header/generationTime");
           String expirationTime = tokenDoc.valueOf("/loginTicketResponse/header/expirationTime");
           configuracionSucursal.setFechaGeneracionTokenWSAA(
-              LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                  LocalDateTime.parse(generationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
           configuracionSucursal.setFechaVencimientoTokenWSAA(
-              LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+                  LocalDateTime.parse(expirationTime, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
           configuracionSucursalService.actualizar(configuracionSucursal);
           return feAuthRequest;
         } catch (DocumentException | IOException | WebServiceClientException | SAXException ex) {
           throw new ServiceException(
-                  messageSource.getMessage("mensaje_autorizacion_error", null, Locale.getDefault()), ex);
+                  messageSource.getMessage(MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
         }
       }
     }
   }
 
-  @Override
-  public void autorizar(ComprobanteAFIP comprobante) {
-    if (!comprobante.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada()) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_sucursal_fe_habilitada", null, Locale.getDefault()));
-    }
-    if (comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_A
-        && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_B
-        && comprobante.getTipoComprobante() != TipoDeComprobante.FACTURA_C
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_A
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_A
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_B
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_B
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_CREDITO_C
-        && comprobante.getTipoComprobante() != TipoDeComprobante.NOTA_DEBITO_C) {
-      throw new BusinessServiceException(messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
-    } else {
-      if ((comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_A
-              || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_B
-              || comprobante.getTipoComprobante() == TipoDeComprobante.FACTURA_C)
-          && facturaVentaService.existeFacturaVentaAnteriorSinAutorizar(comprobante)) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
-      }
-      if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
-              || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
-              || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C)
-          && notaService.existeNotaCreditoAnteriorSinAutorizar(comprobante)) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
-      }
-      if ((comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_A
-              || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_B
-              || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_DEBITO_C)
-          && notaService.existeNotaDebitoAnteriorSinAutorizar(comprobante)) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_existe_comprobante_anterior_sin_autorizar", null, Locale.getDefault()));
-      }
-    }
-    boolean sinCae = comprobante.getCae() != 0;
-    if (sinCae) {
-      throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_comprobanteAFIP_autorizado", null, Locale.getDefault()));
-    }
-    FECAESolicitar fecaeSolicitud = new FECAESolicitar();
-    FEAuthRequest feAuthRequest =
-        this.getFEAuth(WEBSERVICE_FACTURA_ELECTRONICA, comprobante.getSucursal());
-    if (feAuthRequest != null) {
-      fecaeSolicitud.setAuth(feAuthRequest);
-      int nroPuntoDeVentaAfip =
-          comprobante.getSucursal().getConfiguracionSucursal().getNroPuntoDeVentaAfip();
-      int siguienteNroComprobante =
-          this.getSiguienteNroComprobante(
-              feAuthRequest, comprobante.getTipoComprobante(), nroPuntoDeVentaAfip);
-      fecaeSolicitud.setFeCAEReq(
-          this.transformComprobanteToFECAERequest(
-              comprobante, siguienteNroComprobante, nroPuntoDeVentaAfip));
-      try {
-        FECAEResponse response = afipWebServiceSOAPClient.solicitarCAE(fecaeSolicitud);
-        String msjError = "";
-        // errores generales de la request
-        if (response.getErrors() != null) {
-          msjError =
-              response.getErrors().getErr().get(0).getCode()
-                  + "-"
-                  + response.getErrors().getErr().get(0).getMsg();
-          logger.error(msjError);
-          throw new BusinessServiceException(msjError);
-        }
-        // errores particulares de cada comprobante
-        if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {
-          msjError +=
-              response
-                  .getFeDetResp()
-                  .getFECAEDetResponse()
-                  .get(0)
-                  .getObservaciones()
-                  .getObs()
-                  .get(0)
-                  .getMsg();
-          logger.error(msjError);
-          throw new BusinessServiceException(msjError);
-        }
-        long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
-        comprobante.setCae(cae);
-        String fechaVencimientoCaeResponse =
-            response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto();
-        comprobante.setVencimientoCAE(
-            LocalDate.parse(fechaVencimientoCaeResponse, DateTimeFormatter.BASIC_ISO_DATE));
-        comprobante.setNumSerieAfip(nroPuntoDeVentaAfip);
-        comprobante.setNumFacturaAfip(siguienteNroComprobante);
-      } catch (WebServiceClientException | IOException ex) {
-        throw new BusinessServiceException(messageSource.getMessage(
-                "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
-      }
-    }
-  }
-
-  @Override
-  public int getSiguienteNroComprobante(
-      FEAuthRequest feAuthRequest, TipoDeComprobante tipo, int nroPuntoDeVentaAfip) {
+  private int getSiguienteNroComprobante(FEAuthRequest feAuthRequest, TipoDeComprobante tipo, int nroPuntoDeVentaAfip) {
     FECompUltimoAutorizado solicitud = new FECompUltimoAutorizado();
     solicitud.setAuth(feAuthRequest);
     switch (tipo) {
-      case FACTURA_A:
-        solicitud.setCbteTipo(1);
-        break;
-      case NOTA_DEBITO_A:
-        solicitud.setCbteTipo(2);
-        break;
-      case NOTA_CREDITO_A:
-        solicitud.setCbteTipo(3);
-        break;
-      case FACTURA_B:
-        solicitud.setCbteTipo(6);
-        break;
-      case NOTA_DEBITO_B:
-        solicitud.setCbteTipo(7);
-        break;
-      case NOTA_CREDITO_B:
-        solicitud.setCbteTipo(8);
-        break;
-      case FACTURA_C:
-        solicitud.setCbteTipo(11);
-        break;
-      case NOTA_DEBITO_C:
-        solicitud.setCbteTipo(12);
-        break;
-      case NOTA_CREDITO_C:
-        solicitud.setCbteTipo(13);
-        break;
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
+      case FACTURA_A -> solicitud.setCbteTipo(1);
+      case NOTA_DEBITO_A -> solicitud.setCbteTipo(2);
+      case NOTA_CREDITO_A -> solicitud.setCbteTipo(3);
+      case FACTURA_B -> solicitud.setCbteTipo(6);
+      case NOTA_DEBITO_B -> solicitud.setCbteTipo(7);
+      case NOTA_CREDITO_B -> solicitud.setCbteTipo(8);
+      case FACTURA_C -> solicitud.setCbteTipo(11);
+      case NOTA_DEBITO_C -> solicitud.setCbteTipo(12);
+      case NOTA_CREDITO_C -> solicitud.setCbteTipo(13);
+      default -> throw new BusinessServiceException(messageSource.getMessage(
+              MENSAJE_COMPROBANTEAFIP_INVALIDO, null, Locale.getDefault()));
     }
     solicitud.setPtoVta(nroPuntoDeVentaAfip);
     try {
@@ -250,67 +198,64 @@ public class AfipServiceImpl implements IAfipService {
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException | IOException ex) {
       throw new ServiceException(messageSource.getMessage(
-        "mensaje_autorizacion_error", null, Locale.getDefault()), ex);
+              MENSAJE_AUTORIZACION_ERROR, null, Locale.getDefault()), ex);
     }
   }
 
-  @Override
-  public FECAERequest transformComprobanteToFECAERequest(
-      ComprobanteAFIP comprobante, int siguienteNroComprobante, int nroPuntoDeVentaAfip) {
+  private FECAERequest transformComprobanteToFECAERequest(ComprobanteAutorizableAFIP comprobante, int siguienteNroComprobante, int nroPuntoDeVentaAfip) {
     FECAERequest fecaeRequest = new FECAERequest();
     FECAECabRequest cabecera = new FECAECabRequest();
     FECAEDetRequest detalle = new FECAEDetRequest();
-    this.agregarPeridoAlDetalle(comprobante, detalle);
+    this.agregarPeriodoAlDetalle(comprobante, detalle);
     // CbteTipo = 1: Factura A, 2: Nota de Débito A, 3: Nota de Crédito A, 6: Factura B,
     //    7: Nota de Débito B 8: Nota de Crédito B. 11: Factura C. 12: Nota Debito C. 13: Nota Credito C.
     // DocTipo = 80: CUIT, 86: CUIL, 96: DNI, 99: Doc.(Otro)
     int docTipo = (comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80;
     switch (comprobante.getTipoComprobante()) {
-      case FACTURA_A:
+      case FACTURA_A -> {
         this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(1);
         detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
-        break;
-      case NOTA_DEBITO_A:
+      }
+      case NOTA_DEBITO_A -> {
         this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(2);
         detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
-        break;
-      case NOTA_CREDITO_A:
+      }
+      case NOTA_CREDITO_A -> {
         this.validarCliente(comprobante.getCliente());
         cabecera.setCbteTipo(3);
         detalle.setDocTipo(docTipo);
         detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
-        break;
-      case FACTURA_B:
+      }
+      case FACTURA_B -> {
         cabecera.setCbteTipo(6);
         this.procesarDetalle(detalle, comprobante);
-        break;
-      case NOTA_DEBITO_B:
+      }
+      case NOTA_DEBITO_B -> {
         cabecera.setCbteTipo(7);
         this.procesarDetalle(detalle, comprobante);
-        break;
-      case NOTA_CREDITO_B:
+      }
+      case NOTA_CREDITO_B -> {
         cabecera.setCbteTipo(8);
         this.procesarDetalle(detalle, comprobante);
-        break;
-      case FACTURA_C:
+      }
+      case FACTURA_C -> {
         cabecera.setCbteTipo(11);
         this.procesarDetalle(detalle, comprobante);
-        break;
-      case NOTA_DEBITO_C:
+      }
+      case NOTA_DEBITO_C -> {
         cabecera.setCbteTipo(12);
         this.procesarDetalle(detalle, comprobante);
-        break;
-      case NOTA_CREDITO_C:
+      }
+      case NOTA_CREDITO_C -> {
         cabecera.setCbteTipo(13);
         this.procesarDetalle(detalle, comprobante);
-        break;
-      default:
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
+      }
+      default -> throw new BusinessServiceException(messageSource.getMessage(
+              MENSAJE_COMPROBANTEAFIP_INVALIDO, null, Locale.getDefault()));
     }
     // Cantidad de registros del detalle del comprobante o lote de comprobantes de ingreso
     cabecera.setCantReg(1);
@@ -418,7 +363,7 @@ public class AfipServiceImpl implements IAfipService {
     return fecaeRequest;
   }
 
-  private void procesarDetalle(FECAEDetRequest detalle, ComprobanteAFIP comprobante) {
+  private void procesarDetalle(FECAEDetRequest detalle, ComprobanteAutorizableAFIP comprobante) {
     // menor a LIMITE_MONTO_CONSUMIDOR_FINAL, si DocTipo = 99 DocNro debe ser igual a 0 (simula un consumidor final ???)
     if (comprobante.getTotal().compareTo(LIMITE_MONTO_CONSUMIDOR_FINAL) < 0) {
       detalle.setDocTipo(99);
@@ -431,7 +376,7 @@ public class AfipServiceImpl implements IAfipService {
     }
   }
 
-  private void agregarPeridoAlDetalle(ComprobanteAFIP comprobante, FECAEDetRequest detalle) {
+  private void agregarPeriodoAlDetalle(ComprobanteAutorizableAFIP comprobante, FECAEDetRequest detalle) {
     if (comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_A
         || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_B
         || comprobante.getTipoComprobante() == TipoDeComprobante.NOTA_CREDITO_C

@@ -11,7 +11,7 @@ import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.dto.NuevaSucursalDTO;
 import sic.repository.SucursalRepository;
-import sic.service.IPhotoUploader;
+import sic.service.IImageUploaderService;
 import sic.util.CustomValidator;
 
 import javax.persistence.EntityNotFoundException;
@@ -33,7 +33,7 @@ class SucursalServiceImplTest {
   @MockBean SucursalRepository sucursalRepository;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean IPhotoUploader photoUploader;
+  @MockBean IImageUploaderService imageUploaderService;
   @MockBean ProductoServiceImpl productoService;
   @MockBean MessageSource messageSource;
   @Autowired SucursalServiceImpl sucursalService;
@@ -98,7 +98,7 @@ class SucursalServiceImplTest {
     byte[] emptyArray = new byte[0];
     sucursalPersistida.setLogo("Logo");
     sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, emptyArray);
-    verify(photoUploader).borrarImagen("Sucursal1");
+    verify(imageUploaderService).borrarImagen("Sucursal1");
     verify(sucursalRepository).save(sucursalParaActualizar);
   }
 

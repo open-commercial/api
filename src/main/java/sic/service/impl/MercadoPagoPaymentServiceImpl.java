@@ -29,16 +29,17 @@ import java.math.BigDecimal;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Arrays;
 
 @Service
-public class MercadoPagoServiceImpl implements IPagoService {
+public class MercadoPagoPaymentServiceImpl implements IPaymentService {
 
-  @Value("${SIC_MERCADOPAGO_ACCESS_TOKEN}")
+  @Value("${MERCADOPAGO_ACCESS_TOKEN}")
   private String mercadoPagoAccessToken;
-
-  @Value("${SIC_MAIL_USERNAME}")
-  private String emailUsername;
 
   private final IReciboService reciboService;
   private final IClienteService clienteService;
@@ -50,9 +51,13 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private final IProductoService productoService;
   private final EncryptUtils encryptUtils;
   private static final String MENSAJE_PAGO_NO_SOPORTADO = "mensaje_pago_no_soportado";
+  private static final String MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO = "mensaje_preference_tipo_de_movimiento_no_soportado";
+  private static final String MENSAJE_PAGO_ERROR = "mensaje_pago_error";
+  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de Mercado Pago no se encuentra configurado";
   private static final String STRING_ID_USUARIO = "idUsuario";
-  private static final String[] MEDIO_DE_PAGO_NO_PERMITIDOS =
-          new String[]{"rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"};
+  private static final String[] MEDIOS_DE_PAGO_NO_PERMITIDOS = new String[] {
+          "rapipago", "pagofacil", "bapropagos", "cobroexpress", "cargavirtual", "redlink"
+  };
   private static final String APPROVED = "approved";
   private static final String REFUNDED = "refunded";
   private static final String REJECTED = "rejected";
@@ -62,7 +67,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
   private final CustomValidator customValidator;
 
   @Autowired
-  public MercadoPagoServiceImpl(
+  public MercadoPagoPaymentServiceImpl(
     IReciboService reciboService,
     IClienteService clienteService,
     INotaService notaService,
@@ -88,8 +93,13 @@ public class MercadoPagoServiceImpl implements IPagoService {
   }
 
   @Override
-  public List<String> getNuevaPreferenceParams(
-      long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+  public boolean isServicioConfigurado() {
+    return mercadoPagoAccessToken != null && !mercadoPagoAccessToken.isEmpty();
+  }
+
+  @Override
+  public List<String> getNuevaPreferenceParams(long idUsuario, NuevaOrdenDePagoDTO nuevaOrdenDeCompra, String origin) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     customValidator.validar(nuevaOrdenDeCompra);
     var sucursal = sucursalService.getSucursalPorId(nuevaOrdenDeCompra.getIdSucursal());
     var usuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
@@ -181,8 +191,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
                 .build();
       }
       default -> throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
     }
     var jsonObject = JsonParser.parseString(stringJson).getAsJsonObject();
     try {
@@ -199,7 +208,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
             .build();
     var excludedPaymentMethods = new ArrayList<PreferencePaymentMethodRequest>();
     if (!clienteDeUsuario.isPuedeComprarAPlazo()) {
-      Arrays.stream(MEDIO_DE_PAGO_NO_PERMITIDOS).toList().forEach(
+      Arrays.stream(MEDIOS_DE_PAGO_NO_PERMITIDOS).toList().forEach(
               medioDePago -> excludedPaymentMethods.add(PreferencePaymentMethodRequest.builder().id(medioDePago).build())
       );
     }
@@ -237,14 +246,14 @@ public class MercadoPagoServiceImpl implements IPagoService {
         pedidoService.eliminar(pedido.getIdPedido());
       }
       throw new BusinessServiceException(
-              messageSource.getMessage(
-                      "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[]{ex.getMessage()}, Locale.getDefault()));
     }
     return Arrays.asList(preference.getId(), preference.getInitPoint());
   }
 
   @Override
   public void crearComprobantePorNotificacion(long idPayment) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     Payment payment;
     try {
       MercadoPagoConfig.setAccessToken(mercadoPagoAccessToken);
@@ -259,29 +268,24 @@ public class MercadoPagoServiceImpl implements IPagoService {
         var idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
         }
         var idSucursal = convertedObject.get("idSucursal");
         if (idSucursal == null) {
           throw new BusinessServiceException(
-              messageSource.getMessage(
-                  "mensaje_preference_tipo_de_movimiento_no_soportado", null, Locale.getDefault()));
+              messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
         }
-        var cliente =
-            clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
-        var sucursal =
-            sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
+        var cliente = clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
+        var sucursal = sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
         var movimiento = Movimiento.valueOf(convertedObject.get("movimiento").getAsString());
         long idPedido;
         switch (payment.getStatus()) {
-          case APPROVED:
+          case APPROVED -> {
             if (reciboMP.isPresent()) {
-              logger.warn(
-                  messageSource.getMessage(
-                          "mensaje_recibo_de_pago_ya_existente",
-                      new Object[] {payment.getId()},
-                      Locale.getDefault()));
+              logger.warn(messageSource.getMessage(
+                              "mensaje_recibo_de_pago_ya_existente",
+                              new Object[]{payment.getId()},
+                              Locale.getDefault()));
             } else {
               switch (movimiento) {
                 case PEDIDO -> {
@@ -291,44 +295,36 @@ public class MercadoPagoServiceImpl implements IPagoService {
                 }
                 case DEPOSITO -> this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                 default -> throw new BusinessServiceException(
-                        messageSource.getMessage(
-                                "mensaje_preference_tipo_de_movimiento_no_soportado",
-                                null,
-                                Locale.getDefault()));
+                        messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
               }
             }
-            break;
-          case REFUNDED:
+          }
+          case REFUNDED -> {
             if (reciboMP.isEmpty())
-              throw new EntityNotFoundException(
-                  messageSource.getMessage(
-                      "mensaje_recibo_no_existente", null, Locale.getDefault()));
+              throw new EntityNotFoundException(messageSource.getMessage(
+                              "mensaje_recibo_no_existente", null, Locale.getDefault()));
             if (!notaService.existsNotaDebitoPorRecibo(reciboMP.get())) {
               this.crearNotaDebito(
-                  reciboMP.get().getIdRecibo(),
-                  reciboMP.get().getIdCliente(),
-                  reciboMP.get().getSucursal().getIdSucursal(),
-                  cliente.getCredencial());
+                      reciboMP.get().getIdRecibo(),
+                      reciboMP.get().getIdCliente(),
+                      reciboMP.get().getSucursal().getIdSucursal(),
+                      cliente.getCredencial());
             } else {
-              logger.warn(
-                  messageSource.getMessage(
-                      "mensaje_nota_pago_existente",
-                      new Object[] {payment.getId()},
-                      Locale.getDefault()));
+              logger.warn(messageSource.getMessage(
+                              "mensaje_nota_pago_existente",
+                              new Object[]{payment.getId()},
+                              Locale.getDefault()));
             }
-            break;
-          case REJECTED:
-            logger.error(
-                messageSource.getMessage(
-                    "mensaje_pago_rechazado", new Object[] {payment}, Locale.getDefault()));
-            break;
-          default:
-            logger.warn(
-                messageSource.getMessage(
-                    "mensaje_pago_status_no_soportado",
-                    new Object[] {payment.getId()},
-                    Locale.getDefault()));
+          }
+          case REJECTED -> logger.error(messageSource.getMessage(
+                          "mensaje_pago_rechazado", new Object[]{payment}, Locale.getDefault()));
+          default -> {
+            logger.warn(messageSource.getMessage(
+                            "mensaje_pago_status_no_soportado",
+                            new Object[]{payment.getId()},
+                            Locale.getDefault()));
             messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault());
+          }
         }
       } else {
         throw new BusinessServiceException(
@@ -336,6 +332,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
       }
     } catch (MPException | MPApiException ex) {
       throw new BusinessServiceException(
+<<<<<<< HEAD:src/main/java/sic/service/impl/MercadoPagoServiceImpl.java
               messageSource.getMessage(
                       "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
     } catch (GeneralSecurityException e) {
@@ -346,6 +343,7 @@ public class MercadoPagoServiceImpl implements IPagoService {
 
   @Override
   public void devolverPago(long idPayment) {
+    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     try {
       var paymentClient = new PaymentClient();
       var payment = paymentClient.get(idPayment);
@@ -356,43 +354,41 @@ public class MercadoPagoServiceImpl implements IPagoService {
       }
     } catch (MPApiException | MPException ex) {
       throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_pago_error", new Object[] {ex.getMessage()}, Locale.getDefault()));
+          messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[] {ex.getMessage()}, Locale.getDefault()));
     }
   }
 
-  private void crearReciboDePago(
-      Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
+  private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
-      case APPROVED:
+      case APPROVED -> {
         logger.warn(
-            messageSource.getMessage(
-                "mensaje_pago_aprobado", new Object[] {payment}, Locale.getDefault()));
+                messageSource.getMessage(
+                        "mensaje_pago_aprobado", new Object[]{payment}, Locale.getDefault()));
         reciboService.guardar(
-            reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment));
-        break;
-      case PENDING:
+                reciboService.construirReciboPorPayment(sucursal, usuario, cliente, payment));
+      }
+      case PENDING -> {
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
           logger.warn(
-              messageSource.getMessage(
-                  "mensaje_pago_pendiente", new Object[] {payment}, Locale.getDefault()));
+                  messageSource.getMessage(
+                          "mensaje_pago_pendiente", new Object[]{payment}, Locale.getDefault()));
         } else {
           logger.warn(
-              messageSource.getMessage(
-                  "mensaje_pago_no_aprobado", new Object[] {payment}, Locale.getDefault()));
+                  messageSource.getMessage(
+                          "mensaje_pago_no_aprobado", new Object[]{payment}, Locale.getDefault()));
           this.procesarMensajeNoAprobado(payment);
         }
-        break;
-      default:
+      }
+      default -> {
         logger.warn(
-            messageSource.getMessage(
-                "mensaje_pago_no_aprobado", new Object[] {payment}, Locale.getDefault()));
+                messageSource.getMessage(
+                        "mensaje_pago_no_aprobado", new Object[]{payment}, Locale.getDefault()));
         this.procesarMensajeNoAprobado(payment);
+      }
     }
   }
 
-  private void crearNotaDebito(
-      Long idRecibo, Long idCliente, Long idSucursal, Usuario usuarioCliente) {
+  private void crearNotaDebito(Long idRecibo, Long idCliente, Long idSucursal, Usuario usuarioCliente) {
     var nuevaNotaDebitoDeReciboDTO =
         NuevaNotaDebitoDeReciboDTO.builder()
             .idRecibo(idRecibo)
@@ -400,10 +396,10 @@ public class MercadoPagoServiceImpl implements IPagoService {
             .motivo("Devolución de pago por MercadoPago")
             .tipoDeComprobante(notaService.getTipoNotaDebitoCliente(idCliente, idSucursal).get(0))
             .build();
-    var notaGuardada =
-        notaService.guardarNotaDebito(
+    var notaGuardada = notaService.guardarNotaDebito(
             notaService.calcularNotaDebitoConRecibo(nuevaNotaDebitoDeReciboDTO, usuarioCliente));
-    notaService.autorizarNota(notaGuardada);
+    var facturaElectronicaHabilitada = notaGuardada.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada();
+    if (facturaElectronicaHabilitada) notaService.autorizarNota(notaGuardada);
   }
 
   private Pedido crearPedidoPorPreference(

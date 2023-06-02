@@ -50,7 +50,6 @@ public class FacturaVentaController {
     return facturaVentaService.getFacturasVentaPorId(idFactura);
   }
 
-
   @PostMapping("/facturas/ventas/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<FacturaVenta> guardarFacturaVenta(

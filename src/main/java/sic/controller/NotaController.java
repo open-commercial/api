@@ -1,8 +1,7 @@
 package sic.controller;
 
 import java.math.BigDecimal;
-import java.util.*;
-
+import java.util.List;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -214,12 +213,6 @@ public class NotaController {
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     byte[] reportePDF = notaService.getReporteNota(nota);
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-  }
-
-  @PostMapping("/notas/{idNota}/autorizacion")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Nota autorizarNota(@PathVariable long idNota) {
-    return notaService.autorizarNota(notaService.getNotaNoEliminadaPorId(idNota));
   }
 
   @GetMapping("/notas/debito/total")
