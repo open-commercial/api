@@ -30,7 +30,7 @@ class AuthServiceImplTest {
   @Autowired AuthServiceImpl authService;
   static final String BEARER_TOKEN_PREFIX = "Bearer ";
 
-  @Value("${SIC_JWT_TOKEN}")
+  @Value("${API_JWT_TOKEN}")
   private String jwtToken;
 
   @Test

@@ -130,12 +130,10 @@ public class ProductoController {
       formato = "xlsx";
     }
     switch (formato) {
-      case "xlsx" ->
-              productoService.getListaDePreciosEnXls(criteria, idSucursal);
-      case "pdf" ->
-              productoService.getListaDePreciosEnPdf(criteria, idSucursal);
-      default -> throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_formato_no_valido", null, Locale.getDefault()));
+      case "xlsx" -> productoService.getListaDePreciosEnXls(criteria, idSucursal);
+      case "pdf" -> productoService.getListaDePreciosEnPdf(criteria, idSucursal);
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
     }
   }
 

@@ -37,7 +37,7 @@ import java.util.*;
 public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   private final FacturaVentaRepository facturaVentaRepository;
-  private final IAfipService afipService;
+  private final ITaxationService taxationService;
   private final IReciboService reciboService;
   private final IEmailService emailService;
   private final IPedidoService pedidoService;
@@ -59,7 +59,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Lazy
   public FacturaVentaServiceImpl(
       FacturaVentaRepository facturaVentaRepository,
-      IAfipService afipService,
+      ITaxationService taxationService,
       IReciboService reciboService,
       IEmailService emailService,
       IPedidoService pedidoService,
@@ -73,7 +73,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       CustomValidator customValidator) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
-    this.afipService = afipService;
+    this.taxationService = taxationService;
     this.emailService = emailService;
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
@@ -296,25 +296,23 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Override
   @Transactional
-  public List<FacturaVenta> guardar(
-          List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos) {
+  public List<FacturaVenta> guardar(List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos) {
     facturas.forEach(customValidator::validar);
-    List<FacturaVenta> facturasProcesadas = new ArrayList<>();
-    Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
+    var facturasProcesadas = new ArrayList<FacturaVenta>();
+    var pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
     facturas.forEach(f -> {
       if (f.getCliente().equals(pedido.getCliente()) && f.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
               f.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
-        throw
-                new BusinessServiceException(
-                        messageSource.getMessage(
-                                "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
+        throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_factura_no_se_puede_guardar_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
       }
     });
     pedido.setEstado(EstadoPedido.CERRADO);
     pedidoService.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
     this.calcularValoresFacturasVenta(facturas);
     facturas.forEach(f -> f.setPedido(pedido));
-    BigDecimal totalFacturas = facturas.stream()
+    var totalFacturas = facturas.stream()
             .map(Factura::getTotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
     if (recibos != null) {
@@ -322,10 +320,9 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     if (!pedido.getCliente().isPuedeComprarAPlazo()
             && totalFacturas.compareTo(cuentaCorrienteService.getSaldoCuentaCorriente(pedido.getCliente().getIdCliente())) > 0) {
-      throw
-              new BusinessServiceException(
-                      messageSource.getMessage(
-                              "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+                messageSource.getMessage(
+                        "mensaje_cliente_no_puede_comprar_a_plazo", null, Locale.getDefault()));
     }
     facturas.forEach(f -> {
       var facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
@@ -333,14 +330,15 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       facturasProcesadas.add(facturaGuardada);
       logger.info("La Factura {} se guardó correctamente.", facturaGuardada);
     });
-    List<Factura> facturasParaRelacionarAlPedido = new ArrayList<>(facturasProcesadas);
+    var facturasParaRelacionarAlPedido = new ArrayList<Factura>(facturasProcesadas);
     pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
-    List<TipoDeComprobante> tiposAutorizables =
-        Arrays.asList(
-            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
-    facturasProcesadas.stream()
-        .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
-        .forEach(this::autorizarFacturaVenta);
+    var facturaElectronicaHabilitada = pedido.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada();
+    if (facturaElectronicaHabilitada) {
+      var tiposAutorizables = Arrays.asList(TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+      facturasProcesadas.stream()
+              .filter(facturaVenta -> tiposAutorizables.contains(facturaVenta.getTipoComprobante()))
+              .forEach(this::autorizarFacturaVenta);
+    }
     return facturasProcesadas;
   }
 
@@ -363,35 +361,33 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   @Override
   @Transactional
   public FacturaVenta autorizarFacturaVenta(FacturaVenta fv) {
-    List<TipoDeComprobante> tiposAutorizables =
-        Arrays.asList(
-            TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
+    var tiposAutorizables = Arrays.asList(TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_C);
     if (!tiposAutorizables.contains(fv.getTipoComprobante())) {
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_comprobanteAFIP_invalido", null, Locale.getDefault()));
     }
-    ComprobanteAFIP comprobante =
-        ComprobanteAFIP.builder()
-            .idComprobante(fv.getIdFactura())
-            .fecha(fv.getFecha())
-            .tipoComprobante(fv.getTipoComprobante())
-            .cae(fv.getCae())
-            .vencimientoCAE(fv.getVencimientoCae())
-            .numSerieAfip(fv.getNumSerieAfip())
-            .numFacturaAfip(fv.getNumFacturaAfip())
-            .sucursal(fv.getSucursal())
-            .cliente(fv.getClienteEmbedded())
-            .subtotalBruto(fv.getSubTotalBruto())
-            .iva105neto(fv.getIva105Neto())
-            .iva21neto(fv.getIva21Neto())
-            .montoNoGravado(BigDecimal.ZERO)
-            .total(fv.getTotal())
-            .build();
-    afipService.autorizar(comprobante);
-    fv.setCae(comprobante.getCae());
-    fv.setVencimientoCae(comprobante.getVencimientoCAE());
-    fv.setNumSerieAfip(comprobante.getNumSerieAfip());
-    fv.setNumFacturaAfip(comprobante.getNumFacturaAfip());
+    var comprobanteAutorizableAFIP =
+            ComprobanteAutorizableAFIP.builder()
+                    .idComprobante(fv.getIdFactura())
+                    .fecha(fv.getFecha())
+                    .tipoComprobante(fv.getTipoComprobante())
+                    .cae(fv.getCae())
+                    .vencimientoCAE(fv.getVencimientoCae())
+                    .numSerieAfip(fv.getNumSerieAfip())
+                    .numFacturaAfip(fv.getNumFacturaAfip())
+                    .sucursal(fv.getSucursal())
+                    .cliente(fv.getClienteEmbedded())
+                    .subtotalBruto(fv.getSubTotalBruto())
+                    .iva105neto(fv.getIva105Neto())
+                    .iva21neto(fv.getIva21Neto())
+                    .montoNoGravado(BigDecimal.ZERO)
+                    .total(fv.getTotal())
+                    .build();
+    taxationService.autorizar(comprobanteAutorizableAFIP);
+    fv.setCae(comprobanteAutorizableAFIP.getCae());
+    fv.setVencimientoCae(comprobanteAutorizableAFIP.getVencimientoCAE());
+    fv.setNumSerieAfip(comprobanteAutorizableAFIP.getNumSerieAfip());
+    fv.setNumFacturaAfip(comprobanteAutorizableAFIP.getNumFacturaAfip());
     return fv;
   }
 
@@ -499,7 +495,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAFIP comprobante) {
+  public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAutorizableAFIP comprobante) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
