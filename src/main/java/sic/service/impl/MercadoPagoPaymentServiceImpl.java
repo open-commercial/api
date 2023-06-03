@@ -332,7 +332,6 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
       }
     } catch (MPException | MPApiException ex) {
       throw new BusinessServiceException(
-<<<<<<< HEAD:src/main/java/sic/service/impl/MercadoPagoServiceImpl.java
               messageSource.getMessage(
                       "mensaje_pago_error", new Object[]{ex.getMessage()}, Locale.getDefault()));
     } catch (GeneralSecurityException e) {
