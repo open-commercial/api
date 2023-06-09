@@ -333,10 +333,8 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
     } catch (MPException | MPApiException ex) {
       throw new BusinessServiceException(
               messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[]{ex.getMessage()}, Locale.getDefault()));
-    }
-    catch (GeneralSecurityException e) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
+    } catch (GeneralSecurityException e) {
+      logger.warn(messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
     }
   }
 
