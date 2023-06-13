@@ -85,6 +85,8 @@ public interface IProductoService {
 
   void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal);
 
+  byte[] getListaDePreciosEnPdf(long[] idProductos);
+
   void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato);
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
