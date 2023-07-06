@@ -34,8 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(
-    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class})
+@ContextConfiguration(classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class})
 class PedidoServiceImplTest {
 
   @MockBean PedidoRepository pedidoRepository;
@@ -48,11 +47,12 @@ class PedidoServiceImplTest {
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
   @MockBean ReciboServiceImpl reciboService;
-  @MockBean  MessageSource messageSource;
-  @MockBean  ModelMapper modelMapper;
-  @MockBean  IAuthService authService;
-  @MockBean  Javers javers;
-  @MockBean  IAuditService auditService;
+  @MockBean MessageSource messageSource;
+  @MockBean ModelMapper modelMapper;
+  @MockBean IAuthService authService;
+  @MockBean Javers javers;
+  @MockBean IAuditService auditService;
+
   @Autowired PedidoServiceImpl pedidoService;
 
   private Producto construirProducto() {
