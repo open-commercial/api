@@ -796,17 +796,17 @@ public class PedidoServiceImpl implements IPedidoService {
 
   @Override
   public List<CommitDTO> getCambiosPedido(long idPedido) {
-    return auditService.getCambiosDTO(this.getPedidoNoEliminadoPorId(idPedido));
+    return auditService.getCambios(this.getPedidoNoEliminadoPorId(idPedido));
   }
 
   @Override
   public HashMap<String, List<CommitDTO>> getCambiosRenglonesPedido(long idPedido) {
-    var commitsPedido = auditService.getCambiosDTO(this.getPedidoNoEliminadoPorId(idPedido));
+    var commitsPedido = auditService.getCambios(this.getPedidoNoEliminadoPorId(idPedido));
     var cambiosRenglones = new HashMap<String, List<CommitDTO>>();
     if (!commitsPedido.isEmpty()) {
       commitsPedido.forEach(commitPedido -> {
         var idCommitRenglones = commitPedido.getIdCommitRelacionado();
-        var cambios = auditService.getCambiosDTO(idCommitRenglones);
+        var cambios = auditService.getCambios(idCommitRenglones);
         cambios.forEach(commitDTO -> cambiosRenglones.put(idCommitRenglones,cambios));
       });
     }

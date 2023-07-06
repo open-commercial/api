@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import com.google.gson.internal.LinkedTreeMap;
-import org.javers.core.Changes;
 import org.javers.core.Javers;
 import org.javers.core.commit.CommitId;
 import org.javers.core.diff.Change;
@@ -13,15 +12,17 @@ import org.javers.core.diff.changetype.container.ListChange;
 import org.javers.core.metamodel.object.InstanceId;
 import org.javers.repository.jql.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
+import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
-import sic.modelo.Usuario;
 import sic.modelo.dto.CambioDTO;
 import sic.modelo.dto.CommitDTO;
 import sic.service.IAuditService;
 import sic.service.IUsuarioService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Service
@@ -29,6 +30,7 @@ public class JaversAuditServiceImpl implements IAuditService {
 
     private final IUsuarioService usuarioService;
     private final Javers javers;
+    private final MessageSource messageSource;
     private static final String ID_COMMIT_RELACIONADO = "idCommitRelacionado";
     private static final String INITIAL_VALUE_CHANGE = "InitialValueChange";
     private static final String LIST_CHANGE = "ListChange";
@@ -38,9 +40,10 @@ public class JaversAuditServiceImpl implements IAuditService {
     private static final String VALUE_CHANGE = "ValueChange";
 
     @Autowired
-    public JaversAuditServiceImpl(IUsuarioService usuarioService, Javers javers) {
+    public JaversAuditServiceImpl(IUsuarioService usuarioService, Javers javers, MessageSource messageSource) {
         this.usuarioService = usuarioService;
         this.javers = javers;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -49,16 +52,17 @@ public class JaversAuditServiceImpl implements IAuditService {
     }
 
     @Override
-    public <T> List<CommitDTO> getCambiosDTO(T objeto) {
+    public <T> List<CommitDTO> getCambios(T objeto) {
         var changesDTO = new ArrayList<CommitDTO>();
-        this.getChanges(objeto).groupByCommit().forEach(changesByCommit -> {
-            Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changesByCommit.getCommit().getAuthor()));
+        var changes = javers.findChanges(QueryBuilder.byInstance(objeto).build());
+        changes.groupByCommit().forEach(changesByCommit -> {
+            var author = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changesByCommit.getCommit().getAuthor()));
             changesDTO.add(CommitDTO.builder()
                     .idCommit(changesByCommit.getCommit().getId().value())
                     .idCommitRelacionado(changesByCommit.getCommit().getProperties().get(ID_COMMIT_RELACIONADO))
                     .fecha(changesByCommit.getCommit().getCommitDate())
-                    .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
-                    .cambios(this.getDetallesCambiosDTO(changesByCommit.get()))
+                    .usuario(author.getApellido() + " " + author.getNombre() + "(" + author.getUsername() + ")")
+                    .cambios(this.getDetallesCambios(changesByCommit.get()))
                     .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
         });
@@ -66,24 +70,24 @@ public class JaversAuditServiceImpl implements IAuditService {
     }
 
     @Override
-    public List<CommitDTO> getCambiosDTO(String idCommit) {
+    public List<CommitDTO> getCambios(String idCommit) {
         var changesDTO = new ArrayList<CommitDTO>();
         var query = QueryBuilder.anyDomainObject().withCommitId(CommitId.valueOf(idCommit)).build();
-        var cambios = javers.findChanges(query).groupByCommit();
-        cambios.forEach(changesByCommit -> {
-            Usuario usuarioAuthor = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changesByCommit.getCommit().getAuthor()));
+        var changes = javers.findChanges(query).groupByCommit();
+        changes.forEach(changesByCommit -> {
+            var author = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(changesByCommit.getCommit().getAuthor()));
             changesDTO.add(CommitDTO.builder()
                     .idCommit(changesByCommit.getCommit().getId().value())
                     .fecha(changesByCommit.getCommit().getCommitDate())
-                    .usuario(usuarioAuthor.getApellido() + " " + usuarioAuthor.getNombre() + "(" + usuarioAuthor.getUsername() + ")")
-                    .cambios(this.getDetallesCambiosDTO(changesByCommit.get()))
+                    .usuario(author.getApellido() + " " + author.getNombre() + "(" + author.getUsername() + ")")
+                    .cambios(this.getDetallesCambios(changesByCommit.get()))
                     .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
         });
         return changesDTO;
     }
 
-    private List<CambioDTO> getDetallesCambiosDTO(List<Change> changes) {
+    private List<CambioDTO> getDetallesCambios(List<Change> changes) {
         var valuesChanges = new ArrayList<CambioDTO>();
         changes.forEach(change -> {
             switch (change.getClass().getSimpleName()) {
@@ -149,13 +153,11 @@ public class JaversAuditServiceImpl implements IAuditService {
                             .valorSiguiente(initialValueChange.getRight().toString())
                             .build());
                 }
+                //default -> throw new BusinessServiceException(
+                //        messageSource.getMessage("mensaje_tipo_de_cambio_no_valido", null, Locale.getDefault()));
             }
         });
         return valuesChanges;
     }
 
-    private <T> Changes getChanges(T object) {
-        var queryBuilder = QueryBuilder.byInstance(object).build();
-        return javers.findChanges(queryBuilder);
-    }
 }
