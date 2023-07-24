@@ -919,16 +919,16 @@ class AppIntegrationTest {
     assertEquals("Power Max (dueño)", cambios.get(0).getUsuario());
     assertEquals("ALTA", cambios.get(0).getTipoDeOperacion());
     assertEquals(17, cambios.get(0).getCambios().size());
-    Map<String, List<LinkedHashMap<String, String>>> cambiosRenglones =
+    List<LinkedHashMap<String, String>> cambiosRenglones =
             restTemplate.getForObject(
                     apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones/cambios",
-                    Map.class);
+                    List.class);
     assertFalse(cambiosRenglones.isEmpty());
-    assertEquals("1.00", cambiosRenglones.get("1.00").get(0).get("idCommit"));
-    assertNull(cambiosRenglones.get("1.00").get(0).get("idCommitRelacionado"));
-    assertEquals("Power Max(dueño)", cambiosRenglones.get("1.00").get(0).get("usuario"));
-    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get("1.00").get(0).get("tipoDeOperacion"));
-    assertNotNull(cambiosRenglones.get("1.00").get(0).get("cambios"));
+    assertEquals("1.00", cambiosRenglones.get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max (dueño)", cambiosRenglones.get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get(0).get("cambios"));
   }
 
   @Test
@@ -1062,24 +1062,24 @@ class AppIntegrationTest {
     assertEquals(8, cambios.get(0).getCambios().size());
     assertEquals("2.00", cambios.get(1).getIdCommit());
     assertEquals("1.00", cambios.get(1).getIdCommitRelacionado());
-    assertEquals("Power Max(dueño)", cambios.get(1).getUsuario());
+    assertEquals("Power Max (dueño)", cambios.get(1).getUsuario());
     assertEquals("ALTA", cambios.get(1).getTipoDeOperacion());
     assertEquals(17, cambios.get(1).getCambios().size());
-    Map<String, List<LinkedHashMap<String, String>>> cambiosRenglones =
+    List<LinkedHashMap<String, String>> cambiosRenglones =
             restTemplate.getForObject(
                     apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones/cambios",
-                    Map.class);
+                    List.class);
     assertFalse(cambiosRenglones.isEmpty());
-    assertEquals("1.00", cambiosRenglones.get("1.00").get(0).get("idCommit"));
-    assertNull(cambiosRenglones.get("1.00").get(0).get("idCommitRelacionado"));
-    assertEquals("Power Max(dueño)", cambiosRenglones.get("1.00").get(0).get("usuario"));
-    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get("1.00").get(0).get("tipoDeOperacion"));
-    assertNotNull(cambiosRenglones.get("1.00").get(0).get("cambios"));
-    assertEquals("3.00", cambiosRenglones.get("3.00").get(0).get("idCommit"));
-    assertNull(cambiosRenglones.get("3.00").get(0).get("idCommitRelacionado"));
-    assertEquals("Power Max(dueño)", cambiosRenglones.get("3.00").get(0).get("usuario"));
-    assertEquals(TipoDeOperacion.ACTUALIZACION.name() ,cambiosRenglones.get("3.00").get(0).get("tipoDeOperacion"));
-    assertNotNull(cambiosRenglones.get("3.00").get(0).get("cambios"));
+    assertEquals("3.00", cambiosRenglones.get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max (dueño)", cambiosRenglones.get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ACTUALIZACION.name() ,cambiosRenglones.get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get(0).get("cambios"));
+    assertEquals("1.00", cambiosRenglones.get(1).get("idCommit"));
+    assertNull(cambiosRenglones.get(1).get("idCommitRelacionado"));
+    assertEquals("Power Max (dueño)", cambiosRenglones.get(1).get("usuario"));
+    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get(1).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get(1).get("cambios"));
   }
 
   @Test
