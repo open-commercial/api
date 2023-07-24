@@ -916,7 +916,7 @@ class AppIntegrationTest {
     assertFalse(cambios.isEmpty());
     assertEquals("2.00", cambios.get(0).getIdCommit());
     assertEquals("1.00", cambios.get(0).getIdCommitRelacionado());
-    assertEquals("Power Max(dueño)", cambios.get(0).getUsuario());
+    assertEquals("Power Max (dueño)", cambios.get(0).getUsuario());
     assertEquals("ALTA", cambios.get(0).getTipoDeOperacion());
     assertEquals(17, cambios.get(0).getCambios().size());
     Map<String, List<LinkedHashMap<String, String>>> cambiosRenglones =
@@ -1057,7 +1057,7 @@ class AppIntegrationTest {
     assertEquals(2, cambios.size());
     assertEquals("4.00", cambios.get(0).getIdCommit());
     assertEquals("3.00", cambios.get(0).getIdCommitRelacionado());
-    assertEquals("Power Max(dueño)", cambios.get(0).getUsuario());
+    assertEquals("Power Max (dueño)", cambios.get(0).getUsuario());
     assertEquals("ACTUALIZACION", cambios.get(0).getTipoDeOperacion());
     assertEquals(8, cambios.get(0).getCambios().size());
     assertEquals("2.00", cambios.get(1).getIdCommit());
