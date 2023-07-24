@@ -27,8 +27,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.modelo.Resultados;
 import sic.modelo.dto.*;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.*;
@@ -800,14 +798,14 @@ public class PedidoServiceImpl implements IPedidoService {
   }
 
   @Override
-  public HashMap<String, List<CommitDTO>> getCambiosRenglonesPedido(long idPedido) {
+  public List<CommitDTO> getCambiosRenglonesPedido(long idPedido) {
     var commitsPedido = auditService.getCambios(this.getPedidoNoEliminadoPorId(idPedido));
-    var cambiosRenglones = new HashMap<String, List<CommitDTO>>();
+    var cambiosRenglones = new ArrayList<CommitDTO>();
     if (!commitsPedido.isEmpty()) {
       commitsPedido.forEach(commitPedido -> {
         var idCommitRenglones = commitPedido.getIdCommitRelacionado();
         var cambios = auditService.getCambios(idCommitRenglones);
-        cambios.forEach(commitDTO -> cambiosRenglones.put(idCommitRenglones,cambios));
+        cambiosRenglones.addAll(cambios);
       });
     }
     return cambiosRenglones;

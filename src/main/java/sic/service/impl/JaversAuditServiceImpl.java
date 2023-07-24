@@ -14,7 +14,6 @@ import org.javers.repository.jql.QueryBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
-import sic.exception.BusinessServiceException;
 import sic.modelo.TipoDeOperacion;
 import sic.modelo.dto.CambioDTO;
 import sic.modelo.dto.CommitDTO;
@@ -22,8 +21,8 @@ import sic.service.IAuditService;
 import sic.service.IUsuarioService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 @Service
 public class JaversAuditServiceImpl implements IAuditService {
@@ -38,6 +37,7 @@ public class JaversAuditServiceImpl implements IAuditService {
     private static final String REFERENCE_CHANGE = "ReferenceChange";
     private static final String OBJECT_REMOVED = "ObjectRemoved";
     private static final String VALUE_CHANGE = "ValueChange";
+    private static final String PROPERTY_RENGLONES="renglones";
 
     @Autowired
     public JaversAuditServiceImpl(IUsuarioService usuarioService, Javers javers, MessageSource messageSource) {
@@ -61,7 +61,7 @@ public class JaversAuditServiceImpl implements IAuditService {
                     .idCommit(changesByCommit.getCommit().getId().value())
                     .idCommitRelacionado(changesByCommit.getCommit().getProperties().get(ID_COMMIT_RELACIONADO))
                     .fecha(changesByCommit.getCommit().getCommitDate())
-                    .usuario(author.getApellido() + " " + author.getNombre() + "(" + author.getUsername() + ")")
+                    .usuario(author.getApellido() + " " + author.getNombre() + " (" + author.getUsername() + ")")
                     .cambios(this.getDetallesCambios(changesByCommit.get()))
                     .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
@@ -79,7 +79,7 @@ public class JaversAuditServiceImpl implements IAuditService {
             changesDTO.add(CommitDTO.builder()
                     .idCommit(changesByCommit.getCommit().getId().value())
                     .fecha(changesByCommit.getCommit().getCommitDate())
-                    .usuario(author.getApellido() + " " + author.getNombre() + "(" + author.getUsername() + ")")
+                    .usuario(author.getApellido() + " " + author.getNombre() + " (" + author.getUsername() + ")")
                     .cambios(this.getDetallesCambios(changesByCommit.get()))
                     .tipoDeOperacion(changesByCommit.getCommit().getProperties().get(TipoDeOperacion.class.getSimpleName()))
                     .build());
@@ -121,30 +121,7 @@ public class JaversAuditServiceImpl implements IAuditService {
                             .atributo(collectionChange.getPropertyName())
                             .build());
                 }
-                case LIST_CHANGE -> {
-                    var listChange = (ListChange) change;
-                    if (listChange.getRight().get(0) instanceof InstanceId) {
-                        valuesChanges.add(CambioDTO.builder()
-                                .atributo(listChange.getPropertyName())
-                                .valorAnterior(String.valueOf(listChange.getLeft().size()))
-                                .valorSiguiente(String.valueOf(listChange.getRight().size()))
-                                .build());
-                    }
-                    if (listChange.getRight().get(0) instanceof LinkedTreeMap<?,?> mapRight) {
-                        var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
-                                (LinkedTreeMap<?,?>) listChange.getLeft().get(0) : new LinkedTreeMap<>();
-                        var keySet = mapRight.keySet();
-                        keySet.forEach(key -> {
-                            var valorSiguiente = mapRight.get(key);
-                            var valorAnterior = mapLeft.get(key);
-                            valuesChanges.add(CambioDTO.builder()
-                                    .valorSiguiente(valorSiguiente != null ? valorSiguiente.toString() : "")
-                                    .valorAnterior(valorAnterior != null ? valorAnterior.toString() : "")
-                                    .atributo(key.toString())
-                                    .build());
-                        });
-                    }
-                }
+                case LIST_CHANGE -> valuesChanges.addAll(this.procesarCambiosDeListas((ListChange) change));
                 case INITIAL_VALUE_CHANGE -> {
                     var initialValueChange = (InitialValueChange) change;
                     valuesChanges.add(CambioDTO.builder()
@@ -158,6 +135,44 @@ public class JaversAuditServiceImpl implements IAuditService {
             }
         });
         return valuesChanges;
+    }
+
+   
+    private CambioDTO buildCambioDTO(String atributo, String valorAnterior, String valorSiguiente) {
+        return CambioDTO.builder()
+                .atributo(atributo)
+                .valorAnterior(valorAnterior)
+                .valorSiguiente(valorSiguiente)
+                .build();
+    }
+
+    public List<CambioDTO> procesarCambiosDeListas(ListChange listChange) {
+        List<CambioDTO> valuesChanges = new ArrayList<>();
+        if (Objects.equals(listChange.getPropertyName(), PROPERTY_RENGLONES)) {
+            this.procesarElementoDeLista(listChange.getRight().get(0), listChange, valuesChanges);
+        } else {
+            listChange.getRight().forEach(right -> this.procesarElementoDeLista(right, listChange, valuesChanges));
+        }
+        return valuesChanges;
+    }
+
+    public void procesarElementoDeLista(Object right, ListChange listChange, List<CambioDTO> valuesChanges) {
+        if (right instanceof InstanceId) {
+            valuesChanges.add(this.buildCambioDTO(listChange.getPropertyName(),
+                    String.valueOf(listChange.getLeft().size()), String.valueOf(listChange.getRight().size())));
+        }
+        if (right instanceof LinkedTreeMap<?, ?> mapRight) {
+            var mapLeft = listChange.getLeft() != null && !listChange.getLeft().isEmpty() ?
+                    (LinkedTreeMap<?, ?>) listChange.getLeft().get(0) : new LinkedTreeMap<>();
+            var keySet = mapRight.keySet();
+            keySet.forEach(key -> {
+                var valorSiguiente = mapRight.get(key);
+                var valorAnterior = mapLeft.get(key);
+                valuesChanges.add(this.buildCambioDTO(key.toString(),
+                        valorAnterior != null ? valorAnterior.toString() : "",
+                        valorSiguiente != null ? valorSiguiente.toString() : ""));
+            });
+        }
     }
 
 }
