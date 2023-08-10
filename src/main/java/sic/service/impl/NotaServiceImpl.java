@@ -695,7 +695,7 @@ public class NotaServiceImpl implements INotaService {
     notaCredito = notaCreditoRepository.save(notaCredito);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(notaCredito, TipoDeOperacion.ALTA);
     var facturaElectronicaHabilitada = notaCredito.getSucursal().getConfiguracionSucursal().isFacturaElectronicaHabilitada();
-    if (facturaElectronicaHabilitada) {
+    if (facturaElectronicaHabilitada && notaCredito.getMovimiento().equals(Movimiento.VENTA)) {
       var tiposAutorizables = Arrays.asList(TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B, TipoDeComprobante.NOTA_CREDITO_C);
       if (tiposAutorizables.contains(notaCredito.getTipoComprobante())) this.autorizarNota(notaCredito);
     }
