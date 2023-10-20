@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import sic.exception.BusinessServiceException;
@@ -87,8 +85,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public FacturaVenta construirFacturaVenta(
-      NuevaFacturaVentaDTO nuevaFacturaVentaDTO, long idPedido, Long idUsuario) {
+  public FacturaVenta construirFacturaVenta(NuevaFacturaVentaDTO nuevaFacturaVentaDTO, long idPedido, Long idUsuario) {
     FacturaVenta fv = new FacturaVenta();
     Sucursal sucursal;
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(idPedido);
@@ -170,8 +167,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public TipoDeComprobante[] getTiposDeComprobanteVenta(
-      Long idSucursal, Long idCliente, Long idUsuario) {
+  public TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario) {
     List<Rol> rolesDeUsuario = usuarioService.getUsuarioNoEliminadoPorId(idUsuario).getRoles();
     if (rolesDeUsuario.contains(Rol.ADMINISTRADOR)
         || rolesDeUsuario.contains(Rol.ENCARGADO)
@@ -198,8 +194,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public List<RenglonFactura> getRenglonesPedidoParaFacturar(
-      long idPedido, TipoDeComprobante tipoDeComprobante) {
+  public List<RenglonFactura> getRenglonesPedidoParaFacturar(long idPedido, TipoDeComprobante tipoDeComprobante) {
     List<RenglonFactura> renglonesParaFacturar = new ArrayList<>();
     pedidoService
         .getRenglonesDelPedidoOrdenadorPorIdRenglon(idPedido)
@@ -221,8 +216,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public Page<FacturaVenta> buscarFacturaVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     return facturaVentaRepository.findAll(
         this.getBuilderVenta(criteria),
         facturaService.getPageable(
@@ -402,16 +396,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public BigDecimal calcularTotalFacturadoVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     BigDecimal totalFacturado =
         facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilderVenta(criteria));
     return (totalFacturado != null ? totalFacturado : BigDecimal.ZERO);
   }
 
   @Override
-  public BigDecimal calcularIvaVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
     BigDecimal ivaVenta =
         facturaVentaRepository.calcularIVAVenta(this.getBuilderVenta(criteria), tipoFactura);
@@ -419,16 +411,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public BigDecimal calcularGananciaTotal(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
     BigDecimal gananciaTotal =
         facturaVentaRepository.calcularGananciaTotal(this.getBuilderVenta(criteria));
     return (gananciaTotal != null ? gananciaTotal : BigDecimal.ZERO);
   }
 
   @Override
-  public long calcularNumeroFacturaVenta(
-      TipoDeComprobante tipoDeComprobante, long serie, long idSucursal) {
+  public long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idSucursal) {
     Long numeroFactura =
         facturaVentaRepository.buscarMayorNumFacturaSegunTipo(tipoDeComprobante, serie, idSucursal);
     if (numeroFactura == null) {
@@ -491,27 +481,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     } catch (JRException ex) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
-  }
-
-  @Override
-  public boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAutorizableAFIP comprobante) {
-    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
-    BooleanBuilder builder = new BooleanBuilder();
-    builder.and(
-        qFacturaVenta
-            .idFactura
-            .lt(comprobante.getIdComprobante())
-            .and(qFacturaVenta.eliminada.eq(false))
-            .and(qFacturaVenta.sucursal.idSucursal.eq(comprobante.getSucursal().getIdSucursal()))
-            .and(qFacturaVenta.tipoComprobante.eq(comprobante.getTipoComprobante())));
-    Page<FacturaVenta> facturaAnterior =
-        facturaVentaRepository.findAll(
-            builder, PageRequest.of(0, 1, Sort.by(Sort.Direction.DESC, "fecha")));
-    if (facturaAnterior.getTotalElements() > 0L) {
-      return facturaAnterior.getContent().get(0).getCae() == 0L;
-    } else {
-      return false;
     }
   }
 
@@ -728,8 +697,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public void agregarRenglonesEnFacturaSinIVA(
-      FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones) {
+  public void agregarRenglonesEnFacturaSinIVA(FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones) {
     List<RenglonFactura> renglonesSinIVA = new ArrayList<>();
     BigDecimal cantidadProductosRenglonFacturaSinIVA = BigDecimal.ZERO;
     int renglonMarcado = 0;
@@ -779,8 +747,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   }
 
   @Override
-  public void agregarRenglonesEnFacturaConIVA(
-      FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones) {
+  public void agregarRenglonesEnFacturaConIVA(FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones) {
     List<RenglonFactura> renglonesConIVA = new ArrayList<>();
     BigDecimal cantidadProductosRenglonFacturaConIVA = BigDecimal.ZERO;
     int renglonMarcado = 0;
@@ -848,7 +815,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     }
     facturaConIVA.setRenglones(renglonesConIVA);
   }
-
 
   @Override
   public List<FacturaVenta> getFacturasVentaPorId(long[] idFactura) {

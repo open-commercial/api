@@ -15,11 +15,9 @@ public interface IFacturaVentaService {
 
   TipoDeComprobante[] getTiposDeComprobanteVenta(Long idSucursal, Long idCliente, Long idUsuario);
 
-  List<RenglonFactura> getRenglonesPedidoParaFacturar(
-      long idPedido, TipoDeComprobante tipoDeComprobante);
+  List<RenglonFactura> getRenglonesPedidoParaFacturar(long idPedido, TipoDeComprobante tipoDeComprobante);
 
-  Page<FacturaVenta> buscarFacturaVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
   List<FacturaVenta> guardar(List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos);
 
@@ -29,8 +27,7 @@ public interface IFacturaVentaService {
 
   List<FacturaVenta> getFacturaVentaDelRemito(Remito remito);
 
-  BigDecimal calcularTotalFacturadoVenta(
-      BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
   BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
 
@@ -42,15 +39,11 @@ public interface IFacturaVentaService {
 
   List<FacturaVenta> dividirFactura(FacturaVenta factura, int[] indices);
 
-  boolean existeFacturaVentaAnteriorSinAutorizar(ComprobanteAutorizableAFIP comprobante);
-
   void enviarFacturaVentaPorEmail(long idFactura);
 
-  void agregarRenglonesEnFacturaConIVA(
-      FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones);
+  void agregarRenglonesEnFacturaConIVA(FacturaVenta facturaConIVA, int[] indices, List<RenglonFactura> renglones);
 
-  void agregarRenglonesEnFacturaSinIVA(
-      FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
+  void agregarRenglonesEnFacturaSinIVA(FacturaVenta facturaSinIVA, int[] indices, List<RenglonFactura> renglones);
 
   BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria);
 

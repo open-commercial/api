@@ -1,3 +1,3 @@
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sic-api%3Asic-api&metric=alert_status)](https://sonarcloud.io/summary/overall?id=sic-api%3Asic-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=api%3Aapi&metric=alert_status)](https://sonarcloud.io/summary/overall?id=api%3Aapi)
 
 <h2>Open Commercial API</h2>

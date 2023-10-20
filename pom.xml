@@ -4,15 +4,15 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     
     <modelVersion>4.0.0</modelVersion>
-    <groupId>sic-api</groupId>
-    <artifactId>sic-api</artifactId>
+    <groupId>org.opencommercial</groupId>
+    <artifactId>api</artifactId>
     <version>Athena</version>
     <packaging>jar</packaging>
     
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.5</version>
+        <version>2.7.15</version>
         <relativePath/>
     </parent>
 
@@ -30,9 +30,13 @@
         <messaging.saaj.version>1.5.2</messaging.saaj.version>
         <javers.version>6.14.0</javers.version>
         <cloudinary.version>1.33.0</cloudinary.version>
-        <newrelic-agent.version>7.11.1</newrelic-agent.version>
+        <newrelic-agent.version>8.5.0</newrelic-agent.version>
         <mercadopago.version>2.1.4</mercadopago.version>
         <google-gson.version>2.8.9</google-gson.version>
+        <sonar.exclusions>
+            src/main/java/sic/modelo/**,
+            src/main/java/sic/exception/**
+        </sonar.exclusions>
     </properties>
 
     <repositories>
