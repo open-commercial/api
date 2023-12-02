@@ -469,7 +469,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/FacturaVenta.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/FacturaVenta.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

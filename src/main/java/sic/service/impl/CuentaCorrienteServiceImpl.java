@@ -490,22 +490,23 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
-    var classLoader = this.getClass().getClassLoader();
-    var isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    JRBeanCollectionDataSource ds =
-        new JRBeanCollectionDataSource(
-            this.getRenglonesCuentaCorrienteParaReporte(
-                cuentaCorrienteCliente.getIdCuentaCorriente()));
+  public byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
+    JasperReport jasperDesign;
+    try {
+      var classLoader = this.getClass().getClassLoader();
+      var isFileReport = classLoader.getResourceAsStream("report/CuentaCorriente.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
+    var ds = new JRBeanCollectionDataSource(
+            this.getRenglonesCuentaCorrienteParaReporte(cuentaCorrienteCliente.getIdCuentaCorriente()));
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
     Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
-        params.put(
-                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+        params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
       } catch (IOException ex) {
         throw new ServiceException(messageSource.getMessage(
                 "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
@@ -514,7 +515,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     switch (formato) {
       case "xlsx" -> {
         try {
-          return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
+          return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(
                   messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -523,7 +524,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       case "pdf" -> {
         try {
           return JasperExportManager.exportReportToPdf(
-                  JasperFillManager.fillReport(isFileReport, params, ds));
+                  JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
           throw new ServiceException(
                   messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
@@ -610,7 +611,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaClientes.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/ListaClientes.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

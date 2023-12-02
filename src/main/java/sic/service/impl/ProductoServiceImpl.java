@@ -1145,7 +1145,7 @@ public class ProductoServiceImpl implements IProductoService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/ListaPreciosProductos.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);

@@ -326,7 +326,7 @@ public class ReciboServiceImpl implements IReciboService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Recibo.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/Recibo.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(

@@ -1,9 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -401,7 +399,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
           renglones.get(renglonTraspaso.getIdProducto())
                   .setCantidad(renglones.get(renglonTraspaso.getIdProducto()).getCantidad().add(renglonTraspaso.getCantidadProducto()));
         else {
-          RenglonReporteTraspasoDTO renglonReporteTraspasoDTO =
+          var renglonReporteTraspasoDTO =
                   RenglonReporteTraspasoDTO.builder()
                           .sucursalOrigen(traspaso.getNombreSucursalOrigen())
                           .sucursalDestino(traspaso.getNombreSucursalDestino())
@@ -414,9 +412,15 @@ public class TraspasoServiceImpl implements ITraspasoService {
         }
       }));
     var classLoader = this.getClass().getClassLoader();
-    var isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
-    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones.values());
+    JasperReport jasperDesign;
+    try {
+      var isFileReport = classLoader.getResourceAsStream("report/Traspasos.jrxml");
+      jasperDesign = JasperCompileManager.compileReport(isFileReport);
+    } catch (JRException ex) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_error_reporte", null, Locale.getDefault()), ex);
+    }
+    var ds = new JRBeanCollectionDataSource(renglones.values());
     Map<String, Object> params = new HashMap<>();
     params.put("FechaDesde", criteria.getFechaDesde());
     params.put("FechaHasta", criteria.getFechaHasta());
@@ -432,8 +436,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
       }
     }
     try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
+      return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(jasperDesign, params, ds));
     } catch (JRException ex) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);

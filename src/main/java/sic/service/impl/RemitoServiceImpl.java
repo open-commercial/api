@@ -292,20 +292,19 @@ public class RemitoServiceImpl implements IRemitoService {
                         messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
             }
         }
-        List<RenglonRemito> renglones = this.getRenglonesDelRemito(idRemito);
-        JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
+        var renglones = this.getRenglonesDelRemito(idRemito);
+        var ds = new JRBeanCollectionDataSource(renglones);
         JasperReport jasperDesign;
         try {
             var classLoader = this.getClass().getClassLoader();
-            var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Remito.jrxml");
+            var isFileReport = classLoader.getResourceAsStream("report/Remito.jrxml");
             jasperDesign = JasperCompileManager.compileReport(isFileReport);
         } catch (JRException ex) {
             throw new ServiceException(messageSource.getMessage(
                     "mensaje_error_reporte", null, Locale.getDefault()), ex);
         }
         try {
-            return JasperExportManager.exportReportToPdf(
-                    JasperFillManager.fillReport(jasperDesign, params, ds));
+            return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(jasperDesign, params, ds));
         } catch (JRException ex) {
             throw new ServiceException(
                     messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);

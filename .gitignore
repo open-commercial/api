@@ -10,3 +10,4 @@ nb-configuration.xml
 .idea/
 *.iml
 /newrelic
+src/main/resources/**/*.jasper

@@ -564,7 +564,7 @@ public class PedidoServiceImpl implements IPedidoService {
     JasperReport jasperDesign;
     try {
       var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/Pedido.jrxml");
+      var isFileReport = classLoader.getResourceAsStream("report/Pedido.jrxml");
       jasperDesign = JasperCompileManager.compileReport(isFileReport);
     } catch (JRException ex) {
       throw new ServiceException(messageSource.getMessage(
