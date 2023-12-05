@@ -20,6 +20,7 @@ import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
 import sic.service.IEmailService;
 import sic.util.CustomValidator;
+import sic.util.JasperReportsHandler;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,7 +32,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class})
+    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class, JasperReportsHandler.class})
 class PedidoServiceImplTest {
 
   @MockBean PedidoRepository pedidoRepository;
