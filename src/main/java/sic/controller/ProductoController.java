@@ -15,6 +15,7 @@ import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.*;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
+import sic.util.FormatoReporte;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -126,12 +127,10 @@ public class ProductoController {
           @RequestBody BusquedaProductoCriteria criteria,
           @PathVariable long idSucursal,
           @RequestParam(required = false) String formato) {
-    if (formato == null || formato.isEmpty()) {
-      formato = "xlsx";
-    }
+    if (formato == null || formato.isEmpty()) formato = "pdf";
     switch (formato) {
-      case "xlsx" -> productoService.getListaDePreciosEnXls(criteria, idSucursal);
-      case "pdf" -> productoService.getListaDePreciosEnPdf(criteria, idSucursal);
+      case "xlsx" -> productoService.procesarReporteListaDePrecios(criteria, idSucursal, FormatoReporte.XLSX);
+      case "pdf" -> productoService.procesarReporteListaDePrecios(criteria, idSucursal, FormatoReporte.PDF);
       default -> throw new BusinessServiceException(
               messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
     }

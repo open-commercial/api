@@ -1,7 +1,6 @@
 package sic.service.impl;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -11,8 +10,6 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +34,8 @@ import sic.repository.NotaRepository;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.util.CustomValidator;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 
 @Service
 public class NotaServiceImpl implements INotaService {
@@ -64,26 +63,28 @@ public class NotaServiceImpl implements INotaService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
+  private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
   @Lazy
   public NotaServiceImpl(
-    NotaRepository<Nota> notaRepository,
-    NotaCreditoRepository notaCreditoRepository,
-    NotaDebitoRepository notaDebitoRepository,
-    IFacturaService facturaService,
-    INotaService notaService,
-    IReciboService reciboService,
-    IClienteService clienteService,
-    IProveedorService proveedorService,
-    IUsuarioService usuarioService,
-    IProductoService productoService,
-    ISucursalService sucursalService,
-    ICuentaCorrienteService cuentaCorrienteService,
-    IPaymentService paymentService,
-    ITaxationService taxationService,
-    MessageSource messageSource,
-    CustomValidator customValidator) {
+          NotaRepository<Nota> notaRepository,
+          NotaCreditoRepository notaCreditoRepository,
+          NotaDebitoRepository notaDebitoRepository,
+          IFacturaService facturaService,
+          INotaService notaService,
+          IReciboService reciboService,
+          IClienteService clienteService,
+          IProveedorService proveedorService,
+          IUsuarioService usuarioService,
+          IProductoService productoService,
+          ISucursalService sucursalService,
+          ICuentaCorrienteService cuentaCorrienteService,
+          IPaymentService paymentService,
+          ITaxationService taxationService,
+          MessageSource messageSource,
+          CustomValidator customValidator,
+          JasperReportsHandler jasperReportsHandler) {
     this.notaRepository = notaRepository;
     this.notaCreditoRepository = notaCreditoRepository;
     this.notaDebitoRepository = notaDebitoRepository;
@@ -100,6 +101,7 @@ public class NotaServiceImpl implements INotaService {
     this.taxationService = taxationService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
+    this.jasperReportsHandler = jasperReportsHandler;
   }
 
   @Override
@@ -1112,48 +1114,27 @@ public class NotaServiceImpl implements INotaService {
 
   @Override
   public byte[] getReporteNota(Nota nota) {
-    var classLoader = this.getClass().getClassLoader();
-    InputStream isFileReport;
-    JRBeanCollectionDataSource ds;
-    JasperReport jasperDesign;
     Map<String, Object> params = new HashMap<>();
-    if (nota instanceof NotaCredito) {
-      isFileReport = classLoader.getResourceAsStream("report/NotaCredito.jrxml");
-      List<RenglonNotaCredito> renglones = this.getRenglonesDeNotaCredito(nota.getIdNota());
-      ds = new JRBeanCollectionDataSource(renglones);
-      params.put("notaCredito", nota);
-    } else {
-      isFileReport = classLoader.getResourceAsStream("report/NotaDebito.jrxml");
-      List<RenglonNotaDebito> renglones = this.getRenglonesDeNotaDebito(nota.getIdNota());
-      ds = new JRBeanCollectionDataSource(renglones);
-      params.put("notaDebito", nota);
-    }
-    try {
-      jasperDesign = JasperCompileManager.compileReport(isFileReport);
-    } catch (JRException ex) {
-      throw new ServiceException(
-              messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
-    ConfiguracionSucursal configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
+    var configuracionSucursal = nota.getSucursal().getConfiguracionSucursal();
     params.put("preImpresa", configuracionSucursal.isUsarFacturaVentaPreImpresa());
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_C)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO)) {
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_X)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_C)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_X)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_PRESUPUESTO)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_PRESUPUESTO)) {
       nota.setSubTotalBruto(nota.getTotal());
       nota.setIva105Neto(BigDecimal.ZERO);
       nota.setIva21Neto(BigDecimal.ZERO);
     }
     if (nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_A)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)
-        || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_C)) {
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_B)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_CREDITO_C)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_A)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_B)
+            || nota.getTipoComprobante().equals(TipoDeComprobante.NOTA_DEBITO_C)) {
       if (nota.getNumSerieAfip() != 0 && nota.getNumNotaAfip() != 0) {
         params.put("serie", nota.getNumSerieAfip());
         params.put("nroNota", nota.getNumNotaAfip());
@@ -1174,12 +1155,14 @@ public class NotaServiceImpl implements INotaService {
                 messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    try {
-      return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(jasperDesign, params, ds));
-    } catch (JRException ex) {
-      logger.error(ex.getMessage());
-      throw new ServiceException(
-              messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
+    if (nota instanceof NotaCredito) {
+      var renglones = this.getRenglonesDeNotaCredito(nota.getIdNota());
+      params.put("notaCredito", nota);
+      return jasperReportsHandler.compilar("report/NotaCredito.jrxml", params, renglones, FormatoReporte.PDF);
+    } else {
+      var renglones = this.getRenglonesDeNotaDebito(nota.getIdNota());
+      params.put("notaDebito", nota);
+      return jasperReportsHandler.compilar("report/NotaDebito.jrxml", params, renglones, FormatoReporte.PDF);
     }
   }
 

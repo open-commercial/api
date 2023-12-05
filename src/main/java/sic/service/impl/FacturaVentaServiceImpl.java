@@ -1,8 +1,6 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,8 @@ import sic.repository.FacturaVentaRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
 import sic.util.CustomValidator;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -52,6 +52,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private static final String NRO_SERIE = "nroSerie";
   private static final String NRO_FACTURA = "nroFactura";
   private final CustomValidator customValidator;
+  private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
   @Lazy
@@ -68,7 +69,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       ITransportistaService transportistaService,
       ISucursalService sucursalService,
       MessageSource messageSource,
-      CustomValidator customValidator) {
+      CustomValidator customValidator,
+      JasperReportsHandler jasperReportsHandler) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.taxationService = taxationService;
@@ -82,6 +84,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.sucursalService = sucursalService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
+    this.jasperReportsHandler = jasperReportsHandler;
   }
 
   @Override
@@ -464,24 +467,8 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    List<RenglonFactura> renglones = facturaService.getRenglonesDeLaFactura(factura.getIdFactura());
-    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones);
-    JasperReport jasperDesign;
-    try {
-      var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("report/FacturaVenta.jrxml");
-      jasperDesign = JasperCompileManager.compileReport(isFileReport);
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-              "mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
-    try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(jasperDesign, params, ds));
-    } catch (JRException ex) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
+    var renglones = facturaService.getRenglonesDeLaFactura(factura.getIdFactura());
+    return jasperReportsHandler.compilar("report/FacturaVenta.jrxml", params, renglones, FormatoReporte.PDF);
   }
 
   @Override

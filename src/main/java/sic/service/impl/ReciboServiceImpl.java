@@ -8,10 +8,8 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-
 import com.mercadopago.resources.payment.Payment;
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +28,8 @@ import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.util.CustomValidator;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 
 @Service
 public class ReciboServiceImpl implements IReciboService {
@@ -44,18 +44,20 @@ public class ReciboServiceImpl implements IReciboService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
+  private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
   @Lazy
   public ReciboServiceImpl(
-    ReciboRepository reciboRepository,
-    ICuentaCorrienteService cuentaCorrienteService,
-    ISucursalService sucursalService,
-    INotaService notaService,
-    IFormaDePagoService formaDePagoService,
-    ICajaService cajaService,
-    MessageSource messageSource,
-    CustomValidator customValidator) {
+          ReciboRepository reciboRepository,
+          ICuentaCorrienteService cuentaCorrienteService,
+          ISucursalService sucursalService,
+          INotaService notaService,
+          IFormaDePagoService formaDePagoService,
+          ICajaService cajaService,
+          MessageSource messageSource,
+          CustomValidator customValidator,
+          JasperReportsHandler jasperReportsHandler) {
     this.reciboRepository = reciboRepository;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.sucursalService = sucursalService;
@@ -64,6 +66,7 @@ public class ReciboServiceImpl implements IReciboService {
     this.cajaService = cajaService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
+    this.jasperReportsHandler = jasperReportsHandler;
   }
 
   @Override
@@ -316,29 +319,13 @@ public class ReciboServiceImpl implements IReciboService {
     params.put("recibo", recibo);
     if (recibo.getSucursal().getLogo() != null && !recibo.getSucursal().getLogo().isEmpty()) {
       try {
-        params.put(
-            "logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
+        params.put("logo", new ImageIcon(ImageIO.read(new URL(recibo.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
         throw new ServiceException(messageSource.getMessage(
           "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    JasperReport jasperDesign;
-    try {
-      var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("report/Recibo.jrxml");
-      jasperDesign = JasperCompileManager.compileReport(isFileReport);
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-              "mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
-    try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(jasperDesign, params));
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
+    return jasperReportsHandler.compilar("report/Recibo.jrxml", params, null, FormatoReporte.PDF);
   }
 
   @Override

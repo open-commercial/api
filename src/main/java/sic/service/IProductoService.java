@@ -11,6 +11,7 @@ import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.*;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
+import sic.util.FormatoReporte;
 
 public interface IProductoService {
 
@@ -38,9 +39,11 @@ public interface IProductoService {
 
   Page<Producto> buscarProductos(BusquedaProductoCriteria criteria, Long idSucursal);
 
-  Page<Producto> buscarProductosDeCatalogoParaUsuario(BusquedaProductoCriteria criteria, Long idSucursal, Long isSucursal);
+  Page<Producto> buscarProductosDeCatalogoParaUsuario(
+          BusquedaProductoCriteria criteria, Long idSucursal, Long isSucursal);
 
-  Page<Producto> buscarProductosDeCatalogoParaVenta(BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario, Long idCliente);
+  Page<Producto> buscarProductosDeCatalogoParaVenta(
+          BusquedaProductoCriteria criteria, Long idSucursal, Long idUsuario, Long idCliente);
 
   void marcarFavoritos(Page<Producto> productos, long idUsuario);
 
@@ -75,17 +78,17 @@ public interface IProductoService {
 
   Producto getProductoPorCodigo(String codigo);
 
-  Producto getProductoPorDescripcion(String descripciona);
+  Producto getProductoPorDescripcion(String descripcion);
 
   Producto getProductoNoEliminadoPorId(long idProducto);
 
   BigDecimal calcularValorStock(BusquedaProductoCriteria criteria);
 
-  void getListaDePreciosEnXls(BusquedaProductoCriteria criteria, long idSucursal);
+  void procesarReporteListaDePrecios(BusquedaProductoCriteria criteria, long idSucursal, FormatoReporte formato);
 
-  void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal);
+  void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, FormatoReporte formato);
 
-  void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato);
+  byte[] getReporteListaDePrecios(List<Producto> productos, FormatoReporte formato);
 
   Producto guardar(NuevoProductoDTO producto, long idMedida, long idRubro, long idProveedor);
 
@@ -119,7 +122,8 @@ public interface IProductoService {
 
   void validarLongitudDeArrays(int longitudIds, int longitudCantidades);
 
-  ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal);
+  ProductoFaltanteDTO construirNuevoProductoFaltante(
+          Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal);
 
   PrecioProductoEmbeddable construirPrecioProductoEmbeddable(ProductoDTO productoDTO);
 
