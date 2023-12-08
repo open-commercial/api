@@ -18,6 +18,7 @@ import sic.repository.RemitoRepository;
 import sic.repository.RenglonRemitoRepository;
 import sic.service.*;
 import sic.util.CustomValidator;
+import sic.util.JasperReportsHandler;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -33,7 +34,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {CustomValidator.class, RemitoServiceImpl.class, MessageSource.class})
+    classes = {CustomValidator.class, RemitoServiceImpl.class, MessageSource.class, JasperReportsHandler.class})
 class RemitoServiceImplTest {
 
   @MockBean IFacturaService facturaService;

@@ -1,6 +1,5 @@
 package sic.service.impl;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -13,11 +12,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +37,8 @@ import sic.service.ICuentaCorrienteService;
 import sic.service.ISucursalService;
 import sic.service.IUsuarioService;
 import sic.util.CustomValidator;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 
 @Service
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
@@ -58,6 +54,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
+  private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
   @Lazy
@@ -68,7 +65,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
           RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository,
           IUsuarioService usuarioService, IClienteService clienteService,
           ISucursalService sucursalService, CustomValidator customValidator,
-          MessageSource messageSource) {
+          MessageSource messageSource, JasperReportsHandler jasperReportsHandler) {
     this.cuentaCorrienteRepository = cuentaCorrienteRepository;
     this.cuentaCorrienteClienteRepository = cuentaCorrienteClienteRepository;
     this.cuentaCorrienteProveedorRepository = cuentaCorrienteProveedorRepository;
@@ -78,12 +75,12 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     this.sucursalService = sucursalService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
+    this.jasperReportsHandler = jasperReportsHandler;
   }
 
   @Override
   @Transactional
-  public CuentaCorrienteCliente guardarCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente) {
+  public CuentaCorrienteCliente guardarCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente) {
     customValidator.validar(cuentaCorrienteCliente);
     this.validarReglasDeNegocio(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
@@ -93,8 +90,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   @Override
   @Transactional
-  public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
-      CuentaCorrienteProveedor cuentaCorrienteProveedor) {
+  public CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(CuentaCorrienteProveedor cuentaCorrienteProveedor) {
     customValidator.validar(cuentaCorrienteProveedor);
     this.validarReglasDeNegocio(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
@@ -490,69 +486,35 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, String formato) {
-    var classLoader = this.getClass().getClassLoader();
-    var isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/CuentaCorriente.jasper");
-    JRBeanCollectionDataSource ds =
-        new JRBeanCollectionDataSource(
-            this.getRenglonesCuentaCorrienteParaReporte(
-                cuentaCorrienteCliente.getIdCuentaCorriente()));
+  public byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, FormatoReporte formato) {
+    var renglonesCuentaCorriente = this.getRenglonesCuentaCorrienteParaReporte(cuentaCorrienteCliente.getIdCuentaCorriente());
     Map<String, Object> params = new HashMap<>();
     params.put("cuentaCorrienteCliente", cuentaCorrienteCliente);
-    Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    var sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
-        params.put(
-                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+        params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
       } catch (IOException ex) {
-        throw new ServiceException(messageSource.getMessage(
-                "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+        throw new ServiceException(messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    switch (formato) {
-      case "xlsx" -> {
-        try {
-          return xlsReportToArray(JasperFillManager.fillReport(isFileReport, params, ds));
-        } catch (JRException ex) {
-          throw new ServiceException(
-                  messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
-        }
-      }
-      case "pdf" -> {
-        try {
-          return JasperExportManager.exportReportToPdf(
-                  JasperFillManager.fillReport(isFileReport, params, ds));
-        } catch (JRException ex) {
-          throw new ServiceException(
-                  messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
-        }
-      }
-      default -> throw new BusinessServiceException(
-              messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
-    }
+    return jasperReportsHandler.compilar("report/CuentaCorriente.jrxml", params, renglonesCuentaCorriente, formato);
   }
 
-  private byte[] xlsReportToArray(JasperPrint jasperPrint) {
-    byte[] bytes = null;
-    try {
-      JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput =
-          new SimpleOutputStreamExporterOutput(out);
-      jasperXlsxExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
-      jasperXlsxExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
-      jasperXlsxExportMgr.exportReport();
-      bytes = out.toByteArray();
-      out.close();
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-        "mensaje_error_reporte", null, Locale.getDefault()), ex);
-    } catch (IOException ex) {
-      logger.error(ex.getMessage());
+  @Override
+  public byte[] getReporteListaDeCuentasCorrienteClientePorCriteria(BusquedaCuentaCorrienteClienteCriteria criteria,
+                                                                    long idUsuarioLoggedIn, FormatoReporte formato) {
+    var cuentaCorrienteClientes = this.buscarCuentasCorrienteClienteParaReporte(criteria, idUsuarioLoggedIn);
+    Map<String, Object> params = new HashMap<>();
+    var sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
+      try {
+        params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+      } catch (IOException ex) {
+        throw new ServiceException(messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+      }
     }
-    return bytes;
+    return jasperReportsHandler.compilar("report/ListaClientes.jrxml", params, cuentaCorrienteClientes, formato);
   }
 
   @Override
@@ -561,8 +523,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(
-          Factura factura, boolean eliminado) {
+  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeFactura(Factura factura, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByFacturaAndEliminado(factura, eliminado);
   }
 
@@ -572,28 +533,24 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   }
 
   @Override
-  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(
-          Recibo recibo, boolean eliminado) {
+  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRecibo(Recibo recibo, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByReciboAndEliminado(recibo, eliminado);
   }
 
   @Override
-  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(
-          Remito remito, boolean eliminado) {
+  public RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(Remito remito, boolean eliminado) {
     return renglonCuentaCorrienteRepository.findByRemitoAndEliminado(remito, eliminado);
   }
 
   @Override
-  public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
-      long idCuentaCorriente, Integer pagina) {
+  public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(long idCuentaCorriente, Integer pagina) {
     Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
     return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(
         idCuentaCorriente, pageable);
   }
 
   @Override
-  public List<RenglonCuentaCorriente> getRenglonesCuentaCorrienteParaReporte(
-      long idCuentaCorriente) {
+  public List<RenglonCuentaCorriente> getRenglonesCuentaCorrienteParaReporte(long idCuentaCorriente) {
     return renglonCuentaCorrienteRepository.findAllByCuentaCorrienteAndEliminado(idCuentaCorriente);
   }
 
@@ -604,50 +561,4 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
             cuentaCorriente, false);
   }
 
-  @Override
-  public byte[] getReporteListaDeCuentasCorrienteClientePorCriteria(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn, String formato) {
-    List<CuentaCorrienteCliente> cuentaCorrienteClientes = this.buscarCuentasCorrienteClienteParaReporte(criteria, idUsuarioLoggedIn);
-    JasperReport jasperDesign;
-    try {
-      var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaClientes.jrxml");
-      jasperDesign = JasperCompileManager.compileReport(isFileReport);
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(
-              "mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
-    Map<String, Object> params = new HashMap<>();
-    Sucursal sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
-    if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
-      try {
-        params.put(
-                "logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
-      } catch (IOException ex) {
-        throw new ServiceException(messageSource.getMessage(
-                "mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
-      }
-    }
-    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(cuentaCorrienteClientes);
-    switch (formato) {
-      case "xlsx" -> {
-        try {
-          return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
-        } catch (JRException ex) {
-          throw new ServiceException(messageSource.getMessage(
-                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
-        }
-      }
-      case "pdf" -> {
-        try {
-          return JasperExportManager.exportReportToPdf(
-                  JasperFillManager.fillReport(jasperDesign, params, ds));
-        } catch (JRException ex) {
-          throw new ServiceException(messageSource.getMessage(
-                  "mensaje_error_reporte", null, Locale.getDefault()), ex);
-        }
-      }
-      default -> throw new BusinessServiceException(messageSource.getMessage(
-              "mensaje_formato_no_valido", null, Locale.getDefault()));
-    }
-  }
 }

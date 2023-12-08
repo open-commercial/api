@@ -19,6 +19,8 @@ import sic.service.IClienteService;
 import sic.service.ISucursalService;
 import sic.service.IUsuarioService;
 import sic.util.CustomValidator;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {CuentaCorrienteServiceImpl.class, CustomValidator.class, MessageSource.class})
+        classes = {CuentaCorrienteServiceImpl.class, CustomValidator.class, MessageSource.class, JasperReportsHandler.class})
 class CuentaCorrienteServiceImplTest {
 
   @MockBean CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
@@ -56,9 +58,9 @@ class CuentaCorrienteServiceImplTest {
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuario);
     when(cuentaCorrienteClienteRepository.findAll(
             cuentaCorrienteService.getBuilder(
-                BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L),
+                    BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L),
             cuentaCorrienteService.getPageable(null, null, null, "cliente.nombreFiscal", Integer.MAX_VALUE)))
-        .thenReturn(new PageImpl<>(cuentasCorriente));
+            .thenReturn(new PageImpl<>(cuentasCorriente));
     Sucursal sucursal = new Sucursal();
     sucursal.setLogo("noTieneImagen");
     when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
@@ -66,20 +68,20 @@ class CuentaCorrienteServiceImplTest {
         ServiceException.class,
         () ->
             cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, "pdf"));
+                BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, FormatoReporte.PDF));
     assertThrows(
         ServiceException.class,
         () ->
             cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, "xlsx"));
+                BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, FormatoReporte.XLSX));
     verify(messageSource, times(2)).getMessage(eq("mensaje_sucursal_404_logo"), any(), any());
     sucursal.setLogo(null);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
     assertNotNull(
         cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-            BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, "pdf"));
+            BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, FormatoReporte.PDF));
     assertNotNull(
         cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-            BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, "pdf"));
+            BusquedaCuentaCorrienteClienteCriteria.builder().build(), 1L, FormatoReporte.PDF));
   }
 }

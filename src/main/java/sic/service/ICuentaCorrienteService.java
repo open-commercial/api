@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
-
+import sic.util.FormatoReporte;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -18,11 +18,9 @@ public interface ICuentaCorrienteService {
 
   BigDecimal getSaldoCuentaCorriente(long idCliente);
 
-  CuentaCorrienteCliente guardarCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente);
+  CuentaCorrienteCliente guardarCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente);
 
-  CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(
-      CuentaCorrienteProveedor cuentaCorrienteProveedor);
+  CuentaCorrienteProveedor guardarCuentaCorrienteProveedor(CuentaCorrienteProveedor cuentaCorrienteProveedor);
 
   void validarReglasDeNegocio(CuentaCorriente cuentaCorriente);
 
@@ -50,8 +48,10 @@ public interface ICuentaCorrienteService {
 
   void asentarEnCuentaCorriente(Remito remito, TipoDeOperacion tipo);
 
-  byte[] getReporteCuentaCorrienteCliente(
-      CuentaCorrienteCliente cuentaCorrienteCliente, String formato);
+  byte[] getReporteCuentaCorrienteCliente(CuentaCorrienteCliente cuentaCorrienteCliente, FormatoReporte formato);
+
+  byte[] getReporteListaDeCuentasCorrienteClientePorCriteria(
+          BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn, FormatoReporte formato);
 
   List<RenglonCuentaCorriente> getUltimosDosMovimientos(CuentaCorriente cuentaCorriente);
 
@@ -65,11 +65,7 @@ public interface ICuentaCorrienteService {
 
   RenglonCuentaCorriente getRenglonCuentaCorrienteDeRemito(Remito remito, boolean eliminado);
 
-  byte[] getReporteListaDeCuentasCorrienteClientePorCriteria(
-          BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn, String formato);
-
-  BooleanBuilder getBuilder(
-      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
+  BooleanBuilder getBuilder(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);
 
   List<CuentaCorrienteCliente> buscarCuentasCorrienteClienteParaReporte(
       BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn);

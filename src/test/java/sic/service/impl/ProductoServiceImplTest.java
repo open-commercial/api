@@ -32,11 +32,14 @@ import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
 import sic.service.IEmailService;
 import sic.util.CustomValidator;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
+
 import javax.persistence.EntityNotFoundException;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {ProductoServiceImpl.class, CustomValidator.class, MessageSource.class})
+        classes = {ProductoServiceImpl.class, CustomValidator.class, MessageSource.class, JasperReportsHandler.class})
 class ProductoServiceImplTest {
 
   @MockBean MedidaServiceImpl medidaService;
@@ -505,16 +508,16 @@ class ProductoServiceImplTest {
     assertThrows(
         ServiceException.class,
         () ->
-            productoService.getListaDePreciosEnPdf(BusquedaProductoCriteria.builder().build(), 1L));
+            productoService.procesarReporteListaDePrecios(BusquedaProductoCriteria.builder().build(), 1L, FormatoReporte.PDF));
     assertThrows(
         ServiceException.class,
         () ->
-            productoService.getListaDePreciosEnXls(BusquedaProductoCriteria.builder().build(), 1L));
+            productoService.procesarReporteListaDePrecios(BusquedaProductoCriteria.builder().build(), 1L, FormatoReporte.XLSX));
     verify(messageSource, times(2)).getMessage(eq("mensaje_recurso_no_encontrado"), any(), any());
     sucursal.setLogo(null);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
-    productoService.getListaDePreciosEnPdf(criteria, 1L);
-    productoService.getListaDePreciosEnXls(criteria, 1L);
+    productoService.procesarReporteListaDePrecios(criteria, 1L, FormatoReporte.PDF);
+    productoService.procesarReporteListaDePrecios(criteria, 1L, FormatoReporte.XLSX);
     verify(emailService, times(2))
         .enviarEmail(
             eq("correo@gmail.com"), eq(""), eq("Listado de productos"), eq(""), any(), any());
