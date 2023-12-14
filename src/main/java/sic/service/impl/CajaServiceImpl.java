@@ -247,7 +247,7 @@ public class CajaServiceImpl implements ICajaService {
     cajaACerrar.setSaldoSistema(this.getSaldoSistema(cajaACerrar));
     cajaACerrar.setEstado(EstadoCaja.CERRADA);
     this.actualizar(cajaACerrar);
-    log.warn("La Caja {} se cerró correctamente.", cajaACerrar);
+    log.info("La Caja {} se cerró correctamente.", cajaACerrar);
     return cajaACerrar;
   }
 

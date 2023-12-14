@@ -86,7 +86,7 @@ public class RubroServiceImpl implements IRubroService {
     customValidator.validar(rubro);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, rubro);
     rubro = rubroRepository.save(rubro);
-    log.warn("El Rubro {} se guardó correctamente.", rubro);
+    log.info("El Rubro {} se guardó correctamente.", rubro);
     return rubro;
   }
 

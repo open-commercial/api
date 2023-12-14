@@ -156,7 +156,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, transportista);
     transportista = transportistaRepository.save(transportista);
-    log.warn("El Transportista {} se guardó correctamente.", transportista);
+    log.info("El Transportista {} se guardó correctamente.", transportista);
     return transportista;
   }
 

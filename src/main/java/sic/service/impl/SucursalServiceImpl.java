@@ -164,7 +164,7 @@ public class SucursalServiceImpl implements ISucursalService {
     validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursalParaAlta);
     sucursalParaAlta = sucursalRepository.save(sucursalParaAlta);
     this.productoService.guardarCantidadesDeSucursalNueva(sucursalParaAlta);
-    log.warn("La Sucursal {} se guardó correctamente.", nuevaSucursal);
+    log.info("La Sucursal {} se guardó correctamente.", nuevaSucursal);
     if (logo != null)
       sucursalParaAlta.setLogo(
               this.guardarLogo(sucursalParaAlta.getIdSucursal(), logo));

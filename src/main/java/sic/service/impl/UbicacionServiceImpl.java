@@ -61,7 +61,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public Ubicacion guardar(Ubicacion ubicacion) {
     customValidator.validar(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
-    log.warn("La ubicación {} se actualizó correctamente.", ubicacion);
+    log.info("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
   }
 

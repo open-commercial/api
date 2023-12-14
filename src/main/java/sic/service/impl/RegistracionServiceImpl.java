@@ -95,7 +95,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
             Locale.getDefault()),
         null,
         null);
-    log.warn("El mail de registración para el usuario {} se envió.", nuevoUsuario.getUsername());
+    log.info("El mail de registración para el usuario {} se envió.", nuevoUsuario.getUsername());
   }
 
   @Override

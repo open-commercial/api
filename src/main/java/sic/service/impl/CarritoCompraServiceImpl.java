@@ -136,7 +136,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       ItemCarritoCompra itemCC =
           carritoCompraRepository.save(
               new ItemCarritoCompra(null, cantidad, producto, null, usuario));
-      log.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
+      log.info("Nuevo item de carrito de compra agregado: {}", itemCC);
     } else {
       if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
         item.setCantidad(BigDecimal.ZERO);
@@ -144,7 +144,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         item.setCantidad(cantidad);
       }
       ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
-      log.warn("Item de carrito de compra modificado: {}", itemCC);
+      log.info("Item de carrito de compra modificado: {}", itemCC);
     }
   }
 

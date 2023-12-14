@@ -695,8 +695,7 @@ public class ProductoServiceImpl implements IProductoService {
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto = productoRepository.save(producto);
-    log.warn(
-        messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_producto_agrega_stock",
             new Object[] {cantidad, producto},
             Locale.getDefault()));
@@ -717,8 +716,7 @@ public class ProductoServiceImpl implements IProductoService {
             .map(CantidadEnSucursal::getCantidad)
             .reduce(BigDecimal.ZERO, BigDecimal::add));
     producto = productoRepository.save(producto);
-    log.warn(
-        messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_producto_quita_stock",
             new Object[] {cantidad, producto},
             Locale.getDefault()));
@@ -860,7 +858,7 @@ public class ProductoServiceImpl implements IProductoService {
       this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.saveAll(productos);
-    log.warn("Los Productos {} se modificaron correctamente.", productos);
+    log.info("Los Productos {} se modificaron correctamente.", productos);
   }
 
   @Override
@@ -1167,7 +1165,7 @@ public class ProductoServiceImpl implements IProductoService {
     customValidator.validar(productoFavorito);
     producto = productoFavoritoRepository.save(productoFavorito).getProducto();
     producto.setFavorito(true);
-    log.warn(messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_producto_favorito_agregado",
             new Object[] {producto},
             Locale.getDefault()));
@@ -1218,7 +1216,7 @@ public class ProductoServiceImpl implements IProductoService {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     productoFavoritoRepository.deleteByClienteAndProducto(cliente, producto);
-    log.warn(messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_producto_favorito_quitado",
             new Object[] {producto},
             Locale.getDefault()));
@@ -1229,7 +1227,7 @@ public class ProductoServiceImpl implements IProductoService {
   public void quitarProductoDeFavoritos(long idProducto) {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     productoFavoritoRepository.deleteAllByProducto(producto);
-    log.warn(messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_producto_favorito_quitado",
             new Object[] {producto},
             Locale.getDefault()));
@@ -1240,8 +1238,8 @@ public class ProductoServiceImpl implements IProductoService {
   public void quitarProductosDeFavoritos(long idUsuario) {
     Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
     productoFavoritoRepository.deleteAllByCliente(cliente);
-    log.warn(
-            messageSource.getMessage("mensaje_producto_favoritos_quitados", null, Locale.getDefault()));
+    log.info(messageSource.getMessage(
+            "mensaje_producto_favoritos_quitados", null, Locale.getDefault()));
   }
 
   @Override

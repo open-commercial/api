@@ -117,11 +117,10 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));
        customValidator.validar(remito);
        remitoRepository.save(remito);
-       log.warn(
-               messageSource.getMessage(
-                       "mensaje_remito_guardado_correctamente",
-                       new Object[] {remito},
-                       Locale.getDefault()));
+       log.info(messageSource.getMessage(
+                "mensaje_remito_guardado_correctamente",
+                new Object[]{remito},
+                Locale.getDefault()));
        facturas.forEach(facturaVenta -> facturaVentaService.asignarRemitoConFactura(remito, facturaVenta.getIdFactura()));
        cuentaCorrienteService.asentarEnCuentaCorriente(remito, TipoDeOperacion.ALTA);
        return remito;
@@ -186,11 +185,10 @@ public class RemitoServiceImpl implements IRemitoService {
         );
         remito.setEliminado(true);
         remito = remitoRepository.save(remito);
-        log.warn(
-                messageSource.getMessage(
-                        "mensaje_remito_eliminado_correctamente",
-                        new Object[] {remito},
-                        Locale.getDefault()));
+        log.info(messageSource.getMessage(
+                "mensaje_remito_eliminado_correctamente",
+                new Object[]{remito},
+                Locale.getDefault()));
     }
 
     @Override

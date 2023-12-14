@@ -145,7 +145,7 @@ public class GastoServiceImpl implements IGastoService {
     gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getSucursal().getIdSucursal()));
     this.validarReglasDeNegocio(gasto);
     gasto = gastoRepository.save(gasto);
-    log.warn("El Gasto {} se guardó correctamente.", gasto);
+    log.info("El Gasto {} se guardó correctamente.", gasto);
     return gasto;
   }
 

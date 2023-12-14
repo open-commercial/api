@@ -173,7 +173,7 @@ public class ReciboServiceImpl implements IReciboService {
     this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
-    log.warn("El Recibo {} se guardó correctamente.", recibo);
+    log.info("El Recibo {} se guardó correctamente.", recibo);
     return recibo;
   }
 
@@ -277,7 +277,7 @@ public class ReciboServiceImpl implements IReciboService {
       this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
       this.actualizarCajaPorEliminacionDeRecibo(r);
       reciboRepository.save(r);
-      log.warn("El Recibo {} se eliminó correctamente.", r);
+      log.info("El Recibo {} se eliminó correctamente.", r);
     } else {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
@@ -296,7 +296,7 @@ public class ReciboServiceImpl implements IReciboService {
         monto = recibo.getMonto();
       }
       cajaService.actualizarSaldoSistema(caja, monto);
-      log.warn("El Recibo {} modificó la caja {} debido a una eliminación.", recibo, caja);
+      log.info("El Recibo {} modificó la caja {} debido a una eliminación.", recibo, caja);
     }
   }
 

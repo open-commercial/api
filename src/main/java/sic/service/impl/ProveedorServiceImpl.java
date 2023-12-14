@@ -179,7 +179,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     cuentaCorrienteProveedor.setFechaApertura(LocalDateTime.now());
     cuentaCorrienteProveedor.setFechaUltimoMovimiento(LocalDateTime.now());
     cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
-    log.warn("El Proveedor {} se guardó correctamente.", proveedor);
+    log.info("El Proveedor {} se guardó correctamente.", proveedor);
     return proveedor;
   }
 

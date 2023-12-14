@@ -49,7 +49,7 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
       configuracionRepository.desmarcarSucursalPredeterminada();
     }
     configuracionSucursal = configuracionRepository.save(configuracionSucursal);
-    log.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
+    log.info("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
     return configuracionSucursal;
   }
 

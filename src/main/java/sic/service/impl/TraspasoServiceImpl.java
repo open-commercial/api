@@ -109,8 +109,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
             });
     traspaso.setRenglones(renglonesTraspaso);
     traspaso = traspasoRepository.save(traspaso);
-    log.warn(
-        messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_traspaso_realizado", new Object[] {traspaso}, Locale.getDefault()));
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
     return traspaso;
@@ -148,9 +147,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
     }
     traspaso.setRenglones(renglonesTraspaso);
     traspaso = traspasoRepository.save(traspaso);
-    log.warn(
-            messageSource.getMessage(
-                    "mensaje_traspaso_realizado", new Object[] {traspaso}, Locale.getDefault()));
+    log.info(messageSource.getMessage(
+            "mensaje_traspaso_realizado", new Object[]{traspaso}, Locale.getDefault()));
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
     return traspaso;
   }

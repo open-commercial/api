@@ -83,7 +83,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     customValidator.validar(cuentaCorrienteCliente);
     this.validarReglasDeNegocio(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
-    log.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
+    log.info("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
@@ -93,8 +93,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     customValidator.validar(cuentaCorrienteProveedor);
     this.validarReglasDeNegocio(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
-    log.warn(
-        "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
+    log.info("La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
     return cuentaCorrienteProveedor;
   }
 
@@ -297,8 +296,8 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      log.warn(messageSource.getMessage(
-        "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(
+              "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
 
@@ -328,7 +327,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cc.setFechaUltimoMovimiento(factura.getFecha());
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);
-    log.warn(messageSource.getMessage(
+    log.info(messageSource.getMessage(
       "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
   }
 
@@ -357,7 +356,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.warn(messageSource.getMessage(
+      log.info(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -365,7 +364,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      log.warn(messageSource.getMessage(
+      log.info(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
@@ -397,7 +396,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.warn(messageSource.getMessage(
+      log.info(messageSource.getMessage(
               "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -406,7 +405,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.warn(messageSource.getMessage(
+      log.info(messageSource.getMessage(
               "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
@@ -440,7 +439,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.warn(messageSource.getMessage(
+      log.info(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -458,7 +457,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      log.warn(messageSource.getMessage(
+      log.info(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
