@@ -1,5 +1,6 @@
 package sic.service.impl;
 
+import org.javers.core.Javers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -12,12 +13,15 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.CantidadProductoDTO;
 import sic.modelo.dto.ProductoFaltanteDTO;
 import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
+import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
+import sic.service.IAuditService;
+import sic.service.IAuthService;
 import sic.service.IEmailService;
 import sic.util.CustomValidator;
 import sic.util.JasperReportsHandler;
@@ -47,8 +51,49 @@ class PedidoServiceImplTest {
   @MockBean ReciboServiceImpl reciboService;
   @MockBean MessageSource messageSource;
   @MockBean ModelMapper modelMapper;
+  @MockBean IAuthService authService;
+  @MockBean Javers javers;
+  @MockBean IAuditService auditService;
 
   @Autowired PedidoServiceImpl pedidoService;
+
+  private Producto construirProducto() {
+    Producto producto = new Producto();
+    producto.setIdProducto(1L);
+    producto.setCodigo("1");
+    producto.setDescripcion("Cinta adhesiva doble faz 3M");
+    producto.setMedida(new Medida());
+    producto.setPrecioProducto(new PrecioProductoEmbeddable());
+    producto.getPrecioProducto().setPrecioCosto(new BigDecimal("89.35"));
+    producto.getPrecioProducto().setGananciaPorcentaje(new BigDecimal("38.74"));
+    producto.getPrecioProducto().setGananciaNeto(new BigDecimal("34.614"));
+    producto.getPrecioProducto().setPrecioVentaPublico(new BigDecimal("123.964"));
+    producto.getPrecioProducto().setIvaPorcentaje(new BigDecimal("21"));
+    producto.getPrecioProducto().setIvaNeto(new BigDecimal("26.032"));
+    producto.getPrecioProducto().setPrecioLista(new BigDecimal("150"));
+    producto.getPrecioProducto().setPorcentajeBonificacionPrecio(new BigDecimal("10"));
+    producto.getPrecioProducto().setPrecioBonificado(new BigDecimal("135"));
+    producto.getPrecioProducto().setPorcentajeBonificacionOferta(BigDecimal.ZERO);
+    producto.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto.getCantidadProducto().setCantMinima(new BigDecimal("5"));
+    producto.setFechaAlta(LocalDateTime.now());
+    producto.setFechaUltimaModificacion(LocalDateTime.now());
+    Sucursal sucursal = new Sucursal();
+    Rubro rubro = new Rubro();
+    Proveedor proveedor = new Proveedor();
+    Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
+    CantidadEnSucursal cantidadEnSucursal = new CantidadEnSucursal();
+    cantidadEnSucursal.setCantidad(BigDecimal.TEN);
+    cantidadEnSucursal.setSucursal(sucursal);
+    cantidadEnSucursales.add(cantidadEnSucursal);
+    cantidadEnSucursal.setSucursal(sucursal);
+    producto.getCantidadProducto().setCantidadEnSucursales(cantidadEnSucursales);
+    producto.getCantidadProducto().setCantidadTotalEnSucursales(BigDecimal.TEN);
+    producto.getCantidadProducto().setCantidadReservada(BigDecimal.ZERO);
+    producto.setRubro(rubro);
+    producto.setProveedor(proveedor);
+    return producto;
+  }
 
   @Test
   void shouldCancelarPedidoAbierto() {
@@ -86,13 +131,13 @@ class PedidoServiceImplTest {
 
   @Test
   void shouldGetArrayDeIdProducto() {
-    List<NuevoRenglonPedidoDTO> nuevosRenglonesPedido = new ArrayList<>();
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO1 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO1.setIdProductoItem(1L);
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO2 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO2.setIdProductoItem(5L);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO1);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO2);
+    List<CantidadProductoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    CantidadProductoDTO cantidadProductoDTO1 = new CantidadProductoDTO();
+    cantidadProductoDTO1.setIdProductoItem(1L);
+    CantidadProductoDTO cantidadProductoDTO2 = new CantidadProductoDTO();
+    cantidadProductoDTO2.setIdProductoItem(5L);
+    nuevosRenglonesPedido.add(cantidadProductoDTO1);
+    nuevosRenglonesPedido.add(cantidadProductoDTO2);
     long[] idsProductoEsperado = new long[] {1L, 5L};
     long[] idsProductoResultado = pedidoService.getArrayDeIdProducto(nuevosRenglonesPedido);
     assertEquals(idsProductoEsperado.length, idsProductoResultado.length);
@@ -102,13 +147,13 @@ class PedidoServiceImplTest {
 
   @Test
   void shouldGetArrayDeCantidadesProducto() {
-    List<NuevoRenglonPedidoDTO> nuevosRenglonesPedido = new ArrayList<>();
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO1 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO1.setCantidad(BigDecimal.TEN);
-    NuevoRenglonPedidoDTO nuevoRenglonPedidoDTO2 = new NuevoRenglonPedidoDTO();
-    nuevoRenglonPedidoDTO2.setCantidad(BigDecimal.ONE);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO1);
-    nuevosRenglonesPedido.add(nuevoRenglonPedidoDTO2);
+    List<CantidadProductoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    CantidadProductoDTO cantidadProductoDTO1 = new CantidadProductoDTO();
+    cantidadProductoDTO1.setCantidad(BigDecimal.TEN);
+    CantidadProductoDTO cantidadProductoDTO2 = new CantidadProductoDTO();
+    cantidadProductoDTO2.setCantidad(BigDecimal.ONE);
+    nuevosRenglonesPedido.add(cantidadProductoDTO1);
+    nuevosRenglonesPedido.add(cantidadProductoDTO2);
     BigDecimal[] idsProductoEsperado = new BigDecimal[] {BigDecimal.TEN, BigDecimal.ONE};
     BigDecimal[] idsProductoResultado =
         pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedido);
@@ -174,6 +219,7 @@ class PedidoServiceImplTest {
     clienteDeUsuario.setNombreFiscal("nombre fiscal");
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(clienteDeUsuario);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
+    when(auditService.auditar(anyString(),any(),any())).thenReturn("1");
     assertThrows(
         BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
@@ -389,11 +435,8 @@ class PedidoServiceImplTest {
     renglonPedido.setCantidad(BigDecimal.TEN);
     renglonesPedido.add(renglonPedido);
     pedido.setRenglones(renglonesPedido);
-    List<RenglonPedido> renglonesAnterioresPedido = new ArrayList<>();
-    RenglonPedido renglonAnteriorPedido = new RenglonPedido();
-    renglonAnteriorPedido.setIdProductoItem(5L);
-    renglonAnteriorPedido.setCantidad(BigDecimal.ONE);
-    renglonesAnterioresPedido.add(renglonAnteriorPedido);
+    List<CantidadProductoDTO> renglonesAnterioresPedido = new ArrayList<>();
+    renglonesAnterioresPedido.add(CantidadProductoDTO.builder().idProductoItem(5L).cantidad(BigDecimal.ONE).build());
     pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido);
     verify(productoService).quitarCantidadReservada(5L, BigDecimal.ONE);
     verify(productoService).agregarCantidadReservada(1L, BigDecimal.TEN);
@@ -403,15 +446,60 @@ class PedidoServiceImplTest {
   void shouldThrowsServiceExceptionActualizarCantidadReservadaDeProductosPorModificacion() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.CANCELADO);
-    List<RenglonPedido> renglonesAnterioresPedido = new ArrayList<>();
-    RenglonPedido renglonAnteriorPedido = new RenglonPedido();
-    renglonAnteriorPedido.setIdProductoItem(5L);
-    renglonAnteriorPedido.setCantidad(BigDecimal.ONE);
-    renglonesAnterioresPedido.add(renglonAnteriorPedido);
+    List<CantidadProductoDTO> renglonesAnterioresPedido = new ArrayList<>();
+    renglonesAnterioresPedido.add(CantidadProductoDTO.builder().idProductoItem(5L).cantidad(BigDecimal.ONE).build());
     assertThrows(
             ServiceException.class,
             () -> pedidoService.actualizarCantidadReservadaDeProductosPorModificacion(pedido, renglonesAnterioresPedido));
     verify(messageSource)
             .getMessage(eq("mensaje_producto_error_actualizar_cantidad_reservada"), any(), any());
+  }
+
+  @Test
+  void shouldActualizarRenglonesPedido() {
+    Producto productoUno = this.construirProducto();
+    Producto productoDos = this.construirProducto();
+    productoDos.setIdProducto(2L);
+    Producto productoTres = this.construirProducto();
+    productoTres.setIdProducto(3L);
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoUno);
+    when(productoService.getProductoNoEliminadoPorId(2L)).thenReturn(productoDos);
+    when(productoService.getProductoNoEliminadoPorId(3L)).thenReturn(productoTres);
+    List<RenglonPedido> renglones = new ArrayList<>();
+    RenglonPedido renglonPedido1 = new RenglonPedido();
+    renglonPedido1.setIdRenglonPedido(1L);
+    renglonPedido1.setIdProductoItem(1L);
+    renglonPedido1.setCantidad(BigDecimal.TEN);
+    RenglonPedido renglonPedido2 = new RenglonPedido();
+    renglonPedido2.setIdRenglonPedido(2L);
+    renglonPedido2.setIdProductoItem(2L);
+    renglonPedido2.setCantidad(BigDecimal.ONE);
+    renglones.add(renglonPedido1);
+    renglones.add(renglonPedido2);
+    List<CantidadProductoDTO> nuevosRenglonesPedido = new ArrayList<>();
+    CantidadProductoDTO cantidadProductoDTO = new CantidadProductoDTO();
+    cantidadProductoDTO.setIdProductoItem(1L);
+    cantidadProductoDTO.setCantidad(BigDecimal.ONE);
+    nuevosRenglonesPedido.add(cantidadProductoDTO);
+    CantidadProductoDTO nuevoRenglonPedido2DTO = new CantidadProductoDTO();
+    nuevoRenglonPedido2DTO.setIdProductoItem(3L);
+    nuevoRenglonPedido2DTO.setCantidad(BigDecimal.TEN);
+    nuevosRenglonesPedido.add(nuevoRenglonPedido2DTO);
+    pedidoService.actualizarRenglonesPedido(renglones, nuevosRenglonesPedido);
+    assertEquals(1L, renglones.get(0).getIdProductoItem());
+    assertEquals(3L, renglones.get(1).getIdProductoItem());
+    assertEquals(BigDecimal.ONE, renglones.get(0).getCantidad());
+    assertEquals(1L, renglones.get(0).getIdProductoItem());
+    assertEquals(BigDecimal.TEN, renglones.get(1).getCantidad());
+    assertEquals(3L, renglones.get(1).getIdProductoItem());
+  }
+
+  @Test
+  void shouldActualizarRenglon() {
+    Producto productoUno = this.construirProducto();
+    when(productoService.getProductoNoEliminadoPorId(1L)).thenReturn(productoUno);
+    RenglonPedido renglonPedido1 = pedidoService.calcularRenglonPedido(productoUno.getIdProducto(), BigDecimal.TEN);
+    pedidoService.actualizarCantidadRenglonPedido(renglonPedido1, BigDecimal.ONE);
+    assertEquals(BigDecimal.ONE, renglonPedido1.getCantidad());
   }
 }

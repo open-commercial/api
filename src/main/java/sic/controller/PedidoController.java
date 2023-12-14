@@ -3,6 +3,7 @@ package sic.controller;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,23 +15,21 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.dto.*;
 import sic.modelo.Resultados;
-import sic.modelo.dto.PedidoDTO;
-import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.service.*;
 
 @RestController
 @RequestMapping("/api/v1")
 public class PedidoController {
 
-    private final IPedidoService pedidoService;
-    private final IUsuarioService usuarioService;
-    private final ISucursalService sucursalService;
-    private final IClienteService clienteService;
-    private final IReciboService reciboService;
-    private final IAuthService authService;
-    private static final String ID_USUARIO = "idUsuario";
+  private final IPedidoService pedidoService;
+  private final IUsuarioService usuarioService;
+  private final ISucursalService sucursalService;
+  private final IClienteService clienteService;
+  private final IReciboService reciboService;
+  private final IAuthService authService;
+  private static final String ID_USUARIO = "idUsuario";
 
   @Autowired
   public PedidoController(
@@ -48,21 +47,20 @@ public class PedidoController {
     this.authService = authService;
   }
 
-    @GetMapping("/pedidos/{idPedido}")
-    public Pedido getPedidoPorId(@PathVariable long idPedido) {
-        return pedidoService.getPedidoNoEliminadoPorId(idPedido);
-    }
+  @GetMapping("/pedidos/{idPedido}")
+  public Pedido getPedidoPorId(@PathVariable long idPedido) {
+      return pedidoService.getPedidoNoEliminadoPorId(idPedido);
+  }
 
-    @GetMapping("/pedidos/{idPedido}/renglones")
-    public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido,
-                                                     @RequestParam(required = false) boolean clonar) {
-        return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
-    }
+  @GetMapping("/pedidos/{idPedido}/renglones")
+  public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido,
+                                                   @RequestParam(required = false) boolean clonar) {
+      return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
+  }
 
   @PostMapping("/pedidos/renglones/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public List<RenglonPedido> calcularRenglonesPedido(
-      @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
+  public List<RenglonPedido> calcularRenglonesPedido(@RequestBody List<CantidadProductoDTO> nuevosRenglonesPedidoDTO) {
     return pedidoService.calcularRenglonesPedido(
         pedidoService.getArrayDeIdProducto(nuevosRenglonesPedidoDTO),
         pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
@@ -79,14 +77,10 @@ public class PedidoController {
       pedido.setRecargoPorcentaje(pedidoDTO.getRecargoPorcentaje());
     if (pedidoDTO.getDescuentoPorcentaje() != null)
       pedido.setDescuentoPorcentaje(pedidoDTO.getDescuentoPorcentaje());
-    List<RenglonPedido> renglonesAnteriores = new ArrayList<>(pedido.getRenglones());
-    pedido.getRenglones().clear();
-    pedido
-        .getRenglones()
-        .addAll(
-            pedidoService.calcularRenglonesPedido(
-                pedidoService.getArrayDeIdProducto(pedidoDTO.getRenglones()),
-                pedidoService.getArrayDeCantidadesProducto(pedidoDTO.getRenglones())));
+    List<CantidadProductoDTO> renglonesAnteriores = new ArrayList<>();
+    pedido.getRenglones().forEach(renglonPedido -> renglonesAnteriores.add(CantidadProductoDTO.builder()
+            .idProductoItem(renglonPedido.getIdProductoItem()).cantidad(renglonPedido.getCantidad()).build()));
+    pedido.setRenglones(this.pedidoService.actualizarRenglonesPedido(pedido.getRenglones(), pedidoDTO.getRenglones()));
     pedidoService.actualizar(
         pedido,
         renglonesAnteriores,
@@ -144,18 +138,30 @@ public class PedidoController {
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
-    @GetMapping("/pedidos/{idPedido}/reporte")
-    public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_PDF);        
-        headers.add("content-disposition", "inline; filename=Pedido.pdf");
-        headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
-        byte[] reportePDF = pedidoService.getReportePedido(idPedido);
-        return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
-    }
+  @GetMapping("/pedidos/{idPedido}/reporte")
+  public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_PDF);
+      headers.add("content-disposition", "inline; filename=Pedido.pdf");
+      headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
+      byte[] reportePDF = pedidoService.getReportePedido(idPedido);
+      return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
+  }
 
   @PostMapping("/pedidos/calculo-pedido")
   public Resultados calcularResultadosPedido(@RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
     return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);
+  }
+
+  @GetMapping("/pedidos/{idPedido}/cambios")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public List<CommitDTO> getCambios(@PathVariable long idPedido) {
+    return pedidoService.getCambiosPedido(idPedido);
+  }
+
+  @GetMapping("/pedidos/{idPedido}/renglones/cambios")
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  public List<CommitDTO> getCambiosRenglones(@PathVariable long idPedido) {
+    return pedidoService.getCambiosRenglonesPedido(idPedido);
   }
 }

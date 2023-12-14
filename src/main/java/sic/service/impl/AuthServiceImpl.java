@@ -31,6 +31,8 @@ public class AuthServiceImpl implements IAuthService {
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
   private static final String BEARER_TOKEN_PREFIX = "Bearer";
+
+  private long activeUserId;
   private final MessageSource messageSource;
 
   @Value("${RECAPTCHA_SECRET_KEY}")
@@ -130,5 +132,15 @@ public class AuthServiceImpl implements IAuthService {
     if (tokenAccesoExcluidoRepository.findByToken(token) == null) {
       tokenAccesoExcluidoRepository.save(new TokenAccesoExcluido(0, token));
     }
+  }
+
+  @Override
+  public void setActiveUserId(String token) {
+     activeUserId = this.getClaimsDelToken(token).get("idUsuario", Integer.class);
+  }
+
+  @Override
+  public long getActiveUserId() {
+    return activeUserId;
   }
 }

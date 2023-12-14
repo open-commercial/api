@@ -29,6 +29,7 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
       }
       long idUsuario =
           authService.getClaimsDelToken(authorizationHeader).get("idUsuario", Long.class);
+      authService.setActiveUserId(authorizationHeader);
       if (!usuarioService.esUsuarioHabilitado(idUsuario)) {
         throw new UnauthorizedException(
             messageSource.getMessage("mensaje_usuario_no_habilitado", null, Locale.getDefault()));

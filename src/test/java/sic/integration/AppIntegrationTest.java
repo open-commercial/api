@@ -9,10 +9,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -807,7 +804,7 @@ class AppIntegrationTest {
   }
 
   @Test
-  @DisplayName("Dar de alta un cliente y levantar un pedido con reserva, verificar stock")
+  @DisplayName("Dar de alta un cliente y levantar un pedido con reserva, verificar stock y consultar su historico de cambios")
   @Order(7)
   void testEscenarioAltaClienteYPedido() {
     this.iniciarSesionComoAdministrador();
@@ -844,14 +841,14 @@ class AppIntegrationTest {
     Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("13.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("12.000000000000000"), productoDos.getCantidadTotalEnSucursales());
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    List<CantidadProductoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder()
+        CantidadProductoDTO.builder()
             .idProductoItem(1L)
             .cantidad(new BigDecimal("5.000000000000000"))
             .build());
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder()
+        CantidadProductoDTO.builder()
             .idProductoItem(2L)
             .cantidad(new BigDecimal("2.000000000000000"))
             .build());
@@ -912,10 +909,30 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("1768.000000000000000000000000000000"),
         renglonesDelPedido.get(1).getImporte());
+    List<CommitDTO> cambios =
+            Arrays.asList(restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/cambios",
+                    CommitDTO[].class));
+    assertFalse(cambios.isEmpty());
+    assertEquals("2.00", cambios.get(0).getIdCommit());
+    assertEquals("1.00", cambios.get(0).getIdCommitRelacionado());
+    assertEquals("Power Max (dueño)", cambios.get(0).getUsuario());
+    assertEquals("ALTA", cambios.get(0).getTipoDeOperacion());
+    assertEquals(17, cambios.get(0).getCambios().size());
+    List<LinkedHashMap<String, String>> cambiosRenglones =
+            restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones/cambios",
+                    List.class);
+    assertFalse(cambiosRenglones.isEmpty());
+    assertEquals("1.00", cambiosRenglones.get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max (dueño)", cambiosRenglones.get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get(0).get("cambios"));
   }
 
   @Test
-  @DisplayName("Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando y verificando stock")
+  @DisplayName("Modificar el pedido agregando un nuevo producto y cambiando la cantidad de uno ya existente, reservando, verificando stock y su historico de cambios")
   @Order(8)
   void testEscenarioModificacionPedido() {
     this.iniciarSesionComoAdministrador();
@@ -939,17 +956,17 @@ class AppIntegrationTest {
                 sic.model.RenglonPedido[].class));
     assertNotNull(renglonesPedidos);
     assertEquals(2, renglonesPedidos.size());
-    List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
+    List<CantidadProductoDTO> renglonesPedidoDTO = new ArrayList<>();
     renglonesPedidos.forEach(
         renglonPedido ->
             renglonesPedidoDTO.add(
-                NuevoRenglonPedidoDTO.builder()
+                CantidadProductoDTO.builder()
                     .idProductoItem(renglonPedido.getIdProductoItem())
                     .cantidad(renglonPedido.getCantidad())
                     .build()));
     renglonesPedidoDTO.get(1).setCantidad(new BigDecimal("3"));
     renglonesPedidoDTO.add(
-        NuevoRenglonPedidoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
+        CantidadProductoDTO.builder().idProductoItem(3L).cantidad(BigDecimal.TEN).build());
     PedidoDTO pedidoDTO =
         PedidoDTO.builder()
             .idPedido(pedidosRecuperados.get(0).getIdPedido())
@@ -1032,6 +1049,37 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("120279.618000000000000000000000000000"),
         renglonesDelPedido.get(2).getImporte());
+    List<CommitDTO> cambios =
+            Arrays.asList(restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/cambios",
+                    CommitDTO[].class));
+    assertFalse(cambios.isEmpty());
+    assertEquals(2, cambios.size());
+    assertEquals("4.00", cambios.get(0).getIdCommit());
+    assertEquals("3.00", cambios.get(0).getIdCommitRelacionado());
+    assertEquals("Power Max (dueño)", cambios.get(0).getUsuario());
+    assertEquals("ACTUALIZACION", cambios.get(0).getTipoDeOperacion());
+    assertEquals(8, cambios.get(0).getCambios().size());
+    assertEquals("2.00", cambios.get(1).getIdCommit());
+    assertEquals("1.00", cambios.get(1).getIdCommitRelacionado());
+    assertEquals("Power Max (dueño)", cambios.get(1).getUsuario());
+    assertEquals("ALTA", cambios.get(1).getTipoDeOperacion());
+    assertEquals(17, cambios.get(1).getCambios().size());
+    List<LinkedHashMap<String, String>> cambiosRenglones =
+            restTemplate.getForObject(
+                    apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones/cambios",
+                    List.class);
+    assertFalse(cambiosRenglones.isEmpty());
+    assertEquals("3.00", cambiosRenglones.get(0).get("idCommit"));
+    assertNull(cambiosRenglones.get(0).get("idCommitRelacionado"));
+    assertEquals("Power Max (dueño)", cambiosRenglones.get(0).get("usuario"));
+    assertEquals(TipoDeOperacion.ACTUALIZACION.name() ,cambiosRenglones.get(0).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get(0).get("cambios"));
+    assertEquals("1.00", cambiosRenglones.get(1).get("idCommit"));
+    assertNull(cambiosRenglones.get(1).get("idCommitRelacionado"));
+    assertEquals("Power Max (dueño)", cambiosRenglones.get(1).get("usuario"));
+    assertEquals(TipoDeOperacion.ALTA.name() ,cambiosRenglones.get(1).get("tipoDeOperacion"));
+    assertNotNull(cambiosRenglones.get(1).get("cambios"));
   }
 
   @Test

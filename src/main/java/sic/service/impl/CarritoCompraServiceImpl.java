@@ -3,6 +3,7 @@ package sic.service.impl;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -201,7 +202,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
                     i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(nuevaOrdenDePagoDTO.getTipoDeEnvio());
-    Pedido p = pedidoService.guardar(pedido, null);
+    Pedido p = pedidoService.guardar(pedido, Collections.emptyList());
     this.eliminarTodosLosItemsDelUsuario(idUsuario);
     return p;
   }

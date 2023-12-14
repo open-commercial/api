@@ -28,6 +28,7 @@
         <bouncycastle-bcmail.version>1.46</bouncycastle-bcmail.version>
         <commons-io.version>2.7</commons-io.version>
         <messaging.saaj.version>1.5.2</messaging.saaj.version>
+        <javers.version>6.14.0</javers.version>
         <cloudinary.version>1.33.0</cloudinary.version>
         <newrelic-agent.version>8.5.0</newrelic-agent.version>
         <mercadopago.version>2.1.4</mercadopago.version>
@@ -168,6 +169,11 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${google-gson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javers</groupId>
+            <artifactId>javers-spring-boot-starter-sql</artifactId>
+            <version>${javers.version}</version>
         </dependency>
     </dependencies>
 
