@@ -6,13 +6,14 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 import java.util.List;
 
-public interface NotaCreditoRepository
-    extends NotaRepository<NotaCredito>, NotaCreditoRepositoryCustom, QuerydslPredicateExecutor<NotaCredito> {
+public interface NotaCreditoRepository extends
+        NotaRepository<NotaCredito>,
+        NotaCreditoRepositoryCustom,
+        QuerydslPredicateExecutor<NotaCredito> {
 
   List<NotaCredito> findAllByFacturaVentaAndEliminada(FacturaVenta factura, boolean eliminada);
 
-  @Query(
-      "SELECT max(nc.nroNota) FROM NotaCredito nc "
+  @Query("SELECT max(nc.nroNota) FROM NotaCredito nc "
           + "WHERE nc.tipoComprobante = :tipoComprobante "
           + "AND nc.serie = :serie "
           + "AND nc.sucursal.idSucursal = :idSucursal "

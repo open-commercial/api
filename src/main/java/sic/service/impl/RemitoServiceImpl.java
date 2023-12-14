@@ -1,8 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -33,6 +32,7 @@ import java.util.*;
 
 @Service
 @Transactional
+@Slf4j
 public class RemitoServiceImpl implements IRemitoService {
 
     private final IFacturaService facturaService;
@@ -46,7 +46,6 @@ public class RemitoServiceImpl implements IRemitoService {
     private final MessageSource messageSource;
     private static final int TAMANIO_PAGINA_DEFAULT = 25;
     private final CustomValidator customValidator;
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private final JasperReportsHandler jasperReportsHandler;
 
     @Autowired
@@ -118,7 +117,7 @@ public class RemitoServiceImpl implements IRemitoService {
        remito.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevoRemitoDTO.getIdTransportista()));
        customValidator.validar(remito);
        remitoRepository.save(remito);
-       logger.warn(
+       log.warn(
                messageSource.getMessage(
                        "mensaje_remito_guardado_correctamente",
                        new Object[] {remito},
@@ -187,7 +186,7 @@ public class RemitoServiceImpl implements IRemitoService {
         );
         remito.setEliminado(true);
         remito = remitoRepository.save(remito);
-        logger.warn(
+        log.warn(
                 messageSource.getMessage(
                         "mensaje_remito_eliminado_correctamente",
                         new Object[] {remito},

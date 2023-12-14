@@ -11,7 +11,8 @@ import sic.repository.ProductoRepositoryCustom;
 
 public class ProductoRepositoryImpl implements ProductoRepositoryCustom {
 
-  @PersistenceContext private EntityManager em;
+  @PersistenceContext
+  private EntityManager em;
 
   @Override
   public BigDecimal calcularValorStock(BooleanBuilder builder) {

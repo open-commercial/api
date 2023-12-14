@@ -8,8 +8,9 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Localidad;
 import sic.modelo.Provincia;
 
-public interface LocalidadRepository
-    extends PagingAndSortingRepository<Localidad, Long>, QuerydslPredicateExecutor<Localidad> {
+public interface LocalidadRepository extends
+        PagingAndSortingRepository<Localidad, Long>,
+        QuerydslPredicateExecutor<Localidad> {
 
   @Query("SELECT l FROM Localidad l WHERE l.idLocalidad = :idLocalidad")
   Localidad findById(@Param("idLocalidad") long idLocalidad);

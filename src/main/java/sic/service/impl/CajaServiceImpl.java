@@ -5,13 +5,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaCajaCriteria;
 import sic.service.*;
 import javax.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +24,7 @@ import sic.repository.CajaRepository;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class CajaServiceImpl implements ICajaService {
 
   private final CajaRepository cajaRepository;
@@ -35,7 +35,6 @@ public class CajaServiceImpl implements ICajaService {
   private final IReciboService reciboService;
   private final IClockService clockService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -248,13 +247,13 @@ public class CajaServiceImpl implements ICajaService {
     cajaACerrar.setSaldoSistema(this.getSaldoSistema(cajaACerrar));
     cajaACerrar.setEstado(EstadoCaja.CERRADA);
     this.actualizar(cajaACerrar);
-    logger.warn("La Caja {} se cerró correctamente.", cajaACerrar);
+    log.warn("La Caja {} se cerró correctamente.", cajaACerrar);
     return cajaACerrar;
   }
 
   @Scheduled(cron = "30 0 0 * * *") // Todos los dias a las 00:00:30
   public void cerrarCajas() {
-    logger.info("Cierre automático de Cajas a las {}", LocalDateTime.now());
+    log.info("Cierre automático de Cajas a las {}", LocalDateTime.now());
     List<Sucursal> sucursales = this.sucursalService.getSucusales(false);
     sucursales.stream()
         .map(sucursal -> this.getUltimaCaja(sucursal.getIdSucursal()))

@@ -5,8 +5,9 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import sic.modelo.Proveedor;
 
-public interface ProveedorRepository
-    extends PagingAndSortingRepository<Proveedor, Long>, QuerydslPredicateExecutor<Proveedor> {
+public interface ProveedorRepository extends
+        PagingAndSortingRepository<Proveedor, Long>,
+        QuerydslPredicateExecutor<Proveedor> {
 
   Proveedor findByNroProveedorAndEliminado(String nroProveedor, boolean eliminado);
 

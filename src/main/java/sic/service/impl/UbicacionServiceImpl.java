@@ -1,8 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -27,12 +26,12 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
+@Slf4j
 public class UbicacionServiceImpl implements IUbicacionService {
 
   private final UbicacionRepository ubicacionRepository;
   private final LocalidadRepository localidadRepository;
   private final ProvinciaRepository provinciaRepository;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final CustomValidator customValidator;
@@ -62,7 +61,7 @@ public class UbicacionServiceImpl implements IUbicacionService {
   public Ubicacion guardar(Ubicacion ubicacion) {
     customValidator.validar(ubicacion);
     Ubicacion ubicacionGuardada = ubicacionRepository.save(ubicacion);
-    logger.warn("La ubicación {} se actualizó correctamente.", ubicacion);
+    log.warn("La ubicación {} se actualizó correctamente.", ubicacion);
     return ubicacionGuardada;
   }
 

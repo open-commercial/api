@@ -12,28 +12,25 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.ItemCarritoCompra;
 import sic.modelo.Usuario;
 
-public interface CarritoCompraRepository
-    extends PagingAndSortingRepository<ItemCarritoCompra, Long> {
+public interface CarritoCompraRepository extends PagingAndSortingRepository<ItemCarritoCompra, Long> {
 
   Page<ItemCarritoCompra> findAllByUsuario(Usuario usuario, Pageable pageable);
 
   List<ItemCarritoCompra> findAllByUsuarioOrderByIdItemCarritoCompraDesc(Usuario usuario);
 
-  @Query(
-      "SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
+  @Query("SELECT SUM(icc.cantidad) FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
   BigDecimal getCantArticulos(@Param("idUsuario") long idUsuario);
 
   @Query("SELECT COUNT(icc) FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario")
   Long getCantRenglones(@Param("idUsuario") long idUsuario);
 
   @Modifying
-  @Query(
-    "DELETE FROM ItemCarritoCompra icc WHERE icc.producto.idProducto = :idProducto")
+  @Query("DELETE FROM ItemCarritoCompra icc WHERE icc.producto.idProducto = :idProducto")
   void eliminarItem(@Param("idProducto") long idProducto);
 
   @Modifying
-  @Query(
-      "DELETE FROM ItemCarritoCompra icc WHERE icc.usuario.idUsuario = :idUsuario AND icc.producto.idProducto = :idProducto")
+  @Query("DELETE FROM ItemCarritoCompra icc "
+          + "WHERE icc.usuario.idUsuario = :idUsuario AND icc.producto.idProducto = :idProducto")
   void eliminarItemDelUsuario(@Param("idUsuario") long idUsuario, @Param("idProducto") long idProducto);
 
   @Modifying

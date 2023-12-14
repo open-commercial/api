@@ -5,9 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -22,9 +20,9 @@ import sic.modelo.dto.*;
 import sic.repository.CarritoCompraRepository;
 import sic.service.*;
 
-
 @Service
 @Transactional
+@Slf4j
 public class CarritoCompraServiceImpl implements ICarritoCompraService {
 
   private final CarritoCompraRepository carritoCompraRepository;
@@ -34,7 +32,6 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
   private final IClienteService clienteService;
   private final IPedidoService pedidoService;
   private final MessageSource messageSource;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
 
   @Autowired
@@ -139,7 +136,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
       ItemCarritoCompra itemCC =
           carritoCompraRepository.save(
               new ItemCarritoCompra(null, cantidad, producto, null, usuario));
-      logger.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
+      log.warn("Nuevo item de carrito de compra agregado: {}", itemCC);
     } else {
       if (cantidad.compareTo(BigDecimal.ZERO) < 0) {
         item.setCantidad(BigDecimal.ZERO);
@@ -147,7 +144,7 @@ public class CarritoCompraServiceImpl implements ICarritoCompraService {
         item.setCantidad(cantidad);
       }
       ItemCarritoCompra itemCC = carritoCompraRepository.save(item);
-      logger.warn("Item de carrito de compra modificado: {}", itemCC);
+      log.warn("Item de carrito de compra modificado: {}", itemCC);
     }
   }
 

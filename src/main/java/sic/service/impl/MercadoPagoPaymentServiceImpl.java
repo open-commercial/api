@@ -11,8 +11,7 @@ import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.payment.Payment;
 import com.mercadopago.resources.preference.Preference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -36,6 +35,7 @@ import java.util.Locale;
 import java.util.Arrays;
 
 @Service
+@Slf4j
 public class MercadoPagoPaymentServiceImpl implements IPaymentService {
 
   @Value("${MERCADOPAGO_ACCESS_TOKEN}")
@@ -62,7 +62,6 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
   private static final String REFUNDED = "refunded";
   private static final String REJECTED = "rejected";
   private static final String PENDING = "pending";
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -282,7 +281,7 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
         switch (payment.getStatus()) {
           case APPROVED -> {
             if (reciboMP.isPresent()) {
-              logger.warn(messageSource.getMessage(
+              log.warn(messageSource.getMessage(
                               "mensaje_recibo_de_pago_ya_existente",
                               new Object[]{payment.getId()},
                               Locale.getDefault()));
@@ -310,16 +309,16 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
                       reciboMP.get().getSucursal().getIdSucursal(),
                       cliente.getCredencial());
             } else {
-              logger.warn(messageSource.getMessage(
+              log.warn(messageSource.getMessage(
                               "mensaje_nota_pago_existente",
                               new Object[]{payment.getId()},
                               Locale.getDefault()));
             }
           }
-          case REJECTED -> logger.error(messageSource.getMessage(
+          case REJECTED -> log.error(messageSource.getMessage(
                           "mensaje_pago_rechazado", new Object[]{payment}, Locale.getDefault()));
           default -> {
-            logger.warn(messageSource.getMessage(
+            log.warn(messageSource.getMessage(
                             "mensaje_pago_status_no_soportado",
                             new Object[]{payment.getId()},
                             Locale.getDefault()));
@@ -334,7 +333,7 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
       throw new BusinessServiceException(
               messageSource.getMessage(MENSAJE_PAGO_ERROR, new Object[]{ex.getMessage()}, Locale.getDefault()));
     } catch (GeneralSecurityException e) {
-      logger.warn(messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
+      log.warn(messageSource.getMessage("mensaje_error_al_desencriptar", null, Locale.getDefault()), e);
     }
   }
 
@@ -358,7 +357,7 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
   private void crearReciboDePago(Payment payment, Usuario usuario, Cliente cliente, Sucursal sucursal) {
     switch (payment.getStatus()) {
       case APPROVED -> {
-        logger.warn(
+        log.warn(
                 messageSource.getMessage(
                         "mensaje_pago_aprobado", new Object[]{payment}, Locale.getDefault()));
         reciboService.guardar(
@@ -366,18 +365,18 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
       }
       case PENDING -> {
         if (payment.getStatusDetail().equals("pending_waiting_payment")) {
-          logger.warn(
+          log.warn(
                   messageSource.getMessage(
                           "mensaje_pago_pendiente", new Object[]{payment}, Locale.getDefault()));
         } else {
-          logger.warn(
+          log.warn(
                   messageSource.getMessage(
                           "mensaje_pago_no_aprobado", new Object[]{payment}, Locale.getDefault()));
           this.procesarMensajeNoAprobado(payment);
         }
       }
       default -> {
-        logger.warn(
+        log.warn(
                 messageSource.getMessage(
                         "mensaje_pago_no_aprobado", new Object[]{payment}, Locale.getDefault()));
         this.procesarMensajeNoAprobado(payment);

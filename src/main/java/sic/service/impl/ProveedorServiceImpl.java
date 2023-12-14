@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,9 +16,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,12 +28,12 @@ import sic.service.IUbicacionService;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class ProveedorServiceImpl implements IProveedorService {
 
   private final ProveedorRepository proveedorRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUbicacionService ubicacionService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -181,7 +179,7 @@ public class ProveedorServiceImpl implements IProveedorService {
     cuentaCorrienteProveedor.setFechaApertura(LocalDateTime.now());
     cuentaCorrienteProveedor.setFechaUltimoMovimiento(LocalDateTime.now());
     cuentaCorrienteService.guardarCuentaCorrienteProveedor(cuentaCorrienteProveedor);
-    logger.warn("El Proveedor {} se guardó correctamente.", proveedor);
+    log.warn("El Proveedor {} se guardó correctamente.", proveedor);
     return proveedor;
   }
 

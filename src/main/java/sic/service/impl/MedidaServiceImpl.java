@@ -4,9 +4,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -19,10 +17,10 @@ import sic.repository.MedidaRepository;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class MedidaServiceImpl implements IMedidaService {
 
   private final MedidaRepository medidaRepository;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -89,7 +87,7 @@ public class MedidaServiceImpl implements IMedidaService {
     customValidator.validar(medida);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, medida);
     medida = medidaRepository.save(medida);
-    logger.warn("La Medida {} se guardó correctamente.", medida);
+    log.warn("La Medida {} se guardó correctamente.", medida);
     return medida;
   }
 

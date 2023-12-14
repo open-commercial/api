@@ -1,8 +1,7 @@
 package sic.service.impl;
 
 import javax.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -12,14 +11,13 @@ import sic.service.IConfiguracionSucursalService;
 import sic.repository.ConfiguracionSucursalRepository;
 import sic.exception.BusinessServiceException;
 import sic.util.CustomValidator;
-
 import java.util.Locale;
 
 @Service
+@Slf4j
 public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalService {
 
   private final ConfiguracionSucursalRepository configuracionRepository;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -51,7 +49,7 @@ public class ConfiguracionSucursalServiceImpl implements IConfiguracionSucursalS
       configuracionRepository.desmarcarSucursalPredeterminada();
     }
     configuracionSucursal = configuracionRepository.save(configuracionSucursal);
-    logger.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
+    log.warn("La configuracion de sucursal {} se guardó correctamente.", configuracionSucursal);
     return configuracionSucursal;
   }
 

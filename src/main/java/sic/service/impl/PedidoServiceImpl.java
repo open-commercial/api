@@ -10,9 +10,8 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -38,6 +37,7 @@ import sic.util.FormatoReporte;
 import sic.util.JasperReportsHandler;
 
 @Service
+@Slf4j
 public class PedidoServiceImpl implements IPedidoService {
 
   private final PedidoRepository pedidoRepository;
@@ -50,7 +50,6 @@ public class PedidoServiceImpl implements IPedidoService {
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
   private static final BigDecimal CIEN = new BigDecimal("100");
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -212,7 +211,7 @@ public class PedidoServiceImpl implements IPedidoService {
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
     this.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
-    logger.warn("El Pedido {} se guardó correctamente.", pedido);
+    log.warn("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
       emailService.enviarEmail(
@@ -227,7 +226,7 @@ public class PedidoServiceImpl implements IPedidoService {
               Locale.getDefault()),
           this.getReportePedido(pedido.getIdPedido()),
           "Reporte.pdf");
-      logger.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
+      log.warn("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;
   }
@@ -487,7 +486,7 @@ public class PedidoServiceImpl implements IPedidoService {
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
       pedido = pedidoRepository.save(pedido);
       this.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
               "mensaje_pedido_cancelado", new Object[]{pedido}, Locale.getDefault()));
     } else {
       throw new BusinessServiceException(
@@ -646,7 +645,7 @@ public class PedidoServiceImpl implements IPedidoService {
   @Scheduled(cron = "0 0/1 * * * ?")
   @Transactional
   public void cancelarPedidosAbiertos() {
-    logger.info(messageSource.getMessage("mensaje_cron_job_cancelar_pedidos", null, Locale.getDefault()));
+    log.info(messageSource.getMessage("mensaje_cron_job_cancelar_pedidos", null, Locale.getDefault()));
     Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE);
     Page<Pedido> paginaPedidos = pedidoRepository.findAllByEstadoAndEliminado(EstadoPedido.ABIERTO, pageable);
     paginaPedidos.forEach(pedido -> {

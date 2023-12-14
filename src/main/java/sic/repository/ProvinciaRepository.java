@@ -14,5 +14,4 @@ public interface ProvinciaRepository extends PagingAndSortingRepository<Provinci
       Provincia findByNombreOrderByNombreAsc(String nombre);
       
       List<Provincia> findAllByOrderByNombreAsc();
-
 }

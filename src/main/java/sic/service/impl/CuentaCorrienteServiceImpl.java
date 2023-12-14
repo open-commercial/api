@@ -12,8 +12,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -41,6 +40,7 @@ import sic.util.FormatoReporte;
 import sic.util.JasperReportsHandler;
 
 @Service
+@Slf4j
 public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
 
   private final CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
@@ -50,7 +50,6 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final ISucursalService sucursalService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -84,7 +83,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     customValidator.validar(cuentaCorrienteCliente);
     this.validarReglasDeNegocio(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
-    logger.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
+    log.warn("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
@@ -94,7 +93,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     customValidator.validar(cuentaCorrienteProveedor);
     this.validarReglasDeNegocio(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
-    logger.warn(
+    log.warn(
         "La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
     return cuentaCorrienteProveedor;
   }
@@ -298,7 +297,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
@@ -329,7 +328,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
     cc.setFechaUltimoMovimiento(factura.getFecha());
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);
-    logger.warn(messageSource.getMessage(
+    log.warn(messageSource.getMessage(
       "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
   }
 
@@ -358,7 +357,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -366,7 +365,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
@@ -398,7 +397,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
               "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -407,7 +406,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
               "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }
@@ -441,7 +440,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
@@ -459,7 +458,7 @@ public class CuentaCorrienteServiceImpl implements ICuentaCorrienteService {
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      logger.warn(messageSource.getMessage(
+      log.warn(messageSource.getMessage(
         "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
     }
   }

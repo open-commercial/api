@@ -1,8 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -32,6 +31,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@Slf4j
 public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   private final FacturaVentaRepository facturaVentaRepository;
@@ -45,7 +45,6 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
   private final IFacturaService facturaService;
   private final ITransportistaService transportistaService;
   private final ISucursalService sucursalService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private static final BigDecimal IVA_21 = new BigDecimal("21");
   private static final BigDecimal IVA_105 = new BigDecimal("10.5");
@@ -325,7 +324,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       var facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
       this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
       facturasProcesadas.add(facturaGuardada);
-      logger.info("La Factura {} se guardó correctamente.", facturaGuardada);
+      log.info("La Factura {} se guardó correctamente.", facturaGuardada);
     });
     var facturasParaRelacionarAlPedido = new ArrayList<Factura>(facturasProcesadas);
     pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
@@ -519,7 +518,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
           bodyEmail,
           this.getReporteFacturaVenta(factura),
           "Reporte.pdf");
-      logger.info(
+      log.info(
           "El mail de la factura serie {} nro {} se envió.",
           factura.getNumSerie(),
           factura.getNumFactura());

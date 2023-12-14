@@ -10,8 +10,8 @@ import sic.modelo.ProductoFavorito;
 
 import java.util.List;
 
-public interface ProductoFavoritoRepository
-    extends PagingAndSortingRepository<ProductoFavorito, Long>,
+public interface ProductoFavoritoRepository extends
+        PagingAndSortingRepository<ProductoFavorito, Long>,
         QuerydslPredicateExecutor<ProductoFavorito> {
 
   List<ProductoFavorito> findAllByCliente(Cliente cliente);

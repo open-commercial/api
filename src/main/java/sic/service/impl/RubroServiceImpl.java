@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -18,10 +17,10 @@ import sic.repository.RubroRepository;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class RubroServiceImpl implements IRubroService {
 
   private final RubroRepository rubroRepository;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -87,7 +86,7 @@ public class RubroServiceImpl implements IRubroService {
     customValidator.validar(rubro);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, rubro);
     rubro = rubroRepository.save(rubro);
-    logger.warn("El Rubro {} se guardó correctamente.", rubro);
+    log.warn("El Rubro {} se guardó correctamente.", rubro);
     return rubro;
   }
 

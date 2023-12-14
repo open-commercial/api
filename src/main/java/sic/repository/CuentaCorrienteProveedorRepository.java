@@ -8,14 +8,13 @@ import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.Sucursal;
 import sic.modelo.Proveedor;
 
-public interface CuentaCorrienteProveedorRepository
-    extends CuentaCorrienteRepository<CuentaCorrienteProveedor>,
+public interface CuentaCorrienteProveedorRepository extends
+        CuentaCorrienteRepository<CuentaCorrienteProveedor>,
         QuerydslPredicateExecutor<CuentaCorrienteProveedor> {
 
   CuentaCorrienteProveedor findByProveedorAndEliminada(Proveedor proveedor, boolean eliminada);
 
   @Modifying
-  @Query(
-      "UPDATE CuentaCorrienteProveedor ccp SET ccp.eliminada = true WHERE ccp.proveedor.idProveedor = :idProveedor")
+  @Query("UPDATE CuentaCorrienteProveedor ccp SET ccp.eliminada = true WHERE ccp.proveedor.idProveedor = :idProveedor")
   int eliminarCuentaCorrienteProveedor(@Param("idProveedor") long idProveedor);
 }

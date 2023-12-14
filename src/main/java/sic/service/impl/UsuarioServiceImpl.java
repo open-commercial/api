@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-
 import com.querydsl.core.BooleanBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -32,13 +30,13 @@ import sic.util.CustomValidator;
 
 @Service
 @Transactional
+@Slf4j
 public class UsuarioServiceImpl implements IUsuarioService {
 
   private final UsuarioRepository usuarioRepository;
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
   private final IEmailService emailService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -277,7 +275,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     usuario.setUsername(usuario.getUsername().toLowerCase());
     usuarioRepository.save(usuario);
-    logger.warn("El Usuario {} se actualizó correctamente.", usuario);
+    log.warn("El Usuario {} se actualizó correctamente.", usuario);
   }
 
   @Override
@@ -325,7 +323,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     usuario.setUsername(usuario.getUsername().toLowerCase());
     usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
-    logger.warn("El Usuario {} se guardó correctamente.", usuario);
+    log.warn("El Usuario {} se guardó correctamente.", usuario);
     return usuario;
   }
 
@@ -342,7 +340,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
               Locale.getDefault()));
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
-    logger.warn("El Usuario {} se eliminó correctamente.", usuario);
+    log.warn("El Usuario {} se eliminó correctamente.", usuario);
   }
 
   @Override

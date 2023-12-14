@@ -7,12 +7,9 @@ import sic.modelo.RenglonTraspaso;
 
 import java.util.List;
 
-public interface RenglonTraspasoRepository
-    extends PagingAndSortingRepository<RenglonTraspaso, Long> {
+public interface RenglonTraspasoRepository extends PagingAndSortingRepository<RenglonTraspaso, Long> {
 
-  @Query(
-      "SELECT rt FROM Traspaso t INNER JOIN t.renglones rt"
+  @Query("SELECT rt FROM Traspaso t INNER JOIN t.renglones rt"
           + " WHERE t.idTraspaso = :idTraspaso order by rt.idRenglonTraspaso asc")
-  List<RenglonTraspaso> findByIdTraspasoOrderByIdRenglonTraspaso(
-      @Param("idTraspaso") long idTraspaso);
+  List<RenglonTraspaso> findByIdTraspasoOrderByIdRenglonTraspaso(@Param("idTraspaso") long idTraspaso);
 }

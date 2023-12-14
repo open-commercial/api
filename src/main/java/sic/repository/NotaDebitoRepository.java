@@ -5,11 +5,12 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
-public interface NotaDebitoRepository
-    extends NotaRepository<NotaDebito>, NotaDebitoRepositoryCustom, QuerydslPredicateExecutor<NotaDebito> {
+public interface NotaDebitoRepository extends
+        NotaRepository<NotaDebito>,
+        NotaDebitoRepositoryCustom,
+        QuerydslPredicateExecutor<NotaDebito> {
 
-  @Query(
-      "SELECT max(nd.nroNota) FROM NotaDebito nd "
+  @Query("SELECT max(nd.nroNota) FROM NotaDebito nd "
           + "WHERE nd.tipoComprobante = :tipoComprobante AND nd.serie = :serie AND nd.sucursal.idSucursal = :idSucursal "
           + "AND nd.cliente IS NOT null")
   Long buscarMayorNumNotaDebitoClienteSegunTipo(

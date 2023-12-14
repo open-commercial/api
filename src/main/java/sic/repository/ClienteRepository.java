@@ -10,8 +10,9 @@ import sic.modelo.Usuario;
 
 import java.util.List;
 
-public interface ClienteRepository
-    extends PagingAndSortingRepository<Cliente, Long>, QuerydslPredicateExecutor<Cliente> {
+public interface ClienteRepository extends
+        PagingAndSortingRepository<Cliente, Long>,
+        QuerydslPredicateExecutor<Cliente> {
 
   List<Cliente> findByIdFiscalAndEliminado(Long idFiscal, boolean eliminado);
 
@@ -19,12 +20,10 @@ public interface ClienteRepository
 
   boolean existsByAndPredeterminadoAndEliminado(boolean predeterminado, boolean eliminado);
 
-  @Query(
-      "SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.idPedido = :idPedido AND c.eliminado = false")
+  @Query("SELECT c FROM Pedido p INNER JOIN p.cliente c WHERE p.idPedido = :idPedido AND c.eliminado = false")
   Cliente findClienteByIdPedido(@Param("idPedido") long idPedido);
 
-  @Query(
-      "SELECT c FROM Cliente c WHERE c.credencial.idUsuario = :idUsuario AND c.eliminado = false")
+  @Query("SELECT c FROM Cliente c WHERE c.credencial.idUsuario = :idUsuario AND c.eliminado = false")
   Cliente findClienteByIdUsuario(@Param("idUsuario") long idUsuario);
 
   Cliente findByCredencialAndEliminado(Usuario usuarioCredencial, boolean eliminado);
@@ -34,8 +33,7 @@ public interface ClienteRepository
   int desvincularClienteDeViajante(@Param("idUsuarioViajante") long idUsuarioViajante);
 
   @Modifying
-  @Query(
-      "UPDATE Cliente c SET c.credencial = null WHERE c.credencial.idUsuario = :idUsuarioCredencial")
+  @Query("UPDATE Cliente c SET c.credencial = null WHERE c.credencial.idUsuario = :idUsuarioCredencial")
   int desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
 
   boolean existsByNroCliente(String nroCliente);

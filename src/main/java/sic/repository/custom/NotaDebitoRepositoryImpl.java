@@ -2,16 +2,13 @@ package sic.repository.custom;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.stereotype.Repository;
 import sic.modelo.QNotaDebito;
 import sic.modelo.TipoDeComprobante;
 import sic.repository.NotaDebitoRepositoryCustom;
-
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.math.BigDecimal;
 
-@Repository
 public class NotaDebitoRepositoryImpl implements NotaDebitoRepositoryCustom {
 
     @PersistenceContext
