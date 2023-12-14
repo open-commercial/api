@@ -20,6 +20,7 @@ import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.repository.RenglonTraspasoRepository;
 import sic.repository.TraspasoRepository;
 import sic.util.CustomValidator;
+import sic.util.JasperReportsHandler;
 
 import javax.persistence.EntityNotFoundException;
 import java.math.BigDecimal;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {CustomValidator.class, TraspasoServiceImpl.class, MessageSource.class})
+        classes = {CustomValidator.class, TraspasoServiceImpl.class, MessageSource.class, JasperReportsHandler.class})
 class TraspasoServiceImplTest {
 
   @MockBean ProductoServiceImpl productoService;

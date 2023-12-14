@@ -17,6 +17,7 @@ import sic.service.IAuthService;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IProveedorService;
+import sic.util.FormatoReporte;
 
 import javax.crypto.SecretKey;
 import java.time.LocalDateTime;
@@ -65,9 +66,13 @@ class CuentaCorrienteControllerTest {
                         .compact();
         Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
         when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-        when(cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(criteria, 1L, "xlsx")).thenReturn("reporte".getBytes());
-        assertNotNull(cuentaCorrienteController.getReporteListaDeCuentasCorrienteClientePorCriteria(criteria, "xlsx", "headers"));
-        when(cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(criteria, 1L, "pdf")).thenReturn("reporte".getBytes());
-        assertNotNull(cuentaCorrienteController.getReporteListaDeCuentasCorrienteClientePorCriteria(criteria, "pdf", "headers"));
+        when(cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                criteria, 1L, FormatoReporte.XLSX)).thenReturn("reporte".getBytes());
+        assertNotNull(cuentaCorrienteController.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                criteria, "xlsx", "headers"));
+        when(cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                criteria, 1L, FormatoReporte.PDF)).thenReturn("reporte".getBytes());
+        assertNotNull(cuentaCorrienteController.getReporteListaDeCuentasCorrienteClientePorCriteria(
+                criteria, "pdf", "headers"));
     }
 }

@@ -23,6 +23,7 @@ import sic.service.IAuthService;
 import sic.service.IClienteService;
 import sic.service.ICuentaCorrienteService;
 import sic.service.IProveedorService;
+import sic.util.FormatoReporte;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -119,7 +120,7 @@ public class CuentaCorrienteController {
                 cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                         cuentaCorrienteService.getCuentaCorrientePorCliente(
                                 clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
-                        formato);
+                        FormatoReporte.XLSX);
         headers.setContentLength(reporteXls.length);
         return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
       }
@@ -130,7 +131,7 @@ public class CuentaCorrienteController {
                 cuentaCorrienteService.getReporteCuentaCorrienteCliente(
                         cuentaCorrienteService.getCuentaCorrientePorCliente(
                                 clienteService.getClienteNoEliminadoPorId(criteria.getIdCliente())),
-                        formato);
+                        FormatoReporte.PDF);
         return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
       }
       default -> throw new BusinessServiceException(messageSource.getMessage(
@@ -148,32 +149,32 @@ public class CuentaCorrienteController {
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     return switch (formato) {
       case "xlsx" ->
-        this.getReporteListaDeCuentasCorrienteClienteEnXlsx(headers, criteria, claims, formato);
+        this.getReporteListaDeCuentasCorrienteClienteEnXlsx(headers, criteria, claims);
       case "pdf" ->
-        this.getReporteListaDeCuentasCorrienteClienteEnPdf(headers, criteria, claims, formato);
+        this.getReporteListaDeCuentasCorrienteClienteEnPdf(headers, criteria, claims);
       default -> throw new BusinessServiceException(
               messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
     };
   }
 
   private ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClienteEnXlsx(
-          HttpHeaders headers, BusquedaCuentaCorrienteClienteCriteria criteria, Claims claims, String formato) {
+          HttpHeaders headers, BusquedaCuentaCorrienteClienteCriteria criteria, Claims claims) {
     headers.setContentType(new MediaType("application", "vnd.ms-excel"));
     headers.set(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaClientes.xlsx");
     byte[] reporteXls =
             cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                    criteria, (int) claims.get(ID_USUARIO), formato);
+                    criteria, (int) claims.get(ID_USUARIO), FormatoReporte.XLSX);
     headers.setContentLength(reporteXls.length);
     return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
   }
 
   private ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClienteEnPdf(
-          HttpHeaders headers, BusquedaCuentaCorrienteClienteCriteria criteria, Claims claims, String formato) {
+          HttpHeaders headers, BusquedaCuentaCorrienteClienteCriteria criteria, Claims claims) {
     headers.setContentType(MediaType.APPLICATION_PDF);
     headers.add(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaClientes.pdf");
     byte[] reportePDF =
             cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                    criteria, (int) claims.get(ID_USUARIO), formato);
+                    criteria, (int) claims.get(ID_USUARIO), FormatoReporte.PDF);
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 }

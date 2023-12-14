@@ -20,6 +20,7 @@ import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
 import sic.service.IEmailService;
 import sic.util.CustomValidator;
+import sic.util.JasperReportsHandler;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,7 +37,8 @@ import static org.mockito.Mockito.*;
       CustomValidator.class,
       FacturaVentaServiceImpl.class,
       FacturaServiceImpl.class,
-      MessageSource.class
+      MessageSource.class,
+      JasperReportsHandler.class
     })
 class FacturaVentaServiceImplTest {
 

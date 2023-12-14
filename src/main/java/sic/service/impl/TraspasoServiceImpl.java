@@ -1,10 +1,6 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +19,12 @@ import sic.modelo.dto.*;
 import sic.repository.RenglonTraspasoRepository;
 import sic.repository.TraspasoRepository;
 import sic.service.*;
-
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.time.LocalDateTime;
@@ -47,16 +43,18 @@ public class TraspasoServiceImpl implements ITraspasoService {
   private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final Logger logger = LoggerFactory.getLogger(this.getClass());
+  private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
   public TraspasoServiceImpl(
-      TraspasoRepository traspasoRepository,
-      RenglonTraspasoRepository renglonTraspasoRepository,
-      IProductoService productoService,
-      ISucursalService sucursalService,
-      IUsuarioService usuarioService,
-      IPedidoService pedidoService,
-      MessageSource messageSource) {
+          TraspasoRepository traspasoRepository,
+          RenglonTraspasoRepository renglonTraspasoRepository,
+          IProductoService productoService,
+          ISucursalService sucursalService,
+          IUsuarioService usuarioService,
+          IPedidoService pedidoService,
+          MessageSource messageSource,
+          JasperReportsHandler jasperReportsHandler) {
     this.traspasoRepository = traspasoRepository;
     this.renglonTraspasoRepository = renglonTraspasoRepository;
     this.productoService = productoService;
@@ -64,6 +62,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
     this.usuarioService = usuarioService;
     this.pedidoService = pedidoService;
     this.messageSource = messageSource;
+    this.jasperReportsHandler = jasperReportsHandler;
   }
 
   @Override
@@ -376,17 +375,17 @@ public class TraspasoServiceImpl implements ITraspasoService {
 
   @Override
   public byte[] getReporteTraspaso(BusquedaTraspasoCriteria criteria) {
-    List<Traspaso> traspasosParaReporte =
-        traspasoRepository
-            .findAll(
-                this.getBuilderTraspaso(criteria),
-                this.getPageable(
-                    (criteria.getPagina() == null || criteria.getPagina() < 0)
-                        ? 0
-                        : criteria.getPagina(),
-                    criteria.getOrdenarPor(),
-                    criteria.getSentido(), Integer.MAX_VALUE))
-            .getContent();
+    var traspasosParaReporte =
+            traspasoRepository
+                    .findAll(
+                            this.getBuilderTraspaso(criteria),
+                            this.getPageable(
+                                    (criteria.getPagina() == null || criteria.getPagina() < 0)
+                                            ? 0
+                                            : criteria.getPagina(),
+                                    criteria.getOrdenarPor(),
+                                    criteria.getSentido(), Integer.MAX_VALUE))
+                    .getContent();
     if (traspasosParaReporte.isEmpty()) {
       throw new BusinessServiceException(
               messageSource.getMessage(
@@ -399,9 +398,10 @@ public class TraspasoServiceImpl implements ITraspasoService {
       traspaso.getRenglones().forEach(renglonTraspaso -> {
         if (renglones.get(renglonTraspaso.getIdProducto()) != null)
           renglones.get(renglonTraspaso.getIdProducto())
-                  .setCantidad(renglones.get(renglonTraspaso.getIdProducto()).getCantidad().add(renglonTraspaso.getCantidadProducto()));
+                  .setCantidad(renglones.get(renglonTraspaso.getIdProducto())
+                          .getCantidad().add(renglonTraspaso.getCantidadProducto()));
         else {
-          RenglonReporteTraspasoDTO renglonReporteTraspasoDTO =
+          var renglonReporteTraspasoDTO =
                   RenglonReporteTraspasoDTO.builder()
                           .sucursalOrigen(traspaso.getNombreSucursalOrigen())
                           .sucursalDestino(traspaso.getNombreSucursalDestino())
@@ -413,30 +413,20 @@ public class TraspasoServiceImpl implements ITraspasoService {
           renglones.put(renglonTraspaso.getIdProducto(), renglonReporteTraspasoDTO);
         }
       }));
-    var classLoader = this.getClass().getClassLoader();
-    var isFileReport =
-        classLoader.getResourceAsStream("sic/vista/reportes/Traspasos.jasper");
-    JRBeanCollectionDataSource ds = new JRBeanCollectionDataSource(renglones.values());
     Map<String, Object> params = new HashMap<>();
     params.put("FechaDesde", criteria.getFechaDesde());
     params.put("FechaHasta", criteria.getFechaHasta());
-    Sucursal sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
+    var sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
         params.put(
-            "logo",
-            new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
+                "logo",
+                new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
       } catch (IOException ex) {
         throw new ServiceException(
-            messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
+                messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }
     }
-    try {
-      return JasperExportManager.exportReportToPdf(
-          JasperFillManager.fillReport(isFileReport, params, ds));
-    } catch (JRException ex) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_reporte", null, Locale.getDefault()), ex);
-    }
+    return jasperReportsHandler.compilar("report/Traspasos.jrxml", params, renglones.values(), FormatoReporte.PDF);
   }
 }

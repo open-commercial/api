@@ -1,9 +1,6 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
@@ -12,7 +9,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import sic.modelo.*;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
@@ -21,10 +17,6 @@ import java.util.*;
 import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
-
-import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import net.sf.jasperreports.export.SimpleExporterInput;
-import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,8 +33,8 @@ import sic.repository.ProductoRepository;
 import sic.service.*;
 import sic.util.CalculosComprobante;
 import sic.util.CustomValidator;
-
-import java.io.ByteArrayOutputStream;
+import sic.util.FormatoReporte;
+import sic.util.JasperReportsHandler;
 import java.io.IOException;
 
 @Service
@@ -65,32 +57,31 @@ public class ProductoServiceImpl implements IProductoService {
   private final IUsuarioService usuarioService;
   private final IEmailService emailService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private static final String FORMATO_XLSX = "xlsx";
-  private static final String FORMATO_PDF = "pdf";
-  private static final String MENSAJE_ERROR_REPORTE = "mensaje_error_reporte";
   private static final String MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO = "mensaje_error_actualizar_stock_producto_eliminado";
   private static final String PRODUCTO_SIN_IMAGEN = "/producto_sin_imagen.png";
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
+  private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
   @Lazy
   public ProductoServiceImpl(
-    ProductoRepository productoRepository,
-    ProductoFavoritoRepository productoFavoritoRepository,
-    IRubroService rubroService,
-    IProveedorService proveedorService,
-    IMedidaService medidaService,
-    ICarritoCompraService carritoCompraService,
-    IImageUploaderService imageUploaderService,
-    ISucursalService sucursalService,
-    ITraspasoService traspasoService,
-    IPedidoService pedidoService,
-    IClienteService clienteService,
-    IUsuarioService usuarioService,
-    IEmailService emailService,
-    MessageSource messageSource,
-    CustomValidator customValidator) {
+          ProductoRepository productoRepository,
+          ProductoFavoritoRepository productoFavoritoRepository,
+          IRubroService rubroService,
+          IProveedorService proveedorService,
+          IMedidaService medidaService,
+          ICarritoCompraService carritoCompraService,
+          IImageUploaderService imageUploaderService,
+          ISucursalService sucursalService,
+          ITraspasoService traspasoService,
+          IPedidoService pedidoService,
+          IClienteService clienteService,
+          IUsuarioService usuarioService,
+          IEmailService emailService,
+          MessageSource messageSource,
+          CustomValidator customValidator,
+          JasperReportsHandler jasperReportsHandler) {
     this.productoRepository = productoRepository;
     this.productoFavoritoRepository = productoFavoritoRepository;
     this.rubroService = rubroService;
@@ -106,6 +97,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.emailService = emailService;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
+    this.jasperReportsHandler = jasperReportsHandler;
   }
 
   @Override
@@ -1027,7 +1019,8 @@ public class ProductoServiceImpl implements IProductoService {
   }
 
   @Override
-  public ProductoFaltanteDTO construirNuevoProductoFaltante(Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal) {
+  public ProductoFaltanteDTO construirNuevoProductoFaltante(
+          Producto producto, BigDecimal cantidadSolicitada, BigDecimal cantidadDisponible, long idSucursal) {
     ProductoFaltanteDTO productoFaltanteDTO = new ProductoFaltanteDTO();
     productoFaltanteDTO.setIdProducto(producto.getIdProducto());
     productoFaltanteDTO.setCodigo(producto.getCodigo());
@@ -1103,90 +1096,38 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Async
-  public void getListaDePreciosEnXls(BusquedaProductoCriteria criteria, long idSucursal) {
-    List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
-            this.getListaDePrecios(productos, FORMATO_XLSX), FORMATO_XLSX);
+  public void procesarReporteListaDePrecios(BusquedaProductoCriteria criteria, long idSucursal, FormatoReporte formato) {
+    var productos = this.buscarProductosParaReporte(criteria);
+    var reporte = this.getReporteListaDePrecios(productos, formato);
+    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(), reporte, formato);
   }
 
   @Override
-  @Async
-  public void getListaDePreciosEnPdf(BusquedaProductoCriteria criteria, long idSucursal) {
-    List<Producto> productos = this.buscarProductosParaReporte(criteria);
-    this.enviarListaDeProductosPorEmail(sucursalService.getSucursalPorId(idSucursal).getEmail(),
-            this.getListaDePrecios(productos, FORMATO_PDF), FORMATO_PDF);
-  }
-
-  @Override
-  public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, String formato) {
+  public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, FormatoReporte formato) {
     emailService.enviarEmail(
             mailTo,
             "",
             "Listado de productos",
             "",
             listaDeProductos,
-            "ListaDeProductos." + formato);
+            "ListaDeProductos." + formato.toString());
   }
 
-  public byte[] getListaDePrecios(List<Producto> productos, String formato) {
+  @Override
+  public byte[] getReporteListaDePrecios(List<Producto> productos, FormatoReporte formato) {
     var params = new HashMap<String, Object>();
-    var sucursalPredeterminada =  sucursalService.getSucursalPredeterminada();
+    var sucursalPredeterminada = sucursalService.getSucursalPredeterminada();
     if (sucursalPredeterminada.getLogo() != null && !sucursalPredeterminada.getLogo().isEmpty()) {
       try {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(sucursalPredeterminada.getLogo()))).getImage());
         params.put("productoSinImagen",
                 new ImageIcon(ImageIO.read(Objects.requireNonNull(getClass().getResource(PRODUCTO_SIN_IMAGEN))))
-                .getImage());
+                        .getImage());
       } catch (IOException | NullPointerException ex) {
         throw new ServiceException(messageSource.getMessage("mensaje_recurso_no_encontrado", null, Locale.getDefault()), ex);
       }
     }
-    var ds = new JRBeanCollectionDataSource(productos);
-    JasperReport jasperDesign;
-    try {
-      var classLoader = this.getClass().getClassLoader();
-      var isFileReport = classLoader.getResourceAsStream("sic/vista/reportes/ListaPreciosProductos.jrxml");
-      jasperDesign = JasperCompileManager.compileReport(isFileReport);
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
-    }
-    switch (formato) {
-      case "xlsx" -> {
-        try {
-          return xlsReportToArray(JasperFillManager.fillReport(jasperDesign, params, ds));
-        } catch (JRException ex) {
-          throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
-        }
-      }
-      case "pdf" -> {
-        try {
-          return JasperExportManager.exportReportToPdf(JasperFillManager.fillReport(jasperDesign, params, ds));
-        } catch (JRException ex) {
-          throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
-        }
-      }
-      default -> throw new BusinessServiceException(messageSource.getMessage("mensaje_formato_no_valido", null, Locale.getDefault()));
-    }
-  }
-
-  private byte[] xlsReportToArray(JasperPrint jasperPrint) {
-    byte[] bytes = null;
-    try {
-      JRXlsxExporter jasperXlsxExportMgr = new JRXlsxExporter();
-      ByteArrayOutputStream out = new ByteArrayOutputStream();
-      SimpleOutputStreamExporterOutput simpleOutputStreamExporterOutput =
-          new SimpleOutputStreamExporterOutput(out);
-      jasperXlsxExportMgr.setExporterInput(new SimpleExporterInput(jasperPrint));
-      jasperXlsxExportMgr.setExporterOutput(simpleOutputStreamExporterOutput);
-      jasperXlsxExportMgr.exportReport();
-      bytes = out.toByteArray();
-      out.close();
-    } catch (JRException ex) {
-      throw new ServiceException(messageSource.getMessage(MENSAJE_ERROR_REPORTE, null, Locale.getDefault()), ex);
-    } catch (IOException ex) {
-      logger.error(ex.getMessage());
-    }
-    return bytes;
+    return jasperReportsHandler.compilar("report/ListaPreciosProductos.jrxml", params, productos, formato);
   }
 
   private boolean contieneDuplicados(long[] array) {

@@ -9,7 +9,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.App;
 import sic.interceptor.JwtInterceptor;
@@ -33,9 +32,7 @@ class ProductoRepositoryTest {
   @MockBean JwtInterceptor jwtInterceptor;
 
   @Autowired TestEntityManager testEntityManager;
-
   @Autowired ProductoRepositoryImpl productoRepositoryImpl;
-
   @Autowired LocalidadRepository localidadRepository;
 
   @Test
