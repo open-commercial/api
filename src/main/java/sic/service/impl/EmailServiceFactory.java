@@ -14,8 +14,8 @@ public class EmailServiceFactory {
     this.emailServices = emailServices;
   }
 
-  public IEmailService getEmailService(EmailServiceProvider emailServiceProvider) {
-    var emailService = emailServices.get(emailServiceProvider.getName());
+  public IEmailService getEmailService(String emailServiceProvider) {
+    var emailService = emailServices.get(emailServiceProvider);
     if (emailService == null) {
       throw new ServiceException("Proveedor de email no soportado!");
     }

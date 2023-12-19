@@ -24,7 +24,7 @@ import java.util.Locale;
 public class RegistracionServiceImpl implements IRegistracionService {
 
   @Value("${EMAIL_DEFAULT_PROVIDER}")
-  private EmailServiceProvider emailDefaultProvider;
+  private String emailDefaultProvider;
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;

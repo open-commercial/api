@@ -35,7 +35,7 @@ import sic.util.CustomValidator;
 public class UsuarioServiceImpl implements IUsuarioService {
 
   @Value("${EMAIL_DEFAULT_PROVIDER}")
-  private EmailServiceProvider emailDefaultProvider;
+  private String emailDefaultProvider;
 
   private final UsuarioRepository usuarioRepository;
   private final ISucursalService sucursalService;

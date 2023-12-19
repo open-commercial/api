@@ -42,7 +42,7 @@ import java.io.IOException;
 public class ProductoServiceImpl implements IProductoService {
 
   @Value("${EMAIL_DEFAULT_PROVIDER}")
-  private EmailServiceProvider emailDefaultProvider;
+  private String emailDefaultProvider;
 
   private final ProductoRepository productoRepository;
   private final ProductoFavoritoRepository productoFavoritoRepository;

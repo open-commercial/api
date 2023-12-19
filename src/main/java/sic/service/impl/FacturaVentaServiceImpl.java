@@ -36,7 +36,7 @@ import java.util.*;
 public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
   @Value("${EMAIL_DEFAULT_PROVIDER}")
-  private EmailServiceProvider emailDefaultProvider;
+  private String emailDefaultProvider;
 
   private final FacturaVentaRepository facturaVentaRepository;
   private final ITaxationService taxationService;
@@ -522,7 +522,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
                       "Su Factura de Compra",
                       bodyEmail,
                       this.getReporteFacturaVenta(factura),
-                      "Reporte.pdf");
+                      "Factura.pdf");
       log.info(
           "El mail de la factura serie {} nro {} se envió.",
           factura.getNumSerie(),

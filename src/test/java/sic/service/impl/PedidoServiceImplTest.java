@@ -18,10 +18,8 @@ import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.repository.PedidoRepository;
 import sic.repository.RenglonPedidoRepository;
-import sic.service.IEmailService;
 import sic.util.CustomValidator;
 import sic.util.JasperReportsHandler;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -32,7 +30,12 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {PedidoServiceImpl.class, CustomValidator.class, MessageSource.class, JasperReportsHandler.class})
+        classes = {
+                PedidoServiceImpl.class,
+                CustomValidator.class,
+                MessageSource.class,
+                JasperReportsHandler.class
+        })
 class PedidoServiceImplTest {
 
   @MockBean PedidoRepository pedidoRepository;
@@ -41,7 +44,8 @@ class PedidoServiceImplTest {
   @MockBean UsuarioServiceImpl usuarioService;
   @MockBean ClienteServiceImpl clienteService;
   @MockBean ProductoServiceImpl productoService;
-  @MockBean IEmailService emailService;
+  @MockBean EmailServiceFactory emailServiceFactory;
+  @MockBean ResendEmailServiceImpl resendEmailService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
   @MockBean ReciboServiceImpl reciboService;
@@ -166,16 +170,15 @@ class PedidoServiceImplTest {
     pedido.setUsuario(usuarioPedido);
     pedido.setDescuentoPorcentaje(BigDecimal.ONE);
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(cliente);
-    assertThrows(
-            BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
-    verify(messageSource).getMessage(eq("mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales"), any(), any());
+    assertThrows(BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    verify(messageSource).getMessage(
+            eq("mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales"), any(), any());
     Cliente clienteDeUsuario = new Cliente();
     clienteDeUsuario.setIdCliente(2L);
     clienteDeUsuario.setNombreFiscal("nombre fiscal");
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(clienteDeUsuario);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
-    assertThrows(
-        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    assertThrows(BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_detalle_envio_vacio"), any(), any());
     UbicacionDTO ubicacionDTO = new UbicacionDTO();
     pedido.setDetalleEnvio(ubicacionDTO);
@@ -184,10 +187,10 @@ class PedidoServiceImplTest {
     productoFaltante.setIdProducto(1L);
     faltantes.add(productoFaltante);
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(faltantes);
-    assertThrows(
-        BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
+    assertThrows(BusinessServiceException.class, () -> pedidoService.guardar(pedido, new ArrayList<>()));
     verify(messageSource).getMessage(eq("mensaje_pedido_sin_stock"), any(), any());
     when(productoService.getProductosSinStockDisponible(any())).thenReturn(new ArrayList<>());
+    when(emailServiceFactory.getEmailService(anyString())).thenReturn(resendEmailService);
     Pedido pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>());
     assertNotNull(pedidoGuardado);
     assertEquals(1, pedidoGuardado.getRenglones().size());
@@ -207,9 +210,11 @@ class PedidoServiceImplTest {
     verify(messageSource).getMessage(eq("mensaje_cliente_saldar_cc"), any(), any());
     when(cuentaCorrienteService.getSaldoCuentaCorriente(1L)).thenReturn(new BigDecimal("0"));
     pedidoGuardado = pedidoService.guardar(pedido, recibos);
-    assertEquals(pedidoGuardado.getFecha().plusMinutes(15L).truncatedTo(ChronoUnit.MINUTES), pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
+    assertEquals(pedidoGuardado.getFecha().plusMinutes(15L).truncatedTo(ChronoUnit.MINUTES),
+            pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
     pedidoGuardado = pedidoService.guardar(pedido, new ArrayList<>( ));
-    assertEquals(pedidoGuardado.getFecha().plusMinutes(1L).truncatedTo(ChronoUnit.MINUTES), pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
+    assertEquals(pedidoGuardado.getFecha().plusMinutes(1L).truncatedTo(ChronoUnit.MINUTES),
+            pedido.getFechaVencimiento().truncatedTo(ChronoUnit.MINUTES));
     verify(reciboService).guardar(any());
   }
 

@@ -42,7 +42,7 @@ import sic.util.JasperReportsHandler;
 public class PedidoServiceImpl implements IPedidoService {
 
   @Value("${EMAIL_DEFAULT_PROVIDER}")
-  private EmailServiceProvider emailDefaultProvider;
+  private String emailDefaultProvider;
 
   private final PedidoRepository pedidoRepository;
   private final RenglonPedidoRepository renglonPedidoRepository;

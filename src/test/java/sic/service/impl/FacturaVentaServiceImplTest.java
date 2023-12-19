@@ -18,10 +18,8 @@ import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.FacturaRepository;
 import sic.repository.FacturaVentaRepository;
-import sic.service.IEmailService;
 import sic.util.CustomValidator;
 import sic.util.JasperReportsHandler;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -33,13 +31,13 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-    classes = {
-      CustomValidator.class,
-      FacturaVentaServiceImpl.class,
-      FacturaServiceImpl.class,
-      MessageSource.class,
-      JasperReportsHandler.class
-    })
+        classes = {
+                CustomValidator.class,
+                FacturaVentaServiceImpl.class,
+                FacturaServiceImpl.class,
+                MessageSource.class,
+                JasperReportsHandler.class
+        })
 class FacturaVentaServiceImplTest {
 
   @MockBean FacturaRepository<Factura> facturaRepository;
@@ -49,7 +47,8 @@ class FacturaVentaServiceImplTest {
   @MockBean ClienteServiceImpl clienteService;
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
-  @MockBean IEmailService emailService;
+  @MockBean EmailServiceFactory emailServiceFactory;
+  @MockBean ResendEmailServiceImpl resendEmailService;
   @MockBean SucursalServiceImpl sucursalService;
   @MockBean TransportistaServiceImpl transportistaService;
   @MockBean MessageSource messageSource;
@@ -71,7 +70,7 @@ class FacturaVentaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
+    var result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
@@ -89,7 +88,7 @@ class FacturaVentaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_B, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
+    var result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
@@ -107,7 +106,7 @@ class FacturaVentaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
+    var result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
@@ -125,7 +124,7 @@ class FacturaVentaServiceImplTest {
     TipoDeComprobante[] expResult = {
       TipoDeComprobante.FACTURA_C, TipoDeComprobante.FACTURA_X, TipoDeComprobante.PRESUPUESTO
     };
-    TipoDeComprobante[] result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
+    var result = facturaVentaServiceImpl.getTiposDeComprobanteVenta(1L, 1L, 1L);
     assertArrayEquals(expResult, result);
   }
 
@@ -618,6 +617,7 @@ class FacturaVentaServiceImplTest {
     Cliente clienteDeFactura = new Cliente();
     facturaVenta.setCliente(clienteDeFactura);
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
+    when(emailServiceFactory.getEmailService(anyString())).thenReturn(resendEmailService);
     assertThrows(
         BusinessServiceException.class,
         () -> facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L));
@@ -653,14 +653,9 @@ class FacturaVentaServiceImplTest {
     facturaVenta.setPedido(pedido);
     when(facturaRepository.findById(1L)).thenReturn(Optional.of(facturaVenta));
     facturaVentaServiceImpl.enviarFacturaVentaPorEmail(1L);
-    verify(emailService, times(3))
-        .enviarEmail(
-            eq(facturaVenta.getCliente().getEmail()),
-            eq(""),
-            eq("Su Factura de Compra"),
-            any(),
-            any(),
-            eq("Reporte.pdf"));
+    verify(resendEmailService, times(3))
+            .enviarEmail(eq(facturaVenta.getCliente().getEmail()), eq(""),
+                    eq("Su Factura de Compra"), any(), any(), eq("Factura.pdf"));
   }
 
   @Test

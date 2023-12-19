@@ -30,16 +30,19 @@ import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
 import sic.repository.ProductoFavoritoRepository;
 import sic.repository.ProductoRepository;
-import sic.service.IEmailService;
 import sic.util.CustomValidator;
 import sic.util.FormatoReporte;
 import sic.util.JasperReportsHandler;
-
 import javax.persistence.EntityNotFoundException;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(
-        classes = {ProductoServiceImpl.class, CustomValidator.class, MessageSource.class, JasperReportsHandler.class})
+        classes = {
+                ProductoServiceImpl.class,
+                CustomValidator.class,
+                MessageSource.class,
+                JasperReportsHandler.class
+        })
 class ProductoServiceImplTest {
 
   @MockBean MedidaServiceImpl medidaService;
@@ -50,7 +53,8 @@ class ProductoServiceImplTest {
   @MockBean PedidoServiceImpl pedidoService;
   @MockBean ClienteServiceImpl clienteService;
   @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean IEmailService emailService;
+  @MockBean EmailServiceFactory emailServiceFactory;
+  @MockBean ResendEmailServiceImpl resendEmailService;
   @MockBean ProductoRepository productoRepository;
   @MockBean ProductoFavoritoRepository productoFavoritoRepository;
   @MockBean MessageSource messageSource;
@@ -505,22 +509,24 @@ class ProductoServiceImplTest {
     sucursal.setEmail("correo@gmail.com");
     when(sucursalService.getSucursalPredeterminada()).thenReturn(sucursal);
     when(sucursalService.getSucursalPorId(1L)).thenReturn(sucursal);
+    when(emailServiceFactory.getEmailService(anyString())).thenReturn(resendEmailService);
     assertThrows(
         ServiceException.class,
-        () ->
-            productoService.procesarReporteListaDePrecios(BusquedaProductoCriteria.builder().build(), 1L, FormatoReporte.PDF));
+        () -> productoService.procesarReporteListaDePrecios(
+                BusquedaProductoCriteria.builder().build(), 1L, FormatoReporte.PDF));
     assertThrows(
         ServiceException.class,
-        () ->
-            productoService.procesarReporteListaDePrecios(BusquedaProductoCriteria.builder().build(), 1L, FormatoReporte.XLSX));
-    verify(messageSource, times(2)).getMessage(eq("mensaje_recurso_no_encontrado"), any(), any());
+        () -> productoService.procesarReporteListaDePrecios(
+                BusquedaProductoCriteria.builder().build(), 1L, FormatoReporte.XLSX));
+    verify(messageSource, times(2))
+            .getMessage(eq("mensaje_recurso_no_encontrado"), any(), any());
     sucursal.setLogo(null);
     BusquedaProductoCriteria criteria = BusquedaProductoCriteria.builder().build();
     productoService.procesarReporteListaDePrecios(criteria, 1L, FormatoReporte.PDF);
     productoService.procesarReporteListaDePrecios(criteria, 1L, FormatoReporte.XLSX);
-    verify(emailService, times(2))
-        .enviarEmail(
-            eq("correo@gmail.com"), eq(""), eq("Listado de productos"), eq(""), any(), any());
+    verify(resendEmailService, times(2))
+            .enviarEmail(eq("correo@gmail.com"), eq(""), eq("Listado de productos"),
+                         eq(""), any(), any());
   }
 
   @Test
