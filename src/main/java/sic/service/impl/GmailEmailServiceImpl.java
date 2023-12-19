@@ -14,13 +14,12 @@ import javax.mail.util.ByteArrayDataSource;
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
-import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 import sic.service.IEmailService;
 import java.util.Locale;
 import java.util.Properties;
 
-@Service
+@Service("gmail")
 public class GmailEmailServiceImpl implements IEmailService {
 
   @Value("${GMAIL_USERNAME}")
@@ -29,7 +28,6 @@ public class GmailEmailServiceImpl implements IEmailService {
   @Value("${GMAIL_PASSWORD}")
   private String gmailPassword;
 
-  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de GMail no se encuentra configurado";
   private final MessageSource messageSource;
 
   @Autowired
@@ -46,8 +44,11 @@ public class GmailEmailServiceImpl implements IEmailService {
   @Override
   @Async
   public void enviarEmail(String toEmail, String bcc, String subject, String mensaje,
-                          byte[] byteArray, String attachmentDescription) {
-    if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
+                          byte[] byteArray, String attachmentName) {
+    if (!isServicioConfigurado()) {
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_correo_gmail_no_configurado", null, Locale.getDefault()));
+    }
     var props = new Properties();
     props.put("mail.smtp.host", "smtp.gmail.com");
     props.put("mail.smtp.port", "587");
@@ -69,12 +70,12 @@ public class GmailEmailServiceImpl implements IEmailService {
       helper.setText(mensaje);
       if (byteArray != null) {
         var byteArrayDataSource = new ByteArrayDataSource(byteArray, "application/pdf");
-        helper.addAttachment(attachmentDescription, byteArrayDataSource);
+        helper.addAttachment(attachmentName, byteArrayDataSource);
       }
       Transport.send(helper.getMimeMessage());
     } catch (MessagingException | MailException ex) {
-      throw new BusinessServiceException(
-              messageSource.getMessage("mensaje_correo_error", null, Locale.getDefault()), ex);
+      throw new ServiceException(messageSource.getMessage(
+              "mensaje_correo_error", null, Locale.getDefault()), ex);
     }
   }
 }

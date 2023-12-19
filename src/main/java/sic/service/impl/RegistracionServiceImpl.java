@@ -23,12 +23,12 @@ import java.util.Locale;
 @Slf4j
 public class RegistracionServiceImpl implements IRegistracionService {
 
-  @Value("${GMAIL_USERNAME}")
-  private String gmailUsername;
+  @Value("${EMAIL_DEFAULT_PROVIDER}")
+  private EmailServiceProvider emailDefaultProvider;
 
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
-  private final IEmailService emailService;
+  private final EmailServiceFactory emailServiceFactory;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -36,12 +36,12 @@ public class RegistracionServiceImpl implements IRegistracionService {
   public RegistracionServiceImpl(
       IUsuarioService usuarioService,
       IClienteService clienteService,
-      IEmailService emailService,
+      EmailServiceFactory emailServiceFactory,
       MessageSource messageSource,
       CustomValidator customValidator) {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
-    this.emailService = emailService;
+    this.emailServiceFactory = emailServiceFactory;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -79,22 +79,23 @@ public class RegistracionServiceImpl implements IRegistracionService {
     nuevoCliente.setMontoCompraMinima(BigDecimal.ZERO);
     nuevoCliente.setPuedeComprarAPlazo(false);
     clienteService.guardar(nuevoCliente);
-    emailService.enviarEmail(
-        nuevoUsuario.getEmail(),
-        this.gmailUsername,
-        "Registración de cuenta nueva",
-        messageSource.getMessage(
-            "mensaje_correo_registracion",
-            new Object[] {
-              nuevoUsuario.getNombre() + " " + nuevoUsuario.getApellido(),
-              nuevoCliente.getCategoriaIVA(),
-              nuevoCliente.getNombreFiscal(),
-              nuevoCliente.getTelefono(),
-              nuevoUsuario.getUsername(),
-            },
-            Locale.getDefault()),
-        null,
-        null);
+    emailServiceFactory.getEmailService(emailDefaultProvider)
+            .enviarEmail(
+                    nuevoUsuario.getEmail(),
+                    "",
+                    "Registración de cuenta nueva",
+                    messageSource.getMessage(
+                            "mensaje_correo_registracion",
+                            new Object[]{
+                                    nuevoUsuario.getNombre() + " " + nuevoUsuario.getApellido(),
+                                    nuevoCliente.getCategoriaIVA(),
+                                    nuevoCliente.getNombreFiscal(),
+                                    nuevoCliente.getTelefono(),
+                                    nuevoUsuario.getUsername(),
+                            },
+                            Locale.getDefault()),
+                    null,
+                    null);
     log.info("El mail de registración para el usuario {} se envió.", nuevoUsuario.getUsername());
   }
 
