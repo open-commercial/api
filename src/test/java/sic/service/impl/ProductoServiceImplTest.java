@@ -526,7 +526,7 @@ class ProductoServiceImplTest {
     productoService.procesarReporteListaDePrecios(criteria, 1L, FormatoReporte.XLSX);
     verify(resendEmailService, times(2))
             .enviarEmail(eq("correo@gmail.com"), eq(""), eq("Listado de productos"),
-                         eq(""), any(), any());
+                         eq("Adjunto se encuentra el listado de productos solicitado"), any(), any());
   }
 
   @Test
