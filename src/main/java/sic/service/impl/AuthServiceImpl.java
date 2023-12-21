@@ -1,8 +1,7 @@
 package sic.service.impl;
 
 import io.jsonwebtoken.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -15,7 +14,6 @@ import sic.modelo.*;
 import sic.exception.BusinessServiceException;
 import sic.repository.TokenAccesoExcluidoRepository;
 import sic.service.IAuthService;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -24,11 +22,11 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
+@Slf4j
 public class AuthServiceImpl implements IAuthService {
 
   private final RestTemplate restTemplate;
   private final TokenAccesoExcluidoRepository tokenAccesoExcluidoRepository;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
   private static final String BEARER_TOKEN_PREFIX = "Bearer";
   private final MessageSource messageSource;
@@ -81,7 +79,7 @@ public class AuthServiceImpl implements IAuthService {
       Jwts.parser().setSigningKey(jwtSecretKey).parseClaimsJws(token);
       return true;
     } catch (JwtException ex) {
-      logger.error(ex.getMessage());
+      log.error(ex.getMessage());
       return false;
     }
   }
@@ -115,7 +113,7 @@ public class AuthServiceImpl implements IAuthService {
                 .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
                 .getBody();
       } catch (RestClientException ex) {
-        logger.error(ex.getMessage());
+        log.error(ex.getMessage());
       }
       if (reCaptchaResponse == null || !reCaptchaResponse.isSuccess()) {
         throw new BusinessServiceException(messageSource.getMessage(

@@ -5,8 +5,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
@@ -22,28 +21,25 @@ import sic.exception.BusinessServiceException;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class SucursalServiceImpl implements ISucursalService {
 
   private final SucursalRepository sucursalRepository;
-  private final IConfiguracionSucursalService configuracionSucursalService;
   private final IImageUploaderService imageUploaderService;
   private final IUbicacionService ubicacionService;
   private final IProductoService productoService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
   @Autowired
   public SucursalServiceImpl(
     SucursalRepository sucursalRepository,
-    IConfiguracionSucursalService configuracionSucursalService,
     IUbicacionService ubicacionService,
     IImageUploaderService imageUploaderService,
     IProductoService productoService,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.sucursalRepository = sucursalRepository;
-    this.configuracionSucursalService = configuracionSucursalService;
     this.ubicacionService = ubicacionService;
     this.imageUploaderService = imageUploaderService;
     this.productoService = productoService;
@@ -168,7 +164,7 @@ public class SucursalServiceImpl implements ISucursalService {
     validarReglasDeNegocio(TipoDeOperacion.ALTA, sucursalParaAlta);
     sucursalParaAlta = sucursalRepository.save(sucursalParaAlta);
     this.productoService.guardarCantidadesDeSucursalNueva(sucursalParaAlta);
-    logger.warn("La Sucursal {} se guardó correctamente.", nuevaSucursal);
+    log.info("La Sucursal {} se guardó correctamente.", nuevaSucursal);
     if (logo != null)
       sucursalParaAlta.setLogo(
               this.guardarLogo(sucursalParaAlta.getIdSucursal(), logo));

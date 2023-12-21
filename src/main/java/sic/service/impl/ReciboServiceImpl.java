@@ -10,8 +10,7 @@ import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import com.mercadopago.resources.payment.Payment;
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -32,6 +31,7 @@ import sic.util.FormatoReporte;
 import sic.util.JasperReportsHandler;
 
 @Service
+@Slf4j
 public class ReciboServiceImpl implements IReciboService {
 
   private final ReciboRepository reciboRepository;
@@ -40,7 +40,6 @@ public class ReciboServiceImpl implements IReciboService {
   private final INotaService notaService;
   private final IFormaDePagoService formaDePagoService;
   private final ICajaService cajaService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -174,7 +173,7 @@ public class ReciboServiceImpl implements IReciboService {
     this.validarReglasDeNegocio(recibo);
     recibo = reciboRepository.save(recibo);
     this.cuentaCorrienteService.asentarEnCuentaCorriente(recibo, TipoDeOperacion.ALTA);
-    logger.warn("El Recibo {} se guardó correctamente.", recibo);
+    log.info("El Recibo {} se guardó correctamente.", recibo);
     return recibo;
   }
 
@@ -278,7 +277,7 @@ public class ReciboServiceImpl implements IReciboService {
       this.cuentaCorrienteService.asentarEnCuentaCorriente(r, TipoDeOperacion.ELIMINACION);
       this.actualizarCajaPorEliminacionDeRecibo(r);
       reciboRepository.save(r);
-      logger.warn("El Recibo {} se eliminó correctamente.", r);
+      log.info("El Recibo {} se eliminó correctamente.", r);
     } else {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_no_se_puede_eliminar", null, Locale.getDefault()));
@@ -297,7 +296,7 @@ public class ReciboServiceImpl implements IReciboService {
         monto = recibo.getMonto();
       }
       cajaService.actualizarSaldoSistema(caja, monto);
-      logger.warn("El Recibo {} modificó la caja {} debido a una eliminación.", recibo, caja);
+      log.info("El Recibo {} modificó la caja {} debido a una eliminación.", recibo, caja);
     }
   }
 

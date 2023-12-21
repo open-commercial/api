@@ -1,8 +1,7 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -32,6 +31,7 @@ import java.util.*;
 
 @Service
 @Transactional
+@Slf4j
 public class TraspasoServiceImpl implements ITraspasoService {
 
   private final TraspasoRepository traspasoRepository;
@@ -42,7 +42,6 @@ public class TraspasoServiceImpl implements ITraspasoService {
   private final IPedidoService pedidoService;
   private final MessageSource messageSource;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final JasperReportsHandler jasperReportsHandler;
 
   @Autowired
@@ -110,8 +109,7 @@ public class TraspasoServiceImpl implements ITraspasoService {
             });
     traspaso.setRenglones(renglonesTraspaso);
     traspaso = traspasoRepository.save(traspaso);
-    logger.warn(
-        messageSource.getMessage(
+    log.info(messageSource.getMessage(
             "mensaje_traspaso_realizado", new Object[] {traspaso}, Locale.getDefault()));
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
     return traspaso;
@@ -149,9 +147,8 @@ public class TraspasoServiceImpl implements ITraspasoService {
     }
     traspaso.setRenglones(renglonesTraspaso);
     traspaso = traspasoRepository.save(traspaso);
-    logger.warn(
-            messageSource.getMessage(
-                    "mensaje_traspaso_realizado", new Object[] {traspaso}, Locale.getDefault()));
+    log.info(messageSource.getMessage(
+            "mensaje_traspaso_realizado", new Object[]{traspaso}, Locale.getDefault()));
     productoService.actualizarStockTraspaso(traspaso, TipoDeOperacion.ALTA);
     return traspaso;
   }

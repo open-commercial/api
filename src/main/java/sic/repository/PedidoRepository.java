@@ -8,11 +8,11 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.*;
 
-public interface PedidoRepository
-    extends PagingAndSortingRepository<Pedido, Long>, QuerydslPredicateExecutor<Pedido> {
+public interface PedidoRepository extends
+        PagingAndSortingRepository<Pedido, Long>,
+        QuerydslPredicateExecutor<Pedido> {
 
-  Pedido findByNroPedidoAndSucursalAndEliminado(
-      long nroPedido, Sucursal sucursal, boolean eliminado);
+  Pedido findByNroPedidoAndSucursalAndEliminado(long nroPedido, Sucursal sucursal, boolean eliminado);
 
   boolean existsByNroPedidoAndSucursal(long nroPedido, Sucursal sucursal);
 

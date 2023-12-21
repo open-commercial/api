@@ -3,6 +3,7 @@ package sic.service.impl;
 import java.math.BigDecimal;
 
 import com.querydsl.core.BooleanBuilder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,8 +15,6 @@ import sic.service.IGastoService;
 import java.time.LocalDateTime;
 import java.util.*;
 import javax.persistence.EntityNotFoundException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -27,13 +26,13 @@ import sic.service.ISucursalService;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class GastoServiceImpl implements IGastoService {
 
   private final GastoRepository gastoRepository;
   private final ISucursalService sucursalService;
   private final ICajaService cajaService;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -146,7 +145,7 @@ public class GastoServiceImpl implements IGastoService {
     gasto.setNroGasto(this.getUltimoNumeroDeGasto(gasto.getSucursal().getIdSucursal()));
     this.validarReglasDeNegocio(gasto);
     gasto = gastoRepository.save(gasto);
-    logger.warn("El Gasto {} se guardó correctamente.", gasto);
+    log.info("El Gasto {} se guardó correctamente.", gasto);
     return gasto;
   }
 

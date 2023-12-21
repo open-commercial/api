@@ -1,6 +1,7 @@
 package sic.service.impl;
 
 import afip.wsfe.wsdl.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.xml.sax.SAXException;
 import sic.modelo.*;
@@ -20,8 +21,6 @@ import java.util.Locale;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.io.SAXReader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.ws.client.WebServiceClientException;
@@ -29,11 +28,11 @@ import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 
 @Service
+@Slf4j
 public class AfipTaxationServiceImpl implements ITaxationService {
 
   private final AfipWebServiceSOAPClient afipWebServiceSOAPClient;
   private final IConfiguracionSucursalService configuracionSucursalService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
   private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(21500);
@@ -94,7 +93,7 @@ public class AfipTaxationServiceImpl implements ITaxationService {
             response.getErrors().getErr().get(0).getCode()
                 + "-"
                 + response.getErrors().getErr().get(0).getMsg();
-        logger.error(msjError);
+        log.error(msjError);
         throw new BusinessServiceException(msjError);
       }
       // errores particulares de cada comprobante
@@ -108,7 +107,7 @@ public class AfipTaxationServiceImpl implements ITaxationService {
                 .getObs()
                 .get(0)
                 .getMsg();
-        logger.error(msjError);
+        log.error(msjError);
         throw new BusinessServiceException(msjError);
       }
       long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());

@@ -6,8 +6,7 @@ import java.util.*;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
@@ -19,9 +18,9 @@ import sic.exception.UnauthorizedException;
 import sic.exception.ServiceException;
 
 @RestControllerAdvice
+@Slf4j
 public class ExceptionControllerAdvice {
 
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
 
   @Autowired
@@ -35,7 +34,7 @@ public class ExceptionControllerAdvice {
             + "\n(Transaction ID: "
             + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             + ")";
-    logger.error(mensaje, ex);
+    log.error(mensaje, ex);
     return ex.getMessage();
   }
 
@@ -51,7 +50,7 @@ public class ExceptionControllerAdvice {
             "(Transaction ID: "
                 + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
                 + ")");
-    logger.error(transactionID, ex);
+    log.error(transactionID, ex);
     return mensaje;
   }
 

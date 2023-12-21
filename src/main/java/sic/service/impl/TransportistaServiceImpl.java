@@ -1,20 +1,16 @@
 package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -27,11 +23,11 @@ import sic.service.IUbicacionService;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class TransportistaServiceImpl implements ITransportistaService {
 
   private final TransportistaRepository transportistaRepository;
   private final IUbicacionService ubicacionService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -160,7 +156,7 @@ public class TransportistaServiceImpl implements ITransportistaService {
     }
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, transportista);
     transportista = transportistaRepository.save(transportista);
-    logger.warn("El Transportista {} se guardó correctamente.", transportista);
+    log.info("El Transportista {} se guardó correctamente.", transportista);
     return transportista;
   }
 

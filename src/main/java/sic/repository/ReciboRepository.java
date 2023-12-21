@@ -12,90 +12,82 @@ import org.springframework.data.repository.query.Param;
 import sic.modelo.Sucursal;
 import sic.modelo.Recibo;
 
-public interface ReciboRepository
-    extends PagingAndSortingRepository<Recibo, Long>,
+public interface ReciboRepository extends
+        PagingAndSortingRepository<Recibo, Long>,
         QuerydslPredicateExecutor<Recibo>,
         ReciboRepositoryCustom {
 
-  Optional<Recibo> findReciboByIdPagoMercadoPagoAndEliminado(
-      long idPagoMercadoPago, boolean eliminado);
+  Optional<Recibo> findReciboByIdPagoMercadoPagoAndEliminado(long idPagoMercadoPago, boolean eliminado);
 
   Recibo findTopBySucursalAndNumSerieOrderByNumReciboDesc(Sucursal sucursal, long serie);
 
-  @Query(
-      "SELECT r FROM Recibo r "
+  @Query("SELECT r FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   List<Recibo> getRecibosEntreFechasPorFormaDePago(
-      @Param("idSucursal") long idSucursal,
-      @Param("idFormaDePago") long idFormaDePago,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("idFormaDePago") long idFormaDePago,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 
-  @Query(
-      "SELECT SUM(r.monto) FROM Recibo r "
+  @Query("SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.proveedor is null) "
           + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesEntreFechasPorFormaDePago(
-      @Param("idSucursal") long idSucursal,
-      @Param("idFormaDePago") long idFormaDePago,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("idFormaDePago") long idFormaDePago,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 
-  @Query(
-      "SELECT SUM(r.monto) FROM Recibo r "
+  @Query("SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.cliente is null) "
           + "AND r.formaDePago.idFormaDePago = :idFormaDePago "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresEntreFechasPorFormaDePago(
-      @Param("idSucursal") long idSucursal,
-      @Param("idFormaDePago") long idFormaDePago,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("idFormaDePago") long idFormaDePago,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 
-  @Query(
-      "SELECT SUM(r.monto) FROM Recibo r "
+  @Query("SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.proveedor is null) "
           + "AND r.formaDePago.afectaCaja = true "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesQueAfectanCajaEntreFechas(
-      @Param("idSucursal") long idSucursal,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 
-  @Query(
-      "SELECT SUM(r.monto) FROM Recibo r "
+  @Query("SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.cliente is null) "
           + "AND r.formaDePago.afectaCaja = true "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresQueAfectanCajaEntreFechas(
-      @Param("idSucursal") long idSucursal,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 
-  @Query(
-      "SELECT SUM(r.monto) FROM Recibo r "
+  @Query("SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.proveedor is null) "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosClientesEntreFechas(
-      @Param("idSucursal") long idSucursal,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 
-  @Query(
-      "SELECT SUM(r.monto) FROM Recibo r "
+  @Query("SELECT SUM(r.monto) FROM Recibo r "
           + "WHERE r.sucursal.idSucursal = :idSucursal "
           + "AND (r.cliente is null) "
           + "AND r.fecha BETWEEN :desde AND :hasta AND r.eliminado = false")
   BigDecimal getTotalRecibosProveedoresEntreFechas(
-      @Param("idSucursal") long idSucursal,
-      @Param("desde") LocalDateTime desde,
-      @Param("hasta") LocalDateTime hasta);
+          @Param("idSucursal") long idSucursal,
+          @Param("desde") LocalDateTime desde,
+          @Param("hasta") LocalDateTime hasta);
 }

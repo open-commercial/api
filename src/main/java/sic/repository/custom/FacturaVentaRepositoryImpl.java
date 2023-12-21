@@ -3,17 +3,15 @@ package sic.repository.custom;
 import java.math.BigDecimal;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import org.springframework.stereotype.Repository;
 import sic.modelo.*;
 import sic.repository.FacturaVentaRepositoryCustom;
 
-@Repository
 public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom {
 
-  @PersistenceContext private EntityManager em;
+  @PersistenceContext
+  private EntityManager em;
 
   @Override
   public BigDecimal calcularTotalFacturadoVenta(BooleanBuilder builder) {

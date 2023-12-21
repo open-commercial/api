@@ -1,7 +1,6 @@
 package sic.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -14,7 +13,6 @@ import sic.modelo.Usuario;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.*;
 import sic.util.CustomValidator;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -22,6 +20,7 @@ import java.util.Locale;
 
 @Service
 @Transactional
+@Slf4j
 public class RegistracionServiceImpl implements IRegistracionService {
 
   @Value("${GMAIL_USERNAME}")
@@ -30,7 +29,6 @@ public class RegistracionServiceImpl implements IRegistracionService {
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IEmailService emailService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
 
@@ -97,7 +95,7 @@ public class RegistracionServiceImpl implements IRegistracionService {
             Locale.getDefault()),
         null,
         null);
-    logger.warn("El mail de registración para el usuario {} se envió.", nuevoUsuario.getUsername());
+    log.info("El mail de registración para el usuario {} se envió.", nuevoUsuario.getUsername());
   }
 
   @Override

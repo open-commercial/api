@@ -8,9 +8,8 @@ import afip.wsfe.wsdl.FECAESolicitarResponse;
 import afip.wsfe.wsdl.FECompUltimoAutorizado;
 import afip.wsfe.wsdl.FECompUltimoAutorizadoResponse;
 import afip.wsfe.wsdl.FERecuperaLastCbteResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.cms.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
@@ -43,9 +42,9 @@ import org.springframework.xml.transform.StringResult;
 import sic.exception.BusinessServiceException;
 import sic.exception.ServiceException;
 
+@Slf4j
 public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
 
-  private final Logger loggerSoapClient = LoggerFactory.getLogger(this.getClass());
   private static final String SOAP_ACTION_FE_CAE_SOLICITAR = "http://ar.gov.afip.dif.FEV1/FECAESolicitar";
   private static final String SOAP_ACTION_FE_COMPROBANTE_ULTIMO_AUTORIZADO = "http://ar.gov.afip.dif.FEV1/FECompUltimoAutorizado";
   private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "El servicio de AFIP no se encuentra configurado";
@@ -68,10 +67,10 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     var result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(loginCMS, result);
-    loggerSoapClient.info("TOKEN WSAA XML REQUEST: {}", result);
+    log.info("TOKEN WSAA XML REQUEST: {}", result);
     var response = (LoginCmsResponse) this.getWebServiceTemplate().marshalSendAndReceive(afipWsAuthUri, loginCMS);
     this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-    loggerSoapClient.info("TOKEN WSAA XML RESPONSE: {}", result);
+    log.info("TOKEN WSAA XML RESPONSE: {}", result);
     return response.getLoginCmsReturn();
   }
 
@@ -103,7 +102,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         | UnrecoverableKeyException
         | InvalidAlgorithmParameterException
         | NoSuchProviderException ex) {
-      loggerSoapClient.error(ex.getMessage());
+      log.error(ex.getMessage());
       throw new BusinessServiceException(
           messageSource.getMessage("mensaje_certificado_error", null, Locale.getDefault()));
     }
@@ -121,7 +120,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         | NoSuchAlgorithmException
         | NoSuchProviderException
         | IOException ex) {
-      loggerSoapClient.error(ex.getMessage());
+      log.error(ex.getMessage());
       throw new BusinessServiceException(
           messageSource.getMessage(
               "mensaje_firmando_certificado_error", null, Locale.getDefault()));
@@ -157,7 +156,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     var result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
-    loggerSoapClient.info("ULTIMO COMPROBANTE AUTORIZADO XML REQUEST: {}", result);
+    log.info("ULTIMO COMPROBANTE AUTORIZADO XML REQUEST: {}", result);
     var response =
             (FECompUltimoAutorizadoResponse)
                     this.getWebServiceTemplate()
@@ -167,7 +166,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
                                     (WebServiceMessage message) ->
                                             ((SoapMessage) message).setSoapAction(SOAP_ACTION_FE_COMPROBANTE_ULTIMO_AUTORIZADO));
     this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-    loggerSoapClient.info("ULTIMO COMPROBANTE AUTORIZADO XML RESPONSE: {}", result);
+    log.info("ULTIMO COMPROBANTE AUTORIZADO XML RESPONSE: {}", result);
     return response.getFECompUltimoAutorizadoResult();
   }
 
@@ -175,7 +174,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
     if (!isServicioConfigurado()) throw new ServiceException(MENSAJE_SERVICIO_NO_CONFIGURADO);
     var result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
-    loggerSoapClient.info("SOLICITAR cae XML REQUEST: {}", result);
+    log.info("SOLICITAR cae XML REQUEST: {}", result);
     var response =
             (FECAESolicitarResponse)
                     this.getWebServiceTemplate()
@@ -185,7 +184,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
                                     (WebServiceMessage message) ->
                                             ((SoapMessage) message).setSoapAction(SOAP_ACTION_FE_CAE_SOLICITAR));
     this.getWebServiceTemplate().getMarshaller().marshal(response, result);
-    loggerSoapClient.info("SOLICITAR cae XML RESPONSE: {}", result);
+    log.info("SOLICITAR cae XML RESPONSE: {}", result);
     return response.getFECAESolicitarResult();
   }
 }

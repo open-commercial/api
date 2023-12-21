@@ -10,8 +10,7 @@ import javax.imageio.ImageIO;
 import javax.persistence.EntityNotFoundException;
 import javax.swing.ImageIcon;
 import com.querydsl.core.BooleanBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
@@ -38,6 +37,7 @@ import sic.util.FormatoReporte;
 import sic.util.JasperReportsHandler;
 
 @Service
+@Slf4j
 public class NotaServiceImpl implements INotaService {
 
   private final NotaRepository<Nota> notaRepository;
@@ -60,7 +60,6 @@ public class NotaServiceImpl implements INotaService {
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String MENSAJE_NOTA_TIPO_NO_VALIDO = "mensaje_nota_tipo_no_valido";
   private static final String MENSAJE_NOTA_RENGLONES_VACIO = "mensaje_nota_de_renglones_vacio";
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
   private final JasperReportsHandler jasperReportsHandler;
@@ -143,7 +142,7 @@ public class NotaServiceImpl implements INotaService {
     this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
     nota.setEliminada(true);
     notaRepository.save(nota);
-    logger.warn("La Nota {} se eliminó correctamente.", nota);
+    log.info("La Nota {} se eliminó correctamente.", nota);
   }
 
   @Override
@@ -699,7 +698,7 @@ public class NotaServiceImpl implements INotaService {
       var tiposAutorizables = Arrays.asList(TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B, TipoDeComprobante.NOTA_CREDITO_C);
       if (tiposAutorizables.contains(notaCredito.getTipoComprobante())) this.autorizarNota(notaCredito);
     }
-    logger.warn("La Nota de Credito {} se guardó correctamente.", notaCredito);
+    log.info("La Nota de Credito {} se guardó correctamente.", notaCredito);
     return notaCredito;
   }
 
@@ -1049,7 +1048,7 @@ public class NotaServiceImpl implements INotaService {
       var tiposAutorizables = Arrays.asList(TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_B, TipoDeComprobante.NOTA_DEBITO_C);
       if (tiposAutorizables.contains(notaDebito.getTipoComprobante())) this.autorizarNota(notaDebito);
     }
-    logger.warn("La Nota de Debito {} se guardó correctamente.", notaDebito);
+    log.info("La Nota de Debito {} se guardó correctamente.", notaDebito);
     return notaDebito;
   }
 
@@ -1150,7 +1149,7 @@ public class NotaServiceImpl implements INotaService {
       try {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(nota.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
-        logger.error(ex.getMessage());
+        log.error(ex.getMessage());
         throw new ServiceException(
                 messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }

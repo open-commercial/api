@@ -7,9 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
@@ -27,13 +25,13 @@ import sic.exception.BusinessServiceException;
 import sic.util.CustomValidator;
 
 @Service
+@Slf4j
 public class ClienteServiceImpl implements IClienteService {
 
   private final ClienteRepository clienteRepository;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final IUsuarioService usuarioService;
   private final IUbicacionService ubicacionService;
-  private final Logger logger = LoggerFactory.getLogger(this.getClass());
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -277,7 +275,7 @@ public class ClienteServiceImpl implements IClienteService {
     cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
-    logger.warn("El Cliente {} se guardó correctamente.", cliente);
+    log.info("El Cliente {} se guardó correctamente.", cliente);
     return cliente;
   }
 
@@ -304,7 +302,7 @@ public class ClienteServiceImpl implements IClienteService {
       }
     }
     Cliente clienteGuardado = clienteRepository.save(clientePorActualizar);
-    logger.warn("El Cliente {} se actualizó correctamente.", clienteGuardado);
+    log.info("El Cliente {} se actualizó correctamente.", clienteGuardado);
     return clienteGuardado;
   }
 
@@ -322,7 +320,7 @@ public class ClienteServiceImpl implements IClienteService {
     cliente.setUbicacionFacturacion(null);
     cliente.setUbicacionEnvio(null);
     clienteRepository.save(cliente);
-    logger.warn("El Cliente {} se eliminó correctamente.", cliente);
+    log.info("El Cliente {} se eliminó correctamente.", cliente);
   }
 
   @Override
