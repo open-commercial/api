@@ -1110,7 +1110,7 @@ public class ProductoServiceImpl implements IProductoService {
                     mailTo,
                     "",
                     "Listado de productos",
-                    "",
+                    "Adjunto se encuentra el listado de productos solicitado",
                     listaDeProductos,
                     "ListaDeProductos." + formato.toString());
   }
