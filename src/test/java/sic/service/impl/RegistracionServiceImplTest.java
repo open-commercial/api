@@ -9,7 +9,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.CategoriaIVA;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
 import sic.service.IClienteService;
-import sic.service.IEmailService;
 import sic.service.IUsuarioService;
 import sic.util.CustomValidator;
 import javax.validation.ConstraintViolationException;
@@ -21,7 +20,7 @@ class RegistracionServiceImplTest {
 
   @MockBean IUsuarioService usuarioService;
   @MockBean IClienteService clienteService;
-  @MockBean IEmailService emailService;
+  @MockBean EmailServiceFactory emailServiceFactory;
 
   @Autowired RegistracionServiceImpl registracionService;
 

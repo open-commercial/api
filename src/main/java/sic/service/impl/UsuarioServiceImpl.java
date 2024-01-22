@@ -11,6 +11,7 @@ import com.querydsl.core.BooleanBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -33,10 +34,13 @@ import sic.util.CustomValidator;
 @Slf4j
 public class UsuarioServiceImpl implements IUsuarioService {
 
+  @Value("${EMAIL_DEFAULT_PROVIDER}")
+  private String emailDefaultProvider;
+
   private final UsuarioRepository usuarioRepository;
   private final ISucursalService sucursalService;
   private final IClienteService clienteService;
-  private final IEmailService emailService;
+  private final EmailServiceFactory emailServiceFactory;
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
@@ -47,13 +51,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
     UsuarioRepository usuarioRepository,
     ISucursalService sucursalService,
     IClienteService clienteService,
-    IEmailService emailService,
+    EmailServiceFactory emailServiceFactory,
     MessageSource messageSource,
     CustomValidator customValidator) {
     this.usuarioRepository = usuarioRepository;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
-    this.emailService = emailService;
+    this.emailServiceFactory = emailServiceFactory;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
   }
@@ -303,16 +307,17 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
     this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getIdUsuario());
-    emailService.enviarEmail(
-        usuario.getEmail(),
-        "",
-        "Recuperación de contraseña",
-        messageSource.getMessage(
-            "mensaje_correo_recuperacion",
-            new Object[] {host, passwordRecoveryKey, usuario.getIdUsuario()},
-            Locale.getDefault()),
-        null,
-        null);
+    emailServiceFactory.getEmailService(emailDefaultProvider)
+            .enviarEmail(
+                    usuario.getEmail(),
+                    "",
+                    "Recuperación de contraseña",
+                    messageSource.getMessage(
+                            "mensaje_correo_recuperacion",
+                            new Object[]{host, passwordRecoveryKey, usuario.getIdUsuario()},
+                            Locale.getDefault()),
+                    null,
+                    null);
   }
 
   @Override

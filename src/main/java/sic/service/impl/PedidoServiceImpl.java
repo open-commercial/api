@@ -13,6 +13,7 @@ import javax.swing.ImageIcon;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,12 +41,15 @@ import sic.util.JasperReportsHandler;
 @Slf4j
 public class PedidoServiceImpl implements IPedidoService {
 
+  @Value("${EMAIL_DEFAULT_PROVIDER}")
+  private String emailDefaultProvider;
+
   private final PedidoRepository pedidoRepository;
   private final RenglonPedidoRepository renglonPedidoRepository;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
   private final IProductoService productoService;
-  private final IEmailService emailService;
+  private final EmailServiceFactory emailServiceFactory;
   private final IReciboService reciboService;
   private final ICuentaCorrienteService cuentaCorrienteService;
   private final ModelMapper modelMapper;
@@ -62,7 +66,7 @@ public class PedidoServiceImpl implements IPedidoService {
           IUsuarioService usuarioService,
           IClienteService clienteService,
           IProductoService productoService,
-          IEmailService emailService,
+          EmailServiceFactory emailServiceFactory,
           IReciboService reciboService,
           ICuentaCorrienteService cuentaCorrienteService,
           ModelMapper modelMapper,
@@ -74,7 +78,7 @@ public class PedidoServiceImpl implements IPedidoService {
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
     this.productoService = productoService;
-    this.emailService = emailService;
+    this.emailServiceFactory = emailServiceFactory;
     this.reciboService = reciboService;
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.modelMapper = modelMapper;
@@ -167,25 +171,25 @@ public class PedidoServiceImpl implements IPedidoService {
   @Override
   @Transactional
   public Pedido guardar(Pedido pedido, List<Recibo> recibos) {
-    Cliente clienteDeUsuario = clienteService.getClientePorIdUsuario(pedido.getUsuario().getIdUsuario());
-    if (pedido.getCliente().equals(clienteDeUsuario) && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR) &&
-              pedido.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
+    var clienteDeUsuario = clienteService.getClientePorIdUsuario(pedido.getUsuario().getIdUsuario());
+    if (pedido.getCliente().equals(clienteDeUsuario)
+            && pedido.getUsuario().getRoles().contains(Rol.VENDEDOR)
+            && pedido.getDescuentoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
       throw new BusinessServiceException(
               messageSource.getMessage(
-                      "mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales", null, Locale.getDefault()));
+                      "mensaje_no_se_puede_guardar_pedido_con_descuento_usuario_cliente_iguales",
+                      null, Locale.getDefault()));
     }
     if (pedido.getFecha() == null) {
       pedido.setFecha(LocalDateTime.now());
     }
-    BigDecimal importe = BigDecimal.ZERO;
+    var importe = BigDecimal.ZERO;
     for (RenglonPedido renglon : pedido.getRenglones()) {
       importe = importe.add(renglon.getImporte()).setScale(5, RoundingMode.HALF_UP);
     }
-    BigDecimal recargoNeto =
-        importe.multiply(pedido.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal descuentoNeto =
-        importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
-    BigDecimal total = importe.add(recargoNeto).subtract(descuentoNeto);
+    var recargoNeto = importe.multiply(pedido.getRecargoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+    var descuentoNeto = importe.multiply(pedido.getDescuentoPorcentaje()).divide(CIEN, 15, RoundingMode.HALF_UP);
+    var total = importe.add(recargoNeto).subtract(descuentoNeto);
     pedido.setSubTotal(importe);
     pedido.setRecargoNeto(recargoNeto);
     pedido.setDescuentoNeto(descuentoNeto);
@@ -214,18 +218,19 @@ public class PedidoServiceImpl implements IPedidoService {
     log.info("El Pedido {} se guardó correctamente.", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
-      emailService.enviarEmail(
-          emailCliente,
-          "",
-          "Nuevo Pedido Ingresado",
-          messageSource.getMessage(
-              "mensaje_correo_pedido_recibido",
-              new Object[] {
-                pedido.getCliente().getNombreFiscal(), "Pedido Nº " + pedido.getNroPedido()
-              },
-              Locale.getDefault()),
-          this.getReportePedido(pedido.getIdPedido()),
-          "Reporte.pdf");
+      emailServiceFactory.getEmailService(emailDefaultProvider)
+              .enviarEmail(
+                      emailCliente,
+                      "",
+                      "Nuevo Pedido Ingresado",
+                      messageSource.getMessage(
+                              "mensaje_correo_pedido_recibido",
+                              new Object[]{
+                                      pedido.getCliente().getNombreFiscal(), "Pedido Nº " + pedido.getNroPedido()
+                              },
+                              Locale.getDefault()),
+                      this.getReportePedido(pedido.getIdPedido()),
+                      "Pedido.pdf");
       log.info("El mail del pedido nro {} se envió.", pedido.getNroPedido());
     }
     return pedido;

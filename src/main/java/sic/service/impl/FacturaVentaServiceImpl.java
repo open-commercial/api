@@ -3,6 +3,7 @@ package sic.service.impl;
 import com.querydsl.core.BooleanBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
@@ -34,10 +35,13 @@ import java.util.*;
 @Slf4j
 public class FacturaVentaServiceImpl implements IFacturaVentaService {
 
+  @Value("${EMAIL_DEFAULT_PROVIDER}")
+  private String emailDefaultProvider;
+
   private final FacturaVentaRepository facturaVentaRepository;
   private final ITaxationService taxationService;
   private final IReciboService reciboService;
-  private final IEmailService emailService;
+  private final EmailServiceFactory emailServiceFactory;
   private final IPedidoService pedidoService;
   private final IUsuarioService usuarioService;
   private final IClienteService clienteService;
@@ -59,7 +63,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
       FacturaVentaRepository facturaVentaRepository,
       ITaxationService taxationService,
       IReciboService reciboService,
-      IEmailService emailService,
+      EmailServiceFactory emailServiceFactory,
       IPedidoService pedidoService,
       IUsuarioService usuarioService,
       IClienteService clienteService,
@@ -73,7 +77,7 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.taxationService = taxationService;
-    this.emailService = emailService;
+    this.emailServiceFactory = emailServiceFactory;
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.clienteService = clienteService;
@@ -511,13 +515,14 @@ public class FacturaVentaServiceImpl implements IFacturaVentaService {
             messageSource.getMessage(
                 "mensaje_correo_factura_sin_pedido", null, Locale.getDefault());
       }
-      emailService.enviarEmail(
-          facturaVenta.getCliente().getEmail(),
-          "",
-          "Su Factura de Compra",
-          bodyEmail,
-          this.getReporteFacturaVenta(factura),
-          "Reporte.pdf");
+      emailServiceFactory.getEmailService(emailDefaultProvider)
+              .enviarEmail(
+                      facturaVenta.getCliente().getEmail(),
+                      "",
+                      "Su Factura de Compra",
+                      bodyEmail,
+                      this.getReporteFacturaVenta(factura),
+                      "Factura.pdf");
       log.info(
           "El mail de la factura serie {} nro {} se envió.",
           factura.getNumSerie(),

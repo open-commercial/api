@@ -2,6 +2,7 @@ package sic.service.impl;
 
 import com.querydsl.core.BooleanBuilder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.*;
@@ -40,6 +41,9 @@ import java.io.IOException;
 @Slf4j
 public class ProductoServiceImpl implements IProductoService {
 
+  @Value("${EMAIL_DEFAULT_PROVIDER}")
+  private String emailDefaultProvider;
+
   private final ProductoRepository productoRepository;
   private final ProductoFavoritoRepository productoFavoritoRepository;
   private static final BigDecimal CIEN = new BigDecimal("100");
@@ -54,7 +58,7 @@ public class ProductoServiceImpl implements IProductoService {
   private final IPedidoService pedidoService;
   private final IClienteService clienteService;
   private final IUsuarioService usuarioService;
-  private final IEmailService emailService;
+  private final EmailServiceFactory emailServiceFactory;
   private static final int TAMANIO_PAGINA_DEFAULT = 25;
   private static final String MENSAJE_ERROR_ACTUALIZAR_STOCK_PRODUCTO_ELIMINADO = "mensaje_error_actualizar_stock_producto_eliminado";
   private static final String PRODUCTO_SIN_IMAGEN = "/producto_sin_imagen.png";
@@ -77,7 +81,7 @@ public class ProductoServiceImpl implements IProductoService {
           IPedidoService pedidoService,
           IClienteService clienteService,
           IUsuarioService usuarioService,
-          IEmailService emailService,
+          EmailServiceFactory emailServiceFactory,
           MessageSource messageSource,
           CustomValidator customValidator,
           JasperReportsHandler jasperReportsHandler) {
@@ -93,7 +97,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.pedidoService = pedidoService;
     this.clienteService = clienteService;
     this.usuarioService = usuarioService;
-    this.emailService = emailService;
+    this.emailServiceFactory = emailServiceFactory;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
     this.jasperReportsHandler = jasperReportsHandler;
@@ -1101,13 +1105,14 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void enviarListaDeProductosPorEmail(String mailTo, byte[] listaDeProductos, FormatoReporte formato) {
-    emailService.enviarEmail(
-            mailTo,
-            "",
-            "Listado de productos",
-            "",
-            listaDeProductos,
-            "ListaDeProductos." + formato.toString());
+    emailServiceFactory.getEmailService(emailDefaultProvider)
+            .enviarEmail(
+                    mailTo,
+                    "",
+                    "Listado de productos",
+                    "Adjunto se encuentra el listado de productos solicitado",
+                    listaDeProductos,
+                    "ListaDeProductos." + formato.toString());
   }
 
   @Override
