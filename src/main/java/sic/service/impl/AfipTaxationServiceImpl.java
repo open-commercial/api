@@ -35,7 +35,7 @@ public class AfipTaxationServiceImpl implements ITaxationService {
   private final IConfiguracionSucursalService configuracionSucursalService;
   private final MessageSource messageSource;
   private static final String WEBSERVICE_FACTURA_ELECTRONICA = "wsfe";
-  private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(21500);
+  private static final BigDecimal LIMITE_MONTO_CONSUMIDOR_FINAL = new BigDecimal(95000);
   private static final String MENSAJE_AUTORIZACION_ERROR = "mensaje_autorizacion_error";
   private static final String MENSAJE_COMPROBANTEAFIP_INVALIDO = "mensaje_comprobanteAFIP_invalido";
 
