@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.Formula;
-import sic.controller.Views;
+import sic.config.Views;
 
 @Entity
 @Table(name = "rengloncuentacorriente")

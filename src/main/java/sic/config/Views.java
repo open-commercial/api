@@ -1,4 +1,4 @@
-package sic.controller;
+package sic.config;
 
 public class Views {
 

@@ -15,7 +15,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import sic.modelo.embeddable.ClienteEmbeddable;
-import sic.controller.Views;
+import sic.config.Views;
 
 @Entity
 @Table(name = "facturaventa")

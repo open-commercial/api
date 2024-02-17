@@ -15,7 +15,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.validator.constraints.Length;
-import sic.controller.Views;
+import sic.config.Views;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
 

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
 import lombok.*;
 import org.hibernate.validator.constraints.Length;
-import sic.controller.Views;
+import sic.config.Views;
 
 import javax.persistence.*;
 import javax.validation.constraints.DecimalMax;

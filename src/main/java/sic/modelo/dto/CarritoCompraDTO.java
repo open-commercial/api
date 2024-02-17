@@ -2,7 +2,7 @@ package sic.modelo.dto;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import lombok.*;
-import sic.controller.Views;
+import sic.config.Views;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

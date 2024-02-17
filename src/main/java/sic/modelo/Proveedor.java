@@ -1,6 +1,5 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
@@ -13,7 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import sic.controller.Views;
+import sic.config.Views;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;

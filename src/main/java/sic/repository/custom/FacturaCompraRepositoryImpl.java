@@ -27,8 +27,7 @@ public class FacturaCompraRepositoryImpl implements FacturaCompraRepositoryCusto
   }
 
   @Override
-  public BigDecimal calcularIVACompra(
-      BooleanBuilder builder, TipoDeComprobante[] tipoComprobantes) {
+  public BigDecimal calcularIVACompra(BooleanBuilder builder, TipoDeComprobante[] tipoComprobantes) {
     QFacturaCompra qFacturaCompra = QFacturaCompra.facturaCompra;
     JPAQueryFactory queryFactory = new JPAQueryFactory(em);
     BooleanBuilder rsPredicate = new BooleanBuilder();
