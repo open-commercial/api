@@ -45,21 +45,30 @@ public class ResendEmailServiceImpl implements IEmailService {
               "mensaje_correo_resend_no_configurado", null, Locale.getDefault()));
     }
     var resend = new Resend(resendToken);
-    Attachment attachment = null;
+    Attachment attachment;
+    SendEmailRequest sendEmailRequest;
     if (byteArray != null) {
       attachment = Attachment.builder()
               .fileName(attachmentName)
               .content(Base64.getEncoder().encodeToString(byteArray))
               .build();
+      sendEmailRequest = SendEmailRequest.builder()
+              .from(resendFrom)
+              .to(toEmail)
+              .bcc(bcc)
+              .attachments(attachment)
+              .html(mensaje)
+              .subject(subject)
+              .build();
+    } else {
+      sendEmailRequest = SendEmailRequest.builder()
+              .from(resendFrom)
+              .to(toEmail)
+              .bcc(bcc)
+              .html(mensaje)
+              .subject(subject)
+              .build();
     }
-    var sendEmailRequest = SendEmailRequest.builder()
-            .from(resendFrom)
-            .to(toEmail)
-            .bcc(bcc)
-            .attachments(attachment)
-            .html(mensaje)
-            .subject(subject)
-            .build();
     try {
       resend.emails().send(sendEmailRequest);
     } catch (ResendException ex) {
