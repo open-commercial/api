@@ -11,8 +11,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import sic.exception.ForbiddenException;
 import sic.modelo.Rol;
 import sic.service.IAuthService;
-
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Locale;
 
@@ -31,8 +29,7 @@ public class AuthAspect {
 
   @Before("@annotation(AccesoRolesPermitidos)")
   public void autorizarAcceso(AccesoRolesPermitidos AccesoRolesPermitidos) {
-    HttpServletRequest request =
-        ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+    var request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
     String authorizationHeader = request.getHeader("Authorization");
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Rol[] rolesRequeridos = AccesoRolesPermitidos.value();

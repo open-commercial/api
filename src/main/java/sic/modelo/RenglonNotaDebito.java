@@ -11,7 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import sic.controller.Views;
+import sic.config.Views;
 
 import javax.validation.constraints.NotEmpty;
 

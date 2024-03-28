@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import sic.controller.Views;
+import sic.config.Views;
 
 @Data
 @AllArgsConstructor

@@ -6,14 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import sic.config.Views;
+import java.math.BigDecimal;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@JsonView(Views.Comprador.class)
-public class MercadoPagoPreferenceDTO {
+@JsonView(Views.Encargado.class)
+public class PeriodoMontoDTO {
 
-    private String id;
-    private String initPoint;
+  private Integer periodo;
+
+  private BigDecimal monto;
 }
