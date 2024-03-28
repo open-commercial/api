@@ -56,7 +56,8 @@ public class PedidoController {
   @GetMapping("/pedidos/{idPedido}/renglones")
   public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido,
                                                    @RequestParam(required = false) Boolean clonar) {
-      return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
+    clonar = clonar != null;
+    return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
   }
 
   @PostMapping("/pedidos/renglones")
