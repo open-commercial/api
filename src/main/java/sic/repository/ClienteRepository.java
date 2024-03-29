@@ -7,7 +7,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Cliente;
 import sic.modelo.Usuario;
-
 import java.util.List;
 
 public interface ClienteRepository extends
@@ -30,11 +29,11 @@ public interface ClienteRepository extends
 
   @Modifying
   @Query("UPDATE Cliente c SET c.viajante = null WHERE c.viajante.idUsuario = :idUsuarioViajante")
-  int desvincularClienteDeViajante(@Param("idUsuarioViajante") long idUsuarioViajante);
+  void desvincularClienteDeViajante(@Param("idUsuarioViajante") long idUsuarioViajante);
 
   @Modifying
   @Query("UPDATE Cliente c SET c.credencial = null WHERE c.credencial.idUsuario = :idUsuarioCredencial")
-  int desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
+  void desvincularClienteDeCredencial(@Param("idUsuarioCredencial") long idUsuarioCredencial);
 
   boolean existsByNroCliente(String nroCliente);
 }

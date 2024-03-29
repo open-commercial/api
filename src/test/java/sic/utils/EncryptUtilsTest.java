@@ -21,9 +21,9 @@ class EncryptUtilsTest {
   @Test
   void shouldEncriptarAndDesencriptarString() throws GeneralSecurityException {
     String valorParaEncriptar = "TestingAES!.@ABC";
-    String valorEncriptado = encryptUtils.encryptWhitAES(valorParaEncriptar);
+    String valorEncriptado = encryptUtils.encryptWithAES(valorParaEncriptar);
     assertNotEquals(valorParaEncriptar, valorEncriptado);
-    String valorDesencriptado = encryptUtils.decryptWhitAES(valorEncriptado);
+    String valorDesencriptado = encryptUtils.decryptWithAES(valorEncriptado);
     assertEquals(valorParaEncriptar, valorDesencriptado);
   }
 }

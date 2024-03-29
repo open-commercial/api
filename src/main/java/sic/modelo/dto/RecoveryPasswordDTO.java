@@ -13,4 +13,5 @@ public class RecoveryPasswordDTO {
 
   private String key;
   private long id;
+  private String newPassword;
 }

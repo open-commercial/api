@@ -194,7 +194,7 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
     }
     var jsonObject = JsonParser.parseString(stringJson).getAsJsonObject();
     try {
-      stringJson = encryptUtils.encryptWhitAES(jsonObject.toString());
+      stringJson = encryptUtils.encryptWithAES(jsonObject.toString());
     } catch (GeneralSecurityException e) {
       throw new ServiceException(
           messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
@@ -263,7 +263,7 @@ public class MercadoPagoPaymentServiceImpl implements IPaymentService {
         var convertedObject =
             new Gson()
                 .fromJson(
-                    encryptUtils.decryptWhitAES(payment.getExternalReference()), JsonObject.class);
+                    encryptUtils.decryptWithAES(payment.getExternalReference()), JsonObject.class);
         var idUsuario = convertedObject.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(

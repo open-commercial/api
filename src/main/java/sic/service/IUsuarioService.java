@@ -14,7 +14,9 @@ public interface IUsuarioService {
 
   void actualizar(Usuario usuarioPorActualizar);
 
-  void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario);
+  void actualizarPasswordRecoveryKey(String passwordRecoveryKey, Usuario usuario);
+
+  void actualizarPasswordConRecuperacion(String key, long idUsuario, String newPassword);
 
   void enviarEmailDeRecuperacion(long idSucursal, String email, String host);
 
@@ -31,8 +33,6 @@ public interface IUsuarioService {
   void actualizarIdSucursalDeUsuario(long idUsuario, long idSucursalPredeterminada);
 
   Page<Usuario> getUsuariosPorRol(Rol rol);
-
-  String encriptarConMD5(String password);
 
   boolean esUsuarioHabilitado(long idUsuario);
 }

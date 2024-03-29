@@ -1,9 +1,6 @@
 package sic.service.impl;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import javax.persistence.EntityNotFoundException;
@@ -26,11 +23,10 @@ import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.service.*;
 import sic.repository.UsuarioRepository;
 import sic.exception.BusinessServiceException;
-import sic.exception.ServiceException;
 import sic.util.CustomValidator;
+import sic.util.EncryptUtils;
 
 @Service
-@Transactional
 @Slf4j
 public class UsuarioServiceImpl implements IUsuarioService {
 
@@ -44,6 +40,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
   private static final int TAMANIO_PAGINA_DEFAULT = 50;
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
+  private final EncryptUtils encryptUtils;
 
   @Autowired
   @Lazy
@@ -53,35 +50,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
     IClienteService clienteService,
     EmailServiceFactory emailServiceFactory,
     MessageSource messageSource,
-    CustomValidator customValidator) {
+    CustomValidator customValidator,
+    EncryptUtils encryptUtils) {
     this.usuarioRepository = usuarioRepository;
     this.sucursalService = sucursalService;
     this.clienteService = clienteService;
     this.emailServiceFactory = emailServiceFactory;
     this.messageSource = messageSource;
     this.customValidator = customValidator;
-  }
-
-  public String encriptarConMD5(String password) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      byte[] array = md.digest(password.getBytes());
-      StringBuilder sb = new StringBuilder();
-      for (byte anArray : array) {
-        sb.append(Integer.toHexString((anArray & 0xFF) | 0x100).substring(1, 3));
-      }
-      return sb.toString();
-    } catch (NoSuchAlgorithmException ex) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_encriptacion_no_disponible", null, Locale.getDefault()),
-          ex);
-    }
+    this.encryptUtils = encryptUtils;
   }
 
   @Override
   public Usuario getUsuarioNoEliminadoPorId(Long idUsuario) {
-    Optional<Usuario> usuario = usuarioRepository
-      .findByIdUsuario(idUsuario);
+    Optional<Usuario> usuario = usuarioRepository.findByIdUsuario(idUsuario);
     if (usuario.isPresent() && !usuario.get().isEliminado()) {
       return usuario.get();
     } else {
@@ -96,13 +78,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
-      String passwordRecoveryKey, long idUsuario) {
-    Usuario usuario =
-        usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(
+  public Usuario getUsuarioPorPasswordRecoveryKeyAndIdUsuario(String passwordRecoveryKey, long idUsuario) {
+    var usuario = usuarioRepository.findByPasswordRecoveryKeyAndIdUsuarioAndEliminadoAndHabilitado(
             passwordRecoveryKey, idUsuario);
-    if (usuario == null
-        || LocalDateTime.now().isAfter(usuario.getPasswordRecoveryKeyExpirationDate())) {
+    if (usuario == null || LocalDateTime.now().isAfter(usuario.getPasswordRecoveryKeyExpirationDate())) {
       throw new UnauthorizedException(
           messageSource.getMessage("mensaje_error_passwordRecoveryKey", null, Locale.getDefault()));
     }
@@ -115,7 +94,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
         usuarioRepository.findByUsernameOrEmailAndPasswordAndEliminado(
             credencial.getUsername(),
             credencial.getUsername(),
-            this.encriptarConMD5(credencial.getPassword()));
+            encryptUtils.encryptWithMD5(credencial.getPassword()));
     if (usuario == null) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_usuario_logInInvalido", null, Locale.getDefault()));
@@ -213,6 +192,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   public void validarReglasDeNegocio(TipoDeOperacion operacion, Usuario usuario) {
+    customValidator.validar(usuario);
     // Username sin espacios en blanco
     if (usuario.getUsername().contains(" ")) {
       throw new BusinessServiceException(messageSource.getMessage(
@@ -233,8 +213,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION) {
       // username
-      Usuario usuarioGuardado =
-          usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
+      var usuarioGuardado = usuarioRepository.findByUsernameAndEliminado(usuario.getUsername(), false);
       if (usuarioGuardado != null && usuarioGuardado.getIdUsuario() != usuario.getIdUsuario()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_usuario_duplicado_username", null, Locale.getDefault()));
@@ -247,13 +226,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
       }
     }
     // Ultimo usuario administrador
-    if ((operacion == TipoDeOperacion.ACTUALIZACION
-            && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
-        || operacion == TipoDeOperacion.ELIMINACION
-            && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
-      List<Usuario> administradores = this.getUsuariosPorRol(Rol.ADMINISTRADOR).getContent();
-      if (administradores.size() == 1
-          && administradores.get(0).getIdUsuario() == usuario.getIdUsuario()) {
+    if ((operacion == TipoDeOperacion.ACTUALIZACION && !usuario.getRoles().contains(Rol.ADMINISTRADOR))
+        || operacion == TipoDeOperacion.ELIMINACION && usuario.getRoles().contains(Rol.ADMINISTRADOR)) {
+      var administradores = this.getUsuariosPorRol(Rol.ADMINISTRADOR).getContent();
+      if (administradores.size() == 1 && administradores.get(0).getIdUsuario() == usuario.getIdUsuario()) {
         throw new BusinessServiceException(messageSource.getMessage(
           "mensaje_usuario_ultimoAdmin", null, Locale.getDefault()));
       }
@@ -269,7 +245,6 @@ public class UsuarioServiceImpl implements IUsuarioService {
   @Override
   @Transactional
   public void actualizar(Usuario usuario) {
-    customValidator.validar(usuario);
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, usuario);
     if (!usuario.getRoles().contains(Rol.VIAJANTE)) {
       this.clienteService.desvincularClienteDeViajante(usuario.getIdUsuario());
@@ -283,9 +258,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  public void actualizarPasswordRecoveryKey(String passwordRecoveryKey, long idUsuario) {
-    usuarioRepository.updatePasswordRecoveryKey(
-        passwordRecoveryKey, LocalDateTime.now().plusHours(3L), idUsuario);
+  public void actualizarPasswordRecoveryKey(String key, Usuario usuario) {
+    usuario.setPasswordRecoveryKey(key);
+    usuario.setPasswordRecoveryKeyExpirationDate(LocalDateTime.now().plusHours(3L));
+    usuarioRepository.save(usuario);
+  }
+
+  @Override
+  public void actualizarPasswordConRecuperacion(String key, long idUsuario, String newPassword) {
+    var usuario = this.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(key, idUsuario);
+    usuario.setPassword(encryptUtils.encryptWithMD5(newPassword));
+    usuario.setPasswordRecoveryKey(null);
+    usuario.setPasswordRecoveryKeyExpirationDate(null);
+    this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, usuario);
+    usuarioRepository.save(usuario);
   }
 
   @Override
@@ -294,10 +280,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
       throw new EntityNotFoundException(messageSource.getMessage(
         "mensaje_sucursal_no_existente", null, Locale.getDefault()));
     }
-    usuarioRepository.updateIdSucursal(idUsuario, idSucursalPredeterminada);
+    var usuario = this.getUsuarioNoEliminadoPorId(idUsuario);
+    usuario.setIdSucursalPredeterminada(idSucursalPredeterminada);
+    usuarioRepository.save(usuario);
   }
 
   @Override
+  @Transactional
   public void enviarEmailDeRecuperacion(long idSucursal, String email, String host) {
     Usuario usuario = usuarioRepository.findByEmailAndEliminado(email, false);
     if (usuario == null || !usuario.isHabilitado()) {
@@ -306,7 +295,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
               "mensaje_correo_no_existente_or_deshabilitado", null, Locale.getDefault()));
     }
     String passwordRecoveryKey = RandomStringUtils.random(250, true, true);
-    this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario.getIdUsuario());
+    this.actualizarPasswordRecoveryKey(passwordRecoveryKey, usuario);
     emailServiceFactory.getEmailService(emailDefaultProvider)
             .enviarEmail(
                     usuario.getEmail(),
@@ -321,12 +310,10 @@ public class UsuarioServiceImpl implements IUsuarioService {
   }
 
   @Override
-  @Transactional
   public Usuario guardar(Usuario usuario) {
-    customValidator.validar(usuario);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, usuario);
     usuario.setUsername(usuario.getUsername().toLowerCase());
-    usuario.setPassword(this.encriptarConMD5(usuario.getPassword()));
+    usuario.setPassword(encryptUtils.encryptWithMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
     log.info("El Usuario {} se guardó correctamente.", usuario);
     return usuario;
