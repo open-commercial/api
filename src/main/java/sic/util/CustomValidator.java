@@ -14,10 +14,17 @@ import java.util.Set;
 @Component
 public class CustomValidator {
 
-  private Validator validator;
+  private final Validator validator;
 
   public CustomValidator() {
-    this.build();
+    validator =
+            Validation.byDefaultProvider()
+                      .configure()
+                      .messageInterpolator(
+                            new ResourceBundleMessageInterpolator(
+                                    new MessageSourceResourceBundleLocator(getMessageSource())))
+                      .buildValidatorFactory()
+                      .getValidator();
   }
 
   public void validar(Object o) {
@@ -25,22 +32,10 @@ public class CustomValidator {
     if (!violations.isEmpty()) throw new ConstraintViolationException(violations);
   }
 
-  private void build() {
-    validator =
-        Validation.byDefaultProvider()
-            .configure()
-            .messageInterpolator(
-                new ResourceBundleMessageInterpolator(
-                    new MessageSourceResourceBundleLocator(getMessageSource())))
-            .buildValidatorFactory()
-            .getValidator();
-  }
-
   // Por default busca ValidationMessages.properties, pero no lo carga como UTF-8,
   // por eso este metodo extra
   private MessageSource getMessageSource() {
-    ReloadableResourceBundleMessageSource messageSource =
-        new ReloadableResourceBundleMessageSource();
+    var messageSource = new ReloadableResourceBundleMessageSource();
     messageSource.setBasename("classpath:ValidationMessages");
     messageSource.setDefaultEncoding("UTF-8");
     return messageSource;

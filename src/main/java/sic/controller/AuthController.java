@@ -11,7 +11,6 @@ import sic.service.IRegistracionService;
 import sic.service.IUsuarioService;
 
 @RestController
-@RequestMapping("/api/v1")
 public class AuthController {
 
   private final IUsuarioService usuarioService;
@@ -28,41 +27,36 @@ public class AuthController {
     this.authService = authService;
   }
 
-  @PostMapping("/login")
+  @PostMapping("/api/v1/login")
   public String login(@RequestBody Credencial credencial) {
-    Usuario usuario = usuarioService.autenticarUsuario(credencial);
-    return authService.generarJWT(
-        usuario.getIdUsuario(), usuario.getRoles());
+    var usuario = usuarioService.autenticarUsuario(credencial);
+    return authService.generarJWT(usuario.getIdUsuario(), usuario.getRoles());
   }
 
-  @PutMapping("/logout")
-  public void logout(
-      @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+  @PutMapping("/api/v1/logout")
+  public void logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
     if (authorizationHeader != null) {
       authService.excluirTokenAcceso(authorizationHeader);
     }
   }
 
-  @GetMapping("/password-recovery")
-  public void recuperarPassword(
-      @RequestParam String email, @RequestParam long idSucursal, HttpServletRequest request) {
+  @GetMapping("/api/v1/password-recovery")
+  public void recuperarPassword(@RequestParam String email,
+                                @RequestParam long idSucursal,
+                                HttpServletRequest request) {
     String origin = request.getHeader("Origin");
     if (origin == null) origin = request.getHeader("Host");
     usuarioService.enviarEmailDeRecuperacion(idSucursal, email, origin);
   }
 
-  @PostMapping("/password-recovery")
-  public String generarTokenJWTTemporal(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
-    Usuario usuario =
-        usuarioService.getUsuarioPorPasswordRecoveryKeyAndIdUsuario(
-            recoveryPasswordDTO.getKey(), recoveryPasswordDTO.getId());
-    usuarioService.actualizarPasswordRecoveryKey(null, usuario.getIdUsuario());
-    return authService.generarJWT(usuario.getIdUsuario(), usuario.getRoles());
+  @PostMapping("/api/v1/password-recovery")
+  public void cambiarPasswordConRecuperacion(@RequestBody RecoveryPasswordDTO recoveryPasswordDTO) {
+    usuarioService.actualizarPasswordConRecuperacion(recoveryPasswordDTO.getKey(),
+            recoveryPasswordDTO.getId(), recoveryPasswordDTO.getNewPassword());
   }
 
-  @PostMapping("/registracion")
-  public void registrarse(
-      @RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
+  @PostMapping("/api/v1/registracion")
+  public void registrarse(@RequestBody RegistracionClienteAndUsuarioDTO registracionClienteAndUsuarioDTO) {
     authService.validarRecaptcha(registracionClienteAndUsuarioDTO.getRecaptcha());
     this.registracionService.crearCuenta(registracionClienteAndUsuarioDTO);
   }

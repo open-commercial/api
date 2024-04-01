@@ -16,6 +16,7 @@ import sic.modelo.Usuario;
 import sic.modelo.dto.UsuarioDTO;
 import sic.service.IAuthService;
 import sic.service.IUsuarioService;
+import sic.util.EncryptUtils;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -25,17 +26,20 @@ public class UsuarioController {
   private final IAuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
+  private final EncryptUtils encryptUtils;
 
   @Autowired
   public UsuarioController(
       IUsuarioService usuarioService,
       IAuthService authService,
       ModelMapper modelMapper,
-      MessageSource messageSource) {
+      MessageSource messageSource,
+      EncryptUtils encryptUtils) {
     this.usuarioService = usuarioService;
     this.authService = authService;
     this.modelMapper = modelMapper;
     this.messageSource = messageSource;
+    this.encryptUtils = encryptUtils;
   }
 
   @GetMapping("/usuarios/{idUsuario}")
@@ -45,16 +49,14 @@ public class UsuarioController {
 
   @PostMapping("/usuarios/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<Usuario> buscarUsuarios(
-      @RequestBody BusquedaUsuarioCriteria criteria) {
+  public Page<Usuario> buscarUsuarios(@RequestBody BusquedaUsuarioCriteria criteria) {
     return usuarioService.buscarUsuarios(criteria);
   }
 
   @PostMapping("/usuarios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Usuario guardar(
-      @RequestBody UsuarioDTO usuarioDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public Usuario guardar(@RequestBody UsuarioDTO usuarioDTO,
+                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
@@ -67,13 +69,11 @@ public class UsuarioController {
   }
 
   @PutMapping("/usuarios")
-  public void actualizar(
-      @RequestBody UsuarioDTO usuarioDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public void actualizar(@RequestBody UsuarioDTO usuarioDTO,
+                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
-    boolean usuarioSeModificaASiMismo =
-        usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();
+    boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);
       Usuario usuarioPersistido = usuarioService.getUsuarioNoEliminadoPorId(usuarioDTO.getIdUsuario());
@@ -81,10 +81,8 @@ public class UsuarioController {
         usuarioPorActualizar.setRoles(usuarioPersistido.getRoles());
         usuarioPorActualizar.setHabilitado(usuarioPersistido.isHabilitado());
       }
-      if (usuarioPorActualizar.getPassword() != null
-          && !usuarioPorActualizar.getPassword().isEmpty()) {
-        usuarioPorActualizar.setPassword(
-            usuarioService.encriptarConMD5(usuarioPorActualizar.getPassword()));
+      if (usuarioPorActualizar.getPassword() != null && !usuarioPorActualizar.getPassword().isEmpty()) {
+        usuarioPorActualizar.setPassword(encryptUtils.encryptWithMD5(usuarioPorActualizar.getPassword()));
       } else {
         usuarioPorActualizar.setPassword(usuarioPersistido.getPassword());
       }
@@ -96,8 +94,8 @@ public class UsuarioController {
   }
 
   @PutMapping("/usuarios/{idUsuario}/sucursales/{idSucursalPredeterminada}")
-  public void actualizarIdSucursalDeUsuario(
-      @PathVariable long idUsuario, @PathVariable long idSucursalPredeterminada) {
+  public void actualizarIdSucursalDeUsuario(@PathVariable long idUsuario,
+                                            @PathVariable long idSucursalPredeterminada) {
     usuarioService.actualizarIdSucursalDeUsuario(idUsuario, idSucursalPredeterminada);
   }
 
