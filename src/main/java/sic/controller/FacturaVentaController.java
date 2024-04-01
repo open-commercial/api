@@ -16,12 +16,10 @@ import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
-
 import java.math.BigDecimal;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1")
 public class FacturaVentaController {
 
   private final IFacturaVentaService facturaVentaService;
@@ -32,12 +30,11 @@ public class FacturaVentaController {
   private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public FacturaVentaController(
-      IFacturaVentaService facturaVentaService,
-      IFacturaService facturaService,
-      IReciboService reciboService,
-      IAuthService authService,
-      MessageSource messageSource) {
+  public FacturaVentaController(IFacturaVentaService facturaVentaService,
+                                IFacturaService facturaService,
+                                IReciboService reciboService,
+                                IAuthService authService,
+                                MessageSource messageSource) {
     this.facturaVentaService = facturaVentaService;
     this.facturaService = facturaService;
     this.reciboService = reciboService;
@@ -45,17 +42,16 @@ public class FacturaVentaController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/facturas/ventas")
+  @GetMapping("/api/v1/facturas/ventas")
   public List<FacturaVenta> getFacturaPorId(@RequestParam long[] idFactura) {
     return facturaVentaService.getFacturasVentaPorId(idFactura);
   }
 
-  @PostMapping("/facturas/ventas/pedidos/{idPedido}")
+  @PostMapping("/api/v1/facturas/ventas/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public List<FacturaVenta> guardarFacturaVenta(
-      @RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
-      @PathVariable Long idPedido,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public List<FacturaVenta> guardarFacturaVenta(@RequestBody NuevaFacturaVentaDTO nuevaFacturaVentaDTO,
+                                                @PathVariable Long idPedido,
+                                                @RequestHeader("Authorization") String authorizationHeader) {
     List<TipoDeComprobante> tiposDeFacturaPermitidos =
         Arrays.asList(
             TipoDeComprobante.FACTURA_A,
@@ -107,27 +103,25 @@ public class FacturaVentaController {
     return facturasGuardadas;
   }
 
-  @PostMapping("/facturas/ventas/busqueda/criteria")
+  @PostMapping("/api/v1/facturas/ventas/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<FacturaVenta> buscarFacturaVenta(
-      @RequestBody BusquedaFacturaVentaCriteria criteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public Page<FacturaVenta> buscarFacturaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
+                                               @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.buscarFacturaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
-  @GetMapping("/facturas/ventas/tipos/sucursales/{idSucursal}/clientes/{idCliente}")
+  @GetMapping("/api/v1/facturas/ventas/tipos/sucursales/{idSucursal}/clientes/{idCliente}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public TipoDeComprobante[] getTipoFacturaVenta(
-      @PathVariable long idSucursal,
-      @PathVariable long idCliente,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public TipoDeComprobante[] getTipoFacturaVenta(@PathVariable long idSucursal,
+                                                 @PathVariable long idCliente,
+                                                 @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuario = (int) claims.get(CLAIM_ID_USUARIO);
     return facturaVentaService.getTiposDeComprobanteVenta(idSucursal, idCliente, idUsuario);
   }
 
-  @GetMapping("/facturas/ventas/{idFactura}/reporte")
+  @GetMapping("/api/v1/facturas/ventas/{idFactura}/reporte")
   public ResponseEntity<byte[]> getReporteFacturaVenta(@PathVariable long idFactura) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -139,14 +133,14 @@ public class FacturaVentaController {
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
-  @GetMapping("/facturas/ventas/renglones/pedidos/{idPedido}")
+  @GetMapping("/api/v1/facturas/ventas/renglones/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public List<RenglonFactura> getRenglonesPedidoParaFacturar(
-      @PathVariable long idPedido, @RequestParam TipoDeComprobante tipoDeComprobante) {
+  public List<RenglonFactura> getRenglonesPedidoParaFacturar(@PathVariable long idPedido,
+                                                             @RequestParam TipoDeComprobante tipoDeComprobante) {
     return facturaVentaService.getRenglonesPedidoParaFacturar(idPedido, tipoDeComprobante);
   }
 
-  @PostMapping("/facturas/ventas/renglones")
+  @PostMapping("/api/v1/facturas/ventas/renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonFactura> calcularRenglonesVenta(
       @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
@@ -155,7 +149,7 @@ public class FacturaVentaController {
         tipoDeComprobante, Movimiento.VENTA, nuevosRenglonesFacturaDTO);
   }
 
-  @PostMapping("/facturas/ventas/total-facturado/criteria")
+  @PostMapping("/api/v1/facturas/ventas/total-facturado/criteria")
   public BigDecimal calcularTotalFacturadoVenta(
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
@@ -164,25 +158,23 @@ public class FacturaVentaController {
         criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
-  @PostMapping("/facturas/ventas/total-iva/criteria")
+  @PostMapping("/api/v1/facturas/ventas/total-iva/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularIvaVenta(
-      @RequestBody BusquedaFacturaVentaCriteria criteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public BigDecimal calcularIvaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
+                                     @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.calcularIvaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
-  @PostMapping("/facturas/ventas/ganancia-total/criteria")
+  @PostMapping("/api/v1/facturas/ventas/ganancia-total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularGananciaTotal(
-      @RequestBody BusquedaFacturaVentaCriteria criteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public BigDecimal calcularGananciaTotal(@RequestBody BusquedaFacturaVentaCriteria criteria,
+                                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return facturaVentaService.calcularGananciaTotal(criteria, (int) claims.get(CLAIM_ID_USUARIO));
   }
 
-  @GetMapping("/facturas/ventas/email/{idFactura}")
+  @GetMapping("/api/v1/facturas/ventas/email/{idFactura}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void enviarFacturaVentaPorEmail(@PathVariable long idFactura) {
     facturaVentaService.enviarFacturaVentaPorEmail(idFactura);

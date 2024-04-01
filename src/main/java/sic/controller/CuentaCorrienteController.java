@@ -26,7 +26,6 @@ import sic.service.IProveedorService;
 import sic.util.FormatoReporte;
 
 @RestController
-@RequestMapping("/api/v1")
 public class CuentaCorrienteController {
 
   private final ICuentaCorrienteService cuentaCorrienteService;
@@ -38,12 +37,11 @@ public class CuentaCorrienteController {
   private static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
 
   @Autowired
-  public CuentaCorrienteController(
-      ICuentaCorrienteService cuentaCorrienteService,
-      IProveedorService proveedorService,
-      IClienteService clienteService,
-      IAuthService authService,
-      MessageSource messageSource) {
+  public CuentaCorrienteController(ICuentaCorrienteService cuentaCorrienteService,
+                                   IProveedorService proveedorService,
+                                   IClienteService clienteService,
+                                   IAuthService authService,
+                                   MessageSource messageSource) {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.clienteService = clienteService;
     this.proveedorService = proveedorService;
@@ -51,7 +49,7 @@ public class CuentaCorrienteController {
     this.messageSource = messageSource;
   }
 
-  @PostMapping("/cuentas-corriente/clientes/busqueda/criteria")
+  @PostMapping("/api/v1/cuentas-corriente/clientes/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Page<CuentaCorrienteCliente> buscarCuentasCorrienteCliente(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
@@ -61,52 +59,52 @@ public class CuentaCorrienteController {
         criteria, (int) claims.get(ID_USUARIO));
   }
 
-  @PostMapping("/cuentas-corriente/proveedores/busqueda/criteria")
+  @PostMapping("/api/v1/cuentas-corriente/proveedores/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Page<CuentaCorrienteProveedor> buscarCuentasCorrienteProveedor(
       @RequestBody BusquedaCuentaCorrienteProveedorCriteria criteria) {
     return cuentaCorrienteService.buscarCuentaCorrienteProveedor(criteria);
   }
 
-  @GetMapping("/cuentas-corriente/clientes/{idCliente}")
+  @GetMapping("/api/v1/cuentas-corriente/clientes/{idCliente}")
   public CuentaCorrienteCliente getCuentaCorrientePorCliente(@PathVariable Long idCliente) {
     return cuentaCorrienteService.getCuentaCorrientePorCliente(
         clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
-  @GetMapping("/cuentas-corriente/clientes/predeterminado")
+  @GetMapping("/api/v1/cuentas-corriente/clientes/predeterminado")
   public CuentaCorrienteCliente getCuentaCorrienteClientePredeterminado() {
     return cuentaCorrienteService.getCuentaCorrientePorCliente(
         clienteService.getClientePredeterminado());
   }
 
-  @GetMapping("/cuentas-corriente/proveedores/{idProveedor}")
+  @GetMapping("/api/v1/cuentas-corriente/proveedores/{idProveedor}")
   public CuentaCorrienteProveedor getCuentaCorrientePorProveedor(@PathVariable Long idProveedor) {
     return cuentaCorrienteService.getCuentaCorrientePorProveedor(
         proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
 
-  @GetMapping("/cuentas-corriente/clientes/{idCliente}/saldo")
+  @GetMapping("/api/v1/cuentas-corriente/clientes/{idCliente}/saldo")
   public BigDecimal getSaldoCuentaCorrienteCliente(@PathVariable long idCliente) {
     return cuentaCorrienteService.getSaldoCuentaCorriente(idCliente);
   }
 
-  @GetMapping("/cuentas-corriente/proveedores/{idProveedor}/saldo")
+  @GetMapping("/api/v1/cuentas-corriente/proveedores/{idProveedor}/saldo")
   public BigDecimal getSaldoCuentaCorrienteProveedor(@PathVariable long idProveedor) {
     return cuentaCorrienteService
         .getCuentaCorrientePorProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor))
         .getSaldo();
   }
 
-  @GetMapping("/cuentas-corriente/{idCuentaCorriente}/renglones")
+  @GetMapping("/api/v1/cuentas-corriente/{idCuentaCorriente}/renglones")
   public Page<RenglonCuentaCorriente> getRenglonesCuentaCorriente(
-      @PathVariable long idCuentaCorriente,
-      @RequestParam(required = false) Integer pagina) {
+          @PathVariable long idCuentaCorriente,
+          @RequestParam(required = false) Integer pagina) {
     if (pagina == null || pagina < 0) pagina = 0;
     return cuentaCorrienteService.getRenglonesCuentaCorriente(idCuentaCorriente, pagina);
   }
 
-  @PostMapping("/cuentas-corriente/clientes/reporte/criteria")
+  @PostMapping("/api/v1/cuentas-corriente/clientes/reporte/criteria")
   public ResponseEntity<byte[]> getReporteCuentaCorriente(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestParam(required = false) String formato) {
@@ -139,7 +137,7 @@ public class CuentaCorrienteController {
     }
   }
 
-  @PostMapping("/cuentas-corriente/lista-clientes/reporte/criteria")
+  @PostMapping("/api/v1/cuentas-corriente/lista-clientes/reporte/criteria")
   public ResponseEntity<byte[]> getReporteListaDeCuentasCorrienteClientePorCriteria(
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestParam(required = false) String formato,

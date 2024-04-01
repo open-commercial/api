@@ -17,7 +17,6 @@ import sic.modelo.dto.*;
 import sic.service.*;
 
 @RestController
-@RequestMapping("/api/v1")
 public class NotaController {
 
   private final INotaService notaService;
@@ -27,12 +26,11 @@ public class NotaController {
   private final IAuthService authService;
 
   @Autowired
-  public NotaController(
-      INotaService notaService,
-      IReciboService reciboService,
-      ISucursalService sucursalService,
-      IUsuarioService usuarioService,
-      IAuthService authService) {
+  public NotaController(INotaService notaService,
+                        IReciboService reciboService,
+                        ISucursalService sucursalService,
+                        IUsuarioService usuarioService,
+                        IAuthService authService) {
     this.notaService = notaService;
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
@@ -40,159 +38,157 @@ public class NotaController {
     this.authService = authService;
   }
 
-  @GetMapping("/notas/{idNota}")
+  @GetMapping("/api/v1/notas/{idNota}")
   public Nota getNota(@PathVariable long idNota) {
     return notaService.getNotaNoEliminadaPorId(idNota);
   }
 
-  @DeleteMapping("/notas/{idNota}")
+  @DeleteMapping("/api/v1/notas/{idNota}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminarNota(@PathVariable long idNota) {
     notaService.eliminarNota(idNota);
   }
 
-  @GetMapping("/notas/credito/tipos/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/notas/credito/tipos/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoNotaCreditoSucursal(@PathVariable long idSucursal) {
     return notaService.getTiposNotaCredito(sucursalService.getSucursalPorId(idSucursal));
   }
 
-
-  @GetMapping("/notas/debito/tipos/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/notas/debito/tipos/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoNotaDebitoSucursal(@PathVariable long idSucursal) {
     return notaService.getTiposNotaDebito(sucursalService.getSucursalPorId(idSucursal));
   }
 
-  @GetMapping("/notas/{idNota}/facturas")
+  @GetMapping("/api/v1/notas/{idNota}/facturas")
   public Factura getFacturaNotaCredito(@PathVariable long idNota) {
     return notaService.getFacturaDeLaNotaCredito(idNota);
   }
 
-  @GetMapping("/notas/debito/recibo/{idRecibo}/existe")
+  @GetMapping("/api/v1/notas/debito/recibo/{idRecibo}/existe")
   public boolean existeNotaDebitoRecibo(@PathVariable long idRecibo) {
     return notaService.existsNotaDebitoPorRecibo(reciboService.getReciboNoEliminadoPorId(idRecibo));
   }
 
-  @GetMapping("/notas/clientes/tipos/credito")
-  public List<TipoDeComprobante> getTipoNotaCreditoCliente(
-      @RequestParam long idCliente, @RequestParam long idSucursal) {
+  @GetMapping("/api/v1/notas/clientes/tipos/credito")
+  public List<TipoDeComprobante> getTipoNotaCreditoCliente(@RequestParam long idCliente,
+                                                           @RequestParam long idSucursal) {
     return notaService.getTipoNotaCreditoCliente(idCliente, idSucursal);
   }
 
-  @GetMapping("/notas/clientes/tipos/debito")
-  public List<TipoDeComprobante> getTipoNotaDebitoCliente(
-      @RequestParam long idCliente, @RequestParam long idSucursal) {
+  @GetMapping("/api/v1/notas/clientes/tipos/debito")
+  public List<TipoDeComprobante> getTipoNotaDebitoCliente(@RequestParam long idCliente,
+                                                          @RequestParam long idSucursal) {
     return notaService.getTipoNotaDebitoCliente(idCliente, idSucursal);
   }
 
-  @GetMapping("/notas/proveedores/tipos/credito")
-  public List<TipoDeComprobante> getTipoNotaCreditoProveedor(
-    @RequestParam long idProveedor, @RequestParam long idSucursal) {
+  @GetMapping("/api/v1/notas/proveedores/tipos/credito")
+  public List<TipoDeComprobante> getTipoNotaCreditoProveedor(@RequestParam long idProveedor,
+                                                             @RequestParam long idSucursal) {
     return notaService.getTipoNotaCreditoProveedor(idProveedor, idSucursal);
   }
 
-  @GetMapping("/notas/proveedores/tipos/debito")
-  public List<TipoDeComprobante> getTipoNotaDebitoProveedor(
-    @RequestParam long idProveedor, @RequestParam long idSucursal) {
+  @GetMapping("/api/v1/notas/proveedores/tipos/debito")
+  public List<TipoDeComprobante> getTipoNotaDebitoProveedor(@RequestParam long idProveedor,
+                                                            @RequestParam long idSucursal) {
     return notaService.getTipoNotaDebitoProveedor(idProveedor, idSucursal);
   }
 
-  @GetMapping("/notas/renglones/credito/{idNotaCredito}")
-  public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(
-      @PathVariable long idNotaCredito) {
+  @GetMapping("/api/v1/notas/renglones/credito/{idNotaCredito}")
+  public List<RenglonNotaCredito> getRenglonesDeNotaCreditoCliente(@PathVariable long idNotaCredito) {
     return notaService.getRenglonesDeNotaCredito(idNotaCredito);
   }
 
-  @GetMapping("/notas/renglones/debito/{idNotaDebito}")
+  @GetMapping("/api/v1/notas/renglones/debito/{idNotaDebito}")
   public List<RenglonNotaDebito> getRenglonesDeNotaDebitoCliente(@PathVariable long idNotaDebito) {
     return notaService.getRenglonesDeNotaDebito(idNotaDebito);
   }
 
-  @PostMapping("/notas/credito/calculos")
+  @PostMapping("/api/v1/notas/credito/calculos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoConFactura(
-      @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaCreditoConFactura(
-        nuevaNotaCreditoDeFacturaDTO,
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            nuevaNotaCreditoDeFacturaDTO,
+            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
-  @PostMapping("/notas/credito/calculos-sin-factura")
+  @PostMapping("/api/v1/notas/credito/calculos-sin-factura")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito calcularNotaCreditoSinFactura(
-      @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaCreditoSinFactura(
-        nuevaNotaCreditoSinFacturaDTO,
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            nuevaNotaCreditoSinFacturaDTO,
+            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
-  @PostMapping("/notas/debito/calculos")
+  @PostMapping("/api/v1/notas/debito/calculos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaDebito calcularNotaDebitoDeRecibo(
-      @RequestBody NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaDebitoConRecibo(
-        nuevaNotaDebitoDeReciboDTO,
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            nuevaNotaDebitoDeReciboDTO,
+            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
-  @PostMapping("/notas/debito/calculos-sin-recibo")
+  @PostMapping("/api/v1/notas/debito/calculos-sin-recibo")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaDebito calcularNotaDebitoSinRecibo(
-      @RequestBody NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaDebitoSinRecibo(
-        nuevaNotaDebitoSinReciboDTO,
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            nuevaNotaDebitoSinReciboDTO,
+            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
   }
 
-  @PostMapping("/notas/credito/factura")
+  @PostMapping("/api/v1/notas/credito/factura")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito guardarNotaCreditoDeFactura(
-      @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.guardarNotaCredito(
-        notaService.calcularNotaCreditoConFactura(
-            nuevaNotaCreditoDeFacturaDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(
-                ((Integer) claims.get("idUsuario")).longValue())));
+            notaService.calcularNotaCreditoConFactura(
+                    nuevaNotaCreditoDeFacturaDTO,
+                    usuarioService.getUsuarioNoEliminadoPorId(
+                            ((Integer) claims.get("idUsuario")).longValue())));
   }
 
-  @PostMapping("/notas/credito/sin-factura")
+  @PostMapping("/api/v1/notas/credito/sin-factura")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaCredito guardarNotaCreditoSinFactura(
-      @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.guardarNotaCredito(
-        notaService.calcularNotaCreditoSinFactura(
-            nuevaNotaCreditoSinFacturaDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(
-                ((Integer) claims.get("idUsuario")).longValue())));
+            notaService.calcularNotaCreditoSinFactura(
+                    nuevaNotaCreditoSinFacturaDTO,
+                    usuarioService.getUsuarioNoEliminadoPorId(
+                            ((Integer) claims.get("idUsuario")).longValue())));
   }
 
-  @PostMapping("/notas/debito")
+  @PostMapping("/api/v1/notas/debito")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaDebito guardarNotaDebitoDeRecibo(
-      @RequestBody NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.guardarNotaDebito(
-        notaService.calcularNotaDebitoConRecibo(
-            nuevaNotaDebitoDeReciboDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(
-                ((Integer) claims.get("idUsuario")).longValue())));
+            notaService.calcularNotaDebitoConRecibo(
+                    nuevaNotaDebitoDeReciboDTO,
+                    usuarioService.getUsuarioNoEliminadoPorId(
+                            ((Integer) claims.get("idUsuario")).longValue())));
   }
 
-  @PostMapping("/notas/debito/sin-recibo")
+  @PostMapping("/api/v1/notas/debito/sin-recibo")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public NotaDebito guardarNotaDebitoSinRecibo(
           @RequestBody NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO,
@@ -203,7 +199,7 @@ public class NotaController {
             usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue())));
   }
 
-  @GetMapping("/notas/{idNota}/reporte")
+  @GetMapping("/api/v1/notas/{idNota}/reporte")
   public ResponseEntity<byte[]> getReporteNota(@PathVariable long idNota) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);
@@ -215,61 +211,62 @@ public class NotaController {
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
-  @GetMapping("/notas/debito/total")
+  @GetMapping("/api/v1/notas/debito/total")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public BigDecimal calcularTotalDebito(
-      BigDecimal subTotalBruto, BigDecimal iva21Neto, BigDecimal montoNoGravado) {
+  public BigDecimal calcularTotalDebito(BigDecimal subTotalBruto,
+                                        BigDecimal iva21Neto,
+                                        BigDecimal montoNoGravado) {
     return notaService.calcularTotalDebito(subTotalBruto, iva21Neto, montoNoGravado);
   }
 
-  @PostMapping("/notas/credito/busqueda/criteria")
+  @PostMapping("/api/v1/notas/credito/busqueda/criteria")
   public Page<NotaCredito> buscarNotasCredito(
-    @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-    @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
-  @PostMapping("/notas/debito/busqueda/criteria")
+  @PostMapping("/api/v1/notas/debito/busqueda/criteria")
   public Page<NotaDebito> buscarNotasDebito(
-    @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-    @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
-  @PostMapping("/notas/total-credito/criteria")
+  @PostMapping("/api/v1/notas/total-credito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalNotasCredito(
-      @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
-  @PostMapping("/notas/total-debito/criteria")
+  @PostMapping("/api/v1/notas/total-debito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalNotasDebito(
-      @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
-  @PostMapping("/notas/total-iva-credito/criteria")
+  @PostMapping("/api/v1/notas/total-iva-credito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaCredito(
-      @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVACredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }
 
-  @PostMapping("/notas/total-iva-debito/criteria")
+  @PostMapping("/api/v1/notas/total-iva-debito/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalIvaDebito(
-      @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+          @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
+          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularTotalIVADebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
   }

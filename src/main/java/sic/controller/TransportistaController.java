@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -21,7 +19,6 @@ import sic.service.ITransportistaService;
 import sic.service.IUbicacionService;
 
 @RestController
-@RequestMapping("/api/v1")
 public class TransportistaController {
 
   private final ITransportistaService transportistaService;
@@ -29,22 +26,21 @@ public class TransportistaController {
   private final ModelMapper modelMapper;
 
   @Autowired
-  public TransportistaController(
-      ITransportistaService transportistaService,
-      IUbicacionService ubicacionService,
-      ModelMapper modelMapper) {
+  public TransportistaController(ITransportistaService transportistaService,
+                                 IUbicacionService ubicacionService,
+                                 ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
-  @GetMapping("/transportistas/{idTransportista}")
+  @GetMapping("/api/v1/transportistas/{idTransportista}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista getTransportistaPorId(@PathVariable long idTransportista) {
     return transportistaService.getTransportistaNoEliminadoPorId(idTransportista);
   }
 
-  @PutMapping("/transportistas")
+  @PutMapping("/api/v1/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportistaPersistido =
@@ -75,24 +71,23 @@ public class TransportistaController {
     }
   }
 
-  @PostMapping("/transportistas/busqueda/criteria")
-  public Page<Transportista> buscarTransportistas(
-      @RequestBody BusquedaTransportistaCriteria criteria) {
+  @PostMapping("/api/v1/transportistas/busqueda/criteria")
+  public Page<Transportista> buscarTransportistas(@RequestBody BusquedaTransportistaCriteria criteria) {
     return transportistaService.buscarTransportistas(criteria);
   }
 
-  @DeleteMapping("/transportistas/{idTransportista}")
+  @DeleteMapping("/api/v1/transportistas/{idTransportista}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idTransportista) {
     transportistaService.eliminar(idTransportista);
   }
 
-  @GetMapping("/transportistas")
+  @GetMapping("/api/v1/transportistas")
   public List<Transportista> getTransportistas() {
     return transportistaService.getTransportistas();
   }
 
-  @PostMapping("/transportistas")
+  @PostMapping("/api/v1/transportistas")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Transportista guardar(@RequestBody TransportistaDTO transportistaDTO) {
     Transportista transportista = modelMapper.map(transportistaDTO, Transportista.class);

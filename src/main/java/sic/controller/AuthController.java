@@ -18,10 +18,9 @@ public class AuthController {
   private final IAuthService authService;
 
   @Autowired
-  public AuthController(
-      IUsuarioService usuarioService,
-      IRegistracionService registracionService,
-      IAuthService authService) {
+  public AuthController(IUsuarioService usuarioService,
+                        IRegistracionService registracionService,
+                        IAuthService authService) {
     this.usuarioService = usuarioService;
     this.registracionService = registracionService;
     this.authService = authService;

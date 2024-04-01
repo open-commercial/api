@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,29 +11,29 @@ import sic.modelo.dto.RubroDTO;
 import sic.service.IRubroService;
 
 @RestController
-@RequestMapping("/api/v1")
 public class RubroController {
 
   private final IRubroService rubroService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public RubroController(IRubroService rubroService, ModelMapper modelMapper) {
+  public RubroController(IRubroService rubroService,
+                         ModelMapper modelMapper) {
     this.rubroService = rubroService;
     this.modelMapper = modelMapper;
   }
 
-  @GetMapping("/rubros/{idRubro}")
+  @GetMapping("/api/v1/rubros/{idRubro}")
   public Rubro getRubroPorId(@PathVariable long idRubro) {
     return rubroService.getRubroNoEliminadoPorId(idRubro);
   }
 
-  @GetMapping("/rubros")
+  @GetMapping("/api/v1/rubros")
   public List<Rubro> getRubros() {
     return rubroService.getRubros();
   }
 
-  @PutMapping("/rubros")
+  @PutMapping("/api/v1/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody RubroDTO rubroDTO) {
     Rubro rubroPersistido = rubroService.getRubroNoEliminadoPorId(rubroDTO.getIdRubro());
@@ -45,13 +44,13 @@ public class RubroController {
     rubroService.actualizar(rubroPorActualizar);
   }
 
-  @DeleteMapping("/rubros/{idRubro}")
+  @DeleteMapping("/api/v1/rubros/{idRubro}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idRubro) {
     rubroService.eliminar(idRubro);
   }
 
-  @PostMapping("/rubros")
+  @PostMapping("/api/v1/rubros")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Rubro guardar(@RequestBody RubroDTO rubroDTO) {
     Rubro rubro = modelMapper.map(rubroDTO, Rubro.class);

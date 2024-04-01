@@ -10,7 +10,6 @@ import sic.service.IPaymentService;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/api/v1")
 public class PagoController {
 
   private final IPaymentService paymentService;
@@ -23,16 +22,18 @@ public class PagoController {
     this.authService = authService;
   }
 
-  @PostMapping("/pagos/mercado-pago/notificacion")
-  public void crearComprobantePorNotificacion(@RequestParam long id, @RequestParam String topic) {
+  @PostMapping("/api/v1/pagos/mercado-pago/notificacion")
+  public void crearComprobantePorNotificacion(@RequestParam long id,
+                                              @RequestParam String topic) {
     if (topic.equals("payment")) {
       paymentService.crearComprobantePorNotificacion(id);
     }
   }
 
-  @PostMapping("/pagos/mercado-pago/preference")
+  @PostMapping("/api/v1/pagos/mercado-pago/preference")
   public MercadoPagoPreferenceDTO getPreferenceSegunItemsDelUsuario(
-      HttpServletRequest request, @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO) {
+      HttpServletRequest request,
+      @RequestBody NuevaOrdenDePagoDTO nuevaOrdenDePagoDTO) {
     Claims claims = authService.getClaimsDelToken(request.getHeader("Authorization"));
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     String origin = request.getHeader("Origin");

@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.List;
-
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
@@ -21,7 +19,6 @@ import sic.service.IProveedorService;
 import sic.service.IUbicacionService;
 
 @RestController
-@RequestMapping("/api/v1")
 public class ProveedorController {
 
   private final IProveedorService proveedorService;
@@ -29,22 +26,21 @@ public class ProveedorController {
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ProveedorController(
-    IProveedorService proveedorService,
-    IUbicacionService ubicacionService,
-    ModelMapper modelMapper) {
+  public ProveedorController(IProveedorService proveedorService,
+                             IUbicacionService ubicacionService,
+                             ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
-  @GetMapping("/proveedores/{idProveedor}")
+  @GetMapping("/api/v1/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor getProveedorPorId(@PathVariable long idProveedor) {
     return this.proveedorService.getProveedorNoEliminadoPorId(idProveedor);
   }
 
-  @PostMapping("/proveedores")
+  @PostMapping("/api/v1/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Proveedor guardar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedor = modelMapper.map(proveedorDTO, Proveedor.class);
@@ -55,7 +51,7 @@ public class ProveedorController {
     return proveedorService.guardar(proveedor);
   }
 
-  @PutMapping("/proveedores")
+  @PutMapping("/api/v1/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody ProveedorDTO proveedorDTO) {
     Proveedor proveedorPersistido =
@@ -87,20 +83,19 @@ public class ProveedorController {
     }
   }
 
-  @PostMapping("/proveedores/busqueda/criteria")
+  @PostMapping("/api/v1/proveedores/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Page<Proveedor> buscarProveedores(
-    @RequestBody BusquedaProveedorCriteria criteria) {
+  public Page<Proveedor> buscarProveedores(@RequestBody BusquedaProveedorCriteria criteria) {
     return proveedorService.buscarProveedores(criteria);
   }
 
-  @DeleteMapping("/proveedores/{idProveedor}")
+  @DeleteMapping("/api/v1/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void eliminar(@PathVariable long idProveedor) {
     proveedorService.eliminar(idProveedor);
   }
 
-  @GetMapping("/proveedores")
+  @GetMapping("/api/v1/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<Proveedor> getProveedores() {
     return proveedorService.getProveedores();

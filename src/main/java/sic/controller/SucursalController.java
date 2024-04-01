@@ -14,7 +14,6 @@ import sic.service.ISucursalService;
 import sic.service.IUbicacionService;
 
 @RestController
-@RequestMapping("/api/v1")
 public class SucursalController {
 
   public final ISucursalService sucursalService;
@@ -22,24 +21,25 @@ public class SucursalController {
   private final ModelMapper modelMapper;
 
   @Autowired
-  public SucursalController(
-    ISucursalService sucursalService, IUbicacionService ubicacionService, ModelMapper modelMapper) {
+  public SucursalController(ISucursalService sucursalService,
+                            IUbicacionService ubicacionService,
+                            ModelMapper modelMapper) {
     this.sucursalService = sucursalService;
     this.ubicacionService = ubicacionService;
     this.modelMapper = modelMapper;
   }
 
-  @GetMapping("/sucursales")
+  @GetMapping("/api/v1/sucursales")
   public List<Sucursal> getSucursales(@RequestParam(required = false) boolean puntoDeRetiro) {
     return sucursalService.getSucusales(puntoDeRetiro);
   }
 
-  @GetMapping("/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/sucursales/{idSucursal}")
   public Sucursal getSucursalPorId(@PathVariable long idSucursal) {
     return sucursalService.getSucursalPorId(idSucursal);
   }
 
-  @PostMapping("/sucursales")
+  @PostMapping("/api/v1/sucursales")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public Sucursal guardar(@RequestBody NuevaSucursalDTO nuevaSucursal) {
     Ubicacion ubicacion = new Ubicacion();
@@ -49,7 +49,7 @@ public class SucursalController {
     return sucursalService.guardar(nuevaSucursal, ubicacion, nuevaSucursal.getImagen());
   }
 
-  @PutMapping("/sucursales")
+  @PutMapping("/api/v1/sucursales")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void actualizar(@RequestBody SucursalDTO sucursalDTO) {
     Sucursal sucursalParaActualizar = modelMapper.map(sucursalDTO, Sucursal.class);
@@ -75,7 +75,7 @@ public class SucursalController {
     sucursalService.actualizar(sucursalParaActualizar, sucursalPersistida, sucursalDTO.getImagen());
   }
 
-  @DeleteMapping("/sucursales/{idSucursales}")
+  @DeleteMapping("/api/v1/sucursales/{idSucursales}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idSucursales) {
     sucursalService.eliminar(idSucursales);
