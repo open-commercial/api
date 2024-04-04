@@ -18,12 +18,10 @@ import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
 import sic.service.IAuthService;
 import sic.service.ITraspasoService;
-
 import java.util.List;
 import java.util.Locale;
 
 @RestController
-@RequestMapping("/api/v1")
 public class TraspasoController {
 
   private final ITraspasoService traspasoService;
@@ -31,31 +29,32 @@ public class TraspasoController {
   private final MessageSource messageSource;
 
   @Autowired
-  public TraspasoController(
-      ITraspasoService traspasoService, IAuthService authService, MessageSource messageSource) {
+  public TraspasoController(ITraspasoService traspasoService,
+                            IAuthService authService,
+                            MessageSource messageSource) {
     this.traspasoService = traspasoService;
     this.authService = authService;
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/traspasos/{idTraspaso}")
+  @GetMapping("/api/v1/traspasos/{idTraspaso}")
   public Traspaso getTraspasoPorId(@PathVariable long idTraspaso) {
     return traspasoService.getTraspasoNoEliminadoPorid(idTraspaso);
   }
 
-  @PostMapping("/traspasos/busqueda/criteria")
+  @PostMapping("/api/v1/traspasos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Traspaso> getTraspasosCriteria(@RequestBody BusquedaTraspasoCriteria criteria) {
     return traspasoService.buscarTraspasos(criteria);
   }
 
-  @GetMapping("/traspasos/{idTraspaso}/renglones")
+  @GetMapping("/api/v1/traspasos/{idTraspaso}/renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonTraspaso> getRenglonesDelTraspaso(@PathVariable long idTraspaso) {
     return traspasoService.getRenglonesTraspaso(idTraspaso);
   }
 
-  @PostMapping("/traspasos")
+  @PostMapping("/api/v1/traspasos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Traspaso guardarTraspaso(@RequestBody NuevoTraspasoDTO nuevoTraspasoDTO,
                                   @RequestHeader("Authorization") String authorizationHeader) {
@@ -64,7 +63,7 @@ public class TraspasoController {
     return traspasoService.guardarTraspaso(nuevoTraspasoDTO, idUsuarioLoggedIn);
   }
 
-  @DeleteMapping("/traspasos/{idTraspaso}")
+  @DeleteMapping("/api/v1/traspasos/{idTraspaso}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void eliminarTraspaso(@PathVariable long idTraspaso) {
     Traspaso traspaso = traspasoService.getTraspasoNoEliminadoPorid(idTraspaso);
@@ -78,10 +77,9 @@ public class TraspasoController {
     traspasoService.eliminar(idTraspaso);
   }
 
-  @PostMapping("/traspasos/reporte/criteria")
+  @PostMapping("/api/v1/traspasos/reporte/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public ResponseEntity<byte[]> getReporteTraspaso(
-      @RequestBody BusquedaTraspasoCriteria criteria) {
+  public ResponseEntity<byte[]> getReporteTraspaso(@RequestBody BusquedaTraspasoCriteria criteria) {
     HttpHeaders headers = new HttpHeaders();
     headers.setCacheControl("must-revalidate, post-check=0, pre-check=0");
     headers.setContentType(MediaType.APPLICATION_PDF);

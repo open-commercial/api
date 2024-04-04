@@ -19,7 +19,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RestController
-@RequestMapping("/api/v1")
 public class ReciboController {
 
   private final IReciboService reciboService;
@@ -32,15 +31,14 @@ public class ReciboController {
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ReciboController(
-      IReciboService reciboService,
-      ISucursalService sucursalService,
-      IUsuarioService usuarioService,
-      IClienteService clienteService,
-      IProveedorService proveedorService,
-      IFormaDePagoService formaDePagoService,
-      IAuthService authService,
-      ModelMapper modelMapper) {
+  public ReciboController(IReciboService reciboService,
+                          ISucursalService sucursalService,
+                          IUsuarioService usuarioService,
+                          IClienteService clienteService,
+                          IProveedorService proveedorService,
+                          IFormaDePagoService formaDePagoService,
+                          IAuthService authService,
+                          ModelMapper modelMapper) {
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
     this.usuarioService = usuarioService;
@@ -51,28 +49,27 @@ public class ReciboController {
     this.modelMapper = modelMapper;
   }
 
-  @GetMapping("/recibos/{idRecibo}")
+  @GetMapping("/api/v1/recibos/{idRecibo}")
   public Recibo getReciboPorId(@PathVariable long idRecibo) {
     return reciboService.getReciboNoEliminadoPorId(idRecibo);
   }
 
-  @PostMapping("/recibos/busqueda/criteria")
+  @PostMapping("/api/v1/recibos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Recibo> buscarConCriteria(@RequestBody BusquedaReciboCriteria criteria) {
     return reciboService.buscarRecibos(criteria);
   }
 
-  @PostMapping("/recibos/total/criteria")
+  @PostMapping("/api/v1/recibos/total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public BigDecimal getTotalRecibos(@RequestBody BusquedaReciboCriteria criteria) {
     return reciboService.getTotalRecibos(criteria);
   }
 
-  @PostMapping("/recibos/clientes")
+  @PostMapping("/api/v1/recibos/clientes")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Recibo guardarReciboCliente(
-      @RequestBody ReciboDTO reciboDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public Recibo guardarReciboCliente(@RequestBody ReciboDTO reciboDTO,
+                                     @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
     recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
@@ -84,11 +81,10 @@ public class ReciboController {
     return reciboService.guardar(recibo);
   }
 
-  @PostMapping("/recibos/proveedores")
+  @PostMapping("/api/v1/recibos/proveedores")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Recibo guardarReciboProveedor(
-      @RequestBody ReciboDTO reciboDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public Recibo guardarReciboProveedor(@RequestBody ReciboDTO reciboDTO,
+                                       @RequestHeader("Authorization") String authorizationHeader) {
     Recibo recibo = modelMapper.map(reciboDTO, Recibo.class);
     recibo.setSucursal(sucursalService.getSucursalPorId(reciboDTO.getIdSucursal()));
     recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
@@ -100,13 +96,13 @@ public class ReciboController {
     return reciboService.guardar(recibo);
   }
 
-  @DeleteMapping("/recibos/{idRecibo}")
+  @DeleteMapping("/api/v1/recibos/{idRecibo}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public void eliminar(@PathVariable long idRecibo) {
     reciboService.eliminar(idRecibo);
   }
 
-  @GetMapping("/recibos/{idRecibo}/reporte")
+  @GetMapping("/api/v1/recibos/{idRecibo}/reporte")
   public ResponseEntity<byte[]> getReporteRecibo(@PathVariable long idRecibo) {
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_PDF);

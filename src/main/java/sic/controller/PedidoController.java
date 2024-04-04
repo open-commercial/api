@@ -21,7 +21,6 @@ import sic.modelo.dto.NuevoRenglonPedidoDTO;
 import sic.service.*;
 
 @RestController
-@RequestMapping("/api/v1")
 public class PedidoController {
 
   private final IPedidoService pedidoService;
@@ -33,13 +32,12 @@ public class PedidoController {
   private static final String ID_USUARIO = "idUsuario";
 
   @Autowired
-  public PedidoController(
-      IPedidoService pedidoService,
-      IUsuarioService usuarioService,
-      ISucursalService sucursalService,
-      IClienteService clienteService,
-      IReciboService reciboService,
-      IAuthService authService) {
+  public PedidoController(IPedidoService pedidoService,
+                          IUsuarioService usuarioService,
+                          ISucursalService sucursalService,
+                          IClienteService clienteService,
+                          IReciboService reciboService,
+                          IAuthService authService) {
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.sucursalService = sucursalService;
@@ -48,19 +46,19 @@ public class PedidoController {
     this.authService = authService;
   }
 
-  @GetMapping("/pedidos/{idPedido}")
+  @GetMapping("/api/v1/pedidos/{idPedido}")
   public Pedido getPedidoPorId(@PathVariable long idPedido) {
       return pedidoService.getPedidoNoEliminadoPorId(idPedido);
   }
 
-  @GetMapping("/pedidos/{idPedido}/renglones")
+  @GetMapping("/api/v1/pedidos/{idPedido}/renglones")
   public List<RenglonPedido> getRenglonesDelPedido(@PathVariable long idPedido,
                                                    @RequestParam(required = false) Boolean clonar) {
     clonar = clonar != null;
     return pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglonSegunEstadoOrClonar(idPedido, clonar);
   }
 
-  @PostMapping("/pedidos/renglones")
+  @PostMapping("/api/v1/pedidos/renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonPedido> calcularRenglonesPedido(
           @RequestBody List<NuevoRenglonPedidoDTO> nuevosRenglonesPedidoDTO) {
@@ -69,7 +67,7 @@ public class PedidoController {
         pedidoService.getArrayDeCantidadesProducto(nuevosRenglonesPedidoDTO));
   }
 
-  @PutMapping("/pedidos")
+  @PutMapping("/api/v1/pedidos")
   public void actualizar(@RequestBody PedidoDTO pedidoDTO) {
     Pedido pedido = pedidoService.getPedidoNoEliminadoPorId(pedidoDTO.getIdPedido());
     Long idSucursalOrigen = pedido.getIdSucursal();
@@ -101,7 +99,7 @@ public class PedidoController {
             LocalDateTime.now()));
   }
 
-  @PostMapping("/pedidos")
+  @PostMapping("/api/v1/pedidos")
   public Pedido guardar(@RequestBody PedidoDTO pedidoDTO,
                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -131,20 +129,20 @@ public class PedidoController {
             LocalDateTime.now()));
   }
 
-  @PostMapping("/pedidos/busqueda/criteria")
+  @PostMapping("/api/v1/pedidos/busqueda/criteria")
   public Page<Pedido> buscarConCriteria(@RequestBody BusquedaPedidoCriteria criteria,
                                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return pedidoService.buscarPedidos(criteria, (int) claims.get(ID_USUARIO));
   }
 
-  @PutMapping("/pedidos/{idPedido}")
+  @PutMapping("/api/v1/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public void cancelar(@PathVariable long idPedido) {
     pedidoService.cancelar(pedidoService.getPedidoNoEliminadoPorId(idPedido));
   }
 
-  @GetMapping("/pedidos/{idPedido}/reporte")
+  @GetMapping("/api/v1/pedidos/{idPedido}/reporte")
   public ResponseEntity<byte[]> getReportePedido(@PathVariable long idPedido) {
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_PDF);
@@ -154,7 +152,7 @@ public class PedidoController {
       return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 
-  @PostMapping("/pedidos/calculo-pedido")
+  @PostMapping("/api/v1/pedidos/calculo-pedido")
   public Resultados calcularResultadosPedido(
           @RequestBody NuevosResultadosComprobanteDTO nuevosResultadosComprobanteDTO) {
     return pedidoService.calcularResultadosPedido(nuevosResultadosComprobanteDTO);

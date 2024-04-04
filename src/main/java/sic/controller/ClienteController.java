@@ -12,13 +12,11 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.dto.ClienteDTO;
 import sic.service.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Locale;
 
 @RestController
-@RequestMapping("/api/v1")
 public class ClienteController {
 
   private final IClienteService clienteService;
@@ -29,13 +27,12 @@ public class ClienteController {
   private final MessageSource messageSource;
 
   @Autowired
-  public ClienteController(
-      IClienteService clienteService,
-      IUsuarioService usuarioService,
-      IUbicacionService ubicacionService,
-      IAuthService authService,
-      ModelMapper modelMapper,
-      MessageSource messageSource) {
+  public ClienteController(IClienteService clienteService,
+                           IUsuarioService usuarioService,
+                           IUbicacionService ubicacionService,
+                           IAuthService authService,
+                           ModelMapper modelMapper,
+                           MessageSource messageSource) {
     this.clienteService = clienteService;
     this.usuarioService = usuarioService;
     this.ubicacionService = ubicacionService;
@@ -44,35 +41,33 @@ public class ClienteController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/clientes/{idCliente}")
+  @GetMapping("/api/v1/clientes/{idCliente}")
   public Cliente getCliente(@PathVariable long idCliente) {
     return clienteService.getClienteNoEliminadoPorId(idCliente);
   }
 
-  @PostMapping("/clientes/busqueda/criteria")
-  public Page<Cliente> buscarConCriteria(
-      @RequestBody BusquedaClienteCriteria criteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  @PostMapping("/api/v1/clientes/busqueda/criteria")
+  public Page<Cliente> buscarConCriteria(@RequestBody BusquedaClienteCriteria criteria,
+                                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
   }
 
-  @GetMapping("/clientes/existe-predeterminado")
+  @GetMapping("/api/v1/clientes/existe-predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public boolean existeClientePredeterminado() {
     return clienteService.existeClientePredeterminado();
   }
 
-  @DeleteMapping("/clientes/{idCliente}")
+  @DeleteMapping("/api/v1/clientes/{idCliente}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idCliente) {
     clienteService.eliminar(idCliente);
   }
 
-  @PostMapping("/clientes")
-  public Cliente guardar(
-      @RequestBody ClienteDTO nuevoCliente,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  @PostMapping("/api/v1/clientes")
+  public Cliente guardar(@RequestBody ClienteDTO nuevoCliente,
+                         @RequestHeader("Authorization") String authorizationHeader) {
     Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
@@ -117,10 +112,9 @@ public class ClienteController {
     return clienteService.guardar(cliente);
   }
 
-  @PutMapping("/clientes")
-  public Cliente actualizar(
-      @RequestBody ClienteDTO clienteDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  @PutMapping("/api/v1/clientes")
+  public Cliente actualizar(@RequestBody ClienteDTO clienteDTO,
+                            @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
     Cliente clientePersistido =
         clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
@@ -177,19 +171,19 @@ public class ClienteController {
     return clienteService.actualizar(clientePorActualizar, clientePersistido);
   }
 
-  @PutMapping("/clientes/{idCliente}/predeterminado")
+  @PutMapping("/api/v1/clientes/{idCliente}/predeterminado")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setClientePredeterminado(@PathVariable long idCliente) {
     clienteService.setClientePredeterminado(clienteService.getClienteNoEliminadoPorId(idCliente));
   }
 
-  @GetMapping("/clientes/pedidos/{idPedido}")
+  @GetMapping("/api/v1/clientes/pedidos/{idPedido}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
     return clienteService.getClientePorIdPedido(idPedido);
   }
 
-  @GetMapping("/clientes/usuarios/{idUsuario}")
+  @GetMapping("/api/v1/clientes/usuarios/{idUsuario}")
   public Cliente getClientePorIdUsuario(@PathVariable long idUsuario) {
     return clienteService.getClientePorIdUsuario(idUsuario);
   }

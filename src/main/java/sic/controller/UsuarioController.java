@@ -1,7 +1,6 @@
 package sic.controller;
 
 import java.util.Locale;
-
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +18,6 @@ import sic.service.IUsuarioService;
 import sic.util.EncryptUtils;
 
 @RestController
-@RequestMapping("/api/v1")
 public class UsuarioController {
 
   private final IUsuarioService usuarioService;
@@ -29,12 +27,11 @@ public class UsuarioController {
   private final EncryptUtils encryptUtils;
 
   @Autowired
-  public UsuarioController(
-      IUsuarioService usuarioService,
-      IAuthService authService,
-      ModelMapper modelMapper,
-      MessageSource messageSource,
-      EncryptUtils encryptUtils) {
+  public UsuarioController(IUsuarioService usuarioService,
+                           IAuthService authService,
+                           ModelMapper modelMapper,
+                           MessageSource messageSource,
+                           EncryptUtils encryptUtils) {
     this.usuarioService = usuarioService;
     this.authService = authService;
     this.modelMapper = modelMapper;
@@ -42,18 +39,18 @@ public class UsuarioController {
     this.encryptUtils = encryptUtils;
   }
 
-  @GetMapping("/usuarios/{idUsuario}")
+  @GetMapping("/api/v1/usuarios/{idUsuario}")
   public Usuario getUsuarioPorId(@PathVariable long idUsuario) {
     return usuarioService.getUsuarioNoEliminadoPorId(idUsuario);
   }
 
-  @PostMapping("/usuarios/busqueda/criteria")
+  @PostMapping("/api/v1/usuarios/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Usuario> buscarUsuarios(@RequestBody BusquedaUsuarioCriteria criteria) {
     return usuarioService.buscarUsuarios(criteria);
   }
 
-  @PostMapping("/usuarios")
+  @PostMapping("/api/v1/usuarios")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Usuario guardar(@RequestBody UsuarioDTO usuarioDTO,
                          @RequestHeader("Authorization") String authorizationHeader) {
@@ -68,7 +65,7 @@ public class UsuarioController {
     return usuarioService.guardar(usuario);
   }
 
-  @PutMapping("/usuarios")
+  @PutMapping("/api/v1/usuarios")
   public void actualizar(@RequestBody UsuarioDTO usuarioDTO,
                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -93,13 +90,13 @@ public class UsuarioController {
     }
   }
 
-  @PutMapping("/usuarios/{idUsuario}/sucursales/{idSucursalPredeterminada}")
+  @PutMapping("/api/v1/usuarios/{idUsuario}/sucursales/{idSucursalPredeterminada}")
   public void actualizarIdSucursalDeUsuario(@PathVariable long idUsuario,
                                             @PathVariable long idSucursalPredeterminada) {
     usuarioService.actualizarIdSucursalDeUsuario(idUsuario, idSucursalPredeterminada);
   }
 
-  @DeleteMapping("/usuarios/{idUsuario}")
+  @DeleteMapping("/api/v1/usuarios/{idUsuario}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idUsuario) {
     usuarioService.eliminar(idUsuario);

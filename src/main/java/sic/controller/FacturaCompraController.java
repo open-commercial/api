@@ -10,14 +10,12 @@ import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.dto.NuevaFacturaCompraDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
 public class FacturaCompraController {
 
   private final IFacturaCompraService facturaCompraService;
@@ -29,14 +27,13 @@ public class FacturaCompraController {
   private final IAuthService authService;
 
   @Autowired
-  public FacturaCompraController(
-      IFacturaCompraService facturaCompraService,
-      IFacturaService facturaService,
-      ISucursalService sucursalService,
-      IProveedorService proveedorService,
-      IUsuarioService usuarioService,
-      ITransportistaService transportistaService,
-      IAuthService authService) {
+  public FacturaCompraController(IFacturaCompraService facturaCompraService,
+                                 IFacturaService facturaService,
+                                 ISucursalService sucursalService,
+                                 IProveedorService proveedorService,
+                                 IUsuarioService usuarioService,
+                                 ITransportistaService transportistaService,
+                                 IAuthService authService) {
     this.facturaCompraService = facturaCompraService;
     this.facturaService = facturaService;
     this.sucursalService = sucursalService;
@@ -46,11 +43,10 @@ public class FacturaCompraController {
     this.authService = authService;
   }
 
-  @PostMapping("/facturas/compras")
+  @PostMapping("/api/v1/facturas/compras")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<FacturaCompra> guardarFacturaCompra(
-      @RequestBody NuevaFacturaCompraDTO nuevaCompraCompraDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public List<FacturaCompra> guardarFacturaCompra(@RequestBody NuevaFacturaCompraDTO nuevaCompraCompraDTO,
+                                                  @RequestHeader("Authorization") String authorizationHeader) {
     FacturaCompra fc = new FacturaCompra();
     fc.setFecha(nuevaCompraCompraDTO.getFecha());
     fc.setTipoComprobante(nuevaCompraCompraDTO.getTipoDeComprobante());
@@ -93,23 +89,22 @@ public class FacturaCompraController {
     return facturaCompraService.guardar(facturas);
   }
 
-  @PostMapping("/facturas/compras/busqueda/criteria")
+  @PostMapping("/api/v1/facturas/compras/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public Page<FacturaCompra> buscarFacturaCompra(
-      @RequestBody BusquedaFacturaCompraCriteria criteria) {
+  public Page<FacturaCompra> buscarFacturaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaCompraService.buscarFacturaCompra(criteria);
   }
 
-  @GetMapping("/facturas/compras/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
+  @GetMapping("/api/v1/facturas/compras/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public TipoDeComprobante[] getTipoFacturaCompra(
-      @PathVariable long idSucursal, @PathVariable long idProveedor) {
+  public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idSucursal,
+                                                  @PathVariable long idProveedor) {
     return facturaCompraService.getTiposDeComprobanteCompra(
         sucursalService.getSucursalPorId(idSucursal),
         proveedorService.getProveedorNoEliminadoPorId(idProveedor));
   }
 
-  @PostMapping("/facturas/compras/renglones")
+  @PostMapping("/api/v1/facturas/compras/renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
   public List<RenglonFactura> calcularRenglonesCompra(
       @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
@@ -118,14 +113,13 @@ public class FacturaCompraController {
         tipoDeComprobante, Movimiento.COMPRA, nuevosRenglonesFacturaDTO);
   }
 
-  @PostMapping("/facturas/compras/total-facturado/criteria")
+  @PostMapping("/api/v1/facturas/compras/total-facturado/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularTotalFacturadoCompra(
-      @RequestBody BusquedaFacturaCompraCriteria criteria) {
+  public BigDecimal calcularTotalFacturadoCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaCompraService.calcularTotalFacturadoCompra(criteria);
   }
 
-  @PostMapping("/facturas/compras/total-iva/criteria")
+  @PostMapping("/api/v1/facturas/compras/total-iva/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularTotalIvaCompra(@RequestBody BusquedaFacturaCompraCriteria criteria) {
     return facturaCompraService.calcularIvaCompra(criteria);

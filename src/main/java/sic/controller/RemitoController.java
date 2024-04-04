@@ -19,53 +19,52 @@ import sic.service.IRemitoService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
 public class RemitoController {
 
   private final IRemitoService remitoService;
   private final IAuthService authService;
 
   @Autowired
-  public RemitoController(IRemitoService remitoService, IAuthService authService) {
+  public RemitoController(IRemitoService remitoService,
+                          IAuthService authService) {
     this.remitoService = remitoService;
     this.authService = authService;
   }
 
-  @GetMapping("/remitos/{idRemito}")
+  @GetMapping("/api/v1/remitos/{idRemito}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Remito getRemitoPorId(@PathVariable long idRemito) {
     return remitoService.getRemitoPorId(idRemito);
   }
 
-  @PostMapping("/remitos")
+  @PostMapping("/api/v1/remitos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Remito crearRemitoDeFactura(
-      @RequestBody NuevoRemitoDTO nuevoRemitoDTO,
-      @RequestHeader("Authorization") String authorizationHeader) {
+  public Remito crearRemitoDeFactura(@RequestBody NuevoRemitoDTO nuevoRemitoDTO,
+                                     @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get("idUsuario");
     return remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, idUsuarioLoggedIn);
   }
 
-  @DeleteMapping("/remitos/{idRemito}")
+  @DeleteMapping("/api/v1/remitos/{idRemito}")
   @AccesoRolesPermitidos(Rol.ADMINISTRADOR)
   public void eliminar(@PathVariable long idRemito) {
     remitoService.eliminar(idRemito);
   }
 
-  @GetMapping("/remitos/{idRemito}/renglones")
+  @GetMapping("/api/v1/remitos/{idRemito}/renglones")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public List<RenglonRemito> getRenglonesDelRemito(@PathVariable long idRemito) {
     return remitoService.getRenglonesDelRemito(idRemito);
   }
 
-  @PostMapping("/remitos/busqueda/criteria")
+  @PostMapping("/api/v1/remitos/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public Page<Remito> getRemitosCriteria(@RequestBody BusquedaRemitoCriteria criteria) {
     return remitoService.buscarRemito(criteria);
   }
 
-  @GetMapping("/remitos/{idRemito}/reporte")
+  @GetMapping("/api/v1/remitos/{idRemito}/reporte")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public ResponseEntity<byte[]> getReporteRemito(@PathVariable long idRemito) {
     HttpHeaders headers = new HttpHeaders();

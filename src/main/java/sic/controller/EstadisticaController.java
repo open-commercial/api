@@ -10,7 +10,6 @@ import sic.service.IEstadisticaService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
 public class EstadisticaController {
 
   public final IEstadisticaService estadisticaService;
@@ -20,27 +19,27 @@ public class EstadisticaController {
     this.estadisticaService = estadisticaService;
   }
 
-  @GetMapping("/estadisticas/compras/monto-neto-mensual/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/estadisticas/compras/monto-neto-mensual/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<PeriodoMontoDTO> getMontoNetoCompradoPorMes(@PathVariable long idSucursal,
                                                           @RequestParam int anio) {
     return estadisticaService.getMontoNetoCompradoPorMes(idSucursal, anio);
   }
 
-  @GetMapping("/estadisticas/compras/monto-neto-anual/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/estadisticas/compras/monto-neto-anual/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(@PathVariable long idSucursal) {
     return estadisticaService.getMontoNetoCompradoPorAnio(idSucursal);
   }
 
-  @GetMapping("/estadisticas/compras/proveedores/monto-neto-anual/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/estadisticas/compras/proveedores/monto-neto-anual/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorAnio(@PathVariable long idSucursal,
                                                                        @RequestParam int anio) {
     return estadisticaService.getMontoNetoCompradoPorProveedorPorAnio(idSucursal, anio);
   }
 
-  @GetMapping("/estadisticas/compras/proveedores/monto-neto-mensual/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/estadisticas/compras/proveedores/monto-neto-mensual/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorMes(@PathVariable long idSucursal,
                                                                       @RequestParam int anio,

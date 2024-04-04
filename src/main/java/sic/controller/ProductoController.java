@@ -2,7 +2,6 @@ package sic.controller;
 
 import java.math.BigDecimal;
 import java.util.*;
-
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +15,9 @@ import sic.modelo.dto.*;
 import sic.service.*;
 import sic.exception.BusinessServiceException;
 import sic.util.FormatoReporte;
-
 import javax.persistence.EntityNotFoundException;
 
 @RestController
-@RequestMapping("/api/v1")
 public class ProductoController {
 
   private final IProductoService productoService;
@@ -35,16 +32,15 @@ public class ProductoController {
   private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public ProductoController(
-    IProductoService productoService,
-    IMedidaService medidaService,
-    IRubroService rubroService,
-    IProveedorService proveedorService,
-    ISucursalService sucursalService,
-    IUsuarioService usuarioService,
-    IAuthService authService,
-    ModelMapper modelMapper,
-    MessageSource messageSource) {
+  public ProductoController(IProductoService productoService,
+                            IMedidaService medidaService,
+                            IRubroService rubroService,
+                            IProveedorService proveedorService,
+                            ISucursalService sucursalService,
+                            IUsuarioService usuarioService,
+                            IAuthService authService,
+                            ModelMapper modelMapper,
+                            MessageSource messageSource) {
     this.productoService = productoService;
     this.medidaService = medidaService;
     this.rubroService = rubroService;
@@ -56,7 +52,7 @@ public class ProductoController {
     this.messageSource = messageSource;
   }
 
-  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/productos/{idProducto}/sucursales/{idSucursal}")
   public Producto getProductoPorId(
       @PathVariable long idProducto,
       @PathVariable long idSucursal,
@@ -76,7 +72,7 @@ public class ProductoController {
     return producto;
   }
 
-  @GetMapping("/productos/busqueda/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/productos/busqueda/sucursales/{idSucursal}")
   public Producto getProductoPorCodigo(@PathVariable long idSucursal,
                                        @RequestParam String codigo) {
     Producto producto = productoService.getProductoPorCodigo(codigo);
@@ -84,7 +80,7 @@ public class ProductoController {
     return producto;
   }
 
-  @PostMapping("/productos/busqueda/criteria/sucursales/{idSucursal}")
+  @PostMapping("/api/v1/productos/busqueda/criteria/sucursales/{idSucursal}")
   public Page<Producto> buscarProductos(
       @PathVariable long idSucursal,
       @RequestBody BusquedaProductoCriteria criteria,
@@ -116,17 +112,16 @@ public class ProductoController {
     return productos;
   }
 
-  @PostMapping("/productos/valor-stock/criteria")
+  @PostMapping("/api/v1/productos/valor-stock/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public BigDecimal calcularValorStock(@RequestBody BusquedaProductoCriteria criteria) {
     return productoService.calcularValorStock(criteria);
   }
 
-  @PostMapping("/productos/reporte/criteria/sucursales/{idSucursal}")
-  public void getListaDePrecios(
-          @RequestBody BusquedaProductoCriteria criteria,
-          @PathVariable long idSucursal,
-          @RequestParam(required = false) String formato) {
+  @PostMapping("/api/v1/productos/reporte/criteria/sucursales/{idSucursal}")
+  public void getListaDePrecios(@RequestBody BusquedaProductoCriteria criteria,
+                                @PathVariable long idSucursal,
+                                @RequestParam(required = false) String formato) {
     if (formato == null || formato.isEmpty()) formato = "pdf";
     switch (formato) {
       case "xlsx" -> productoService.procesarReporteListaDePrecios(criteria, idSucursal, FormatoReporte.XLSX);
@@ -136,13 +131,13 @@ public class ProductoController {
     }
   }
 
-  @DeleteMapping("/productos")
+  @DeleteMapping("/api/v1/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
     productoService.eliminarMultiplesProductos(idProducto);
   }
 
-  @PutMapping("/productos")
+  @PutMapping("/api/v1/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(
       @RequestBody ProductoDTO productoDTO,
@@ -204,7 +199,7 @@ public class ProductoController {
     productoService.actualizar(productoPorActualizar, productoPersistido, productoDTO.getImagen());
   }
 
-  @PostMapping("/productos")
+  @PostMapping("/api/v1/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public Producto guardar(
       @RequestBody NuevoProductoDTO nuevoProductoDTO,
@@ -214,7 +209,7 @@ public class ProductoController {
     return productoService.guardar(nuevoProductoDTO, idMedida, idRubro, idProveedor);
   }
 
-  @PutMapping("/productos/multiples")
+  @PutMapping("/api/v1/productos/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizarMultiplesProductos(
     @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO,
@@ -224,13 +219,13 @@ public class ProductoController {
     productoService.actualizarMultiples(productosParaActualizarDTO, usuarioLogueado);
   }
 
-  @PostMapping("/productos/disponibilidad-stock")
+  @PostMapping("/api/v1/productos/disponibilidad-stock")
   public List<ProductoFaltanteDTO> verificarDisponibilidadStock(
       @RequestBody ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO);
   }
 
-  @PostMapping("/productos/{idProducto}/favoritos")
+  @PostMapping("/api/v1/productos/{idProducto}/favoritos")
   public void marcarComoFavorito(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
@@ -239,7 +234,7 @@ public class ProductoController {
     productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
 
-  @GetMapping("/productos/favoritos/sucursales/{idSucursal}")
+  @GetMapping("/api/v1/productos/favoritos/sucursales/{idSucursal}")
   public Page<Producto> getProductosFavoritosDelCliente(
           @PathVariable long idSucursal,
           @RequestParam int pagina,
@@ -249,7 +244,7 @@ public class ProductoController {
     return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, idSucursal, pagina);
   }
 
-  @DeleteMapping("/productos/{idProducto}/favoritos")
+  @DeleteMapping("/api/v1/productos/{idProducto}/favoritos")
   public void quitarProductoDeFavoritos(
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
@@ -258,22 +253,26 @@ public class ProductoController {
     productoService.quitarProductoDeFavoritos(idUsuarioLoggedIn, idProducto);
   }
 
-  @DeleteMapping("/productos/favoritos")
-  public void quitarProductosDeFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+  @DeleteMapping("/api/v1/productos/favoritos")
+  public void quitarProductosDeFavoritos(
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     productoService.quitarProductosDeFavoritos(idUsuarioLoggedIn);
   }
 
-  @GetMapping("/productos/favoritos/cantidad")
-  public Long getCantidadDeProductosFavoritos(@RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
+  @GetMapping("/api/v1/productos/favoritos/cantidad")
+  public Long getCantidadDeProductosFavoritos(
+          @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
     return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
   }
 
-  @GetMapping("/productos/{idProducto}/sucursales/{idSucursal}/recomendados")
-  public Page<Producto> getProductosRecomendados(@PathVariable long idProducto, @PathVariable long idSucursal, @RequestParam int pagina) {
+  @GetMapping("/api/v1/productos/{idProducto}/sucursales/{idSucursal}/recomendados")
+  public Page<Producto> getProductosRecomendados(@PathVariable long idProducto,
+                                                 @PathVariable long idSucursal,
+                                                 @RequestParam int pagina) {
     return productoService.getProductosRelacionados(idProducto, idSucursal, pagina);
   }
 }
