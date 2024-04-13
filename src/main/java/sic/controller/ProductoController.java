@@ -133,7 +133,7 @@ public class ProductoController {
 
   @DeleteMapping("/api/v1/productos")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
-  public void eliminarMultiplesProductos(@RequestParam long[] idProducto) {
+  public void eliminarMultiplesProductos(@RequestParam Set<Long> idProducto) {
     productoService.eliminarMultiplesProductos(idProducto);
   }
 

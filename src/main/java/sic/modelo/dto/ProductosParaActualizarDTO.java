@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @Builder
 public class ProductosParaActualizarDTO {
 
-  private long[] idProducto;
+  private Set<Long> idProducto;
   private BigDecimal descuentoRecargoPorcentaje;
   private BigDecimal cantidadVentaMinima;
   private Long idMedida;

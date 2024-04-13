@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import sic.modelo.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.*;
@@ -74,7 +75,7 @@ public interface IProductoService {
 
   BigDecimal calcularPrecioLista(BigDecimal pvp, BigDecimal ivaPorcentaje);
 
-  void eliminarMultiplesProductos(long[] idProducto);
+  void eliminarMultiplesProductos(Set<Long> idProducto);
 
   Producto getProductoPorCodigo(String codigo);
 
@@ -113,8 +114,6 @@ public interface IProductoService {
   boolean isFavorito(long idUsuario, long idProducto);
 
   void quitarProductoDeFavoritos(long idUsuario, long idProducto);
-
-  void quitarProductoDeFavoritos(long idProducto);
 
   void quitarProductosDeFavoritos(long idUsuario);
 

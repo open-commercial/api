@@ -12,6 +12,7 @@ import sic.modelo.Producto;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ProductoRepository extends
         PagingAndSortingRepository<Producto, Long>,
@@ -23,6 +24,8 @@ public interface ProductoRepository extends
   Producto findByDescripcionAndEliminado(String descripcion, boolean eliminado);
 
   List<Producto> findAllByEliminado(boolean eliminado);
+
+  List<Producto> findByIdProductoInAndEliminadoFalse(Set<Long> idsProducto);
 
   @Modifying
   @Query("UPDATE Producto p SET p.urlImagen = :urlImagen WHERE p.idProducto = :idProducto")
