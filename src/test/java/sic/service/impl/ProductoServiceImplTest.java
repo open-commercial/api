@@ -377,7 +377,7 @@ class ProductoServiceImplTest {
         () ->
             productoService.actualizarMultiples(
                 ProductosParaActualizarDTO.builder()
-                    .idProducto(new long[] {1L})
+                    .idProducto(Set.of(1L))
                     .descuentoRecargoPorcentaje(BigDecimal.TEN)
                     .cantidadVentaMinima(BigDecimal.TEN)
                     .idMedida(1L)
@@ -390,23 +390,6 @@ class ProductoServiceImplTest {
                     .publico(true)
                     .build(), usuario));
     verify(messageSource).getMessage(eq("mensaje_modificar_producto_no_permitido"), any(), any());
-    assertThrows(
-        BusinessServiceException.class,
-        () ->
-            productoService.actualizarMultiples(
-                ProductosParaActualizarDTO.builder()
-                    .idProducto(new long[] {1L, 1L})
-                    .cantidadVentaMinima(BigDecimal.TEN)
-                    .idMedida(1L)
-                    .idRubro(1L)
-                    .idProveedor(2L)
-                    .gananciaPorcentaje(BigDecimal.TEN)
-                    .ivaPorcentaje(new BigDecimal("21"))
-                    .precioCosto(BigDecimal.TEN)
-                    .porcentajeBonificacionPrecio(BigDecimal.TEN)
-                    .publico(true)
-                    .build(), usuario));
-    verify(messageSource).getMessage(eq("mensaje_error_ids_duplicados"), any(), any());
     Producto producto1 = new Producto();
     producto1.setIdProducto(1L);
     producto1.setCodigo("1a");
@@ -423,7 +406,7 @@ class ProductoServiceImplTest {
     when(productoRepository.findByCodigoAndEliminado("2b", false)).thenReturn(Optional.of(producto2));
     productoService.actualizarMultiples(
             ProductosParaActualizarDTO.builder()
-                    .idProducto(new long[] {1L, 2L})
+                    .idProducto(Set.of(1L, 2L))
                     .cantidadVentaMinima(BigDecimal.TEN)
                     .idMedida(1L)
                     .idRubro(1L)
@@ -437,7 +420,7 @@ class ProductoServiceImplTest {
                     .build(), usuario);
     productoService.actualizarMultiples(
             ProductosParaActualizarDTO.builder()
-                    .idProducto(new long[] {1L, 2L})
+                    .idProducto(Set.of(1L, 2L))
                     .cantidadVentaMinima(BigDecimal.TEN)
                     .idMedida(1L)
                     .idRubro(1L)
@@ -913,18 +896,6 @@ class ProductoServiceImplTest {
   }
 
   @Test
-  void shouldTestQuitarProductoDeFavoritos() {
-    Producto producto = new Producto();
-    producto.setDescripcion("Producto Test");
-    producto.setIdProducto(1L);
-    when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
-    productoService.quitarProductoDeFavoritos(1L);
-    verify(productoFavoritoRepository).deleteAllByProducto(producto);
-    verify(messageSource)
-            .getMessage(eq("mensaje_producto_favorito_quitado"), eq(new Object[] {producto}), eq(Locale.getDefault()));
-  }
-
-  @Test
   void shouldTestBuscarProductos() {
     Cliente cliente = new Cliente();
     cliente.setIdCliente(1L);
@@ -1084,12 +1055,4 @@ class ProductoServiceImplTest {
     verify(productoRepository).actualizarCantidadReservada(1L, BigDecimal.TEN.negate());
   }
 
-  @Test
-  void shouldBuscarProductoDeCatalogoParaUsuario() {
-    Usuario usuarioDeConsulta = new Usuario();
-    usuarioDeConsulta.setRoles(Collections.singletonList(Rol.COMPRADOR));
-    when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioDeConsulta);
-    Cliente clienteDeUsuario = new Cliente();
-    clienteDeUsuario.setPuedeComprarAPlazo(true);
-  }
 }

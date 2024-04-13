@@ -112,7 +112,7 @@ public class ProductoServiceImpl implements IProductoService {
               "mensaje_producto_oferta_inferior_0", null, Locale.getDefault()));
     }
     // Codigo
-    if (!producto.getCodigo().equals("")) {
+    if (!producto.getCodigo().isEmpty()) {
       Producto productoDuplicado = this.getProductoPorCodigo(producto.getCodigo());
       if (operacion.equals(TipoDeOperacion.ACTUALIZACION)
           && productoDuplicado != null
@@ -123,7 +123,7 @@ public class ProductoServiceImpl implements IProductoService {
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && productoDuplicado != null
-          && !producto.getCodigo().equals("")) {
+          && !producto.getCodigo().isEmpty()) {
         throw new BusinessServiceException(
           messageSource.getMessage(
             "mensaje_producto_duplicado_codigo", null, Locale.getDefault()));
@@ -354,8 +354,11 @@ public class ProductoServiceImpl implements IProductoService {
     if (criteria.getListarSoloParaCatalogo() != null)
       builder.and(Boolean.TRUE.equals(criteria.getListarSoloParaCatalogo()) ? qProducto.paraCatalogo.isTrue() : qProducto.paraCatalogo.isFalse());
     if (criteria.getPublico() != null) {
-      if (criteria.getPublico()) builder.and(qProducto.publico.isTrue());
-      else builder.and(qProducto.publico.isFalse());
+      if (Boolean.TRUE.equals(criteria.getPublico())) {
+        builder.and(qProducto.publico.isTrue());
+      } else {
+        builder.and(qProducto.publico.isFalse());
+      }
     }
     if (criteria.getOferta() != null && criteria.getOferta())
       builder.and(qProducto.precioProducto.oferta.isTrue());
@@ -464,7 +467,7 @@ public class ProductoServiceImpl implements IProductoService {
     this.calcularPrecioBonificado(productoPorActualizar);
     if (productoPersistido.isPublico() && !productoPorActualizar.isPublico()) {
       carritoCompraService.eliminarItem(productoPersistido.getIdProducto());
-      this.quitarProductoDeFavoritos(productoPersistido.getIdProducto());
+      this.quitarProductoDeFavoritos(productoPersistido);
     }
     //se setea siempre en false momentaneamente
     productoPorActualizar.getCantidadProducto().setIlimitado(false);
@@ -729,34 +732,24 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   @Transactional
-  public void eliminarMultiplesProductos(long[] idProducto) {
-    if (this.contieneDuplicados(idProducto)) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_ids_duplicados", null, Locale.getDefault()));
-    }
-    List<Producto> productos = new ArrayList<>();
-    for (Long i : idProducto) {
-      Producto producto = this.getProductoNoEliminadoPorId(i);
-      if (producto == null) {
-        throw new EntityNotFoundException(messageSource.getMessage(
-          "mensaje_producto_no_existente", null, Locale.getDefault()));
+  public void eliminarMultiplesProductos(Set<Long> idProducto) {
+    var productos = productoRepository.findByIdProductoInAndEliminadoFalse(idProducto);
+    for (Producto p : productos) {
+      carritoCompraService.eliminarItem(p.getIdProducto());
+      this.quitarProductoDeFavoritos(p);
+      p.setEliminado(true);
+      if (p.getUrlImagen() != null && !p.getUrlImagen().isEmpty()) {
+        imageUploaderService.borrarImagen(Producto.class.getSimpleName() + p.getIdProducto());
       }
-      carritoCompraService.eliminarItem(i);
-      this.quitarProductoDeFavoritos(i);
-      producto.setEliminado(true);
-      if (producto.getUrlImagen() != null && !producto.getUrlImagen().isEmpty()) {
-        imageUploaderService.borrarImagen(Producto.class.getSimpleName() + producto.getIdProducto());
-      }
-      productos.add(producto);
     }
     productoRepository.saveAll(productos);
+    log.info("Los Productos {} se eliminaron.", productos);
   }
 
   @Override
   @Transactional
   public void actualizarMultiples(ProductosParaActualizarDTO productosParaActualizarDTO, Usuario usuarioLogueado) {
-    boolean actualizaPrecios =
-        productosParaActualizarDTO.getGananciaPorcentaje() != null
+    boolean actualizaPrecios = productosParaActualizarDTO.getGananciaPorcentaje() != null
             && productosParaActualizarDTO.getIvaPorcentaje() != null
             && productosParaActualizarDTO.getPrecioCosto() != null;
     boolean aplicaDescuentoRecargoPorcentaje = productosParaActualizarDTO.getDescuentoRecargoPorcentaje() != null;
@@ -764,19 +757,10 @@ public class ProductoServiceImpl implements IProductoService {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_modificar_producto_no_permitido", null, Locale.getDefault()));
     }
-    // Requeridos
-    if (this.contieneDuplicados(productosParaActualizarDTO.getIdProducto())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_error_ids_duplicados", null, Locale.getDefault()));
-    }
-    List<Producto> productos = new ArrayList<>();
-    for (long i : productosParaActualizarDTO.getIdProducto()) {
-      productos.add(this.getProductoNoEliminadoPorId(i));
-    }
+    var productos = productoRepository.findByIdProductoInAndEliminadoFalse(productosParaActualizarDTO.getIdProducto());
     BigDecimal multiplicador = BigDecimal.ZERO;
     if (aplicaDescuentoRecargoPorcentaje) {
-      if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje().compareTo(BigDecimal.ZERO)
-          > 0) {
+      if (productosParaActualizarDTO.getDescuentoRecargoPorcentaje().compareTo(BigDecimal.ZERO) > 0) {
         multiplicador =
             productosParaActualizarDTO
                 .getDescuentoRecargoPorcentaje()
@@ -796,16 +780,16 @@ public class ProductoServiceImpl implements IProductoService {
         p.setMedida(medidaService.getMedidaNoEliminadaPorId(productosParaActualizarDTO.getIdMedida()));
       }
       if (productosParaActualizarDTO.getIdRubro() != null) {
-        Rubro rubro = rubroService.getRubroNoEliminadoPorId(productosParaActualizarDTO.getIdRubro());
+        var rubro = rubroService.getRubroNoEliminadoPorId(productosParaActualizarDTO.getIdRubro());
         p.setRubro(rubro);
       }
       if (productosParaActualizarDTO.getIdProveedor() != null) {
-        Proveedor proveedor =
-            proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
+        var proveedor = proveedorService.getProveedorNoEliminadoPorId(productosParaActualizarDTO.getIdProveedor());
         p.setProveedor(proveedor);
       }
-      if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getCantidadVentaMinima() != null
-                && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
+      if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
+              && productosParaActualizarDTO.getCantidadVentaMinima() != null
+              && productosParaActualizarDTO.getCantidadVentaMinima().compareTo(BigDecimal.ZERO) > 0) {
           p.getCantidadProducto().setCantMinima(productosParaActualizarDTO.getCantidadVentaMinima());
       }
       if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR) && productosParaActualizarDTO.getParaCatalogo() != null) {
@@ -814,30 +798,34 @@ public class ProductoServiceImpl implements IProductoService {
       if (actualizaPrecios) {
         p.getPrecioProducto().setPrecioCosto(productosParaActualizarDTO.getPrecioCosto());
         p.getPrecioProducto().setGananciaPorcentaje(productosParaActualizarDTO.getGananciaPorcentaje());
-        p.getPrecioProducto().setGananciaNeto(this.calcularGananciaNeto(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
-        p.getPrecioProducto().setPrecioVentaPublico(this.calcularPVP(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
+        p.getPrecioProducto().setGananciaNeto(
+                this.calcularGananciaNeto(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
+        p.getPrecioProducto().setPrecioVentaPublico(
+                this.calcularPVP(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
         p.getPrecioProducto().setIvaPorcentaje(productosParaActualizarDTO.getIvaPorcentaje());
-        p.getPrecioProducto().setIvaNeto(this.calcularIVANeto(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
+        p.getPrecioProducto().setIvaNeto(
+                this.calcularIVANeto(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
         p.getPrecioProducto().setPrecioLista(
                 this.calcularPrecioLista(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
         if (productosParaActualizarDTO.getPorcentajeBonificacionOferta() != null
-                && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO)
-                > 0) {
+                && productosParaActualizarDTO.getPorcentajeBonificacionOferta().compareTo(BigDecimal.ZERO) > 0) {
           p.getPrecioProducto().setOferta(true);
-          p.getPrecioProducto().setPorcentajeBonificacionOferta(
-                  productosParaActualizarDTO.getPorcentajeBonificacionOferta());
+          p.getPrecioProducto().setPorcentajeBonificacionOferta(productosParaActualizarDTO.getPorcentajeBonificacionOferta());
         } else {
           p.getPrecioProducto().setOferta(false);
         }
       }
       if (aplicaDescuentoRecargoPorcentaje) {
         p.getPrecioProducto().setPrecioCosto(p.getPrecioProducto().getPrecioCosto().multiply(multiplicador));
-        p.getPrecioProducto().setGananciaNeto(this.calcularGananciaNeto(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
-        p.getPrecioProducto().setPrecioVentaPublico(this.calcularPVP(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
-        p.getPrecioProducto().setIvaNeto(this.calcularIVANeto(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
+        p.getPrecioProducto().setGananciaNeto(
+                this.calcularGananciaNeto(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
+        p.getPrecioProducto().setPrecioVentaPublico(
+                this.calcularPVP(p.getPrecioProducto().getPrecioCosto(), p.getPrecioProducto().getGananciaPorcentaje()));
+        p.getPrecioProducto().setIvaNeto(
+                this.calcularIVANeto(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
         p.getPrecioProducto().setPrecioLista(
-            this.calcularPrecioLista(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
+                this.calcularPrecioLista(p.getPrecioProducto().getPrecioVentaPublico(), p.getPrecioProducto().getIvaPorcentaje()));
         p.setFechaUltimaModificacion(LocalDateTime.now());
       }
       if (productosParaActualizarDTO.getIdMedida() != null
@@ -849,14 +837,11 @@ public class ProductoServiceImpl implements IProductoService {
       }
       if (productosParaActualizarDTO.getPublico() != null) {
         p.setPublico(productosParaActualizarDTO.getPublico());
-        if (!productosParaActualizarDTO.getPublico())
-          carritoCompraService.eliminarItem(p.getIdProducto());
+        if (Boolean.FALSE.equals(productosParaActualizarDTO.getPublico())) carritoCompraService.eliminarItem(p.getIdProducto());
       }
       if (productosParaActualizarDTO.getPorcentajeBonificacionPrecio() != null
-          && productosParaActualizarDTO.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO)
-              >= 0) {
-        p.getPrecioProducto().setPorcentajeBonificacionPrecio(
-            productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
+              && productosParaActualizarDTO.getPorcentajeBonificacionPrecio().compareTo(BigDecimal.ZERO) >= 0) {
+        p.getPrecioProducto().setPorcentajeBonificacionPrecio(productosParaActualizarDTO.getPorcentajeBonificacionPrecio());
       }
       this.calcularPrecioBonificado(p);
       this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
@@ -938,23 +923,23 @@ public class ProductoServiceImpl implements IProductoService {
   public List<ProductoFaltanteDTO> getProductosSinStockDisponible(
       ProductosParaVerificarStockDTO productosParaVerificarStockDTO) {
     if (productosParaVerificarStockDTO.getIdSucursal() <= 0) {
-    throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_producto_consulta_stock_sin_sucursal", null, Locale.getDefault()));}
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_producto_consulta_stock_sin_sucursal", null, Locale.getDefault()));
+    }
     List<ProductoFaltanteDTO> productosFaltantes = new ArrayList<>();
     int longitudIds = productosParaVerificarStockDTO.getIdProducto().length;
     int longitudCantidades = productosParaVerificarStockDTO.getCantidad().length;
     HashMap<Long, BigDecimal> listaIdsAndCantidades = new HashMap<>();
     this.validarLongitudDeArrays(longitudIds, longitudCantidades);
     if (productosParaVerificarStockDTO.getIdPedido() != null) {
-      List<RenglonPedido> renglonesDelPedido =
-              pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(productosParaVerificarStockDTO.getIdPedido());
-      if (!renglonesDelPedido.isEmpty()){
-      renglonesDelPedido.forEach(renglonPedido -> listaIdsAndCantidades.put(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
+      var renglonesDelPedido = pedidoService.getRenglonesDelPedidoOrdenadorPorIdRenglon(productosParaVerificarStockDTO.getIdPedido());
+      if (!renglonesDelPedido.isEmpty()) {
+        renglonesDelPedido.forEach(
+                renglonPedido -> listaIdsAndCantidades.put(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
       }
     }
     for (int i = 0; i < longitudIds; i++) {
-      Producto producto =
-          this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
+      var producto = this.getProductoNoEliminadoPorId(productosParaVerificarStockDTO.getIdProducto()[i]);
       this.calcularCantidadEnSucursalesDisponible(producto, productosParaVerificarStockDTO.getIdSucursal());
       BigDecimal cantidadParaCalcular = productosParaVerificarStockDTO.getCantidad()[i];
       if (!listaIdsAndCantidades.isEmpty() && listaIdsAndCantidades.get(producto.getIdProducto()) != null) {
@@ -983,9 +968,10 @@ public class ProductoServiceImpl implements IProductoService {
 
   @Override
   public void validarLongitudDeArrays(int longitudIds, int longitudCantidades) {
-    if (longitudIds != longitudCantidades)
-       throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
+    if (longitudIds != longitudCantidades) {
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_error_logitudes_arrays", null, Locale.getDefault()));
+    }
   }
 
   @Override
@@ -1132,15 +1118,6 @@ public class ProductoServiceImpl implements IProductoService {
     return jasperReportsHandler.compilar("report/ListaPreciosProductos.jrxml", params, productos, formato);
   }
 
-  private boolean contieneDuplicados(long[] array) {
-      Set<Long> set = new HashSet<>();
-      for (long i : array) {
-        if (set.contains(i)) return true;
-        set.add(i);
-      }
-      return false;
-  }
-
   @Override
   public Producto calcularCantidadEnSucursalesDisponible(Producto producto, long idSucursalSeleccionada) {
     Set<CantidadEnSucursal> cantidadesEnSucursales = new HashSet<>();
@@ -1161,19 +1138,19 @@ public class ProductoServiceImpl implements IProductoService {
   public Producto guardarProductoFavorito(long idUsuario, long idProducto) {
     Producto producto = this.getProductoNoEliminadoPorId(idProducto);
     if (this.isFavorito(idUsuario, idProducto)) {
-        producto.setFavorito(true);
+      producto.setFavorito(true);
     } else {
-    Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
-    ProductoFavorito productoFavorito = new ProductoFavorito();
-    productoFavorito.setCliente(cliente);
-    productoFavorito.setProducto(producto);
-    customValidator.validar(productoFavorito);
-    producto = productoFavoritoRepository.save(productoFavorito).getProducto();
-    producto.setFavorito(true);
-    log.info(messageSource.getMessage(
-            "mensaje_producto_favorito_agregado",
-            new Object[] {producto},
-            Locale.getDefault()));
+      Cliente cliente = clienteService.getClientePorIdUsuario(idUsuario);
+      ProductoFavorito productoFavorito = new ProductoFavorito();
+      productoFavorito.setCliente(cliente);
+      productoFavorito.setProducto(producto);
+      customValidator.validar(productoFavorito);
+      producto = productoFavoritoRepository.save(productoFavorito).getProducto();
+      producto.setFavorito(true);
+      log.info(messageSource.getMessage(
+              "mensaje_producto_favorito_agregado",
+              new Object[]{producto},
+              Locale.getDefault()));
     }
     return producto;
   }
@@ -1227,10 +1204,7 @@ public class ProductoServiceImpl implements IProductoService {
             Locale.getDefault()));
   }
 
-  @Override
-  @Transactional
-  public void quitarProductoDeFavoritos(long idProducto) {
-    Producto producto = this.getProductoNoEliminadoPorId(idProducto);
+  private void quitarProductoDeFavoritos(Producto producto) {
     productoFavoritoRepository.deleteAllByProducto(producto);
     log.info(messageSource.getMessage(
             "mensaje_producto_favorito_quitado",
@@ -1291,9 +1265,12 @@ public class ProductoServiceImpl implements IProductoService {
   @Override
   public Page<Producto> getProductosRelacionados(long idProducto, long idSucursal, int pagina) {
     Pageable pageable = PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT);
-    Page<Producto> productosRelacionados = productoRepository.buscarProductosRelacionadosPorRubro(this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
+    var productosRelacionados =
+            productoRepository.buscarProductosRelacionadosPorRubro(
+                    this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
     productosRelacionados.forEach(producto -> this.calcularCantidadEnSucursalesDisponible(producto, idSucursal));
-    return productoRepository.buscarProductosRelacionadosPorRubro(this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
+    return productoRepository.buscarProductosRelacionadosPorRubro(
+            this.getProductoNoEliminadoPorId(idProducto).getRubro().getIdRubro(), idProducto, pageable);
   }
 
   @Override
