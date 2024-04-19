@@ -1,12 +1,10 @@
 name: Open Commercial CI
-
 on:
   push:
     branches:
       - master
   pull_request:
     types: [ opened, synchronize, reopened ]
-
 jobs:
   build-analyze-deploy:
     name: Build, analyze, dockerize, and publish
@@ -21,10 +19,6 @@ jobs:
         with:
           java-version: 17
           distribution: temurin
-#      - name: Set timezone
-#        uses: zcong1993/setup-timezone@master
-#        with:
-#          timezone: America/Argentina/Buenos_Aires
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
@@ -50,6 +44,17 @@ jobs:
           CLOUDINARY_URL: ""
           MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=api:api
+      - name: Get release version
+        run: |
+          RELEASE_VERSION=$( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+      - name: Create Release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_VERSION }}
+          release_name: ${{ env.RELEASE_VERSION }}
       - name: Set up QEMU
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/setup-qemu-action@v2
@@ -68,4 +73,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: opencommercial/api:latest
+          tags: opencommercial/api:${{ env.RELEASE_VERSION }}
