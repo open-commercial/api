@@ -44,6 +44,11 @@ jobs:
           CLOUDINARY_URL: ""
           MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=api:api
+      - name: Generate changelog
+        uses: Bullrich/generate-release-changelog@master
+        id: changelog
+        env:
+          REPO: ${{ github.repository }}
       - name: Get release version
         run: |
           echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
@@ -55,6 +60,8 @@ jobs:
         with:
           tag_name: ${{ env.RELEASE_VERSION }}
           release_name: ${{ env.RELEASE_VERSION }}
+          body: |
+            ${{ steps.changelog.outputs.changelog }}
       - name: Set up QEMU
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/setup-qemu-action@v2
