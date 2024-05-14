@@ -287,7 +287,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
   @Override
   @Transactional
-  public void enviarEmailDeRecuperacion(long idSucursal, String email, String host) {
+  public void enviarEmailDeRecuperacion(String email, String host) {
     Usuario usuario = usuarioRepository.findByEmailAndEliminado(email, false);
     if (usuario == null || !usuario.isHabilitado()) {
       throw new BusinessServiceException(
