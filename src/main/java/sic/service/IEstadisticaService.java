@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface IEstadisticaService {
 
-  List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(long idSucursal);
+  List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(long idSucursal, int limite);
 
   List<PeriodoMontoDTO> getMontoNetoCompradoPorMes(long idSucursal, int anio);
 

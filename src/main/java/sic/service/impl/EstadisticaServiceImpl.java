@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.MessageSource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.cache.annotation.Cacheable;
@@ -42,8 +43,8 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
 
   @Override
   @Cacheable("monto-neto-comprado-por-anio")
-  public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(long idSucursal) {
-    return facturaCompraRepository.getMontoNetoCompradoPorAnio(idSucursal)
+  public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(long idSucursal, int limite) {
+    return facturaCompraRepository.getMontoNetoCompradoPorAnio(idSucursal, PageRequest.ofSize(limite))
             .stream()
             .map(this::mapPeriodoMonto)
             .toList();
