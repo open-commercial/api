@@ -64,8 +64,8 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
 
   @Override
   @Cacheable(MONTO_NETO_COMPRADO_POR_ANIO)
-  public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(long idSucursal) {
-    return facturaCompraRepository.getMontoNetoCompradoPorAnio(idSucursal)
+  public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(long idSucursal, int limite) {
+    return facturaCompraRepository.getMontoNetoCompradoPorAnio(idSucursal, PageRequest.ofSize(limite))
             .stream()
             .map(this::mapPeriodoMonto)
             .toList();
