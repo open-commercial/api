@@ -14,4 +14,12 @@ public interface IEstadisticaService {
 
   List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorMes(long idSucursal, int anio, int mes);
 
+  List<PeriodoMontoDTO> getMontoNetoVendidoPorAnio(long idSucursal, int limite);
+
+  List<PeriodoMontoDTO> getMontoNetoVendidoPorMes(long idSucursal, int anio);
+
+  List<EntidadMontoDTO> getMontoNetoVendidoPorRubroPorAnio(long idSucursal, int anio);
+
+  List<EntidadMontoDTO> getMontoNetoVendidoPorRubroPorMes(long idSucursal, int anio, int mes);
+
 }
