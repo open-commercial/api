@@ -29,6 +29,8 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   private final FacturaVentaRepository facturaVentaRepository;
   private final CacheManager cacheManager;
   private final MessageSource messageSource;
+  private static final String MENSAJE_ERROR_FORMATO_ANIO_NO_VALIDO = "mensaje_formato_anio_no_valido";
+  private static final String MENSAJE_ERROR_FORMATO_MES_NO_VALIDO = "mensaje_formato_mes_no_valido";
   private static final String MONTO_NETO_COMPRADO_POR_ANIO = "monto-neto-comprado-por-anio";
   private static final String MONTO_NETO_COMPRADO_POR_MES = "monto-neto-comprado-por-mes";
   private static final String MONTO_NETO_COMPRADO_POR_PROVEEDOR_POR_ANIO = "monto-neto-comprado-por-proveedor-por-anio";
@@ -75,7 +77,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   @Cacheable(MONTO_NETO_COMPRADO_POR_MES)
   public List<PeriodoMontoDTO> getMontoNetoCompradoPorMes(long idSucursal, int anio) {
     if (!this.isAnioValido(anio)) throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_anio_no_valido", null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_ERROR_FORMATO_ANIO_NO_VALIDO, null, Locale.getDefault()));
     return facturaCompraRepository.getMontoNetoCompradoPorMes(idSucursal, anio)
             .stream()
             .map(this::mapPeriodoMonto)
@@ -86,7 +88,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   @Cacheable(MONTO_NETO_COMPRADO_POR_PROVEEDOR_POR_ANIO)
   public List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorAnio(long idSucursal, int anio) {
     if (!this.isAnioValido(anio)) throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_anio_no_valido", null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_ERROR_FORMATO_ANIO_NO_VALIDO, null, Locale.getDefault()));
     return facturaCompraRepository.getMontoNetoCompradoPorProveedorPorAnio(idSucursal, anio)
             .stream()
             .map(this::mapEntidadMonto)
@@ -97,7 +99,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   @Cacheable(MONTO_NETO_COMPRADO_POR_PROVEEDOR_POR_MES)
   public List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorMes(long idSucursal, int anio, int mes) {
     if (!this.isMesValido(mes)) throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_mes_no_valido", null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_ERROR_FORMATO_MES_NO_VALIDO, null, Locale.getDefault()));
     return facturaCompraRepository.getMontoNetoCompradoPorProveedorPorMes(idSucursal, anio, mes)
             .stream()
             .map(this::mapEntidadMonto)
@@ -117,7 +119,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   @Cacheable(MONTO_NETO_VENDIDO_POR_MES)
   public List<PeriodoMontoDTO> getMontoNetoVendidoPorMes(long idSucursal, int anio) {
     if (!this.isAnioValido(anio)) throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_anio_no_valido", null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_ERROR_FORMATO_ANIO_NO_VALIDO, null, Locale.getDefault()));
     return facturaVentaRepository.getMontoNetoVendidoPorMes(idSucursal, anio)
             .stream()
             .map(this::mapPeriodoMonto)
@@ -128,7 +130,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   @Cacheable(MONTO_NETO_VENDIDO_POR_RUBRO_POR_ANIO)
   public List<EntidadMontoDTO> getMontoNetoVendidoPorRubroPorAnio(long idSucursal, int anio) {
     if (!this.isAnioValido(anio)) throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_anio_no_valido", null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_ERROR_FORMATO_ANIO_NO_VALIDO, null, Locale.getDefault()));
     return facturaVentaRepository.getMontoNetoVendidoPorRubroPorAnio(idSucursal, anio)
             .stream()
             .map(this::mapEntidadMonto)
@@ -139,7 +141,7 @@ public class EstadisticaServiceImpl implements IEstadisticaService {
   @Cacheable(MONTO_NETO_VENDIDO_POR_RUBRO_POR_MES)
   public List<EntidadMontoDTO> getMontoNetoVendidoPorRubroPorMes(long idSucursal, int anio, int mes) {
     if (!this.isMesValido(mes)) throw new BusinessServiceException(
-            messageSource.getMessage("mensaje_formato_mes_no_valido", null, Locale.getDefault()));
+            messageSource.getMessage(MENSAJE_ERROR_FORMATO_MES_NO_VALIDO, null, Locale.getDefault()));
     return facturaVentaRepository.getMontoNetoVendidoPorRubroPorMes(idSucursal, anio, mes)
             .stream()
             .map(this::mapEntidadMonto)
