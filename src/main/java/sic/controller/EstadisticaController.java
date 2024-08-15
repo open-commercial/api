@@ -28,8 +28,9 @@ public class EstadisticaController {
 
   @GetMapping("/api/v1/estadisticas/compras/monto-neto-anual/sucursales/{idSucursal}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(@PathVariable long idSucursal) {
-    return estadisticaService.getMontoNetoCompradoPorAnio(idSucursal);
+  public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(@PathVariable long idSucursal,
+                                                           @RequestParam(required = false, defaultValue = "4") int limite) {
+    return estadisticaService.getMontoNetoCompradoPorAnio(idSucursal, limite);
   }
 
   @GetMapping("/api/v1/estadisticas/compras/proveedores/monto-neto-anual/sucursales/{idSucursal}")
