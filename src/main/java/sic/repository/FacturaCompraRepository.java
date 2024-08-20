@@ -17,7 +17,7 @@ public interface FacturaCompraRepository extends
           "FROM FacturaCompra fc " +
           "WHERE fc.eliminada = false AND fc.sucursal.idSucursal = :idSucursal " +
           "GROUP BY periodo " +
-          "ORDER BY periodo")
+          "ORDER BY periodo desc")
   List<PeriodoMontoProjection> getMontoNetoCompradoPorAnio(long idSucursal, Pageable pageable);
 
   @Query("SELECT month(fc.fecha) as periodo, round(sum(fc.total)) as monto " +
