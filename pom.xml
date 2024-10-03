@@ -26,7 +26,7 @@
         <apache-poi.version>3.17</apache-poi.version>
         <jjwt.version>0.9.1</jjwt.version>
         <bouncycastle-bcmail.version>1.46</bouncycastle-bcmail.version>
-        <commons-io.version>2.7</commons-io.version>
+        <commons-io.version>2.14.0</commons-io.version>
         <messaging.saaj.version>1.5.2</messaging.saaj.version>
         <cloudinary.version>1.33.0</cloudinary.version>
         <newrelic-agent.version>8.9.1</newrelic-agent.version>
