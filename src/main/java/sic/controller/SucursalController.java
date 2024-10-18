@@ -1,28 +1,29 @@
 package sic.controller;
 
-import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.Sucursal;
 import sic.modelo.Rol;
+import sic.modelo.Sucursal;
 import sic.modelo.Ubicacion;
 import sic.modelo.dto.NuevaSucursalDTO;
 import sic.modelo.dto.SucursalDTO;
-import sic.service.ISucursalService;
-import sic.service.IUbicacionService;
+import sic.service.SucursalService;
+import sic.service.UbicacionService;
+
+import java.util.List;
 
 @RestController
 public class SucursalController {
 
-  public final ISucursalService sucursalService;
-  public final IUbicacionService ubicacionService;
+  public final SucursalService sucursalService;
+  public final UbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public SucursalController(ISucursalService sucursalService,
-                            IUbicacionService ubicacionService,
+  public SucursalController(SucursalService sucursalService,
+                            UbicacionService ubicacionService,
                             ModelMapper modelMapper) {
     this.sucursalService = sucursalService;
     this.ubicacionService = ubicacionService;

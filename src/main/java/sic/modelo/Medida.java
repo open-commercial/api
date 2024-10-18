@@ -1,8 +1,8 @@
 package sic.modelo;
 
 import java.io.Serializable;
-import javax.validation.constraints.NotNull;
-import javax.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.*;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import sic.config.Views;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "medida")

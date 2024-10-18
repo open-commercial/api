@@ -1,9 +1,6 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +15,15 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
-import sic.service.impl.*;
+import sic.service.*;
 
-import javax.crypto.SecretKey;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -52,8 +47,7 @@ class FacturaVentaControllerTest {
 
   @Test
   void shouldGuardarFacturaVenta() {
-    NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
-        NuevaFacturaVentaDTO.builder().tipoDeComprobante(TipoDeComprobante.PEDIDO).build();
+    var nuevaFacturaVentaDTO = NuevaFacturaVentaDTO.builder().tipoDeComprobante(TipoDeComprobante.PEDIDO).build();
     assertThrows(
         BusinessServiceException.class,
         () -> facturaVentaController.guardarFacturaVenta(nuevaFacturaVentaDTO, 1L, "headers"));
@@ -74,20 +68,7 @@ class FacturaVentaControllerTest {
     pedido.setIdPedido(1L);
     pedido.setSucursal(sucursal);
     when(pedidoService.getPedidoNoEliminadoPorId(1L)).thenReturn(new Pedido());
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
-    SecretKey secretKey = MacProvider.generateKey();
-    String token =
-            Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", roles)
-                    .compact();
-    Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
@@ -96,33 +77,19 @@ class FacturaVentaControllerTest {
     facturaVenta.setCliente(cliente);
     facturaVenta.setUsuario(usuario);
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_A);
-    when(facturaVentaService.construirFacturaVenta(any(), anyLong(), any())).thenReturn(facturaVenta);
+    when(facturaVentaService.construirFacturaVenta(any(), anyLong(), anyLong())).thenReturn(facturaVenta);
     facturaVentaController.guardarFacturaVenta(nuevaFacturaVenta2DTO, 1L, "headers");
     List<FacturaVenta> facturaVentas = new ArrayList<>();
     facturaVentas.add(facturaVenta);
-    verify(facturaVentaService, times(1))
-            .guardar(facturaVentas, 1L, Collections.emptyList());
+    verify(facturaVentaService, times(1)).guardar(facturaVentas, 1L, Collections.emptyList());
     facturaVenta.setTipoComprobante(TipoDeComprobante.FACTURA_X);
-    when(facturaVentaService.construirFacturaVenta(any(), anyLong(), any())).thenReturn(facturaVenta);
-    verify(facturaVentaService, times(1))
-            .guardar(facturaVentas, 1L, Collections.emptyList());
+    when(facturaVentaService.construirFacturaVenta(any(), anyLong(), anyLong())).thenReturn(facturaVenta);
+    verify(facturaVentaService, times(1)).guardar(facturaVentas, 1L, Collections.emptyList());
   }
 
   @Test
   void shouldBuscarFacturaVenta() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    String token =
-        Jwts.builder()
-            .setIssuedAt(Date.from(zdtNow.toInstant()))
-            .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-            .signWith(SignatureAlgorithm.HS512, secretKey)
-            .claim("idUsuario", 1L)
-            .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-            .compact();
-    Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken(any())).thenReturn(claims);
     List<FacturaVenta> facturas = new ArrayList<>();
     FacturaVenta facturaVenta = new FacturaVenta();
@@ -137,22 +104,7 @@ class FacturaVentaControllerTest {
 
   @Test
   void shouldGetTipoFacturaVenta() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .compact())
-            .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
@@ -161,26 +113,15 @@ class FacturaVentaControllerTest {
     when(facturaVentaService.getTiposDeComprobanteVenta(any(), any(), any()))
         .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.FACTURA_A});
     assertEquals(
-        new TipoDeComprobante[] {TipoDeComprobante.FACTURA_A}[0],
-        facturaVentaController.getTipoFacturaVenta(1L, 1L, "headers")[0]);
-    claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.VENDEDOR))
-                    .compact())
-            .getBody();
+            TipoDeComprobante.FACTURA_A,
+            facturaVentaController.getTipoFacturaVenta(1L, 1L, "headers")[0]);
+    claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("VENDEDOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     when(facturaVentaService.getTiposDeComprobanteVenta(any(), any(), any()))
         .thenReturn(new TipoDeComprobante[] {TipoDeComprobante.PEDIDO});
     assertEquals(
-        new TipoDeComprobante[] {TipoDeComprobante.PEDIDO}[0],
-        facturaVentaController.getTipoFacturaVenta(1L, 1L, "headers")[0]);
+            TipoDeComprobante.PEDIDO,
+            facturaVentaController.getTipoFacturaVenta(1L, 1L, "headers")[0]);
   }
 
   @Test
@@ -218,22 +159,7 @@ class FacturaVentaControllerTest {
 
   @Test
   void shouldCalcularTotalFacturadoVenta() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .compact())
-            .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
@@ -247,22 +173,7 @@ class FacturaVentaControllerTest {
 
   @Test
   void shouldCalcularIvaVenta() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .compact())
-            .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();
@@ -275,22 +186,7 @@ class FacturaVentaControllerTest {
 
   @Test
   void shouldCalcularGananciaTotal() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .compact())
-            .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
         BusquedaFacturaVentaCriteria.builder().build();

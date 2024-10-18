@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import sic.modelo.Movimiento;
 import sic.modelo.TipoDeEnvio;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 @Data

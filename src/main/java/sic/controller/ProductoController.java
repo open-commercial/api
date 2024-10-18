@@ -1,44 +1,48 @@
 package sic.controller;
 
-import java.math.BigDecimal;
-import java.util.*;
 import io.jsonwebtoken.Claims;
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.exception.BusinessServiceException;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaProductoCriteria;
 import sic.modelo.dto.*;
 import sic.service.*;
-import sic.exception.BusinessServiceException;
 import sic.util.FormatoReporte;
-import javax.persistence.EntityNotFoundException;
+
+import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @RestController
 public class ProductoController {
 
-  private final IProductoService productoService;
-  private final IMedidaService medidaService;
-  private final IRubroService rubroService;
-  private final IProveedorService proveedorService;
-  private final ISucursalService sucursalService;
-  private final IUsuarioService usuarioService;
-  private final IAuthService authService;
+  private final ProductoService productoService;
+  private final MedidaService medidaService;
+  private final RubroService rubroService;
+  private final ProveedorService proveedorService;
+  private final SucursalService sucursalService;
+  private final UsuarioService usuarioService;
+  private final AuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
   private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public ProductoController(IProductoService productoService,
-                            IMedidaService medidaService,
-                            IRubroService rubroService,
-                            IProveedorService proveedorService,
-                            ISucursalService sucursalService,
-                            IUsuarioService usuarioService,
-                            IAuthService authService,
+  public ProductoController(ProductoService productoService,
+                            MedidaService medidaService,
+                            RubroService rubroService,
+                            ProveedorService proveedorService,
+                            SucursalService sucursalService,
+                            UsuarioService usuarioService,
+                            AuthService authService,
                             ModelMapper modelMapper,
                             MessageSource messageSource) {
     this.productoService = productoService;
@@ -66,7 +70,7 @@ public class ProductoController {
     }
     if (authorizationHeader != null) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
       if (productoService.isFavorito(idUsuarioLoggedIn, idProducto)) producto.setFavorito(true);
     }
     return producto;
@@ -98,12 +102,12 @@ public class ProductoController {
             && idCliente != null;
     if (esAutogestion) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
       productos = productoService.buscarProductosDeCatalogoParaUsuario(criteria, idSucursal, idUsuarioLoggedIn);
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
     } else if (esGestionAdministrativa) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
-      long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+      long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
       productos = productoService.buscarProductosDeCatalogoParaVenta(criteria, idSucursal, idUsuarioLoggedIn, idCliente);
       productoService.marcarFavoritos(productos, idUsuarioLoggedIn);
     } else {
@@ -159,7 +163,7 @@ public class ProductoController {
           proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(Long.parseLong(claims.get(CLAIM_ID_USUARIO).toString()));
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class));
     if (usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)) {
       Set<CantidadEnSucursal> cantidadEnSucursales = new HashSet<>();
       productoDTO
@@ -215,7 +219,7 @@ public class ProductoController {
     @RequestBody ProductosParaActualizarDTO productosParaActualizarDTO,
     @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
+    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class));
     productoService.actualizarMultiples(productosParaActualizarDTO, usuarioLogueado);
   }
 
@@ -230,7 +234,7 @@ public class ProductoController {
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     productoService.guardarProductoFavorito(idUsuarioLoggedIn, idProducto);
   }
 
@@ -240,7 +244,7 @@ public class ProductoController {
           @RequestParam int pagina,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     return productoService.getPaginaProductosFavoritosDelCliente(idUsuarioLoggedIn, idSucursal, pagina);
   }
 
@@ -249,7 +253,7 @@ public class ProductoController {
           @PathVariable long idProducto,
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     productoService.quitarProductoDeFavoritos(idUsuarioLoggedIn, idProducto);
   }
 
@@ -257,7 +261,7 @@ public class ProductoController {
   public void quitarProductosDeFavoritos(
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     productoService.quitarProductosDeFavoritos(idUsuarioLoggedIn);
   }
 
@@ -265,7 +269,7 @@ public class ProductoController {
   public Long getCantidadDeProductosFavoritos(
           @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get(CLAIM_ID_USUARIO);
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     return productoService.getCantidadDeProductosFavoritos(idUsuarioLoggedIn);
   }
 

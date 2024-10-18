@@ -13,12 +13,12 @@ import sic.service.*;
 @RestController
 public class FacturaController {
 
-  private final IFacturaService facturaService;
-  private final ISucursalService sucursalService;
+  private final FacturaService facturaService;
+  private final SucursalService sucursalService;
 
   @Autowired
-  public FacturaController(IFacturaService facturaService,
-                           ISucursalService sucursalService) {
+  public FacturaController(FacturaService facturaService,
+                           SucursalService sucursalService) {
     this.facturaService = facturaService;
     this.sucursalService = sucursalService;
   }

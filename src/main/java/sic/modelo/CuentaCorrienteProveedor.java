@@ -1,21 +1,21 @@
 package sic.modelo;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import sic.config.Views;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "cuentacorrienteproveedor")
@@ -25,8 +25,8 @@ import sic.config.Views;
 @JsonView(Views.Comprador.class)
 public class CuentaCorrienteProveedor extends CuentaCorriente implements Serializable {
 
-  @OneToOne
-  @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+  @ManyToOne
+  @JoinColumn(name = "id_Proveedor")
   @QueryInit("ubicacion.localidad.provincia")
   @NotNull(message = "{mensaje_cuenta_corriente_proveedor_vacio}")
   private Proveedor proveedor;

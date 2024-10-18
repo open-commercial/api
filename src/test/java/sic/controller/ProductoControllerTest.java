@@ -1,9 +1,6 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -16,13 +13,9 @@ import sic.modelo.dto.CantidadEnSucursalDTO;
 import sic.modelo.dto.ProductoDTO;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
-import sic.service.impl.*;
+import sic.service.*;
 
-import javax.crypto.SecretKey;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -81,20 +74,7 @@ class ProductoControllerTest {
     when(modelMapper.map(productoDTO, Producto.class)).thenReturn(productoPorActualizar);
     when(modelMapper.map(cantidadEnSucursalDTO, CantidadEnSucursal.class))
         .thenReturn(cantidadEnSucursal);
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
-    SecretKey secretKey = MacProvider.generateKey();
-    String token =
-            Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", roles)
-                    .compact();
-    Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     Usuario usuario = new Usuario();
     usuario.setUsername("usuario");
@@ -106,22 +86,7 @@ class ProductoControllerTest {
 
   @Test
   void shouldMarcarComoFavorito() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .compact())
-            .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     productoController.marcarComoFavorito(1L, "headers");
     verify(productoService).guardarProductoFavorito(1L, 1L);
@@ -129,22 +94,7 @@ class ProductoControllerTest {
 
   @Test
   void shouldGetProductoFavoritosDelCliente() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-            Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(
-                            Jwts.builder()
-                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                                    .claim("idUsuario", 1L)
-                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .compact())
-                    .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     productoController.getProductosFavoritosDelCliente(1L,0, "headers");
     verify(productoService).getPaginaProductosFavoritosDelCliente(1L, 1L, 0);
@@ -152,22 +102,7 @@ class ProductoControllerTest {
 
   @Test
   void shouldQuitarProductoDeFavoritos() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-            Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(
-                            Jwts.builder()
-                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                                    .claim("idUsuario", 1L)
-                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .compact())
-                    .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     productoController.quitarProductoDeFavoritos(4L, "headers");
     verify(productoService).quitarProductoDeFavoritos(1L, 4L);
@@ -175,22 +110,7 @@ class ProductoControllerTest {
 
   @Test
   void shouldQuitarProductosDeFavoritos() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-            Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(
-                            Jwts.builder()
-                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                                    .claim("idUsuario", 1L)
-                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .compact())
-                    .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     productoController.quitarProductosDeFavoritos("headers");
     verify(productoService).quitarProductosDeFavoritos(1L);
@@ -198,22 +118,7 @@ class ProductoControllerTest {
 
   @Test
   void shouldGetCantidadDeProductosFavoritos() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-            Jwts.parser()
-                    .setSigningKey(secretKey)
-                    .parseClaimsJws(
-                            Jwts.builder()
-                                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                                    .claim("idUsuario", 1L)
-                                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                                    .compact())
-                    .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     productoController.getCantidadDeProductosFavoritos("headers");
     verify(productoService).getCantidadDeProductosFavoritos(1L);

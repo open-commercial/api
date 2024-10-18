@@ -1,17 +1,13 @@
 package sic.modelo;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 import sic.config.Views;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "itemcarritocompra")
@@ -32,13 +28,13 @@ public class ItemCarritoCompra implements Serializable {
   private BigDecimal cantidad;
 
   @ManyToOne
-  @JoinColumn(name = "idProducto", referencedColumnName = "idProducto")
+  @JoinColumn(name = "idProducto")
   private Producto producto;
 
   @Transient
   private BigDecimal importe;
 
   @ManyToOne
-  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @JoinColumn(name = "id_Usuario")
   private Usuario usuario;
 }

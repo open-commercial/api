@@ -1,24 +1,19 @@
 package sic.modelo;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import sic.config.Views;
 
-import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gasto")
@@ -47,18 +42,18 @@ public class Gasto implements Serializable {
   private String concepto;
 
   @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @JoinColumn(name = "idSucursal")
   @QueryInit("ubicacion.localidad.provincia")
   @NotNull(message = "{mensaje_gasto_sucursal_vacia}")
   private Sucursal sucursal;
 
-  @OneToOne
-  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @ManyToOne
+  @JoinColumn(name = "id_Usuario")
   @NotNull(message = "{mensaje_gasto_usuario_vacio}")
   private Usuario usuario;
 
-  @OneToOne
-  @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
+  @ManyToOne
+  @JoinColumn(name = "id_FormaDePago")
   @NotNull(message = "{mensaje_gasto_forma_de_pago_vacia}")
   private FormaDePago formaDePago;
 

@@ -4,18 +4,17 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import sic.config.Views;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import javax.persistence.*;
-import javax.validation.constraints.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import sic.config.Views;
 
 @Entity
 @Table(name = "cliente")
@@ -66,12 +65,12 @@ public class Cliente implements Serializable {
   @NotBlank(message = "{mensaje_cliente_vacio_telefono}")
   private String telefono;
 
-  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "idUbicacionFacturacion", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionFacturacion;
 
-  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
+  @ManyToOne(cascade = CascadeType.ALL)
   @JoinColumn(name = "idUbicacionEnvio", referencedColumnName = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacionEnvio;
@@ -85,8 +84,8 @@ public class Cliente implements Serializable {
   @JoinColumn(name = "id_Usuario_Viajante", referencedColumnName = "id_Usuario")
   private Usuario viajante;
 
-  @OneToOne
-  @JoinColumn(name = "id_Usuario_Credencial", referencedColumnName = "id_Usuario")
+  @ManyToOne
+  @JoinColumn(name = "id_Usuario_Credencial")
   private Usuario credencial;
 
   private boolean eliminado;

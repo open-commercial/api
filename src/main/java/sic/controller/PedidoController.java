@@ -1,8 +1,5 @@
 package sic.controller;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,30 +11,33 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaPedidoCriteria;
-import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.modelo.Resultados;
-import sic.modelo.dto.PedidoDTO;
 import sic.modelo.dto.NuevoRenglonPedidoDTO;
+import sic.modelo.dto.NuevosResultadosComprobanteDTO;
+import sic.modelo.dto.PedidoDTO;
 import sic.service.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 public class PedidoController {
 
-  private final IPedidoService pedidoService;
-  private final IUsuarioService usuarioService;
-  private final ISucursalService sucursalService;
-  private final IClienteService clienteService;
-  private final IReciboService reciboService;
-  private final IAuthService authService;
-  private static final String ID_USUARIO = "idUsuario";
+  private final PedidoService pedidoService;
+  private final UsuarioService usuarioService;
+  private final SucursalService sucursalService;
+  private final ClienteService clienteService;
+  private final ReciboService reciboService;
+  private final AuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public PedidoController(IPedidoService pedidoService,
-                          IUsuarioService usuarioService,
-                          ISucursalService sucursalService,
-                          IClienteService clienteService,
-                          IReciboService reciboService,
-                          IAuthService authService) {
+  public PedidoController(PedidoService pedidoService,
+                          UsuarioService usuarioService,
+                          SucursalService sucursalService,
+                          ClienteService clienteService,
+                          ReciboService reciboService,
+                          AuthService authService) {
     this.pedidoService = pedidoService;
     this.usuarioService = usuarioService;
     this.sucursalService = sucursalService;
@@ -110,7 +110,7 @@ public class PedidoController {
     Sucursal sucursalDePedido;
     sucursalDePedido = sucursalService.getSucursalPorId(pedidoDTO.getIdSucursal());
     pedido.setSucursal(sucursalDePedido);
-    long idUsuario = (int) claims.get(ID_USUARIO);
+    long idUsuario = claims.get(CLAIM_ID_USUARIO, Long.class);
     pedido.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuario));
     pedido.setCliente(clienteService.getClienteNoEliminadoPorId(pedidoDTO.getIdCliente()));
     if (pedidoDTO.getTipoDeEnvio() != null) pedido.setTipoDeEnvio(pedidoDTO.getTipoDeEnvio());
@@ -133,7 +133,7 @@ public class PedidoController {
   public Page<Pedido> buscarConCriteria(@RequestBody BusquedaPedidoCriteria criteria,
                                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return pedidoService.buscarPedidos(criteria, (int) claims.get(ID_USUARIO));
+    return pedidoService.buscarPedidos(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PutMapping("/api/v1/pedidos/{idPedido}")

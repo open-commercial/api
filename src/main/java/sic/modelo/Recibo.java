@@ -2,20 +2,18 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.Positive;
+import lombok.*;
+import sic.config.Views;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import javax.validation.constraints.*;
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import sic.config.Views;
 
 @Entity
 @Table(name = "recibo")
@@ -49,25 +47,25 @@ public class Recibo implements Serializable {
   private String concepto;
 
   @ManyToOne
-  @JoinColumn(name = "id_FormaDePago", referencedColumnName = "id_FormaDePago")
+  @JoinColumn(name = "id_FormaDePago")
   @NotNull(message = "{mensaje_recibo_forma_de_pago_vacia}")
   private FormaDePago formaDePago;
 
   @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @JoinColumn(name = "idSucursal")
   @NotNull(message = "{mensaje_recibo_sucursal_vacia}")
   private Sucursal sucursal;
 
   @ManyToOne
-  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @JoinColumn(name = "id_Cliente")
   private Cliente cliente;
 
   @ManyToOne
-  @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+  @JoinColumn(name = "id_Proveedor")
   private Proveedor proveedor;
 
   @ManyToOne
-  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @JoinColumn(name = "id_Usuario")
   @NotNull(message = "{mensaje_recibo_usuario_vacio}")
   private Usuario usuario;
 

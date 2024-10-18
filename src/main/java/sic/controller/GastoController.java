@@ -5,29 +5,31 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.Gasto;
 import sic.modelo.Rol;
+import sic.modelo.criteria.BusquedaGastoCriteria;
 import sic.modelo.dto.NuevoGastoDTO;
 import sic.service.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RestController
 public class GastoController {
 
-  private final IGastoService gastoService;
-  private final ISucursalService sucursalService;
-  private final IFormaDePagoService formaDePagoService;
-  private final IUsuarioService usuarioService;
-  private final IAuthService authService;
+  private final GastoService gastoService;
+  private final SucursalService sucursalService;
+  private final FormaDePagoService formaDePagoService;
+  private final UsuarioService usuarioService;
+  private final AuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public GastoController(IGastoService gastoService,
-                         ISucursalService sucursalService,
-                         IFormaDePagoService formaDePagoService,
-                         IUsuarioService usuarioService,
-                         IAuthService authService) {
+  public GastoController(GastoService gastoService,
+                         SucursalService sucursalService,
+                         FormaDePagoService formaDePagoService,
+                         UsuarioService usuarioService,
+                         AuthService authService) {
     this.gastoService = gastoService;
     this.sucursalService = sucursalService;
     this.formaDePagoService = formaDePagoService;
@@ -69,7 +71,7 @@ public class GastoController {
     gasto.setConcepto(nuevoGastoDTO.getConcepto());
     gasto.setMonto(nuevoGastoDTO.getMonto());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     gasto.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn));
     gasto.setFecha(LocalDateTime.now());
     return gastoService.guardar(gasto);

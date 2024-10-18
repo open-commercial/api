@@ -1,19 +1,15 @@
 package sic.modelo;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import javax.persistence.*;
-import javax.validation.constraints.DecimalMin;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import lombok.*;
 import sic.config.Views;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "localidad")
@@ -36,7 +32,7 @@ public class Localidad implements Serializable {
   private String codigoPostal;
 
   @ManyToOne
-  @JoinColumn(name = "idProvincia", referencedColumnName = "idProvincia")
+  @JoinColumn(name = "idProvincia")
   private Provincia provincia;
 
   private boolean envioGratuito;

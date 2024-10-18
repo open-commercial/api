@@ -16,21 +16,23 @@ import sic.modelo.Rol;
 import sic.modelo.Traspaso;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
-import sic.service.IAuthService;
-import sic.service.ITraspasoService;
+import sic.service.AuthService;
+import sic.service.TraspasoService;
+
 import java.util.List;
 import java.util.Locale;
 
 @RestController
 public class TraspasoController {
 
-  private final ITraspasoService traspasoService;
-  private final IAuthService authService;
+  private final TraspasoService traspasoService;
+  private final AuthService authService;
   private final MessageSource messageSource;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public TraspasoController(ITraspasoService traspasoService,
-                            IAuthService authService,
+  public TraspasoController(TraspasoService traspasoService,
+                            AuthService authService,
                             MessageSource messageSource) {
     this.traspasoService = traspasoService;
     this.authService = authService;
@@ -59,7 +61,7 @@ public class TraspasoController {
   public Traspaso guardarTraspaso(@RequestBody NuevoTraspasoDTO nuevoTraspasoDTO,
                                   @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     return traspasoService.guardarTraspaso(nuevoTraspasoDTO, idUsuarioLoggedIn);
   }
 

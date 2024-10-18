@@ -10,7 +10,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sic.exception.ForbiddenException;
 import sic.modelo.Rol;
-import sic.service.IAuthService;
+import sic.service.AuthService;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -18,11 +19,12 @@ import java.util.Locale;
 @Component
 public class AuthAspect {
 
-  private final IAuthService authService;
+  private final AuthService authService;
   private final MessageSource messageSource;
+  private static final String CLAIM_ROLES = "roles";
 
   @Autowired
-  public AuthAspect(IAuthService authService, MessageSource messageSource) {
+  public AuthAspect(AuthService authService, MessageSource messageSource) {
     this.authService = authService;
     this.messageSource = messageSource;
   }
@@ -33,7 +35,7 @@ public class AuthAspect {
     String authorizationHeader = request.getHeader("Authorization");
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Rol[] rolesRequeridos = AccesoRolesPermitidos.value();
-    var rolesDelUsuario = claims.get("roles", List.class);
+    var rolesDelUsuario = claims.get(CLAIM_ROLES, List.class);
     boolean accesoDenegado = true;
     for (Rol rolRequerido : rolesRequeridos) {
       if (rolesDelUsuario.contains(rolRequerido.toString())) accesoDenegado = false;

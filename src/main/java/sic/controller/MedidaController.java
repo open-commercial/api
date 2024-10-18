@@ -8,16 +8,16 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Medida;
 import sic.modelo.Rol;
 import sic.modelo.dto.MedidaDTO;
-import sic.service.IMedidaService;
+import sic.service.MedidaService;
 
 @RestController
 public class MedidaController {
 
-  private final IMedidaService medidaService;
+  private final MedidaService medidaService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public MedidaController(IMedidaService medidaService,
+  public MedidaController(MedidaService medidaService,
                           ModelMapper modelMapper) {
     this.medidaService = medidaService;
     this.modelMapper = modelMapper;

@@ -1,20 +1,16 @@
 package sic.modelo;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import sic.config.Views;
+
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "caja")
@@ -38,17 +34,17 @@ public class Caja implements Serializable {
   private LocalDateTime fechaCierre;
 
   @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @JoinColumn(name = "idSucursal")
   @NotNull(message = "{mensaje_caja_sucursal_vacia}")
   private Sucursal sucursal;
 
-  @OneToOne
-  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @ManyToOne
+  @JoinColumn(name = "id_Usuario")
   @NotNull(message = "{mensaje_caja_usuario_vacio}")
   private Usuario usuarioAbreCaja;
 
-  @OneToOne
-  @JoinColumn(name = "id_UsuarioCierra", referencedColumnName = "id_Usuario")
+  @ManyToOne
+  @JoinColumn(name = "id_UsuarioCierra")
   private Usuario usuarioCierraCaja;
 
   @Column(nullable = false)

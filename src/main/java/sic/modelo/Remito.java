@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,10 +15,6 @@ import sic.config.Views;
 import sic.modelo.dto.UbicacionDTO;
 import sic.modelo.embeddable.ClienteEmbeddable;
 
-import javax.persistence.*;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -51,17 +51,17 @@ public class Remito implements Serializable {
   private Cliente cliente;
 
   @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @JoinColumn(name = "idSucursal")
   @NotNull(message = "{mensaje_remito_sucursal_vacia}")
   private Sucursal sucursal;
 
   @ManyToOne
-  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @JoinColumn(name = "id_Usuario")
   @NotNull(message = "{mensaje_remito_usuario_vacio}")
   private Usuario usuario;
 
   @ManyToOne
-  @JoinColumn(name = "id_Transportista", referencedColumnName = "id_Transportista")
+  @JoinColumn(name = "id_Transportista")
   private Transportista transportista;
 
   @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)

@@ -6,24 +6,28 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
+import sic.exception.BusinessServiceException;
+import sic.modelo.Localidad;
+import sic.modelo.Provincia;
+import sic.modelo.Rol;
+import sic.modelo.Ubicacion;
 import sic.modelo.criteria.BusquedaLocalidadCriteria;
 import sic.modelo.dto.LocalidadDTO;
 import sic.modelo.dto.LocalidadesParaActualizarDTO;
-import sic.service.*;
-import sic.exception.BusinessServiceException;
+import sic.service.UbicacionService;
+
 import java.util.List;
 import java.util.Locale;
 
 @RestController
 public class UbicacionController {
 
-  private final IUbicacionService ubicacionService;
+  private final UbicacionService ubicacionService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
 
   @Autowired
-  public UbicacionController(IUbicacionService ubicacionService,
+  public UbicacionController(UbicacionService ubicacionService,
                              ModelMapper modelMapper,
                              MessageSource messageSource) {
     this.ubicacionService = ubicacionService;
@@ -63,8 +67,7 @@ public class UbicacionController {
   @PutMapping("/api/v1/ubicaciones/localidades")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void actualizar(@RequestBody LocalidadDTO localidadDTO) {
-    Localidad localidadPersistida =
-      ubicacionService.getLocalidadPorId(localidadDTO.getIdLocalidad());
+    Localidad localidadPersistida = ubicacionService.getLocalidadPorId(localidadDTO.getIdLocalidad());
     Localidad localidadPorActualizar = modelMapper.map(localidadDTO, Localidad.class);
     if (localidadPorActualizar.getNombre() != null
       && !localidadPorActualizar.getNombre().equals(localidadPersistida.getNombre())) {
@@ -89,8 +92,7 @@ public class UbicacionController {
 
   @PutMapping("/api/v1/ubicaciones/multiples")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public void actualizarMultiplesUbicaciones(
-      @RequestBody LocalidadesParaActualizarDTO localidadesParaActualizarDTO) {
+  public void actualizarMultiplesUbicaciones(@RequestBody LocalidadesParaActualizarDTO localidadesParaActualizarDTO) {
     ubicacionService.actualizarMultiplesLocalidades(localidadesParaActualizarDTO);
   }
 }

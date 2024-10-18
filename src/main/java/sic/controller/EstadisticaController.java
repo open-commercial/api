@@ -6,16 +6,16 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.dto.EntidadMontoDTO;
 import sic.modelo.dto.PeriodoMontoDTO;
-import sic.service.IEstadisticaService;
+import sic.service.EstadisticaService;
 import java.util.List;
 
 @RestController
 public class EstadisticaController {
 
-  public final IEstadisticaService estadisticaService;
+  public final EstadisticaService estadisticaService;
 
   @Autowired
-  public EstadisticaController(IEstadisticaService estadisticaService) {
+  public EstadisticaController(EstadisticaService estadisticaService) {
     this.estadisticaService = estadisticaService;
   }
 

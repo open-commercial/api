@@ -2,7 +2,7 @@ package sic.modelo.dto;
 
 import lombok.*;
 
-import javax.persistence.Embeddable;
+import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 
 @Data

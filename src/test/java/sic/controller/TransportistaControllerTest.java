@@ -6,12 +6,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import sic.modelo.Transportista;
-import sic.service.impl.TransportistaServiceImpl;
+import sic.service.TransportistaServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)

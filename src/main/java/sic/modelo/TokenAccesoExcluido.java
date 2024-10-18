@@ -1,9 +1,11 @@
 package sic.modelo;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.*;
+
 import java.io.Serializable;
 
 @Entity
@@ -11,6 +13,7 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class TokenAccesoExcluido implements Serializable {
 
     @Id

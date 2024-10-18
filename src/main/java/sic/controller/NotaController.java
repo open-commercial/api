@@ -1,7 +1,5 @@
 package sic.controller;
 
-import java.math.BigDecimal;
-import java.util.List;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,24 +11,31 @@ import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.*;
 import sic.modelo.criteria.BusquedaNotaCriteria;
-import sic.modelo.dto.*;
+import sic.modelo.dto.NuevaNotaCreditoDeFacturaDTO;
+import sic.modelo.dto.NuevaNotaCreditoSinFacturaDTO;
+import sic.modelo.dto.NuevaNotaDebitoDeReciboDTO;
+import sic.modelo.dto.NuevaNotaDebitoSinReciboDTO;
 import sic.service.*;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 public class NotaController {
 
-  private final INotaService notaService;
-  private final IReciboService reciboService;
-  private final ISucursalService sucursalService;
-  private final IUsuarioService usuarioService;
-  private final IAuthService authService;
+  private final NotaService notaService;
+  private final ReciboService reciboService;
+  private final SucursalService sucursalService;
+  private final UsuarioService usuarioService;
+  private final AuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public NotaController(INotaService notaService,
-                        IReciboService reciboService,
-                        ISucursalService sucursalService,
-                        IUsuarioService usuarioService,
-                        IAuthService authService) {
+  public NotaController(NotaService notaService,
+                        ReciboService reciboService,
+                        SucursalService sucursalService,
+                        UsuarioService usuarioService,
+                        AuthService authService) {
     this.notaService = notaService;
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
@@ -113,7 +118,7 @@ public class NotaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaCreditoConFactura(
             nuevaNotaCreditoDeFacturaDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
   }
 
   @PostMapping("/api/v1/notas/credito/calculos-sin-factura")
@@ -124,7 +129,7 @@ public class NotaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaCreditoSinFactura(
             nuevaNotaCreditoSinFacturaDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
   }
 
   @PostMapping("/api/v1/notas/debito/calculos")
@@ -135,7 +140,7 @@ public class NotaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaDebitoConRecibo(
             nuevaNotaDebitoDeReciboDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
   }
 
   @PostMapping("/api/v1/notas/debito/calculos-sin-recibo")
@@ -146,7 +151,7 @@ public class NotaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.calcularNotaDebitoSinRecibo(
             nuevaNotaDebitoSinReciboDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+            usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
   }
 
   @PostMapping("/api/v1/notas/credito/factura")
@@ -158,8 +163,7 @@ public class NotaController {
     return notaService.guardarNotaCredito(
             notaService.calcularNotaCreditoConFactura(
                     nuevaNotaCreditoDeFacturaDTO,
-                    usuarioService.getUsuarioNoEliminadoPorId(
-                            ((Integer) claims.get("idUsuario")).longValue())));
+                    usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class))));
   }
 
   @PostMapping("/api/v1/notas/credito/sin-factura")
@@ -171,8 +175,7 @@ public class NotaController {
     return notaService.guardarNotaCredito(
             notaService.calcularNotaCreditoSinFactura(
                     nuevaNotaCreditoSinFacturaDTO,
-                    usuarioService.getUsuarioNoEliminadoPorId(
-                            ((Integer) claims.get("idUsuario")).longValue())));
+                    usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class))));
   }
 
   @PostMapping("/api/v1/notas/debito")
@@ -184,8 +187,7 @@ public class NotaController {
     return notaService.guardarNotaDebito(
             notaService.calcularNotaDebitoConRecibo(
                     nuevaNotaDebitoDeReciboDTO,
-                    usuarioService.getUsuarioNoEliminadoPorId(
-                            ((Integer) claims.get("idUsuario")).longValue())));
+                    usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class))));
   }
 
   @PostMapping("/api/v1/notas/debito/sin-recibo")
@@ -196,7 +198,7 @@ public class NotaController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     return notaService.guardarNotaDebito(notaService.calcularNotaDebitoSinRecibo(
             nuevaNotaDebitoSinReciboDTO,
-            usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue())));
+            usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class))));
   }
 
   @GetMapping("/api/v1/notas/{idNota}/reporte")
@@ -224,7 +226,7 @@ public class NotaController {
           @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.buscarNotasCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+    return notaService.buscarNotasCredito(busquedaNotaCriteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/notas/debito/busqueda/criteria")
@@ -232,7 +234,7 @@ public class NotaController {
           @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.buscarNotasDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+    return notaService.buscarNotasDebito(busquedaNotaCriteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/notas/total-credito/criteria")
@@ -241,7 +243,7 @@ public class NotaController {
           @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.calcularTotalCredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalCredito(busquedaNotaCriteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/notas/total-debito/criteria")
@@ -250,7 +252,7 @@ public class NotaController {
           @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.calcularTotalDebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalDebito(busquedaNotaCriteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/notas/total-iva-credito/criteria")
@@ -259,7 +261,7 @@ public class NotaController {
           @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.calcularTotalIVACredito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalIVACredito(busquedaNotaCriteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/notas/total-iva-debito/criteria")
@@ -268,6 +270,6 @@ public class NotaController {
           @RequestBody BusquedaNotaCriteria busquedaNotaCriteria,
           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return notaService.calcularTotalIVADebito(busquedaNotaCriteria, (int) claims.get("idUsuario"));
+    return notaService.calcularTotalIVADebito(busquedaNotaCriteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 }

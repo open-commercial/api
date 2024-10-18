@@ -1,28 +1,20 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Rol;
 import sic.modelo.Traspaso;
 import sic.modelo.criteria.BusquedaTraspasoCriteria;
 import sic.modelo.dto.NuevoTraspasoDTO;
-import sic.service.impl.AuthServiceImpl;
-import sic.service.impl.TraspasoServiceImpl;
+import sic.service.AuthServiceImpl;
+import sic.service.TraspasoServiceImpl;
 
-import javax.crypto.SecretKey;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,22 +43,7 @@ class TraspasoControllerTest {
 
   @Test
   void shouldGuardarTraspaso() {
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    SecretKey secretKey = MacProvider.generateKey();
-    Claims claims =
-        Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(
-                Jwts.builder()
-                    .setIssuedAt(Date.from(zdtNow.toInstant()))
-                    .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                    .signWith(SignatureAlgorithm.HS512, secretKey)
-                    .claim("idUsuario", 1L)
-                    .claim("roles", Collections.singletonList(Rol.ADMINISTRADOR))
-                    .compact())
-            .getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     traspasoController.guardarTraspaso(NuevoTraspasoDTO.builder().build(), "headers");
     verify(traspasoService).guardarTraspaso(NuevoTraspasoDTO.builder().build(), 1L);

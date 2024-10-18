@@ -2,10 +2,10 @@ package sic.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.Producto;
 
@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 
 public interface ProductoRepository extends
-        PagingAndSortingRepository<Producto, Long>,
+        JpaRepository<Producto, Long>,
         QuerydslPredicateExecutor<Producto>,
         ProductoRepositoryCustom {
 

@@ -1,11 +1,12 @@
 package sic.repository;
 
 import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import sic.modelo.Sucursal;
 
-public interface SucursalRepository extends PagingAndSortingRepository<Sucursal, Long> {
+public interface SucursalRepository extends JpaRepository<Sucursal, Long> {
 
   Sucursal findByIdFiscalAndEliminada(Long idFiscal, boolean eliminada);
 

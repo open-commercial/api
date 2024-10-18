@@ -1,20 +1,24 @@
 package sic.controller;
 
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RestController;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.FormaDePago;
 import sic.modelo.Rol;
-import sic.service.IFormaDePagoService;
+import sic.service.FormaDePagoService;
+
+import java.util.List;
 
 @RestController
 public class FormaDePagoController {
 
-  private final IFormaDePagoService formaDePagoService;
+  private final FormaDePagoService formaDePagoService;
 
   @Autowired
-  public FormaDePagoController(IFormaDePagoService formaDePagoService) {
+  public FormaDePagoController(FormaDePagoService formaDePagoService) {
     this.formaDePagoService = formaDePagoService;
   }
 
@@ -36,7 +40,6 @@ public class FormaDePagoController {
   @PutMapping("/api/v1/formas-de-pago/predeterminada/{idFormaDePago}")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setFormaDePagoPredeterminada(@PathVariable long idFormaDePago) {
-    formaDePagoService.setFormaDePagoPredeterminada(
-        formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
+    formaDePagoService.setFormaDePagoPredeterminada(formaDePagoService.getFormasDePagoNoEliminadoPorId(idFormaDePago));
   }
 }

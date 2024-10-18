@@ -3,18 +3,13 @@ package sic.modelo;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
-import java.io.Serializable;
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import sic.config.Views;
 
-import javax.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "transportista")
@@ -37,8 +32,8 @@ public class Transportista implements Serializable {
   @NotEmpty(message = "{mensaje_transportista_nombre_vacio}")
   private String nombre;
 
-  @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-  @JoinColumn(name = "idUbicacion", referencedColumnName = "idUbicacion")
+  @ManyToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "idUbicacion")
   @QueryInit("localidad.provincia")
   private Ubicacion ubicacion;
 

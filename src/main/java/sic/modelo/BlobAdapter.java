@@ -1,7 +1,7 @@
 package sic.modelo;
 
 import java.sql.Blob;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * Se utiliza como adaptador para poder trabajar con objetos tipo blob.

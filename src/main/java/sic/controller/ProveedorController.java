@@ -1,33 +1,30 @@
 package sic.controller;
 
-import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
+import sic.modelo.Proveedor;
+import sic.modelo.Rol;
+import sic.modelo.Ubicacion;
 import sic.modelo.criteria.BusquedaProveedorCriteria;
 import sic.modelo.dto.ProveedorDTO;
-import sic.service.IProveedorService;
-import sic.service.IUbicacionService;
+import sic.service.ProveedorService;
+import sic.service.UbicacionService;
+
+import java.util.List;
 
 @RestController
 public class ProveedorController {
 
-  private final IProveedorService proveedorService;
-  private final IUbicacionService ubicacionService;
+  private final ProveedorService proveedorService;
+  private final UbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ProveedorController(IProveedorService proveedorService,
-                             IUbicacionService ubicacionService,
+  public ProveedorController(ProveedorService proveedorService,
+                             UbicacionService ubicacionService,
                              ModelMapper modelMapper) {
     this.proveedorService = proveedorService;
     this.ubicacionService = ubicacionService;

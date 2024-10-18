@@ -1,9 +1,6 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,21 +8,15 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import sic.modelo.Rol;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
-import sic.service.IAuthService;
-import sic.service.IClienteService;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IProveedorService;
+import sic.service.AuthService;
+import sic.service.ClienteService;
+import sic.service.CuentaCorrienteService;
+import sic.service.ProveedorService;
 import sic.util.FormatoReporte;
 
-import javax.crypto.SecretKey;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -35,13 +26,13 @@ import static org.mockito.Mockito.when;
 class CuentaCorrienteControllerTest {
 
     @MockBean
-    ICuentaCorrienteService cuentaCorrienteService;
+    CuentaCorrienteService cuentaCorrienteService;
     @MockBean
-    IProveedorService proveedorService;
+    ProveedorService proveedorService;
     @MockBean
-    IClienteService clienteService;
+    ClienteService clienteService;
     @MockBean
-    IAuthService authService;
+    AuthService authService;
     @MockBean
     MessageSource messageSource;
 
@@ -51,20 +42,7 @@ class CuentaCorrienteControllerTest {
     @Test
     void shouldTestReporteListaDeCuentasCorrienteClientePorCriteria() {
         BusquedaCuentaCorrienteClienteCriteria criteria = BusquedaCuentaCorrienteClienteCriteria.builder().build();
-        LocalDateTime today = LocalDateTime.now();
-        ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-        ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-        List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
-        SecretKey secretKey = MacProvider.generateKey();
-        String token =
-                Jwts.builder()
-                        .setIssuedAt(Date.from(zdtNow.toInstant()))
-                        .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-                        .signWith(SignatureAlgorithm.HS512, secretKey)
-                        .claim("idUsuario", 1L)
-                        .claim("roles", roles)
-                        .compact();
-        Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+        var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
         when(authService.getClaimsDelToken("headers")).thenReturn(claims);
         when(cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
                 criteria, 1L, FormatoReporte.XLSX)).thenReturn("reporte".getBytes());

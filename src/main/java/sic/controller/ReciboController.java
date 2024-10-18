@@ -10,34 +10,36 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.modelo.Recibo;
 import sic.modelo.Rol;
+import sic.modelo.criteria.BusquedaReciboCriteria;
 import sic.modelo.dto.ReciboDTO;
 import sic.service.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @RestController
 public class ReciboController {
 
-  private final IReciboService reciboService;
-  private final ISucursalService sucursalService;
-  private final IUsuarioService usuarioService;
-  private final IClienteService clienteService;
-  private final IProveedorService proveedorService;
-  private final IFormaDePagoService formaDePagoService;
-  private final IAuthService authService;
+  private final ReciboService reciboService;
+  private final SucursalService sucursalService;
+  private final UsuarioService usuarioService;
+  private final ClienteService clienteService;
+  private final ProveedorService proveedorService;
+  private final FormaDePagoService formaDePagoService;
+  private final AuthService authService;
   private final ModelMapper modelMapper;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public ReciboController(IReciboService reciboService,
-                          ISucursalService sucursalService,
-                          IUsuarioService usuarioService,
-                          IClienteService clienteService,
-                          IProveedorService proveedorService,
-                          IFormaDePagoService formaDePagoService,
-                          IAuthService authService,
+  public ReciboController(ReciboService reciboService,
+                          SucursalService sucursalService,
+                          UsuarioService usuarioService,
+                          ClienteService clienteService,
+                          ProveedorService proveedorService,
+                          FormaDePagoService formaDePagoService,
+                          AuthService authService,
                           ModelMapper modelMapper) {
     this.reciboService = reciboService;
     this.sucursalService = sucursalService;
@@ -75,8 +77,7 @@ public class ReciboController {
     recibo.setCliente(clienteService.getClienteNoEliminadoPorId(reciboDTO.getIdCliente()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    recibo.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    recibo.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
     recibo.setFecha(LocalDateTime.now());
     return reciboService.guardar(recibo);
   }
@@ -90,8 +91,7 @@ public class ReciboController {
     recibo.setProveedor(proveedorService.getProveedorNoEliminadoPorId(reciboDTO.getIdProveedor()));
     recibo.setFormaDePago(formaDePagoService.getFormasDePagoNoEliminadoPorId(reciboDTO.getIdFormaDePago()));
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    recibo.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    recibo.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
     recibo.setFecha(LocalDateTime.now());
     return reciboService.guardar(recibo);
   }

@@ -1,12 +1,13 @@
 package sic.repository;
 
 import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import sic.modelo.Proveedor;
 
 public interface ProveedorRepository extends
-        PagingAndSortingRepository<Proveedor, Long>,
+        JpaRepository<Proveedor, Long>,
         QuerydslPredicateExecutor<Proveedor> {
 
   Proveedor findByNroProveedorAndEliminado(String nroProveedor, boolean eliminado);
