@@ -1,12 +1,12 @@
 package sic.repository;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.ConfiguracionSucursal;
 
-public interface ConfiguracionSucursalRepository extends PagingAndSortingRepository<ConfiguracionSucursal, Long> {
+public interface ConfiguracionSucursalRepository extends JpaRepository<ConfiguracionSucursal, Long> {
 
   @Query("SELECT configuracionSucursal.cantidadMaximaDeRenglonesEnFactura "
           + "FROM Sucursal sucursal INNER JOIN sucursal.configuracionSucursal configuracionSucursal "

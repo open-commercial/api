@@ -15,25 +15,32 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaVentaCriteria;
 import sic.modelo.dto.NuevaFacturaVentaDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
-import sic.service.*;
+import sic.service.AuthService;
+import sic.service.FacturaService;
+import sic.service.FacturaVentaService;
+import sic.service.ReciboService;
+
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 @RestController
 public class FacturaVentaController {
 
-  private final IFacturaVentaService facturaVentaService;
-  private final IFacturaService facturaService;
-  private final IReciboService reciboService;
-  private final IAuthService authService;
+  private final FacturaVentaService facturaVentaService;
+  private final FacturaService facturaService;
+  private final ReciboService reciboService;
+  private final AuthService authService;
   private final MessageSource messageSource;
   private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public FacturaVentaController(IFacturaVentaService facturaVentaService,
-                                IFacturaService facturaService,
-                                IReciboService reciboService,
-                                IAuthService authService,
+  public FacturaVentaController(FacturaVentaService facturaVentaService,
+                                FacturaService facturaService,
+                                ReciboService reciboService,
+                                AuthService authService,
                                 MessageSource messageSource) {
     this.facturaVentaService = facturaVentaService;
     this.facturaService = facturaService;
@@ -65,9 +72,9 @@ public class FacturaVentaController {
               "mensaje_tipo_de_comprobante_no_valido", null, Locale.getDefault()));
     }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    FacturaVenta fv =
-        facturaVentaService.construirFacturaVenta(
-            nuevaFacturaVentaDTO, idPedido, ((Integer) claims.get(CLAIM_ID_USUARIO)).longValue());
+    FacturaVenta fv = facturaVentaService.construirFacturaVenta(nuevaFacturaVentaDTO,
+                                                                idPedido,
+                                                                claims.get(CLAIM_ID_USUARIO, Long.class));
     List<FacturaVenta> facturasGuardadas;
     if (nuevaFacturaVentaDTO.getIndices() != null
         && nuevaFacturaVentaDTO.getIndices().length > 0
@@ -108,7 +115,7 @@ public class FacturaVentaController {
   public Page<FacturaVenta> buscarFacturaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
                                                @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.buscarFacturaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
+    return facturaVentaService.buscarFacturaVenta(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @GetMapping("/api/v1/facturas/ventas/tipos/sucursales/{idSucursal}/clientes/{idCliente}")
@@ -117,7 +124,7 @@ public class FacturaVentaController {
                                                  @PathVariable long idCliente,
                                                  @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuario = (int) claims.get(CLAIM_ID_USUARIO);
+    long idUsuario = claims.get(CLAIM_ID_USUARIO, Long.class);
     return facturaVentaService.getTiposDeComprobanteVenta(idSucursal, idCliente, idUsuario);
   }
 
@@ -145,8 +152,7 @@ public class FacturaVentaController {
   public List<RenglonFactura> calcularRenglonesVenta(
       @RequestBody List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO,
       @RequestParam TipoDeComprobante tipoDeComprobante) {
-    return facturaService.calcularRenglones(
-        tipoDeComprobante, Movimiento.VENTA, nuevosRenglonesFacturaDTO);
+    return facturaService.calcularRenglones(tipoDeComprobante, Movimiento.VENTA, nuevosRenglonesFacturaDTO);
   }
 
   @PostMapping("/api/v1/facturas/ventas/total-facturado/criteria")
@@ -154,8 +160,7 @@ public class FacturaVentaController {
       @RequestBody BusquedaFacturaVentaCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.calcularTotalFacturadoVenta(
-        criteria, (int) claims.get(CLAIM_ID_USUARIO));
+    return facturaVentaService.calcularTotalFacturadoVenta(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/facturas/ventas/total-iva/criteria")
@@ -163,7 +168,7 @@ public class FacturaVentaController {
   public BigDecimal calcularIvaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
                                      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.calcularIvaVenta(criteria, (int) claims.get(CLAIM_ID_USUARIO));
+    return facturaVentaService.calcularIvaVenta(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/facturas/ventas/ganancia-total/criteria")
@@ -171,7 +176,7 @@ public class FacturaVentaController {
   public BigDecimal calcularGananciaTotal(@RequestBody BusquedaFacturaVentaCriteria criteria,
                                           @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.calcularGananciaTotal(criteria, (int) claims.get(CLAIM_ID_USUARIO));
+    return facturaVentaService.calcularGananciaTotal(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @GetMapping("/api/v1/facturas/ventas/email/{idFactura}")

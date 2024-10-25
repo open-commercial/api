@@ -8,16 +8,16 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.Rol;
 import sic.modelo.Rubro;
 import sic.modelo.dto.RubroDTO;
-import sic.service.IRubroService;
+import sic.service.RubroService;
 
 @RestController
 public class RubroController {
 
-  private final IRubroService rubroService;
+  private final RubroService rubroService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public RubroController(IRubroService rubroService,
+  public RubroController(RubroService rubroService,
                          ModelMapper modelMapper) {
     this.rubroService = rubroService;
     this.modelMapper = modelMapper;

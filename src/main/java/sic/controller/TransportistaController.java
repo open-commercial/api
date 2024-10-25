@@ -1,33 +1,30 @@
 package sic.controller;
 
-import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
+import sic.modelo.Rol;
+import sic.modelo.Transportista;
+import sic.modelo.Ubicacion;
 import sic.modelo.criteria.BusquedaTransportistaCriteria;
 import sic.modelo.dto.TransportistaDTO;
-import sic.service.ITransportistaService;
-import sic.service.IUbicacionService;
+import sic.service.TransportistaService;
+import sic.service.UbicacionService;
+
+import java.util.List;
 
 @RestController
 public class TransportistaController {
 
-  private final ITransportistaService transportistaService;
-  private final IUbicacionService ubicacionService;
+  private final TransportistaService transportistaService;
+  private final UbicacionService ubicacionService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public TransportistaController(ITransportistaService transportistaService,
-                                 IUbicacionService ubicacionService,
+  public TransportistaController(TransportistaService transportistaService,
+                                 UbicacionService ubicacionService,
                                  ModelMapper modelMapper) {
     this.transportistaService = transportistaService;
     this.ubicacionService = ubicacionService;

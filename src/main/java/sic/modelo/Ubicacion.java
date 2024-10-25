@@ -4,14 +4,17 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.querydsl.core.annotations.QueryInit;
-import lombok.*;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 import sic.config.Views;
 
-import javax.persistence.*;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -30,7 +33,7 @@ public class Ubicacion implements Serializable {
   private long idUbicacion;
 
   @ManyToOne
-  @JoinColumn(name = "idLocalidad", referencedColumnName = "idLocalidad")
+  @JoinColumn(name = "idLocalidad")
   @QueryInit("provincia")
   @NotNull
   private Localidad localidad;

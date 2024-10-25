@@ -1,7 +1,5 @@
 package sic.controller;
 
-import java.math.BigDecimal;
-import java.util.Locale;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -12,35 +10,38 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
+import sic.exception.BusinessServiceException;
 import sic.modelo.CuentaCorrienteCliente;
 import sic.modelo.CuentaCorrienteProveedor;
 import sic.modelo.RenglonCuentaCorriente;
 import sic.modelo.Rol;
 import sic.modelo.criteria.BusquedaCuentaCorrienteClienteCriteria;
 import sic.modelo.criteria.BusquedaCuentaCorrienteProveedorCriteria;
-import sic.exception.BusinessServiceException;
-import sic.service.IAuthService;
-import sic.service.IClienteService;
-import sic.service.ICuentaCorrienteService;
-import sic.service.IProveedorService;
+import sic.service.AuthService;
+import sic.service.ClienteService;
+import sic.service.CuentaCorrienteService;
+import sic.service.ProveedorService;
 import sic.util.FormatoReporte;
+
+import java.math.BigDecimal;
+import java.util.Locale;
 
 @RestController
 public class CuentaCorrienteController {
 
-  private final ICuentaCorrienteService cuentaCorrienteService;
-  private final IProveedorService proveedorService;
-  private final IClienteService clienteService;
-  private final IAuthService authService;
+  private final CuentaCorrienteService cuentaCorrienteService;
+  private final ProveedorService proveedorService;
+  private final ClienteService clienteService;
+  private final AuthService authService;
   private final MessageSource messageSource;
-  private static final String ID_USUARIO = "idUsuario";
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
   private static final String CONTENT_DISPOSITION_HEADER = "Content-Disposition";
 
   @Autowired
-  public CuentaCorrienteController(ICuentaCorrienteService cuentaCorrienteService,
-                                   IProveedorService proveedorService,
-                                   IClienteService clienteService,
-                                   IAuthService authService,
+  public CuentaCorrienteController(CuentaCorrienteService cuentaCorrienteService,
+                                   ProveedorService proveedorService,
+                                   ClienteService clienteService,
+                                   AuthService authService,
                                    MessageSource messageSource) {
     this.cuentaCorrienteService = cuentaCorrienteService;
     this.clienteService = clienteService;
@@ -55,8 +56,7 @@ public class CuentaCorrienteController {
       @RequestBody BusquedaCuentaCorrienteClienteCriteria criteria,
       @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return cuentaCorrienteService.buscarCuentaCorrienteCliente(
-        criteria, (int) claims.get(ID_USUARIO));
+    return cuentaCorrienteService.buscarCuentaCorrienteCliente(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @PostMapping("/api/v1/cuentas-corriente/proveedores/busqueda/criteria")
@@ -161,7 +161,7 @@ public class CuentaCorrienteController {
     headers.set(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaClientes.xlsx");
     byte[] reporteXls =
             cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                    criteria, (int) claims.get(ID_USUARIO), FormatoReporte.XLSX);
+                    criteria, claims.get(CLAIM_ID_USUARIO, Long.class), FormatoReporte.XLSX);
     headers.setContentLength(reporteXls.length);
     return new ResponseEntity<>(reporteXls, headers, HttpStatus.OK);
   }
@@ -172,7 +172,7 @@ public class CuentaCorrienteController {
     headers.add(CONTENT_DISPOSITION_HEADER, "attachment; filename=ListaClientes.pdf");
     byte[] reportePDF =
             cuentaCorrienteService.getReporteListaDeCuentasCorrienteClientePorCriteria(
-                    criteria, (int) claims.get(ID_USUARIO), FormatoReporte.PDF);
+                    criteria, claims.get(CLAIM_ID_USUARIO, Long.class), FormatoReporte.PDF);
     return new ResponseEntity<>(reportePDF, headers, HttpStatus.OK);
   }
 }

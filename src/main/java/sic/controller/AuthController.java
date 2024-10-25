@@ -1,26 +1,26 @@
 package sic.controller;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sic.modelo.*;
 import sic.modelo.dto.RecoveryPasswordDTO;
 import sic.modelo.dto.RegistracionClienteAndUsuarioDTO;
-import sic.service.IAuthService;
-import sic.service.IRegistracionService;
-import sic.service.IUsuarioService;
+import sic.service.AuthService;
+import sic.service.RegistracionService;
+import sic.service.UsuarioService;
 
 @RestController
 public class AuthController {
 
-  private final IUsuarioService usuarioService;
-  private final IRegistracionService registracionService;
-  private final IAuthService authService;
+  private final UsuarioService usuarioService;
+  private final RegistracionService registracionService;
+  private final AuthService authService;
 
   @Autowired
-  public AuthController(IUsuarioService usuarioService,
-                        IRegistracionService registracionService,
-                        IAuthService authService) {
+  public AuthController(UsuarioService usuarioService,
+                        RegistracionService registracionService,
+                        AuthService authService) {
     this.usuarioService = usuarioService;
     this.registracionService = registracionService;
     this.authService = authService;

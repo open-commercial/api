@@ -2,20 +2,20 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import sic.config.Views;
+import sic.modelo.embeddable.ClienteEmbeddable;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import sic.modelo.embeddable.ClienteEmbeddable;
-import sic.config.Views;
 
 @Entity
 @Table(name = "facturaventa")
@@ -36,12 +36,12 @@ public class FacturaVenta extends Factura implements Serializable {
   @Embedded private ClienteEmbeddable clienteEmbedded;
 
   @ManyToOne
-  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @JoinColumn(name = "id_Cliente")
   @NotNull(message = "{mensaje_factura_cliente_vacio}")
   private Cliente cliente;
 
   @ManyToOne
-  @JoinColumn(name = "idRemito", referencedColumnName = "idRemito")
+  @JoinColumn(name = "idRemito")
   private Remito remito;
 
   public FacturaVenta() {}

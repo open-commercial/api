@@ -4,8 +4,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import sic.modelo.RenglonPedido;
-
-import java.math.BigDecimal;
 import java.util.List;
 
 public interface RenglonPedidoRepository extends PagingAndSortingRepository<RenglonPedido, Long> {

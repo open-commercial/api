@@ -2,22 +2,22 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import sic.config.Views;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import sic.config.Views;
 
 @Entity
 @Table(name = "facturacompra")
@@ -29,7 +29,7 @@ import sic.config.Views;
 public class FacturaCompra extends Factura implements Serializable {
 
   @ManyToOne
-  @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+  @JoinColumn(name = "id_Proveedor")
   @NotNull(message = "{mensaje_factura_proveedor_vacio}")
   private Proveedor proveedor;
 

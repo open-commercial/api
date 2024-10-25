@@ -2,20 +2,16 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import org.hibernate.annotations.Formula;
+import sic.config.Views;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.hibernate.annotations.Formula;
-import sic.config.Views;
 
 @Entity
 @Table(name = "rengloncuentacorriente")
@@ -54,27 +50,27 @@ public class RenglonCuentaCorriente implements Serializable {
     private BigDecimal monto;
     
     @ManyToOne
-    @JoinColumn(name = "id_cuenta_corriente", referencedColumnName = "id_cuenta_corriente")
+    @JoinColumn(name = "id_cuenta_corriente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CuentaCorriente cuentaCorriente;
-    
-    @OneToOne
-    @JoinColumn(name = "id_Factura", referencedColumnName = "id_Factura")  
+
+    @ManyToOne
+    @JoinColumn(name = "id_Factura")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Factura factura;
-    
-    @OneToOne
-    @JoinColumn(name = "idNota", referencedColumnName = "idNota")  
+
+    @ManyToOne
+    @JoinColumn(name = "idNota")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Nota nota;
-    
-    @OneToOne
-    @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")  
+
+    @ManyToOne
+    @JoinColumn(name = "idRecibo")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
 
-    @OneToOne
-    @JoinColumn(name = "idRemito", referencedColumnName = "idRemito")
+    @ManyToOne
+    @JoinColumn(name = "idRemito")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Remito remito;
 

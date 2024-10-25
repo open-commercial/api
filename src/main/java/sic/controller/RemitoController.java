@@ -14,19 +14,21 @@ import sic.modelo.RenglonRemito;
 import sic.modelo.Rol;
 import sic.modelo.criteria.BusquedaRemitoCriteria;
 import sic.modelo.dto.NuevoRemitoDTO;
-import sic.service.IAuthService;
-import sic.service.IRemitoService;
+import sic.service.AuthService;
+import sic.service.RemitoService;
+
 import java.util.List;
 
 @RestController
 public class RemitoController {
 
-  private final IRemitoService remitoService;
-  private final IAuthService authService;
+  private final RemitoService remitoService;
+  private final AuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public RemitoController(IRemitoService remitoService,
-                          IAuthService authService) {
+  public RemitoController(RemitoService remitoService,
+                          AuthService authService) {
     this.remitoService = remitoService;
     this.authService = authService;
   }
@@ -42,7 +44,7 @@ public class RemitoController {
   public Remito crearRemitoDeFactura(@RequestBody NuevoRemitoDTO nuevoRemitoDTO,
                                      @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     return remitoService.crearRemitoDeFacturasVenta(nuevoRemitoDTO, idUsuarioLoggedIn);
   }
 

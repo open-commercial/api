@@ -1,25 +1,18 @@
 package sic.modelo;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import sic.config.Views;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import sic.config.Views;
 
 @Entity
 @Table(name = "notadebito")
@@ -39,7 +32,7 @@ public class NotaDebito extends Nota implements Serializable {
   private BigDecimal montoNoGravado;
 
   @ManyToOne
-  @JoinColumn(name = "idRecibo", referencedColumnName = "idRecibo")
+  @JoinColumn(name = "idRecibo")
   private Recibo recibo;
 
   public NotaDebito() {}

@@ -4,8 +4,8 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import sic.modelo.QCaja;
 import sic.repository.CajaRepositoryCustom;
-import javax.persistence.PersistenceContext;
-import javax.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 
 public class CajaRepositoryImpl implements CajaRepositoryCustom {

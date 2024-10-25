@@ -2,11 +2,10 @@ package sic.repository;
 
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
 import sic.modelo.FormaDePago;
 
-public interface FormaDePagoRepository extends PagingAndSortingRepository<FormaDePago, Long> {
+public interface FormaDePagoRepository extends JpaRepository<FormaDePago, Long> {
 
   Optional<FormaDePago> findByAndPredeterminadoAndEliminada(boolean predeterminado, boolean eliminada);
 

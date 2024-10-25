@@ -8,10 +8,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
-import sic.modelo.*;
+import sic.modelo.Cliente;
+import sic.modelo.Rol;
+import sic.modelo.Ubicacion;
+import sic.modelo.Usuario;
 import sic.modelo.criteria.BusquedaClienteCriteria;
 import sic.modelo.dto.ClienteDTO;
-import sic.service.*;
+import sic.service.AuthService;
+import sic.service.ClienteService;
+import sic.service.UbicacionService;
+import sic.service.UsuarioService;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -19,18 +26,19 @@ import java.util.Locale;
 @RestController
 public class ClienteController {
 
-  private final IClienteService clienteService;
-  private final IUsuarioService usuarioService;
-  private final IUbicacionService ubicacionService;
-  private final IAuthService authService;
+  private final ClienteService clienteService;
+  private final UsuarioService usuarioService;
+  private final UbicacionService ubicacionService;
+  private final AuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public ClienteController(IClienteService clienteService,
-                           IUsuarioService usuarioService,
-                           IUbicacionService ubicacionService,
-                           IAuthService authService,
+  public ClienteController(ClienteService clienteService,
+                           UsuarioService usuarioService,
+                           UbicacionService ubicacionService,
+                           AuthService authService,
                            ModelMapper modelMapper,
                            MessageSource messageSource) {
     this.clienteService = clienteService;
@@ -50,7 +58,7 @@ public class ClienteController {
   public Page<Cliente> buscarConCriteria(@RequestBody BusquedaClienteCriteria criteria,
                                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return clienteService.buscarClientes(criteria, (int) claims.get("idUsuario"));
+    return clienteService.buscarClientes(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
   }
 
   @GetMapping("/api/v1/clientes/existe-predeterminado")
@@ -70,7 +78,7 @@ public class ClienteController {
                          @RequestHeader("Authorization") String authorizationHeader) {
     Cliente cliente = modelMapper.map(nuevoCliente, Cliente.class);
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (nuevoCliente.getIdCredencial() != null) {
       if (nuevoCliente.getIdCredencial() != idUsuarioLoggedIn
@@ -116,10 +124,9 @@ public class ClienteController {
   public Cliente actualizar(@RequestBody ClienteDTO clienteDTO,
                             @RequestHeader("Authorization") String authorizationHeader) {
     Cliente clientePorActualizar = modelMapper.map(clienteDTO, Cliente.class);
-    Cliente clientePersistido =
-        clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
+    Cliente clientePersistido = clienteService.getClienteNoEliminadoPorId(clientePorActualizar.getIdCliente());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (clienteDTO.getIdCredencial() != null) {
       if (clienteDTO.getIdCredencial() != idUsuarioLoggedIn

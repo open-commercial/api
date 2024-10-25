@@ -10,6 +10,7 @@ import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.dto.NuevaFacturaCompraDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
 import sic.service.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,22 +19,23 @@ import java.util.List;
 @RestController
 public class FacturaCompraController {
 
-  private final IFacturaCompraService facturaCompraService;
-  private final IFacturaService facturaService;
-  private final ISucursalService sucursalService;
-  private final IProveedorService proveedorService;
-  private final IUsuarioService usuarioService;
-  private final ITransportistaService transportistaService;
-  private final IAuthService authService;
+  private final FacturaCompraService facturaCompraService;
+  private final FacturaService facturaService;
+  private final SucursalService sucursalService;
+  private final ProveedorService proveedorService;
+  private final UsuarioService usuarioService;
+  private final TransportistaService transportistaService;
+  private final AuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public FacturaCompraController(IFacturaCompraService facturaCompraService,
-                                 IFacturaService facturaService,
-                                 ISucursalService sucursalService,
-                                 IProveedorService proveedorService,
-                                 IUsuarioService usuarioService,
-                                 ITransportistaService transportistaService,
-                                 IAuthService authService) {
+  public FacturaCompraController(FacturaCompraService facturaCompraService,
+                                 FacturaService facturaService,
+                                 SucursalService sucursalService,
+                                 ProveedorService proveedorService,
+                                 UsuarioService usuarioService,
+                                 TransportistaService transportistaService,
+                                 AuthService authService) {
     this.facturaCompraService = facturaCompraService;
     this.facturaService = facturaService;
     this.sucursalService = sucursalService;
@@ -82,8 +84,7 @@ public class FacturaCompraController {
               nuevaCompraCompraDTO.getIdTransportista()));
     }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    fc.setUsuario(
-        usuarioService.getUsuarioNoEliminadoPorId(((Integer) claims.get("idUsuario")).longValue()));
+    fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
     List<FacturaCompra> facturas = new ArrayList<>();
     facturas.add(fc);
     return facturaCompraService.guardar(facturas);

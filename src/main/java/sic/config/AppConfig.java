@@ -21,21 +21,13 @@ import sic.modelo.Cliente;
 import sic.modelo.Ubicacion;
 import sic.modelo.dto.ClienteDTO;
 import sic.modelo.dto.UbicacionDTO;
-import sic.service.impl.AfipWebServiceSOAPClient;
+import sic.service.AfipWebServiceSOAPClient;
 
 import java.io.IOException;
 import java.time.Clock;
 
 @Configuration
 public class AppConfig {
-
-  @Bean
-  public Jaxb2Marshaller marshaller() {
-    Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
-    // this package must match the package in the <generatePackage> specified in pom.xml
-    marshaller.setContextPaths("afip.wsaa.wsdl", "afip.wsfe.wsdl");
-    return marshaller;
-  }
 
   @Bean
   public Module springDataPageModule() {
@@ -60,6 +52,14 @@ public class AppConfig {
                 gen.writeEndObject();
               }
             });
+  }
+
+  @Bean
+  public Jaxb2Marshaller marshaller() {
+    Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
+    // this package must match the package in the <generatePackage> specified in pom.xml
+    marshaller.setContextPaths("afip.wsaa.wsdl", "afip.wsfe.wsdl");
+    return marshaller;
   }
 
   @Bean

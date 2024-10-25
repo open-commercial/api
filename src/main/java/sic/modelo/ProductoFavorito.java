@@ -1,11 +1,12 @@
 package sic.modelo;
 
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import javax.persistence.*;
-import javax.validation.constraints.NotNull;
+
 import java.io.Serializable;
 
 @Entity
@@ -20,13 +21,13 @@ public class ProductoFavorito implements Serializable {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long idProductoFavorito;
 
-  @OneToOne
-  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @ManyToOne
+  @JoinColumn(name = "id_Cliente")
   @NotNull(message = "{mensaje_cliente_vacio}")
   private Cliente cliente;
 
-  @OneToOne
-  @JoinColumn(name = "idProducto", referencedColumnName = "idProducto")
+  @ManyToOne
+  @JoinColumn(name = "idProducto")
   @NotNull(message = "{mensaje_producto_vacio}")
   private Producto producto;
 }

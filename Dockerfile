@@ -1,4 +1,4 @@
-FROM amazoncorretto:17-alpine-jdk
+FROM amazoncorretto:21-alpine-jdk
 COPY target/*.jar api.jar
 ADD newrelic newrelic
 EXPOSE 8080

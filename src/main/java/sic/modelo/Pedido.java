@@ -2,22 +2,19 @@ package sic.modelo;
 
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import sic.config.Views;
+import sic.modelo.dto.UbicacionDTO;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import javax.validation.constraints.*;
-import javax.persistence.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-
-import sic.config.Views;
-import sic.modelo.dto.UbicacionDTO;
 
 @Entity
 @Table(name = "pedido")
@@ -51,7 +48,7 @@ public class Pedido implements Serializable {
   private String observaciones;
 
   @ManyToOne
-  @JoinColumn(name = "idSucursal", referencedColumnName = "idSucursal")
+  @JoinColumn(name = "idSucursal")
   @NotNull(message = "{mensaje_pedido_sucursal_vacia}")
   private Sucursal sucursal;
 
@@ -65,16 +62,16 @@ public class Pedido implements Serializable {
   private boolean eliminado;
 
   @ManyToOne
-  @JoinColumn(name = "id_Cliente", referencedColumnName = "id_Cliente")
+  @JoinColumn(name = "id_Cliente")
   @NotNull(message = "{mensaje_pedido_cliente_vacio}")
   private Cliente cliente;
 
   @ManyToOne
-  @JoinColumn(name = "id_Usuario", referencedColumnName = "id_Usuario")
+  @JoinColumn(name = "id_Usuario")
   @NotNull(message = "{mensaje_pedido_usuario_vacio}")
   private Usuario usuario;
 
-  @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "pedido")
   @JsonProperty(access = Access.WRITE_ONLY)
   private List<Factura> facturas;
 

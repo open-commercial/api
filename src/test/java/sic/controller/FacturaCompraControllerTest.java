@@ -1,9 +1,6 @@
 package sic.controller;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.impl.crypto.MacProvider;
+import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,20 +10,14 @@ import sic.modelo.*;
 import sic.modelo.criteria.BusquedaFacturaCompraCriteria;
 import sic.modelo.dto.NuevaFacturaCompraDTO;
 import sic.modelo.dto.NuevoRenglonFacturaDTO;
-import sic.service.impl.*;
+import sic.service.*;
 
-import javax.crypto.SecretKey;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -50,20 +41,7 @@ class FacturaCompraControllerTest {
     FacturaCompra facturaCompra = new FacturaCompra();
     facturasCompra.add(facturaCompra);
     when(facturaCompraService.guardar(any())).thenReturn(facturasCompra);
-    LocalDateTime today = LocalDateTime.now();
-    ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
-    List<Rol> roles = Collections.singletonList(Rol.ADMINISTRADOR);
-    SecretKey secretKey = MacProvider.generateKey();
-    String token =
-        Jwts.builder()
-            .setIssuedAt(Date.from(zdtNow.toInstant()))
-            .setExpiration(Date.from(zdtInOneMonth.toInstant()))
-            .signWith(SignatureAlgorithm.HS512, secretKey)
-            .claim("idUsuario", 1L)
-            .claim("roles", roles)
-            .compact();
-    Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
     assertEquals(
         facturasCompra,

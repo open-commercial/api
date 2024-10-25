@@ -9,8 +9,8 @@ import sic.modelo.Resultados;
 import sic.modelo.Sucursal;
 import sic.modelo.TipoDeComprobante;
 import sic.modelo.dto.NuevosResultadosComprobanteDTO;
-import sic.service.impl.FacturaServiceImpl;
-import sic.service.impl.SucursalServiceImpl;
+import sic.service.FacturaServiceImpl;
+import sic.service.SucursalServiceImpl;
 
 import java.math.BigDecimal;
 

@@ -1,32 +1,37 @@
 package sic.controller;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.*;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
-import sic.modelo.*;
+import sic.modelo.Caja;
+import sic.modelo.MovimientoCaja;
+import sic.modelo.Rol;
 import sic.modelo.criteria.BusquedaCajaCriteria;
 import sic.service.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 public class CajaController {
 
-  private final ICajaService cajaService;
-  private final ISucursalService sucursalService;
-  private final IUsuarioService usuarioService;
-  private final IFormaDePagoService formaDePagoService;
-  private final IAuthService authService;
+  private final CajaService cajaService;
+  private final SucursalService sucursalService;
+  private final UsuarioService usuarioService;
+  private final FormaDePagoService formaDePagoService;
+  private final AuthService authService;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public CajaController(ICajaService cajaService,
-                        ISucursalService sucursalService,
-                        IFormaDePagoService formaDePagoService,
-                        IUsuarioService usuarioService,
-                        IAuthService authService) {
+  public CajaController(CajaService cajaService,
+                        SucursalService sucursalService,
+                        FormaDePagoService formaDePagoService,
+                        UsuarioService usuarioService,
+                        AuthService authService) {
     this.cajaService = cajaService;
     this.sucursalService = sucursalService;
     this.formaDePagoService = formaDePagoService;
@@ -46,7 +51,7 @@ public class CajaController {
                         @RequestParam BigDecimal saldoApertura,
                         @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = (claims.get(CLAIM_ID_USUARIO, Long.class));
     return cajaService.abrirCaja(
         sucursalService.getSucursalPorId(idSucursal),
         usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn),
@@ -65,7 +70,7 @@ public class CajaController {
                          @RequestParam BigDecimal monto,
                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    long idUsuarioLoggedIn = (int) claims.get("idUsuario");
+    long idUsuarioLoggedIn = claims.get(CLAIM_ID_USUARIO, Long.class);
     return cajaService.cerrarCaja(idCaja, monto, idUsuarioLoggedIn, false);
   }
 

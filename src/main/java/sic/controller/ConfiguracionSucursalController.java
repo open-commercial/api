@@ -12,19 +12,19 @@ import sic.aspect.AccesoRolesPermitidos;
 import sic.modelo.ConfiguracionSucursal;
 import sic.modelo.Rol;
 import sic.modelo.dto.ConfiguracionSucursalDTO;
-import sic.service.IConfiguracionSucursalService;
-import sic.service.ISucursalService;
+import sic.service.ConfiguracionSucursalService;
+import sic.service.SucursalService;
 
 @RestController
 public class ConfiguracionSucursalController {
 
-  private final IConfiguracionSucursalService configuracionSucursal;
-  private final ISucursalService sucursalService;
+  private final ConfiguracionSucursalService configuracionSucursal;
+  private final SucursalService sucursalService;
   private final ModelMapper modelMapper;
 
   @Autowired
-  public ConfiguracionSucursalController(IConfiguracionSucursalService configuracionSucursal,
-                                         ISucursalService sucursalService,
+  public ConfiguracionSucursalController(ConfiguracionSucursalService configuracionSucursal,
+                                         SucursalService sucursalService,
                                          ModelMapper modelMapper) {
     this.configuracionSucursal = configuracionSucursal;
     this.sucursalService = sucursalService;

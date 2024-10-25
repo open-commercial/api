@@ -5,8 +5,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import sic.modelo.QGasto;
 import sic.repository.GastoRepositoryCustom;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
 
 public class GastoRepositoryImpl implements GastoRepositoryCustom {

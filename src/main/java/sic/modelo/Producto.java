@@ -1,23 +1,22 @@
 package sic.modelo;
 
-import com.fasterxml.jackson.annotation.*;
-
-import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import javax.persistence.*;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import sic.config.Views;
 import sic.modelo.embeddable.CantidadProductoEmbeddable;
 import sic.modelo.embeddable.PrecioProductoEmbeddable;
+
+import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "producto")
@@ -56,12 +55,12 @@ public class Producto implements Serializable {
   private CantidadProductoEmbeddable cantidadProducto;
 
   @ManyToOne
-  @JoinColumn(name = "id_Medida", referencedColumnName = "id_Medida")
+  @JoinColumn(name = "id_Medida")
   @NotNull(message = "{mensaje_producto_vacio_medida}")
   private Medida medida;
 
   @ManyToOne
-  @JoinColumn(name = "id_Rubro", referencedColumnName = "id_Rubro")
+  @JoinColumn(name = "id_Rubro")
   @NotNull(message = "{mensaje_producto_vacio_rubro}")
   private Rubro rubro;
 
@@ -78,7 +77,7 @@ public class Producto implements Serializable {
   private LocalDateTime fechaUltimaModificacion;
 
   @ManyToOne
-  @JoinColumn(name = "id_Proveedor", referencedColumnName = "id_Proveedor")
+  @JoinColumn(name = "id_Proveedor")
   @NotNull(message = "{mensaje_producto_vacio_proveedor}")
   private Proveedor proveedor;
 

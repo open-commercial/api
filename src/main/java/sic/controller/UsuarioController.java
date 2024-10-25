@@ -1,6 +1,5 @@
 package sic.controller;
 
-import java.util.Locale;
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,26 +8,29 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import sic.aspect.AccesoRolesPermitidos;
 import sic.exception.ForbiddenException;
-import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.modelo.Rol;
 import sic.modelo.Usuario;
+import sic.modelo.criteria.BusquedaUsuarioCriteria;
 import sic.modelo.dto.UsuarioDTO;
-import sic.service.IAuthService;
-import sic.service.IUsuarioService;
+import sic.service.AuthService;
+import sic.service.UsuarioService;
 import sic.util.EncryptUtils;
+
+import java.util.Locale;
 
 @RestController
 public class UsuarioController {
 
-  private final IUsuarioService usuarioService;
-  private final IAuthService authService;
+  private final UsuarioService usuarioService;
+  private final AuthService authService;
   private final ModelMapper modelMapper;
   private final MessageSource messageSource;
   private final EncryptUtils encryptUtils;
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
 
   @Autowired
-  public UsuarioController(IUsuarioService usuarioService,
-                           IAuthService authService,
+  public UsuarioController(UsuarioService usuarioService,
+                           AuthService authService,
                            ModelMapper modelMapper,
                            MessageSource messageSource,
                            EncryptUtils encryptUtils) {
@@ -55,7 +57,7 @@ public class UsuarioController {
   public Usuario guardar(@RequestBody UsuarioDTO usuarioDTO,
                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
+    Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class));
     if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
         && (usuarioDTO.getRoles().size() != 1 || !usuarioDTO.getRoles().contains(Rol.COMPRADOR))) {
       throw new ForbiddenException(messageSource.getMessage(
@@ -69,7 +71,7 @@ public class UsuarioController {
   public void actualizar(@RequestBody UsuarioDTO usuarioDTO,
                          @RequestHeader("Authorization") String authorizationHeader) {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    Usuario usuarioLoggedIn = this.getUsuarioPorId((int) claims.get("idUsuario"));
+    Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class));
     boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();
     if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
       Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);

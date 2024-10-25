@@ -1,18 +1,18 @@
 package sic.integration;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
@@ -20,7 +20,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import sic.model.*;
+import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 import sic.model.Caja;
 import sic.model.CantidadEnSucursal;
 import sic.model.Cliente;
@@ -40,91 +42,86 @@ import sic.model.Rubro;
 import sic.model.Sucursal;
 import sic.model.Ubicacion;
 import sic.model.Usuario;
-import sic.modelo.*;
+import sic.model.*;
 import sic.modelo.RenglonFactura;
+import sic.modelo.*;
 import sic.modelo.criteria.*;
 import sic.modelo.dto.*;
-import java.io.*;
+
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
+
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
+@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(locations = "/application.properties")
 class AppIntegrationTest {
 
   String token;
-  final String apiPrefix = "/api/v1";
   static final BigDecimal CIEN = new BigDecimal("100");
 
   @Autowired TestRestTemplate restTemplate;
   @Autowired MessageSource messageSource;
 
+  @Container
+  @ServiceConnection
+  static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.3.0");
+
   void iniciarSesionComoAdministrador() {
-    this.token =
-        restTemplate
-            .postForEntity(
-                apiPrefix + "/login",
-                new Credencial("dueño", "dueño123"),
-                String.class)
-            .getBody();
+    this.token = restTemplate.postForEntity("/api/v1/login",
+                                            new Credencial("dueño", "dueño123"),
+                                            String.class)
+                              .getBody();
     assertNotNull(this.token);
   }
 
   @BeforeEach
   void setup() {
     // Interceptor de RestTemplate para JWT
-    List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+    var interceptors = new ArrayList<ClientHttpRequestInterceptor>();
     interceptors.add(
-        (ClientHttpRequestInterceptor)
             (HttpRequest request, byte[] body, ClientHttpRequestExecution execution) -> {
               request.getHeaders().set("Authorization", "Bearer " + token);
               return execution.execute(request, body);
             });
     restTemplate.getRestTemplate().setInterceptors(interceptors);
-    // ErrorHandler para RestTemplate
-    restTemplate
-        .getRestTemplate()
-        .setErrorHandler(
-            new ResponseErrorHandler() {
-              @Override
-              public boolean hasError(ClientHttpResponse response) throws IOException {
-                HttpStatus.Series series = response.getStatusCode().series();
-                return (HttpStatus.Series.CLIENT_ERROR.equals(series)
-                    || HttpStatus.Series.SERVER_ERROR.equals(series));
-              }
+    restTemplate.getRestTemplate()
+                .setErrorHandler(
+                    new ResponseErrorHandler() {
+                      @Override
+                      public boolean hasError(@NotNull ClientHttpResponse response) throws IOException {
+                        return (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError());
+                      }
 
-              @Override
-              public void handleError(ClientHttpResponse response) throws IOException {
-                String mensaje = IOUtils.toString(response.getBody(), Charset.defaultCharset());
-                throw new RestClientResponseException(
-                    mensaje,
-                    response.getRawStatusCode(),
-                    response.getStatusText(),
-                    response.getHeaders(),
-                    null,
-                    Charset.defaultCharset());
-              }
-            });
+                      @Override
+                      public void handleError(@NotNull ClientHttpResponse response) throws IOException {
+                        String mensaje = IOUtils.toString(response.getBody(), Charset.defaultCharset());
+                        throw new RestClientResponseException(
+                                mensaje,
+                                response.getStatusCode(),
+                                response.getStatusText(),
+                                response.getHeaders(),
+                                null,
+                                Charset.defaultCharset());
+                      }
+                    });
   }
 
   @Test
   @DisplayName("Iniciar actividad con una nueva sucursal y un usuario Administrador")
   @Order(1)
-  void iniciarActividadComercial() throws IOException {
-    this.token =
-        restTemplate
-            .postForEntity(
-                apiPrefix + "/login",
-                new Credencial("test", "test"),
-                String.class)
+  void iniciarActividadComercial() {
+    this.token = restTemplate.postForEntity("/api/v1/login",
+                    new Credencial("test", "test"),
+                    String.class)
             .getBody();
-    Usuario credencial =
+    Usuario usuario =
         Usuario.builder()
             .username("dueño")
             .password("dueño123")
@@ -133,9 +130,9 @@ class AppIntegrationTest {
             .email("liderDeLaEmpresa@yahoo.com.br")
             .roles(new ArrayList<>(Collections.singletonList(Rol.ADMINISTRADOR)))
             .build();
-    credencial = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, Usuario.class);
-    credencial.setHabilitado(true);
-    restTemplate.put(apiPrefix + "/usuarios", credencial);
+    usuario = restTemplate.postForObject("/api/v1/usuarios", usuario, Usuario.class);
+    usuario.setHabilitado(true);
+    restTemplate.put("/api/v1/usuarios", usuario);
     this.iniciarSesionComoAdministrador();
     NuevaSucursal nuevaSucursal =
             NuevaSucursal.builder()
@@ -145,8 +142,7 @@ class AppIntegrationTest {
                     .idFiscal(20311023188L)
                     .ubicacion(UbicacionDTO.builder().idLocalidad(1L).idProvincia(1L).build())
                     .build();
-    Sucursal sucursalRecuperada =
-        restTemplate.postForObject(apiPrefix + "/sucursales", nuevaSucursal, Sucursal.class);
+    var sucursalRecuperada = restTemplate.postForObject("/api/v1/sucursales", nuevaSucursal, Sucursal.class);
     assertEquals(nuevaSucursal.getNombre(), sucursalRecuperada.getNombre());
     assertEquals(nuevaSucursal.getLema(), sucursalRecuperada.getLema());
     assertEquals(nuevaSucursal.getCategoriaIVA(), sucursalRecuperada.getCategoriaIVA());
@@ -157,30 +153,21 @@ class AppIntegrationTest {
     assertEquals(nuevaSucursal.getTelefono(), sucursalRecuperada.getTelefono());
     assertEquals(nuevaSucursal.getUbicacion().getIdLocalidad(), sucursalRecuperada.getUbicacion().getIdLocalidad());
     ConfiguracionSucursal configuracionSucursal =
-        restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+        restTemplate.getForObject("/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
             ConfiguracionSucursal.class);
     configuracionSucursal.setPuntoDeRetiro(true);
     configuracionSucursal.setPredeterminada(true);
-    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursal);
+    restTemplate.put("/api/v1/configuraciones-sucursal", configuracionSucursal);
     configuracionSucursal = restTemplate.getForObject(
-            apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+            "/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
             ConfiguracionSucursal.class);
     assertTrue(configuracionSucursal.isPuntoDeRetiro());
     assertTrue(configuracionSucursal.isPredeterminada());
-    File resource = new ClassPathResource("/certificadoAfipTest.p12").getFile();
-    byte[] certificadoAfip = new byte[(int) resource.length()];
-    FileInputStream fileInputStream = new FileInputStream(resource);
-    fileInputStream.read(certificadoAfip);
-    fileInputStream.close();
-    this.iniciarSesionComoAdministrador();
-    configuracionSucursal.setCertificadoAfip(certificadoAfip);
     configuracionSucursal.setFacturaElectronicaHabilitada(false);
-    configuracionSucursal.setFirmanteCertificadoAfip("globo");
-    configuracionSucursal.setPasswordCertificadoAfip("globo123");
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
-    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursal);
+    restTemplate.put("/api/v1/configuraciones-sucursal", configuracionSucursal);
     ConfiguracionSucursal configuracionSucursalActualizada =
-        restTemplate.getForObject(apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+        restTemplate.getForObject("/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
             ConfiguracionSucursal.class);
     assertEquals(configuracionSucursal, configuracionSucursalActualizada);
   }
@@ -190,8 +177,8 @@ class AppIntegrationTest {
   @Order(2)
   void testEscenarioAbrirCaja() {
     this.iniciarSesionComoAdministrador();
-    Caja cajaAbierta = restTemplate.postForObject(
-            apiPrefix + "/cajas/apertura/sucursales/1?saldoApertura=1000", null, Caja.class);
+    var cajaAbierta = restTemplate.postForObject(
+            "/api/v1/cajas/apertura/sucursales/1?saldoApertura=1000", null, Caja.class);
     assertEquals(EstadoCaja.ABIERTA, cajaAbierta.getEstado());
     assertEquals(new BigDecimal("1000"), cajaAbierta.getSaldoApertura());
     NuevoGastoDTO nuevoGasto =
@@ -201,17 +188,16 @@ class AppIntegrationTest {
             .idFormaDePago(1L)
             .idSucursal(1L)
             .build();
-    List<Sucursal> sucursales =
-        Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+    List<Sucursal> sucursales = Arrays.asList(restTemplate.getForObject("/api/v1/sucursales", Sucursal[].class));
     assertFalse(sucursales.isEmpty());
     assertEquals(1, sucursales.size());
-    restTemplate.postForObject(apiPrefix + "/gastos", nuevoGasto, Gasto.class);
+    restTemplate.postForObject("/api/v1/gastos", nuevoGasto, Gasto.class);
     BusquedaGastoCriteria criteria = BusquedaGastoCriteria.builder().idSucursal(1L).build();
     HttpEntity<BusquedaGastoCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<Gasto> resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/gastos/busqueda/criteria",
+                "/api/v1/gastos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Gasto>>() {})
@@ -234,13 +220,13 @@ class AppIntegrationTest {
             .razonSocial("Chamaco S.R.L.")
             .build();
     Proveedor proveedorRecuperado =
-        restTemplate.postForObject(apiPrefix + "/proveedores", proveedor, Proveedor.class);
+        restTemplate.postForObject("/api/v1/proveedores", proveedor, Proveedor.class);
     assertEquals(proveedor, proveedorRecuperado);
     Rubro rubro = Rubro.builder().nombre("Ferreteria").build();
-    Rubro rubroDadoDeAlta = restTemplate.postForObject(apiPrefix + "/rubros", rubro, Rubro.class);
+    Rubro rubroDadoDeAlta = restTemplate.postForObject("/api/v1/rubros", rubro, Rubro.class);
     assertEquals(rubro, rubroDadoDeAlta);
     Medida medida = Medida.builder().nombre("Metro").build();
-    Medida medidaDadaDeAlta = restTemplate.postForObject(apiPrefix + "/medidas", medida, Medida.class);
+    Medida medidaDadaDeAlta = restTemplate.postForObject("/api/v1/medidas", medida, Medida.class);
     assertEquals(medida, medidaDadaDeAlta);
     NuevoProductoDTO nuevoProductoUno =
         NuevoProductoDTO.builder()
@@ -296,10 +282,9 @@ class AppIntegrationTest {
             .porcentajeBonificacionPrecio(BigDecimal.TEN)
             .paraCatalogo(true)
             .build();
-    Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
+    Sucursal sucursal = restTemplate.getForObject("/api/v1/sucursales/1", Sucursal.class);
     restTemplate.postForObject(
-        apiPrefix
-            + "/productos?idMedida=" + medidaDadaDeAlta.getIdMedida()
+            "/api/v1/productos?idMedida=" + medidaDadaDeAlta.getIdMedida()
             + "&idRubro=" + rubroDadoDeAlta.getIdRubro()
             + "&idProveedor=" + proveedorRecuperado.getIdProveedor()
             + "&idSucursal=" + sucursal.getIdSucursal(),
@@ -311,7 +296,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Producto> resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -334,8 +319,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("20.000000000000000"), productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
     assertEquals(new BigDecimal("968.000000000000000"), productosRecuperados.get(0).getPrecioBonificado());
     restTemplate.postForObject(
-        apiPrefix
-            + "/productos?idMedida=" + medidaDadaDeAlta.getIdMedida()
+            "/api/v1/productos?idMedida=" + medidaDadaDeAlta.getIdMedida()
             + "&idRubro=" + rubroDadoDeAlta.getIdRubro()
             + "&idProveedor=" + proveedorRecuperado.getIdProveedor()
             + "&idSucursal=" + sucursal.getIdSucursal(),
@@ -346,7 +330,7 @@ class AppIntegrationTest {
     resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -368,8 +352,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("20.000000000000000"), productosRecuperados.get(0).getPorcentajeBonificacionPrecio());
     assertEquals(new BigDecimal("884.000000000000000"), productosRecuperados.get(0).getPrecioBonificado());
     restTemplate.postForObject(
-        apiPrefix
-            + "/productos?idMedida=" + medidaDadaDeAlta.getIdMedida()
+            "/api/v1/productos?idMedida=" + medidaDadaDeAlta.getIdMedida()
             + "&idRubro=" + rubroDadoDeAlta.getIdRubro()
             + "&idProveedor=" + proveedorRecuperado.getIdProveedor()
             + "&idSucursal=" + sucursal.getIdSucursal(),
@@ -380,7 +363,7 @@ class AppIntegrationTest {
     resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -407,7 +390,7 @@ class AppIntegrationTest {
     resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -439,7 +422,7 @@ class AppIntegrationTest {
             .fecha(LocalDateTime.now())
             .build();
     restTemplate.postForObject(
-        apiPrefix + "/facturas/compras", nuevaFacturaCompraDTO, FacturaCompra[].class);
+        "/api/v1/facturas/compras", nuevaFacturaCompraDTO, FacturaCompra[].class);
     BusquedaFacturaCompraCriteria criteriaCompra =
         BusquedaFacturaCompraCriteria.builder()
             .idSucursal(1L)
@@ -450,7 +433,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<FacturaCompra> resultadoBusquedaCompra =
         restTemplate
             .exchange(
-                apiPrefix + "/facturas/compras/busqueda/criteria",
+                "/api/v1/facturas/compras/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityCompra,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompra>>() {})
@@ -469,7 +452,7 @@ class AppIntegrationTest {
     assertEquals(proveedorRecuperado.getRazonSocial(), facturasRecuperadas.get(0).getRazonSocialProveedor());
     assertEquals(sucursal.getNombre(), facturasRecuperadas.get(0).getNombreSucursal());
     assertEquals(new BigDecimal("-554.540000000000000"),
-        restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
+        restTemplate.getForObject("/api/v1/cuentas-corriente/proveedores/1/saldo", BigDecimal.class));
     Recibo recibo =
         Recibo.builder()
             .monto(554.54)
@@ -479,19 +462,19 @@ class AppIntegrationTest {
             .idFormaDePago(2L)
             .build();
     Recibo reciboRecuperado =
-        restTemplate.postForObject(apiPrefix + "/recibos/proveedores", recibo, Recibo.class);
+        restTemplate.postForObject("/api/v1/recibos/proveedores", recibo, Recibo.class);
     assertEquals(recibo, reciboRecuperado);
     assertEquals(
         0.0,
         restTemplate
-            .getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
+            .getForObject("/api/v1/cuentas-corriente/proveedores/1/saldo", BigDecimal.class)
             .doubleValue());
     criteria = BusquedaProductoCriteria.builder().build();
     requestEntity = new HttpEntity<>(criteria);
     resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -508,7 +491,7 @@ class AppIntegrationTest {
   @Order(4)
   void testEscenarioCompraEscenario2() {
     this.iniciarSesionComoAdministrador();
-    assertEquals(0.0, restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo",
+    assertEquals(0.0, restTemplate.getForObject("/api/v1/cuentas-corriente/proveedores/1/saldo",
             BigDecimal.class).doubleValue());
     BusquedaProductoCriteria criteria =
             BusquedaProductoCriteria.builder().descripcion("Ventilador").build();
@@ -516,7 +499,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Producto> resultadoBusqueda =
             restTemplate
                     .exchange(
-                            apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                            "/api/v1/productos/busqueda/criteria/sucursales/1",
                             HttpMethod.POST,
                             requestEntity,
                             new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -535,7 +518,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<FacturaCompra> resultadoBusquedaCompra =
             restTemplate
                     .exchange(
-                            apiPrefix + "/facturas/compras/busqueda/criteria",
+                            "/api/v1/facturas/compras/busqueda/criteria",
                             HttpMethod.POST,
                             requestEntityCompra,
                             new ParameterizedTypeReference<PaginaRespuestaRest<FacturaCompra>>() {})
@@ -543,7 +526,7 @@ class AppIntegrationTest {
     assertNotNull(resultadoBusquedaCompra);
     List<FacturaCompra> facturasRecuperadas = resultadoBusquedaCompra.getContent();
     assertEquals(1, facturasRecuperadas.size());
-    List<sic.model.RenglonFactura> renglonesFacturaCompra = Arrays.asList(restTemplate.getForObject(apiPrefix + "/facturas/" +
+    List<sic.model.RenglonFactura> renglonesFacturaCompra = Arrays.asList(restTemplate.getForObject("/api/v1/facturas/" +
             facturasRecuperadas.get(0).getIdFactura() + "/renglones", sic.model.RenglonFactura[].class));
     NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO = NuevaNotaCreditoDeFacturaDTO
             .builder()
@@ -553,16 +536,16 @@ class AppIntegrationTest {
             .modificaStock(true)
             .motivo("Unidad Fallada")
             .build();
-    NotaCredito notaCredito = restTemplate.postForObject(apiPrefix + "/notas/credito/factura", nuevaNotaCreditoDeFacturaDTO, NotaCredito.class);
+    NotaCredito notaCredito = restTemplate.postForObject("/api/v1/notas/credito/factura", nuevaNotaCreditoDeFacturaDTO, NotaCredito.class);
     assertEquals(Movimiento.COMPRA, notaCredito.getMovimiento());
     assertEquals(notaCredito.getIdFacturaCompra(), facturasRecuperadas.get(0).getIdFactura());
     assertEquals(notaCredito.getIdNota(), 1L);
-    assertEquals(82.28, restTemplate.getForObject(apiPrefix + "/cuentas-corriente/proveedores/1/saldo",
+    assertEquals(82.28, restTemplate.getForObject("/api/v1/cuentas-corriente/proveedores/1/saldo",
             BigDecimal.class).doubleValue());
     resultadoBusqueda =
             restTemplate
                     .exchange(
-                            apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                            "/api/v1/productos/busqueda/criteria/sucursales/1",
                             HttpMethod.POST,
                             requestEntity,
                             new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -584,7 +567,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Proveedor> resultadoBusquedaProveedor =
         restTemplate
             .exchange(
-                apiPrefix + "/proveedores/busqueda/criteria",
+                "/api/v1/proveedores/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Proveedor>>() {})
@@ -600,7 +583,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Recibo> resultadoBusquedaRecibo =
         restTemplate
             .exchange(
-                apiPrefix + "/recibos/busqueda/criteria",
+                "/api/v1/recibos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Recibo>>() {})
@@ -617,9 +600,9 @@ class AppIntegrationTest {
             .build();
 //    NotaDebito notaDebitoCalculada =
 //        restTemplate.postForObject(
-//            apiPrefix + "/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebito.class);
+//            "/api/v1/notas/debito/calculos", nuevaNotaDebitoDeReciboDTO, NotaDebito.class);
 //    NotaDebito notaDebitoGuardada =
-        restTemplate.postForObject(apiPrefix + "/notas/debito", nuevaNotaDebitoDeReciboDTO, NotaDebito.class);
+        restTemplate.postForObject("/api/v1/notas/debito", nuevaNotaDebitoDeReciboDTO, NotaDebito.class);
     BusquedaNotaCriteria criteriaNota =
             BusquedaNotaCriteria.builder()
                     .idSucursal(1L)
@@ -627,7 +610,7 @@ class AppIntegrationTest {
                     .build();
     HttpEntity<BusquedaNotaCriteria> requestEntityNota = new HttpEntity<>(criteriaNota);
     PaginaRespuestaRest<NotaDebito> resultadoBusquedaNota =
-            restTemplate.exchange(apiPrefix + "/notas/debito/busqueda/criteria", HttpMethod.POST,
+            restTemplate.exchange("/api/v1/notas/debito/busqueda/criteria", HttpMethod.POST,
                     requestEntityNota, new ParameterizedTypeReference<PaginaRespuestaRest<NotaDebito>>() {})
                     .getBody();
     assertNotNull(resultadoBusquedaNota);
@@ -635,7 +618,7 @@ class AppIntegrationTest {
     List<sic.model.RenglonNotaDebito> renglones =
             Arrays.asList(
                     restTemplate.getForObject(
-                            apiPrefix + "/notas/renglones/debito/" + notasRecuperadas.get(0).getIdNota(),
+                            "/api/v1/notas/renglones/debito/" + notasRecuperadas.get(0).getIdNota(),
                             sic.model.RenglonNotaDebito[].class));
     assertNotNull(renglones);
     assertEquals(2, renglones.size());
@@ -657,21 +640,21 @@ class AppIntegrationTest {
   @Test
   @DisplayName("Dar de alta un producto")
   @Order(6)
-  void testEscenarioAltaDeProducto() throws IOException {
+  void testEscenarioAltaDeProducto() {
     this.iniciarSesionComoAdministrador();
-    var medidas = Arrays.asList(restTemplate.getForObject(apiPrefix + "/medidas", Medida[].class));
+    var medidas = Arrays.asList(restTemplate.getForObject("/api/v1/medidas", Medida[].class));
     assertFalse(medidas.isEmpty());
     assertEquals(1, medidas.size());
-    var rubros = Arrays.asList(restTemplate.getForObject(apiPrefix + "/rubros", Rubro[].class));
+    var rubros = Arrays.asList(restTemplate.getForObject("/api/v1/rubros", Rubro[].class));
     assertFalse(rubros.isEmpty());
     assertEquals(1, rubros.size());
-    var sucursales = Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+    var sucursales = Arrays.asList(restTemplate.getForObject("/api/v1/sucursales", Sucursal[].class));
     assertFalse(sucursales.isEmpty());
     assertEquals(1, sucursales.size());
     BusquedaProveedorCriteria criteriaParaProveedores = BusquedaProveedorCriteria.builder().build();
     HttpEntity<BusquedaProveedorCriteria> requestEntityParaProveedores = new HttpEntity<>(criteriaParaProveedores);
     PaginaRespuestaRest<Proveedor> resultadoBusquedaProveedor =
-            restTemplate.exchange(apiPrefix + "/proveedores/busqueda/criteria", HttpMethod.POST,
+            restTemplate.exchange("/api/v1/proveedores/busqueda/criteria", HttpMethod.POST,
                     requestEntityParaProveedores, new ParameterizedTypeReference<PaginaRespuestaRest<Proveedor>>() {})
                     .getBody();
     assertNotNull(resultadoBusquedaProveedor);
@@ -698,7 +681,7 @@ class AppIntegrationTest {
             .build();
     Producto productoGuardado =
         restTemplate.postForObject(
-            apiPrefix + "/productos?idMedida=" + medidas.get(0).getIdMedida()
+            "/api/v1/productos?idMedida=" + medidas.get(0).getIdMedida()
                 + "&idRubro=" + rubros.get(0).getIdRubro()
                 + "&idProveedor=" + proveedoresRecuperados.get(0).getIdProveedor(),
             nuevoProductoCuatro,
@@ -721,7 +704,7 @@ class AppIntegrationTest {
             .roles(new ArrayList<>(Collections.singletonList(Rol.COMPRADOR)))
             .habilitado(true)
             .build();
-    var credencialDadaDeAlta = restTemplate.postForObject(apiPrefix + "/usuarios", credencial, Usuario.class);
+    var credencialDadaDeAlta = restTemplate.postForObject("/api/v1/usuarios", credencial, Usuario.class);
     credencialDadaDeAlta.setHabilitado(true);
     assertEquals(credencial, credencialDadaDeAlta);
     Cliente cliente =
@@ -736,10 +719,10 @@ class AppIntegrationTest {
             .email("correoparapagos@gmail.com")
             .puedeComprarAPlazo(true)
             .build();
-    Cliente clienteRecuperado = restTemplate.postForObject(apiPrefix + "/clientes", cliente, Cliente.class);
+    Cliente clienteRecuperado = restTemplate.postForObject("/api/v1/clientes", cliente, Cliente.class);
     assertEquals(cliente, clienteRecuperado);
-    Producto productoUno = restTemplate.getForObject(apiPrefix + "/productos/1/sucursales/1", Producto.class);
-    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
+    Producto productoUno = restTemplate.getForObject("/api/v1/productos/1/sucursales/1", Producto.class);
+    Producto productoDos = restTemplate.getForObject("/api/v1/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("13.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("12.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     List<NuevoRenglonPedidoDTO> renglonesPedidoDTO = new ArrayList<>();
@@ -762,9 +745,9 @@ class AppIntegrationTest {
             .idCliente(clienteRecuperado.getIdCliente())
             .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
             .build();
-    Pedido pedidoRecuperado = restTemplate.postForObject(apiPrefix + "/pedidos", pedidoDTO, Pedido.class);
-    productoUno = restTemplate.getForObject(apiPrefix + "/productos/1/sucursales/1", Producto.class);
-    productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
+    Pedido pedidoRecuperado = restTemplate.postForObject("/api/v1/pedidos", pedidoDTO, Pedido.class);
+    productoUno = restTemplate.getForObject("/api/v1/productos/1/sucursales/1", Producto.class);
+    productoDos = restTemplate.getForObject("/api/v1/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("8.000000000000000"), productoUno.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("10.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("5.000000000000000"), productoUno.getCantidadReservada());
@@ -773,7 +756,7 @@ class AppIntegrationTest {
     assertEquals(EstadoPedido.ABIERTO, pedidoRecuperado.getEstado());
     List<sic.model.RenglonPedido> renglonesDelPedido =
             Arrays.asList(restTemplate.getForObject(
-                    apiPrefix + "/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones",
+                    "/api/v1/pedidos/" + pedidoRecuperado.getIdPedido() + "/renglones",
                     sic.model.RenglonPedido[].class));
     assertEquals(2, renglonesDelPedido.size());
     assertEquals("Ventilador de pie", renglonesDelPedido.get(0).getDescripcionItem());
@@ -804,7 +787,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
+                "/api/v1/pedidos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -815,7 +798,7 @@ class AppIntegrationTest {
     List<sic.model.RenglonPedido> renglonesPedidos =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones",
+                "/api/v1/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones",
                 sic.model.RenglonPedido[].class));
     assertNotNull(renglonesPedidos);
     assertEquals(2, renglonesPedidos.size());
@@ -840,8 +823,8 @@ class AppIntegrationTest {
             .idCliente(pedidosRecuperados.get(0).getCliente().getIdCliente())
             .tipoDeEnvio(TipoDeEnvio.RETIRO_EN_SUCURSAL)
             .build();
-    restTemplate.put(apiPrefix + "/pedidos", pedidoDTO);
-    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
+    restTemplate.put("/api/v1/pedidos", pedidoDTO);
+    Producto productoDos = restTemplate.getForObject("/api/v1/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("9.000000000000000"), productoDos.getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("3.000000000000000"), productoDos.getCantidadReservada());
     criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
@@ -849,7 +832,7 @@ class AppIntegrationTest {
     resultadoBusquedaPedido =
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
+                "/api/v1/pedidos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -861,7 +844,7 @@ class AppIntegrationTest {
     List<sic.model.RenglonPedido> renglonesDelPedido =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones",
+                "/api/v1/pedidos/" + pedidosRecuperados.get(0).getIdPedido() + "/renglones",
                 sic.model.RenglonPedido[].class));
     assertEquals(3, renglonesDelPedido.size());
     assertEquals("Ventilador de pie", renglonesDelPedido.get(0).getDescripcionItem());
@@ -900,7 +883,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
+                "/api/v1/pedidos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -911,8 +894,7 @@ class AppIntegrationTest {
     List<RenglonFactura> renglones =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix
-                    + "/facturas/ventas/renglones/pedidos/"
+                    "/api/v1/facturas/ventas/renglones/pedidos/"
                     + pedidosRecuperados.get(0).getIdPedido()
                     + "?tipoDeComprobante=FACTURA_A",
                 RenglonFactura[].class));
@@ -949,7 +931,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("1234.751000000000000"), renglones.get(2).getGananciaNeto());
     assertEquals(new BigDecimal("133644.020000000000000000000000000000"), renglones.get(2).getImporteAnterior());
     assertEquals(new BigDecimal("108850.329000000000000000000000000000"), renglones.get(2).getImporte());
-    Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/1", Cliente.class);
+    Cliente cliente = restTemplate.getForObject("/api/v1/clientes/1", Cliente.class);
     assertNotNull(cliente);
     int[] indices = new int[] {0};
     NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
@@ -962,13 +944,13 @@ class AppIntegrationTest {
             .indices(indices)
             .build();
     FacturaVenta[] facturas = restTemplate.postForObject(
-            apiPrefix + "/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(),
+            "/api/v1/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(),
             nuevaFacturaVentaDTO, FacturaVenta[].class);
-    Producto productoUno = restTemplate.getForObject(apiPrefix + "/productos/1/sucursales/1", Producto.class);
+    Producto productoUno = restTemplate.getForObject("/api/v1/productos/1/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("8.000000000000000"), productoUno.getCantidadTotalEnSucursales());
-    Producto productoDos = restTemplate.getForObject(apiPrefix + "/productos/2/sucursales/1", Producto.class);
+    Producto productoDos = restTemplate.getForObject("/api/v1/productos/2/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("9.000000000000000"), productoDos.getCantidadTotalEnSucursales());
-    Producto productoTres = restTemplate.getForObject(apiPrefix + "/productos/3/sucursales/1", Producto.class);
+    Producto productoTres = restTemplate.getForObject("/api/v1/productos/3/sucursales/1", Producto.class);
     assertEquals(new BigDecimal("0E-15"), productoTres.getCantidadTotalEnSucursales());
     assertEquals(2, facturas.length);
     assertEquals(TipoDeComprobante.FACTURA_A, facturas[1].getTipoComprobante());
@@ -976,19 +958,19 @@ class AppIntegrationTest {
     //assertNotEquals(0L, facturas[1].getCae());
     assertNotNull(
         restTemplate.getForObject(
-            apiPrefix + "/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte",
+            "/api/v1/facturas/ventas/" + facturas[0].getIdFactura() + "/reporte",
             byte[].class));
     assertNotNull(
         restTemplate.getForObject(
-            apiPrefix + "/facturas/ventas/" + facturas[1].getIdFactura() + "/reporte",
+            "/api/v1/facturas/ventas/" + facturas[1].getIdFactura() + "/reporte",
             byte[].class));
     assertEquals(cliente.getNombreFiscal(), facturas[0].getNombreFiscalCliente());
-    Sucursal sucursal = restTemplate.getForObject(apiPrefix + "/sucursales/1", Sucursal.class);
+    Sucursal sucursal = restTemplate.getForObject("/api/v1/sucursales/1", Sucursal.class);
     assertNotNull(sucursal);
     assertEquals(sucursal.getNombre(), facturas[0].getNombreSucursal());
     assertEquals(cliente.getNombreFiscal(), facturas[1].getNombreFiscalCliente());
     assertEquals(sucursal.getNombre(), facturas[1].getNombreSucursal());
-    Usuario credencial = restTemplate.getForObject(apiPrefix + "/usuarios/2", Usuario.class);
+    Usuario credencial = restTemplate.getForObject("/api/v1/usuarios/2", Usuario.class);
     assertNotNull(credencial);
     assertEquals(credencial.getNombre() + " " + credencial.getApellido() + " (" + credencial.getUsername() + ")",
             facturas[0].getNombreUsuario());
@@ -1013,12 +995,12 @@ class AppIntegrationTest {
     List<RenglonFactura> renglonesFacturaUno =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/facturas/" + facturas[0].getIdFactura() + "/renglones",
+                "/api/v1/facturas/" + facturas[0].getIdFactura() + "/renglones",
                 RenglonFactura[].class));
     List<RenglonFactura> renglonesFacturaDos =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/facturas/" + facturas[1].getIdFactura() + "/renglones",
+                "/api/v1/facturas/" + facturas[1].getIdFactura() + "/renglones",
                 RenglonFactura[].class));
     assertEquals(2.0, renglonesFacturaUno.get(0).getCantidad().doubleValue());
     assertEquals(3.0, renglonesFacturaDos.get(0).getCantidad().doubleValue());
@@ -1027,7 +1009,7 @@ class AppIntegrationTest {
     assertEquals(
         -108320.27151325,
         restTemplate
-            .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
+            .getForObject("/api/v1/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());
     Recibo recibo =
         Recibo.builder()
@@ -1038,22 +1020,22 @@ class AppIntegrationTest {
             .idFormaDePago(1L)
             .build();
     Recibo reciboDeFactura =
-        restTemplate.postForObject(apiPrefix + "/recibos/clientes", recibo, Recibo.class);
+        restTemplate.postForObject("/api/v1/recibos/clientes", recibo, Recibo.class);
     assertNotNull(
         restTemplate.getForObject(
-            apiPrefix + "/recibos/" + reciboDeFactura.getIdRecibo() + "/reporte", byte[].class));
+            "/api/v1/recibos/" + reciboDeFactura.getIdRecibo() + "/reporte", byte[].class));
     assertEquals(recibo, reciboDeFactura);
     assertEquals(
         0.0,
         restTemplate
-            .getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
+            .getForObject("/api/v1/cuentas-corriente/clientes/1/saldo", BigDecimal.class)
             .doubleValue());
     criteria = BusquedaPedidoCriteria.builder().idSucursal(1L).build();
     requestEntity = new HttpEntity<>(criteria);
     resultadoBusquedaPedido =
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
+                "/api/v1/pedidos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -1077,16 +1059,14 @@ class AppIntegrationTest {
     transportistaNuevo.setNombre("Transportista nuevo");
     transportistaNuevo.setTelefono("3795448866");
     transportistaNuevo.setWeb("transportista.com.ar");
-    transportistaNuevo = restTemplate.postForObject(apiPrefix + "/transportistas", transportistaNuevo, TransportistaDTO.class);
+    transportistaNuevo = restTemplate.postForObject("/api/v1/transportistas", transportistaNuevo, TransportistaDTO.class);
     assertEquals("Transportista nuevo", transportistaNuevo.getNombre());
     assertEquals("3795448866", transportistaNuevo.getTelefono());
     assertEquals("transportista.com.ar", transportistaNuevo.getWeb());
     BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     HttpEntity<BusquedaFacturaVentaCriteria> requestEntity = new HttpEntity<>(criteria);
     PaginaRespuestaRest<FacturaVenta> resultadoBusquedaFactura =
-            restTemplate
-                    .exchange(
-                            apiPrefix + "/facturas/ventas/busqueda/criteria",
+            restTemplate.exchange("/api/v1/facturas/ventas/busqueda/criteria",
                             HttpMethod.POST,
                             requestEntity,
                             new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
@@ -1098,7 +1078,7 @@ class AppIntegrationTest {
     TipoBulto[] tipoBulto = new TipoBulto[]{TipoBulto.CAJA, TipoBulto.ATADO};
     Remito remitoResultante =
         restTemplate.postForObject(
-            apiPrefix + "/remitos",
+            "/api/v1/remitos",
             NuevoRemitoDTO.builder()
                 .idFacturaVenta(new long[] {facturasVenta.get(0).getIdFactura(), facturasVenta.get(1).getIdFactura()})
                 .cantidadPorBulto(cantidadesDeBultos)
@@ -1130,11 +1110,11 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("118"), remitoResultante.getVolumenTotalEnM3());
     assertEquals(new BigDecimal("16"), remitoResultante.getCantidadDeBultos());
     assertEquals(remitoResultante.getNombreTransportista(), transportistaNuevo.getNombre());
-    assertNotNull(restTemplate.getForObject(apiPrefix + "/remitos/" + remitoResultante.getIdRemito() + "/reporte", byte[].class));
+    assertNotNull(restTemplate.getForObject("/api/v1/remitos/" + remitoResultante.getIdRemito() + "/reporte", byte[].class));
     resultadoBusquedaFactura =
             restTemplate
                     .exchange(
-                            apiPrefix + "/facturas/ventas/busqueda/criteria",
+                            "/api/v1/facturas/ventas/busqueda/criteria",
                             HttpMethod.POST,
                             requestEntity,
                             new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
@@ -1164,7 +1144,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<FacturaVenta> resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/facturas/ventas/busqueda/criteria",
+                "/api/v1/facturas/ventas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<FacturaVenta>>() {})
@@ -1185,10 +1165,10 @@ class AppIntegrationTest {
             .build();
     NotaCredito notaCreditoCalculada =
         restTemplate.postForObject(
-            apiPrefix + "/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCredito.class);
+            "/api/v1/notas/credito/calculos", nuevaNotaCreditoDTO, NotaCredito.class);
     NotaCredito notaCreditoGuardada =
         restTemplate.postForObject(
-            apiPrefix + "/notas/credito/factura", nuevaNotaCreditoDTO, NotaCredito.class);
+            "/api/v1/notas/credito/factura", nuevaNotaCreditoDTO, NotaCredito.class);
     assertEquals(TipoDeComprobante.NOTA_CREDITO_X, notaCreditoCalculada.getTipoComprobante());
     BusquedaNotaCriteria criteriaNota =
         BusquedaNotaCriteria.builder()
@@ -1199,7 +1179,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<NotaCredito> resultadoBusquedaNota =
         restTemplate
             .exchange(
-                apiPrefix + "/notas/credito/busqueda/criteria",
+                "/api/v1/notas/credito/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityNota,
                 new ParameterizedTypeReference<PaginaRespuestaRest<NotaCredito>>() {})
@@ -1209,7 +1189,7 @@ class AppIntegrationTest {
     List<sic.model.RenglonNotaCredito> renglones =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/notas/renglones/credito/" + notasRecuperadas.get(0).getIdNota(),
+                "/api/v1/notas/renglones/credito/" + notasRecuperadas.get(0).getIdNota(),
                 sic.model.RenglonNotaCredito[].class));
     assertNotNull(renglones);
     assertEquals(1, renglones.size());
@@ -1231,8 +1211,8 @@ class AppIntegrationTest {
     assertEquals(0.0, notaCreditoGuardada.getIva21Neto().doubleValue());
     assertEquals(BigDecimal.ZERO, notaCreditoGuardada.getIva105Neto());
     assertEquals(new BigDecimal("680.000000000000000000000000000000"), notaCreditoGuardada.getTotal());
-    assertNotNull(restTemplate.getForObject(apiPrefix + "/notas/1/reporte", byte[].class));
-    assertEquals(655.0, restTemplate.getForObject(apiPrefix + "/cuentas-corriente/clientes/1/saldo",
+    assertNotNull(restTemplate.getForObject("/api/v1/notas/1/reporte", byte[].class));
+    assertEquals(655.0, restTemplate.getForObject("/api/v1/cuentas-corriente/clientes/1/saldo",
             BigDecimal.class).doubleValue());
   }
 
@@ -1251,46 +1231,46 @@ class AppIntegrationTest {
             .recaptcha("111111")
             .nombreFiscal("theRedWolf")
             .build();
-    restTemplate.postForObject(apiPrefix + "/registracion", registro, Void.class);
+    restTemplate.postForObject("/api/v1/registracion", registro, Void.class);
     this.iniciarSesionComoAdministrador();
-    Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
+    Usuario usuario = restTemplate.getForObject("/api/v1/usuarios/4", Usuario.class);
     assertEquals("Sansa María", usuario.getNombre());
     assertEquals("Stark", usuario.getApellido());
     assertTrue(usuario.isHabilitado());
-    Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
+    Cliente cliente = restTemplate.getForObject("/api/v1/clientes/2", Cliente.class);
     assertEquals("theRedWolf", cliente.getNombreFiscal());
     assertEquals(0.0, cliente.getMontoCompraMinima().doubleValue());
     assertFalse(cliente.isPuedeComprarAPlazo());
     sic.model.CuentaCorrienteCliente cuentaCorrienteCliente =
         restTemplate.getForObject(
-            apiPrefix + "/cuentas-corriente/clientes/" + cliente.getIdCliente(),
+            "/api/v1/cuentas-corriente/clientes/" + cliente.getIdCliente(),
             sic.model.CuentaCorrienteCliente.class);
     assertNotNull(cuentaCorrienteCliente);
     assertEquals(0.0, cuentaCorrienteCliente.getSaldo().doubleValue());
     cliente.setUbicacionFacturacion(Ubicacion.builder().idLocalidad(2L).idProvincia(2L).build());
     cliente.setPuedeComprarAPlazo(true);
-    restTemplate.put(apiPrefix + "/clientes", cliente);
+    restTemplate.put("/api/v1/clientes", cliente);
     this.token =
         restTemplate
             .postForEntity(
-                apiPrefix + "/login",
+                "/api/v1/login",
                 new Credencial(usuario.getUsername(), "caraDeMala"),
                 String.class)
             .getBody();
     assertNotNull(this.token);
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/productos/1?cantidad=5", null, ItemCarritoCompra.class);
+        "/api/v1/carrito-compra/productos/1?cantidad=5", null, ItemCarritoCompra.class);
     restTemplate.postForObject(
-        apiPrefix + "/carrito-compra/productos/2?cantidad=9", null, ItemCarritoCompra.class);
+        "/api/v1/carrito-compra/productos/2?cantidad=9", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/productos/1/sucursales/1", ItemCarritoCompra.class);
+            "/api/v1/carrito-compra/productos/1/sucursales/1", ItemCarritoCompra.class);
     assertNotNull(item1);
     assertEquals(1L, item1.getProducto().getIdProducto().longValue());
     assertEquals(5, item1.getCantidad().doubleValue());
     ItemCarritoCompra item2 =
         restTemplate.getForObject(
-            apiPrefix + "/carrito-compra/productos/2/sucursales/1", ItemCarritoCompra.class);
+            "/api/v1/carrito-compra/productos/2/sucursales/1", ItemCarritoCompra.class);
     assertNotNull(item2);
     assertEquals(2L, item2.getProducto().getIdProducto().longValue());
     assertEquals(9, item2.getCantidad().doubleValue());
@@ -1301,7 +1281,7 @@ class AppIntegrationTest {
                 .build();
     Pedido pedido =
         restTemplate.postForObject(
-            apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
+            "/api/v1/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
     assertNotNull(pedido);
     assertEquals(14, pedido.getCantidadArticulos().doubleValue());
     assertEquals(new BigDecimal("12796.000000000000000"), pedido.getTotal());
@@ -1309,7 +1289,7 @@ class AppIntegrationTest {
     List<sic.model.RenglonPedido> renglonesDelPedido =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix + "/pedidos/" + pedido.getIdPedido() + "/renglones",
+                "/api/v1/pedidos/" + pedido.getIdPedido() + "/renglones",
                 sic.model.RenglonPedido[].class));
     assertEquals(2, renglonesDelPedido.size());
     assertEquals("Reflector led 100w", renglonesDelPedido.get(0).getDescripcionItem());
@@ -1336,7 +1316,7 @@ class AppIntegrationTest {
   void testEscenarioCerrarCaja1() {
     this.iniciarSesionComoAdministrador();
     List<Sucursal> sucursales =
-        Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+        Arrays.asList(restTemplate.getForObject("/api/v1/sucursales", Sucursal[].class));
     assertNotNull(sucursales);
     assertEquals(1, sucursales.size());
     BusquedaCajaCriteria criteriaParaBusquedaCaja =
@@ -1346,7 +1326,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Caja> resultadosBusquedaCaja =
         restTemplate
             .exchange(
-                apiPrefix + "/cajas/busqueda/criteria",
+                "/api/v1/cajas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
@@ -1356,12 +1336,12 @@ class AppIntegrationTest {
     assertEquals(1, cajasRecuperadas.size());
     assertEquals(EstadoCaja.ABIERTA, cajasRecuperadas.get(0).getEstado());
     restTemplate.put(
-        apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5276.66",
+        "/api/v1/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5276.66",
         null);
     resultadosBusquedaCaja =
         restTemplate
             .exchange(
-                apiPrefix + "/cajas/busqueda/criteria",
+                "/api/v1/cajas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
@@ -1375,8 +1355,7 @@ class AppIntegrationTest {
     List<MovimientoCaja> movimientoCajas =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix
-                    + "/cajas/"
+                    "/api/v1/cajas/"
                     + cajasRecuperadas.get(0).getIdCaja()
                     + "/movimientos?idFormaDePago=1",
                 MovimientoCaja[].class));
@@ -1386,8 +1365,7 @@ class AppIntegrationTest {
     movimientoCajas =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix
-                    + "/cajas/"
+                    "/api/v1/cajas/"
                     + cajasRecuperadas.get(0).getIdCaja()
                     + "/movimientos?idFormaDePago=2",
                 MovimientoCaja[].class));
@@ -1396,12 +1374,12 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("108820.271513250000000"),
         restTemplate.getForObject(
-            apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
+            "/api/v1/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
             BigDecimal.class));
     assertEquals(
         new BigDecimal("108265.731513250000000"),
         restTemplate.getForObject(
-            apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
+            "/api/v1/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
             BigDecimal.class));
   }
 
@@ -1410,17 +1388,14 @@ class AppIntegrationTest {
   @Order(14)
   void testEscenarioCerrarCaja2() {
     this.iniciarSesionComoAdministrador();
-    List<Sucursal> sucursales =
-        Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+    var sucursales = Arrays.asList(restTemplate.getForObject("/api/v1/sucursales", Sucursal[].class));
     assertEquals(1, sucursales.size());
-    BusquedaCajaCriteria criteriaParaBusquedaCaja =
-        BusquedaCajaCriteria.builder().idSucursal(sucursales.get(0).getIdSucursal()).build();
-    HttpEntity<BusquedaCajaCriteria> requestEntityParaProveedores =
-        new HttpEntity<>(criteriaParaBusquedaCaja);
+    var criteriaParaBusquedaCaja = BusquedaCajaCriteria.builder().idSucursal(sucursales.get(0).getIdSucursal()).build();
+    HttpEntity<BusquedaCajaCriteria> requestEntityParaProveedores = new HttpEntity<>(criteriaParaBusquedaCaja);
     PaginaRespuestaRest<Caja> resultadosBusquedaCaja =
         restTemplate
             .exchange(
-                apiPrefix + "/cajas/busqueda/criteria",
+                "/api/v1/cajas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
@@ -1430,12 +1405,13 @@ class AppIntegrationTest {
     assertEquals(1, cajasRecuperadas.size());
     assertEquals(EstadoCaja.CERRADA, cajasRecuperadas.get(0).getEstado());
     restTemplate.put(
-        apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/reapertura?monto=1100",
-        null);
+            "/api/v1/cajas/"
+                + cajasRecuperadas.get(0).getIdCaja() + "/reapertura?monto=1100",
+            null);
     resultadosBusquedaCaja =
         restTemplate
             .exchange(
-                apiPrefix + "/cajas/busqueda/criteria",
+                "/api/v1/cajas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
@@ -1444,8 +1420,7 @@ class AppIntegrationTest {
     cajasRecuperadas = resultadosBusquedaCaja.getContent();
     assertEquals(1, cajasRecuperadas.size());
     assertEquals(EstadoCaja.ABIERTA, cajasRecuperadas.get(0).getEstado());
-    assertEquals(
-        new BigDecimal("1100.000000000000000"), cajasRecuperadas.get(0).getSaldoApertura());
+    assertEquals(new BigDecimal("1100.000000000000000"), cajasRecuperadas.get(0).getSaldoApertura());
     NuevoGastoDTO nuevoGasto =
         NuevoGastoDTO.builder()
             .concepto("Gasto olvidado")
@@ -1453,15 +1428,12 @@ class AppIntegrationTest {
             .idSucursal(1L)
             .idFormaDePago(1L)
             .build();
-    Gasto gasto =
-        restTemplate.postForObject(
-            apiPrefix + "/gastos", nuevoGasto, Gasto.class);
-   assertNotNull(gasto);
+    Gasto gasto = restTemplate.postForObject("/api/v1/gastos", nuevoGasto, Gasto.class);
+    assertNotNull(gasto);
     List<MovimientoCaja> movimientoCajas =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix
-                    + "/cajas/"
+                    "/api/v1/cajas/"
                     + cajasRecuperadas.get(0).getIdCaja()
                     + "/movimientos?idFormaDePago=1",
                 MovimientoCaja[].class));
@@ -1472,8 +1444,7 @@ class AppIntegrationTest {
     movimientoCajas =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix
-                    + "/cajas/"
+                    "/api/v1/cajas/"
                     + cajasRecuperadas.get(0).getIdCaja()
                     + "/movimientos?idFormaDePago=2",
                 MovimientoCaja[].class));
@@ -1482,12 +1453,12 @@ class AppIntegrationTest {
     assertEquals(
         new BigDecimal("108170.271513250000000"),
         restTemplate.getForObject(
-            apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
+            "/api/v1/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-afecta-caja",
             BigDecimal.class));
     assertEquals(
         new BigDecimal("107615.731513250000000"),
         restTemplate.getForObject(
-            apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
+            "/api/v1/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/saldo-sistema",
             BigDecimal.class));
   }
 
@@ -1502,7 +1473,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Producto> resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntityProductos,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -1520,7 +1491,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
+                "/api/v1/pedidos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -1531,8 +1502,7 @@ class AppIntegrationTest {
     List<RenglonFactura> renglones =
         Arrays.asList(
             restTemplate.getForObject(
-                apiPrefix
-                    + "/facturas/ventas/renglones/pedidos/"
+                    "/api/v1/facturas/ventas/renglones/pedidos/"
                     + pedidosRecuperados.get(0).getIdPedido()
                     + "?tipoDeComprobante=FACTURA_X",
                 RenglonFactura[].class));
@@ -1558,7 +1528,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("900.000000000000000"), renglones.get(1).getGananciaNeto());
     assertEquals(new BigDecimal("6050.000000000000000000000000000000"), renglones.get(1).getImporteAnterior());
     assertEquals(new BigDecimal("4000.000000000000000000000000000000"), renglones.get(1).getImporte());
-    Cliente cliente = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
+    Cliente cliente = restTemplate.getForObject("/api/v1/clientes/2", Cliente.class);
     assertNotNull(cliente);
     int[] indices = new int[] {0};
     NuevaFacturaVentaDTO nuevaFacturaVentaDTO =
@@ -1570,14 +1540,14 @@ class AppIntegrationTest {
             .descuentoPorcentaje(new BigDecimal("25"))
             .indices(indices)
             .build();
-    restTemplate.postForObject(apiPrefix + "/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(),
+    restTemplate.postForObject("/api/v1/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(),
             nuevaFacturaVentaDTO, FacturaVenta[].class);
     pedidoCriteria = BusquedaPedidoCriteria.builder().idSucursal(1L).estadoPedido(EstadoPedido.CERRADO).build();
     requestEntity = new HttpEntity<>(pedidoCriteria);
     resultadoBusquedaPedido =
         restTemplate
             .exchange(
-                apiPrefix + "/pedidos/busqueda/criteria",
+                "/api/v1/pedidos/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntity,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -1589,7 +1559,7 @@ class AppIntegrationTest {
     resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntityProductos,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -1601,7 +1571,7 @@ class AppIntegrationTest {
     RestClientResponseException thrown =
         assertThrows(
             RestClientResponseException.class,
-            () -> restTemplate.put(apiPrefix + "/pedidos/2", null));
+            () -> restTemplate.put("/api/v1/pedidos/2", null));
     assertNotNull(thrown.getMessage());
     assertTrue(
         thrown
@@ -1618,9 +1588,9 @@ class AppIntegrationTest {
   @Order(16)
   void testEscenarioActualizarStockParaDosSucursales() {
     this.iniciarSesionComoAdministrador();
-    Cliente clienteParaEditar = restTemplate.getForObject(apiPrefix + "/clientes/2", Cliente.class);
+    Cliente clienteParaEditar = restTemplate.getForObject("/api/v1/clientes/2", Cliente.class);
     clienteParaEditar.setPuedeComprarAPlazo(true);
-    restTemplate.put(apiPrefix + "/clientes", clienteParaEditar);
+    restTemplate.put("/api/v1/clientes", clienteParaEditar);
     Sucursal sucursalNueva =
             Sucursal.builder()
                     .nombre("Sucursal Centrica")
@@ -1630,22 +1600,22 @@ class AppIntegrationTest {
                     .ubicacion(Ubicacion.builder().idLocalidad(1L).idProvincia(1L).build())
                     .build();
     Sucursal sucursalRecuperada =
-            restTemplate.postForObject(apiPrefix + "/sucursales", sucursalNueva, Sucursal.class);
+            restTemplate.postForObject("/api/v1/sucursales", sucursalNueva, Sucursal.class);
     assertEquals(sucursalNueva, sucursalRecuperada);
     ConfiguracionSucursal configuracionSucursal =
             restTemplate.getForObject(
-                    apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+                    "/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
                     ConfiguracionSucursal.class);
     configuracionSucursal.setPuntoDeRetiro(true);
-    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursal);
+    restTemplate.put("/api/v1/configuraciones-sucursal", configuracionSucursal);
     configuracionSucursal =
             restTemplate.getForObject(
-                    apiPrefix + "/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+                    "/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
                     ConfiguracionSucursal.class);
     assertTrue(configuracionSucursal.isPuntoDeRetiro());
     assertFalse(configuracionSucursal.isComparteStock());
     List<Sucursal> sucursales =
-            Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+            Arrays.asList(restTemplate.getForObject("/api/v1/sucursales", Sucursal[].class));
     assertFalse(sucursales.isEmpty());
     assertEquals(2, sucursales.size());
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder()
@@ -1655,7 +1625,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Producto> resultadoBusqueda =
             restTemplate
                     .exchange(
-                            apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                            "/api/v1/productos/busqueda/criteria/sucursales/1",
                             HttpMethod.POST,
                             requestEntityProductos,
                             new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -1686,10 +1656,10 @@ class AppIntegrationTest {
             .porcentajeBonificacionPrecio(new BigDecimal("20"))
             .paraCatalogo(true)
             .build();
-    restTemplate.put(apiPrefix + "/productos", productoParaActualizar);
+    restTemplate.put("/api/v1/productos", productoParaActualizar);
     Producto productoParaControlarStock =
         restTemplate.getForObject(
-            apiPrefix + "/productos/" + resultadoBusqueda.getContent().get(0).getIdProducto() + "/sucursales/1",
+            "/api/v1/productos/" + resultadoBusqueda.getContent().get(0).getIdProducto() + "/sucursales/1",
             Producto.class);
     assertEquals(140, productoParaControlarStock.getCantidadTotalEnSucursales().doubleValue());
   }
@@ -1699,20 +1669,20 @@ class AppIntegrationTest {
   @Order(17)
   void testEscenarioPedidoConStockDeDosSucursales() {
     this.iniciarSesionComoAdministrador();
-    Usuario usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
+    Usuario usuario = restTemplate.getForObject("/api/v1/usuarios/4", Usuario.class);
     this.token =
         restTemplate
             .postForEntity(
-                apiPrefix + "/login",
+                "/api/v1/login",
                 new Credencial(usuario.getUsername(), "caraDeMala"),
                 String.class)
             .getBody();
     assertNotNull(this.token);
     restTemplate.postForObject(
-            apiPrefix + "/carrito-compra/productos/4?cantidad=50", null, ItemCarritoCompra.class);
+            "/api/v1/carrito-compra/productos/4?cantidad=50", null, ItemCarritoCompra.class);
     ItemCarritoCompra item1 =
             restTemplate.getForObject(
-                    apiPrefix + "/carrito-compra/productos/4/sucursales/1", ItemCarritoCompra.class);
+                    "/api/v1/carrito-compra/productos/4/sucursales/1", ItemCarritoCompra.class);
     assertNotNull(item1);
     assertEquals(4L, item1.getProducto().getIdProducto().longValue());
     assertEquals(50, item1.getCantidad().doubleValue());
@@ -1725,35 +1695,35 @@ class AppIntegrationTest {
                     RestClientResponseException.class,
                     () ->
                             restTemplate.postForObject(
-                                    apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
+                                    "/api/v1/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class));
     assertNotNull(thrown.getMessage());
     assertTrue(thrown.getMessage().contains(messageSource.getMessage("mensaje_pedido_sin_stock",
             null, Locale.getDefault())));
     this.iniciarSesionComoAdministrador();
     ConfiguracionSucursal configuracionSucursal =
             restTemplate.getForObject(
-                    apiPrefix + "/configuraciones-sucursal/2",
+                    "/api/v1/configuraciones-sucursal/2",
                     ConfiguracionSucursal.class);
     configuracionSucursal.setComparteStock(true);
-    restTemplate.put(apiPrefix + "/configuraciones-sucursal", configuracionSucursal);
+    restTemplate.put("/api/v1/configuraciones-sucursal", configuracionSucursal);
     configuracionSucursal =
             restTemplate.getForObject(
-                    apiPrefix + "/configuraciones-sucursal/2",
+                    "/api/v1/configuraciones-sucursal/2",
                     ConfiguracionSucursal.class);
     assertTrue(configuracionSucursal.isPuntoDeRetiro());
     assertTrue(configuracionSucursal.isComparteStock());
-    usuario = restTemplate.getForObject(apiPrefix + "/usuarios/4", Usuario.class);
+    usuario = restTemplate.getForObject("/api/v1/usuarios/4", Usuario.class);
     this.token =
         restTemplate
             .postForEntity(
-                apiPrefix + "/login",
+                "/api/v1/login",
                 new Credencial(usuario.getUsername(), "caraDeMala"),
                 String.class)
             .getBody();
     assertNotNull(this.token);
     Pedido pedido =
         restTemplate.postForObject(
-            apiPrefix + "/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
+            "/api/v1/carrito-compra", nuevaOrdenDePagoDTO, Pedido.class);
     assertEquals(new BigDecimal("50.000000000000000") , pedido.getCantidadArticulos());
     this.iniciarSesionComoAdministrador();
     BusquedaProductoCriteria productosCriteria = BusquedaProductoCriteria.builder()
@@ -1763,7 +1733,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Producto> resultadoBusqueda =
             restTemplate
                     .exchange(
-                            apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                            "/api/v1/productos/busqueda/criteria/sucursales/1",
                             HttpMethod.POST,
                             requestEntityProductos,
                             new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -1771,7 +1741,7 @@ class AppIntegrationTest {
     assertNotNull(resultadoBusqueda);
     Producto productoParaControlarStock =
             restTemplate.getForObject(
-                    apiPrefix + "/productos/" + resultadoBusqueda.getContent().get(0).getIdProducto() + "/sucursales/1",
+                    "/api/v1/productos/" + resultadoBusqueda.getContent().get(0).getIdProducto() + "/sucursales/1",
                     Producto.class);
     assertEquals(90 , productoParaControlarStock.getCantidadTotalEnSucursales().doubleValue());
     List<CantidadEnSucursal> cantidadEnSucursalesParaAssert = new ArrayList<>(productoParaControlarStock.getCantidadEnSucursales());
@@ -1792,7 +1762,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Pedido> resultadoBusquedaPedido =
             restTemplate
                     .exchange(
-                            apiPrefix + "/pedidos/busqueda/criteria",
+                            "/api/v1/pedidos/busqueda/criteria",
                             HttpMethod.POST,
                             requestEntity,
                             new ParameterizedTypeReference<PaginaRespuestaRest<Pedido>>() {})
@@ -1803,8 +1773,7 @@ class AppIntegrationTest {
     List<RenglonFactura> renglones =
             Arrays.asList(
                     restTemplate.getForObject(
-                            apiPrefix
-                                    + "/facturas/ventas/renglones/pedidos/"
+                                    "/api/v1/facturas/ventas/renglones/pedidos/"
                                     + pedidosRecuperados.get(0).getIdPedido()
                                     + "?tipoDeComprobante=FACTURA_X",
                             RenglonFactura[].class));
@@ -1829,7 +1798,7 @@ class AppIntegrationTest {
                     .descuentoPorcentaje(new BigDecimal("25"))
                     .indices(indices)
                     .build();
-    restTemplate.postForObject(apiPrefix + "/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(),
+    restTemplate.postForObject("/api/v1/facturas/ventas/pedidos/" + pedidosRecuperados.get(0).getIdPedido(),
             nuevaFacturaVentaDTO, FacturaVenta[].class);
   }
 
@@ -1843,7 +1812,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Producto> resultadoBusqueda =
         restTemplate
             .exchange(
-                apiPrefix + "/productos/busqueda/criteria/sucursales/1",
+                "/api/v1/productos/busqueda/criteria/sucursales/1",
                 HttpMethod.POST,
                 requestEntityProductos,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Producto>>() {})
@@ -1854,7 +1823,7 @@ class AppIntegrationTest {
     assertEquals(new BigDecimal("90.000000000000000"), productosRecuperados.get(1).getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("0E-15"), productosRecuperados.get(2).getCantidadTotalEnSucursales());
     assertEquals(new BigDecimal("4.000000000000000"), productosRecuperados.get(3).getCantidadTotalEnSucursales());
-    List<Sucursal> sucursales = Arrays.asList(restTemplate.getForObject(apiPrefix + "/sucursales", Sucursal[].class));
+    List<Sucursal> sucursales = Arrays.asList(restTemplate.getForObject("/api/v1/sucursales", Sucursal[].class));
     assertEquals(2, sucursales.size());
     BusquedaCajaCriteria criteriaParaBusquedaCaja =
         BusquedaCajaCriteria.builder().idSucursal(sucursales.get(0).getIdSucursal()).build();
@@ -1863,7 +1832,7 @@ class AppIntegrationTest {
     PaginaRespuestaRest<Caja> resultadosBusquedaCaja =
         restTemplate
             .exchange(
-                apiPrefix + "/cajas/busqueda/criteria",
+                "/api/v1/cajas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
@@ -1873,12 +1842,12 @@ class AppIntegrationTest {
     assertEquals(1, cajasRecuperadas.size());
     assertEquals(EstadoCaja.ABIERTA, cajasRecuperadas.get(0).getEstado());
     restTemplate.put(
-        apiPrefix + "/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5276.66",
+        "/api/v1/cajas/" + cajasRecuperadas.get(0).getIdCaja() + "/cierre?monto=5276.66",
         null);
     requestEntityParaProveedores = new HttpEntity<>(criteriaParaBusquedaCaja);
     resultadosBusquedaCaja =
         restTemplate.exchange(
-                apiPrefix + "/cajas/busqueda/criteria",
+                "/api/v1/cajas/busqueda/criteria",
                 HttpMethod.POST,
                 requestEntityParaProveedores,
                 new ParameterizedTypeReference<PaginaRespuestaRest<Caja>>() {})
