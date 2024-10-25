@@ -33,12 +33,10 @@ class ClienteServiceImplTest {
 
   @MockBean MessageSource messageSource;
   @MockBean ClienteRepository clienteRepository;
-  @MockBean
-  CuentaCorrienteService cuentaCorrienteService;
-  @MockBean
-  UsuarioService usuarioService;
-  @MockBean
-  UbicacionService ubicacionService;
+  @MockBean CuentaCorrienteService cuentaCorrienteService;
+  @MockBean UsuarioService usuarioService;
+  @MockBean UbicacionService ubicacionService;
+
   @Autowired ClienteServiceImpl clienteService;
 
   String mensaje_cliente_duplicado_idFiscal = "Ya existe el ID fiscal ingresado.";

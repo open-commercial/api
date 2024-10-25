@@ -28,12 +28,9 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {ReciboServiceImpl.class, MessageSource.class})
 class ReciboServiceImplTest {
 
-  @MockBean
-  ConfiguracionSucursalService configuracionSucursalServiceInterface;
-  @MockBean
-  FormaDePagoService formaDePagoService;
-  @MockBean
-  SucursalService sucursalService;
+  @MockBean ConfiguracionSucursalService configuracionSucursalServiceInterface;
+  @MockBean FormaDePagoService formaDePagoService;
+  @MockBean SucursalService sucursalService;
   @MockBean ReciboRepository reciboRepository;
   @MockBean MessageSource messageSource;
 

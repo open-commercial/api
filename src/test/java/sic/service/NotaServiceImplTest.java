@@ -34,6 +34,7 @@ class NotaServiceImplTest {
   @MockBean ProveedorServiceImpl proveedorService;
   @MockBean NotaDebitoRepository notaDebitoRepository;
   @MockBean MessageSource messageSource;
+
   @Autowired NotaServiceImpl notaServiceImpl;
 
   @Test

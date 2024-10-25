@@ -33,10 +33,10 @@ class SucursalServiceImplTest {
   @MockBean SucursalRepository sucursalRepository;
   @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
   @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean
-  ImageUploaderService imageUploaderService;
+  @MockBean ImageUploaderService imageUploaderService;
   @MockBean ProductoServiceImpl productoService;
   @MockBean MessageSource messageSource;
+
   @Autowired SucursalServiceImpl sucursalService;
 
   @Test

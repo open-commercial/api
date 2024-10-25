@@ -36,12 +36,9 @@ class CuentaCorrienteServiceImplTest {
   @MockBean CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
   @MockBean CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
   @MockBean RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
-  @MockBean
-  UsuarioService usuarioService;
-  @MockBean
-  ClienteService clienteService;
-  @MockBean
-  SucursalService sucursalService;
+  @MockBean UsuarioService usuarioService;
+  @MockBean ClienteService clienteService;
+  @MockBean SucursalService sucursalService;
   @MockBean MessageSource messageSource;
 
   @Autowired CuentaCorrienteServiceImpl cuentaCorrienteService;

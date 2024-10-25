@@ -18,10 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ContextConfiguration(classes = {RegistracionServiceImpl.class, CustomValidator.class})
 class RegistracionServiceImplTest {
 
-  @MockBean
-  UsuarioService usuarioService;
-  @MockBean
-  ClienteService clienteService;
+  @MockBean UsuarioService usuarioService;
+  @MockBean ClienteService clienteService;
   @MockBean EmailServiceFactory emailServiceFactory;
 
   @Autowired RegistracionServiceImpl registracionService;

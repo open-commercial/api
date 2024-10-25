@@ -25,19 +25,13 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {CuentaCorrienteController.class})
 class CuentaCorrienteControllerTest {
 
-    @MockBean
-    CuentaCorrienteService cuentaCorrienteService;
-    @MockBean
-    ProveedorService proveedorService;
-    @MockBean
-    ClienteService clienteService;
-    @MockBean
-    AuthService authService;
-    @MockBean
-    MessageSource messageSource;
+    @MockBean CuentaCorrienteService cuentaCorrienteService;
+    @MockBean ProveedorService proveedorService;
+    @MockBean ClienteService clienteService;
+    @MockBean AuthService authService;
+    @MockBean MessageSource messageSource;
 
-    @Autowired
-    CuentaCorrienteController cuentaCorrienteController;
+    @Autowired CuentaCorrienteController cuentaCorrienteController;
 
     @Test
     void shouldTestReporteListaDeCuentasCorrienteClientePorCriteria() {

@@ -37,24 +37,16 @@ import static org.mockito.Mockito.when;
     classes = {CustomValidator.class, RemitoServiceImpl.class, MessageSource.class, JasperReportsHandler.class})
 class RemitoServiceImplTest {
 
-  @MockBean
-  FacturaService facturaService;
-  @MockBean
-  FacturaVentaService facturaVentaService;
+  @MockBean FacturaService facturaService;
+  @MockBean FacturaVentaService facturaVentaService;
   @MockBean RemitoRepository remitoRepository;
   @MockBean RenglonRemitoRepository renglonRemitoRepository;
-  @MockBean
-  ClienteService clienteService;
-  @MockBean
-  UsuarioService usuarioService;
-  @MockBean
-  TransportistaService transportistaService;
-  @MockBean
-  ConfiguracionSucursalService configuracionSucursalService;
-  @MockBean
-  CuentaCorrienteService cuentaCorrienteService;
-  @MockBean
-  SucursalService sucursalService;
+  @MockBean ClienteService clienteService;
+  @MockBean UsuarioService usuarioService;
+  @MockBean TransportistaService transportistaService;
+  @MockBean ConfiguracionSucursalService configuracionSucursalService;
+  @MockBean CuentaCorrienteService cuentaCorrienteService;
+  @MockBean SucursalService sucursalService;
   @MockBean MessageSource messageSource;
 
   @Autowired RemitoServiceImpl remitoService;

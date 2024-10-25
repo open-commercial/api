@@ -25,16 +25,11 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {NotaController.class, MessageSource.class})
 class NotaControllerTest {
 
-  @MockBean
-  NotaService notaService;
-  @MockBean
-  ReciboService reciboService;
-  @MockBean
-  SucursalService sucursalService;
-  @MockBean
-  UsuarioService usuarioService;
-  @MockBean
-  AuthService authService;
+  @MockBean NotaService notaService;
+  @MockBean ReciboService reciboService;
+  @MockBean SucursalService sucursalService;
+  @MockBean UsuarioService usuarioService;
+  @MockBean AuthService authService;
   @MockBean MessageSource messageSource;
 
   @Autowired NotaController notaController;

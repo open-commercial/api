@@ -1,7 +1,7 @@
 package sic.integration;
 
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

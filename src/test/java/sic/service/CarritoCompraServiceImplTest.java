@@ -34,16 +34,11 @@ import static org.mockito.Mockito.*;
 class CarritoCompraServiceImplTest {
 
   @MockBean CarritoCompraRepository carritoCompraRepository;
-  @MockBean
-  UsuarioService usuarioService;
-  @MockBean
-  ProductoService productoService;
-  @MockBean
-  SucursalService sucursalService;
-  @MockBean
-  ClienteService clienteService;
-  @MockBean
-  PedidoService pedidoService;
+  @MockBean UsuarioService usuarioService;
+  @MockBean ProductoService productoService;
+  @MockBean SucursalService sucursalService;
+  @MockBean ClienteService clienteService;
+  @MockBean PedidoService pedidoService;
 
   @Autowired CarritoCompraServiceImpl carritoCompraServiceImpl;
 
