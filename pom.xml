@@ -25,7 +25,7 @@
         <apache-poi.version>3.17</apache-poi.version>
         <jjwt.version>0.12.6</jjwt.version>
         <bouncycastle-bcmail.version>1.46</bouncycastle-bcmail.version>
-        <commons-io.version>2.7</commons-io.version>
+        <commons-io.version>2.14.0</commons-io.version>
         <xml-soap.version>1.4.0</xml-soap.version>
         <messaging-saaj.version>3.0.4</messaging-saaj.version>
         <cloudinary.version>1.39.0</cloudinary.version>
