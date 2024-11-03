@@ -51,6 +51,9 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
   private final MessageSource messageSource;
   private final CustomValidator customValidator;
   private final JasperReportsHandler jasperReportsHandler;
+  private static final String MENSAJE_RENGLON_CC_GUARDADO = "mensaje_renglon_cuenta_corriente_guardado";
+  private static final String MENSAJE_RENGLON_CC_ELIMINADO = "mensaje_renglon_cuenta_corriente_eliminado";
+  private static final String MENSAJE_CC_NO_EXISTENTE = "mensaje_cuenta_corriente_no_existente";
 
   @Autowired
   @Lazy
@@ -120,8 +123,8 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
   }
 
   @Override
-  public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(
-      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+  public Page<CuentaCorrienteCliente> buscarCuentaCorrienteCliente(BusquedaCuentaCorrienteClienteCriteria criteria,
+                                                                   long idUsuarioLoggedIn) {
     return cuentaCorrienteClienteRepository.findAll(
         this.getBuilder(criteria, idUsuarioLoggedIn),
         this.getPageable(
@@ -133,11 +136,10 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
   }
 
   @Override
-  public List<CuentaCorrienteCliente> buscarCuentasCorrienteClienteParaReporte(
-      BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
+  public List<CuentaCorrienteCliente> buscarCuentasCorrienteClienteParaReporte(BusquedaCuentaCorrienteClienteCriteria criteria,
+                                                                               long idUsuarioLoggedIn) {
     criteria.setPagina(0);
-    return cuentaCorrienteClienteRepository
-        .findAll(
+    return cuentaCorrienteClienteRepository.findAll(
             this.getBuilder(criteria, idUsuarioLoggedIn),
             this.getPageable(
                 criteria.getPagina(),
@@ -150,8 +152,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
 
   @Override
   public BooleanBuilder getBuilder(BusquedaCuentaCorrienteClienteCriteria criteria, long idUsuarioLoggedIn) {
-    QCuentaCorrienteCliente qCuentaCorrienteCliente =
-            QCuentaCorrienteCliente.cuentaCorrienteCliente;
+    QCuentaCorrienteCliente qCuentaCorrienteCliente = QCuentaCorrienteCliente.cuentaCorrienteCliente;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getNombreFiscal() != null) {
       String[] terminos = criteria.getNombreFiscal().split(" ");
@@ -172,27 +173,21 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
     if (criteria.getIdFiscal() != null)
       builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.getNroDeCliente() != null)
-      builder.or(
-              qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(
-                      criteria.getNroDeCliente()));
+      builder.or(qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.getIdViajante() != null)
       builder.and(qCuentaCorrienteCliente.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdLocalidad() != null)
-      builder.and(
-              qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(
-                      criteria.getIdLocalidad()));
+      builder.and(qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
-      builder.and(
-              qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
-                      criteria.getIdProvincia()));
-    Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
-    if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
-            && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
-            && !usuarioLogueado.getRoles().contains(Rol.ENCARGADO)) {
+      builder.and(qCuentaCorrienteCliente.cliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
+    Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
+    if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)
+            && !usuarioLoggedIn.getRoles().contains(Rol.VENDEDOR)
+            && !usuarioLoggedIn.getRoles().contains(Rol.ENCARGADO)) {
       BooleanBuilder rsPredicate = new BooleanBuilder();
-      for (Rol rol : usuarioLogueado.getRoles()) {
+      for (Rol rol : usuarioLoggedIn.getRoles()) {
         switch (rol) {
-          case VIAJANTE -> rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLogueado));
+          case VIAJANTE -> rsPredicate.or(qCuentaCorrienteCliente.cliente.viajante.eq(usuarioLoggedIn));
           case COMPRADOR -> this.filtraPorClienteRelacionado(rsPredicate, idUsuarioLoggedIn, qCuentaCorrienteCliente);
           default -> rsPredicate.or(qCuentaCorrienteCliente.cliente.isNull());
         }
@@ -203,10 +198,9 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
     return builder;
   }
 
-  private void filtraPorClienteRelacionado(
-          BooleanBuilder rsPredicate, long idUsuarioLoggedIn, QCuentaCorrienteCliente qCuentaCorrienteCliente) {
-    Cliente clienteRelacionado =
-            clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
+  private void filtraPorClienteRelacionado(BooleanBuilder rsPredicate, long idUsuarioLoggedIn,
+                                           QCuentaCorrienteCliente qCuentaCorrienteCliente) {
+    Cliente clienteRelacionado = clienteService.getClientePorIdUsuario(idUsuarioLoggedIn);
     if (clienteRelacionado != null) {
       rsPredicate.or(qCuentaCorrienteCliente.cliente.eq(clienteRelacionado));
     }
@@ -214,56 +208,47 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
 
   @Override
   public Pageable getPageable(Integer pagina, String ordenarPor, String sentido, String ordenDefault, int tamanioPagina) {
-    if (pagina == null) pagina = 0;
+    if (pagina == null)
+      pagina = 0;
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(
-          pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
+      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
       return switch (sentido) {
-        case "ASC" -> PageRequest.of(
-                pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC" -> PageRequest.of(
-                pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default -> PageRequest.of(
-                pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
+        case "ASC" -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
       };
     }
   }
 
   @Override
-  public Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(
-      BusquedaCuentaCorrienteProveedorCriteria criteria) {
-    QCuentaCorrienteProveedor qCuentaCorrienteProveedor =
-        QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
+  public Page<CuentaCorrienteProveedor> buscarCuentaCorrienteProveedor(BusquedaCuentaCorrienteProveedorCriteria criteria) {
+    QCuentaCorrienteProveedor qCuentaCorrienteProveedor = QCuentaCorrienteProveedor.cuentaCorrienteProveedor;
     BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getNroProveedor() != null)
-      builder.or(
-          qCuentaCorrienteProveedor.proveedor.nroProveedor.containsIgnoreCase(
-              criteria.getNroProveedor()));
+      builder.or(qCuentaCorrienteProveedor.proveedor.nroProveedor.containsIgnoreCase(criteria.getNroProveedor()));
     if (criteria.getRazonSocial() != null) {
       String[] terminos = criteria.getRazonSocial().split(" ");
       BooleanBuilder rsPredicate = new BooleanBuilder();
       for (String termino : terminos) {
-        rsPredicate.and(
-            qCuentaCorrienteProveedor.proveedor.razonSocial.containsIgnoreCase(termino));
+        rsPredicate.and(qCuentaCorrienteProveedor.proveedor.razonSocial.containsIgnoreCase(termino));
       }
       builder.or(rsPredicate);
     }
     if (criteria.getIdFiscal() != null)
       builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
     if (criteria.getIdLocalidad() != null)
-      builder.and(
-          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(
-              criteria.getIdLocalidad()));
+      builder.and(qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
-      builder.and(
-          qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(
-              criteria.getIdProvincia()));
+      builder.and(qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     builder.and(qCuentaCorrienteProveedor.eliminada.eq(false));
-    return cuentaCorrienteProveedorRepository.findAll(
-        builder,
-        this.getPageable(
-            criteria.getPagina(), criteria.getOrdenarPor(), criteria.getSentido(), "proveedor.razonSocial", TAMANIO_PAGINA_DEFAULT));
+    return cuentaCorrienteProveedorRepository
+            .findAll(builder,
+                    this.getPageable(criteria.getPagina(),
+                            criteria.getOrdenarPor(),
+                            criteria.getSentido(),
+                            "proveedor.razonSocial",
+                            TAMANIO_PAGINA_DEFAULT));
   }
 
   @Override
@@ -279,10 +264,9 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
   @Override
   @Transactional
   public void asentarEnCuentaCorriente(FacturaVenta facturaVenta, TipoDeOperacion tipo) {
-    CuentaCorriente cc = this.getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(facturaVenta.getIdCliente()));
+    var cc = this.getCuentaCorrientePorCliente(clienteService.getClienteNoEliminadoPorId(facturaVenta.getIdCliente()));
     if (null == cc) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
+      throw new BusinessServiceException(messageSource.getMessage(MENSAJE_CC_NO_EXISTENTE, null, Locale.getDefault()));
     }
     cc.setFechaUltimoMovimiento(LocalDateTime.now());
     if (tipo == TipoDeOperacion.ALTA) {
@@ -293,8 +277,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeFactura(facturaVenta, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      log.info(messageSource.getMessage(
-              "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_ELIMINADO, null, Locale.getDefault()), rcc);
     }
   }
 
@@ -303,8 +286,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
   public void asentarEnCuentaCorriente(FacturaCompra facturaCompra) {
     CuentaCorriente cc = this.getCuentaCorrientePorProveedor(facturaCompra.getProveedor());
     if (null == cc) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
+      throw new BusinessServiceException(messageSource.getMessage(MENSAJE_CC_NO_EXISTENTE, null, Locale.getDefault()));
     }
     cc.setFechaUltimoMovimiento(LocalDateTime.now());
     this.guardarRenglonCuentaCorrienteDeFactura(facturaCompra, cc);
@@ -324,8 +306,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
     cc.setFechaUltimoMovimiento(factura.getFecha());
     rcc.setCuentaCorriente(cc);
     this.renglonCuentaCorrienteRepository.save(rcc);
-    log.info(messageSource.getMessage(
-      "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
+    log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_GUARDADO, null, Locale.getDefault()), rcc);
   }
 
   @Override
@@ -353,16 +334,14 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.info(messageSource.getMessage(
-        "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_GUARDADO, null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeNota(nota, false);
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(rcc.getMonto()));
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      log.info(messageSource.getMessage(
-        "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_ELIMINADO, null, Locale.getDefault()), rcc);
     }
   }
 
@@ -393,8 +372,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
       cc.getRenglones().add(rcc);
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.info(messageSource.getMessage(
-              "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_GUARDADO, null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       RenglonCuentaCorriente rcc = this.getRenglonCuentaCorrienteDeRemito(remito, false);
@@ -402,8 +380,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.info(messageSource.getMessage(
-              "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_ELIMINADO, null, Locale.getDefault()), rcc);
     }
   }
 
@@ -428,16 +405,14 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
         cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor());
       }
       if (cc == null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
+        throw new BusinessServiceException(messageSource.getMessage(MENSAJE_CC_NO_EXISTENTE, null, Locale.getDefault()));
       }
       cc.getRenglones().add(rcc);
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().add(recibo.getMonto()));
       cc.setFechaUltimoMovimiento(recibo.getFecha());
       rcc.setCuentaCorriente(cc);
       this.renglonCuentaCorrienteRepository.save(rcc);
-      log.info(messageSource.getMessage(
-        "mensaje_reglon_cuenta_corriente_guardado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_GUARDADO, null, Locale.getDefault()), rcc);
     }
     if (tipo == TipoDeOperacion.ELIMINACION) {
       CuentaCorriente cc = null;
@@ -447,15 +422,13 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
         cc = this.getCuentaCorrientePorProveedor(recibo.getProveedor());
       }
       if (null == cc) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cuenta_corriente_no_existente", null, Locale.getDefault()));
+        throw new BusinessServiceException(messageSource.getMessage(MENSAJE_CC_NO_EXISTENTE, null, Locale.getDefault()));
       }
       this.setSaldoCuentaCorriente(cc, cc.getSaldo().subtract(recibo.getMonto()));
       rcc = this.getRenglonCuentaCorrienteDeRecibo(recibo, false);
       this.cambiarFechaUltimoComprobante(cc, rcc);
       rcc.setEliminado(true);
-      log.info(messageSource.getMessage(
-        "mensaje_reglon_cuenta_corriente_eliminado", null, Locale.getDefault()), rcc);
+      log.info(messageSource.getMessage(MENSAJE_RENGLON_CC_ELIMINADO, null, Locale.getDefault()), rcc);
     }
   }
 
