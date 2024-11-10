@@ -4,7 +4,7 @@
 	<property name="ireport.zoom" value="1.5"/>
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
-	<parameter name="sucursal" class="sic.modelo.Sucursal"/>
+	<parameter name="sucursal" class="org.opencommercial.model.Sucursal"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="productoSinImagen" class="java.awt.Image"/>
 	<queryString language="hql">
@@ -17,13 +17,13 @@
 	<field name="descripcion" class="java.lang.String">
 		<fieldDescription><![CDATA[descripcion]]></fieldDescription>
 	</field>
-	<field name="precioProducto" class="sic.modelo.embeddable.PrecioProductoEmbeddable">
+	<field name="precioProducto" class="org.opencommercial.model.embeddable.PrecioProductoEmbeddable">
 		<fieldDescription><![CDATA[precioProducto]]></fieldDescription>
 	</field>
-	<field name="cantidadProducto" class="sic.modelo.embeddable.CantidadProductoEmbeddable">
+	<field name="cantidadProducto" class="org.opencommercial.model.embeddable.CantidadProductoEmbeddable">
 		<fieldDescription><![CDATA[cantidadProducto]]></fieldDescription>
 	</field>
-	<field name="medida" class="sic.modelo.Medida">
+	<field name="medida" class="org.opencommercial.model.Medida">
 		<fieldDescription><![CDATA[medida]]></fieldDescription>
 	</field>
 	<background>

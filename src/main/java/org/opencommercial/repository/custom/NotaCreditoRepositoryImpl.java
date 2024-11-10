@@ -1,0 +1,46 @@
+package org.opencommercial.repository.custom;
+
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.opencommercial.model.QNotaCredito;
+import org.opencommercial.model.TipoDeComprobante;
+import org.opencommercial.repository.NotaCreditoRepositoryCustom;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.math.BigDecimal;
+
+public class NotaCreditoRepositoryImpl implements NotaCreditoRepositoryCustom {
+
+  @PersistenceContext
+  private EntityManager em;
+
+  @Override
+  public BigDecimal calcularTotalCredito(BooleanBuilder builder) {
+    QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
+    JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+    return queryFactory
+        .select(qNotaCredito.total.sum())
+        .from(qNotaCredito)
+        .where(builder)
+        .fetch()
+        .get(0);
+  }
+
+  @Override
+  public BigDecimal calcularIVACredito(
+      BooleanBuilder builder, TipoDeComprobante[] tipoComprobantes) {
+    QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
+    JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+    BooleanBuilder rsPredicate = new BooleanBuilder();
+    for (TipoDeComprobante tipoComprobante : tipoComprobantes) {
+      rsPredicate.or(qNotaCredito.tipoComprobante.eq(tipoComprobante));
+    }
+    builder.and(rsPredicate);
+    return queryFactory
+        .select(qNotaCredito.iva105Neto.add(qNotaCredito.iva21Neto).sum())
+        .from(qNotaCredito)
+        .where(builder)
+        .fetch()
+        .get(0);
+  }
+}

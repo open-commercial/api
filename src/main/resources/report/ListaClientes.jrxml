@@ -13,12 +13,12 @@
 	<property name="com.jaspersoft.studio.unit.rightMargin" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
-	<parameter name="sucursal" class="sic.modelo.Sucursal"/>
+	<parameter name="sucursal" class="org.opencommercial.model.Sucursal"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<queryString language="hql">
 		<![CDATA[]]>
 	</queryString>
-	<field name="cliente" class="sic.modelo.Cliente">
+	<field name="cliente" class="org.opencommercial.model.Cliente">
 		<fieldDescription><![CDATA[cliente]]></fieldDescription>
 	</field>
 	<field name="fechaUltimoMovimiento" class="java.time.LocalDateTime"/>
