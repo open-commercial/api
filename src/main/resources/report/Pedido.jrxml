@@ -5,7 +5,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-	<parameter name="pedido" class="sic.modelo.Pedido"/>
+	<parameter name="pedido" class="org.opencommercial.model.Pedido"/>
 	<parameter name="nroComprobante" class="java.lang.String"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="detalleEnvio" class="java.lang.String"/>

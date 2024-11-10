@@ -5,7 +5,7 @@
 	<property name="ireport.x" value="0"/>
 	<property name="ireport.y" value="0"/>
 	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="One Empty Record"/>
-	<parameter name="notaCredito" class="sic.modelo.NotaCredito"/>
+	<parameter name="notaCredito" class="org.opencommercial.model.NotaCredito"/>
 	<parameter name="serie" class="java.lang.Long"/>
 	<parameter name="logo" class="java.awt.Image"/>
 	<parameter name="preImpresa" class="java.lang.Boolean"/>

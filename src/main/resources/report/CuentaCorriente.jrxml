@@ -15,9 +15,9 @@
 	<property name="com.jaspersoft.studio.unit.columnWidth" value="pixel"/>
 	<property name="com.jaspersoft.studio.unit.columnSpacing" value="pixel"/>
 	<property name="com.jaspersoft.studio.report.description" value=""/>
-	<parameter name="cuentaCorrienteCliente" class="sic.modelo.CuentaCorrienteCliente"/>
+	<parameter name="cuentaCorrienteCliente" class="org.opencommercial.model.CuentaCorrienteCliente"/>
 	<parameter name="logo" class="java.awt.Image"/>
-	<field name="tipoComprobante" class="sic.modelo.TipoDeComprobante"/>
+	<field name="tipoComprobante" class="org.opencommercial.model.TipoDeComprobante"/>
 	<field name="fecha" class="java.time.LocalDateTime"/>
 	<field name="serie" class="java.lang.Long"/>
 	<field name="numero" class="java.lang.Long"/>
