@@ -14,7 +14,7 @@ public class BusquedaCuentaCorrienteClienteCriteria {
   private Long idCliente;
   private String nombreFiscal;
   private String nombreFantasia;
-  private Long idFiscal;
+  private String idFiscal;
   private Long idViajante;
   private Long idProvincia;
   private Long idLocalidad;

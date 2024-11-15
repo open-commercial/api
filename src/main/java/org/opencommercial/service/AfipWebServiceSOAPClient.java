@@ -6,6 +6,8 @@ import afip.wsfe.wsdl.*;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.cms.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.opencommercial.exception.BusinessServiceException;
+import org.opencommercial.exception.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -13,8 +15,6 @@ import org.springframework.ws.WebServiceMessage;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.springframework.ws.soap.SoapMessage;
 import org.springframework.xml.transform.StringResult;
-import org.opencommercial.exception.BusinessServiceException;
-import org.opencommercial.exception.ServiceException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -32,6 +32,7 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
 
   private static final String SOAP_ACTION_FE_CAE_SOLICITAR = "http://ar.gov.afip.dif.FEV1/FECAESolicitar";
   private static final String SOAP_ACTION_FE_COMPROBANTE_ULTIMO_AUTORIZADO = "http://ar.gov.afip.dif.FEV1/FECompUltimoAutorizado";
+  private static final String MENSAJE_SERVICIO_NO_CONFIGURADO = "mensaje_taxation_afip_no_configurado";
 
   @Autowired
   private MessageSource messageSource;
@@ -48,8 +49,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   }
 
   public String loginCMS(LoginCms loginCMS) throws IOException {
-    if (!isServicioConfigurado()) throw new ServiceException(messageSource.getMessage(
-            "mensaje_taxation_afip_no_configurado", null, Locale.getDefault()));
+    if (!isServicioConfigurado())
+      throw new ServiceException(messageSource.getMessage(MENSAJE_SERVICIO_NO_CONFIGURADO, null, Locale.getDefault()));
     var result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(loginCMS, result);
     log.info("TOKEN WSAA XML REQUEST: {}", result);
@@ -60,8 +61,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   }
 
   public byte[] crearCMS(byte[] p12file, String p12pass, String signer, String service, long ticketTimeInHours) {
-    if (!isServicioConfigurado()) throw new ServiceException(messageSource.getMessage(
-            "mensaje_taxation_afip_no_configurado", null, Locale.getDefault()));
+    if (!isServicioConfigurado())
+      throw new ServiceException(messageSource.getMessage(MENSAJE_SERVICIO_NO_CONFIGURADO, null, Locale.getDefault()));
     PrivateKey pKey;
     X509Certificate pCertificate;
     byte[] asn1Cms;
@@ -111,8 +112,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   }
 
   public String crearTicketRequerimientoAcceso(String service, long ticketTimeInHours) {
-    if (!isServicioConfigurado()) throw new ServiceException(messageSource.getMessage(
-            "mensaje_taxation_afip_no_configurado", null, Locale.getDefault()));
+    if (!isServicioConfigurado())
+      throw new ServiceException(messageSource.getMessage(MENSAJE_SERVICIO_NO_CONFIGURADO, null, Locale.getDefault()));
     var now = LocalDateTime.now();
     var zdt = now.atZone(ZoneId.systemDefault());
     var uniqueId = Long.toString(zdt.toInstant().toEpochMilli() / 1000);
@@ -135,8 +136,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   }
 
   public FERecuperaLastCbteResponse getUltimoComprobanteAutorizado(FECompUltimoAutorizado solicitud) throws IOException {
-    if (!isServicioConfigurado()) throw new ServiceException(messageSource.getMessage(
-            "mensaje_taxation_afip_no_configurado", null, Locale.getDefault()));
+    if (!isServicioConfigurado())
+      throw new ServiceException(messageSource.getMessage(MENSAJE_SERVICIO_NO_CONFIGURADO, null, Locale.getDefault()));
     var result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
     log.info("ULTIMO COMPROBANTE AUTORIZADO XML REQUEST: {}", result);
@@ -154,8 +155,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
   }
 
   public FECAEResponse solicitarCAE(FECAESolicitar solicitud) throws IOException {
-    if (!isServicioConfigurado()) throw new ServiceException(messageSource.getMessage(
-            "mensaje_taxation_afip_no_configurado", null, Locale.getDefault()));
+    if (!isServicioConfigurado())
+      throw new ServiceException(messageSource.getMessage(MENSAJE_SERVICIO_NO_CONFIGURADO, null, Locale.getDefault()));
     var result = new StringResult();
     this.getWebServiceTemplate().getMarshaller().marshal(solicitud, result);
     log.info("SOLICITAR cae XML REQUEST: {}", result);

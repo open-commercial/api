@@ -170,8 +170,8 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.getIdFiscal() != null)
-      builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getIdFiscal() != null && criteria.getIdFiscal().matches("\\d+"))
+      builder.or(qCuentaCorrienteCliente.cliente.idFiscal.eq(Long.valueOf(criteria.getIdFiscal())));
     if (criteria.getNroDeCliente() != null)
       builder.or(qCuentaCorrienteCliente.cliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.getIdViajante() != null)
@@ -235,8 +235,8 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.getIdFiscal() != null)
-      builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getIdFiscal() != null && criteria.getIdFiscal().matches("\\d+"))
+      builder.or(qCuentaCorrienteProveedor.proveedor.idFiscal.eq(Long.valueOf(criteria.getIdFiscal())));
     if (criteria.getIdLocalidad() != null)
       builder.and(qCuentaCorrienteProveedor.proveedor.ubicacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)

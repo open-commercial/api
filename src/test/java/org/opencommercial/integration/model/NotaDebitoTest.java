@@ -16,6 +16,6 @@ public class NotaDebitoTest extends NotaTest {
 
   private List<RenglonNotaDebitoTest> renglonesNotaDebito;
   private BigDecimal montoNoGravado;
-  private Long idRecibo = 0L;
-  private boolean pagada = true;
+  private Long idRecibo;
+  private boolean pagada;
 }

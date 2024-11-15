@@ -85,29 +85,29 @@ public class AfipTaxationServiceImpl implements TaxationService {
       // errores generales de la request
       if (response.getErrors() != null) {
         msjError =
-            response.getErrors().getErr().get(0).getCode()
+            response.getErrors().getErr().getFirst().getCode()
                 + "-"
-                + response.getErrors().getErr().get(0).getMsg();
+                + response.getErrors().getErr().getFirst().getMsg();
         log.error(msjError);
         throw new BusinessServiceException(msjError);
       }
       // errores particulares de cada comprobante
-      if (response.getFeDetResp().getFECAEDetResponse().get(0).getResultado().equals("R")) {
+      if (response.getFeDetResp().getFECAEDetResponse().getFirst().getResultado().equals("R")) {
         msjError +=
             response
                 .getFeDetResp()
                 .getFECAEDetResponse()
-                .get(0)
+                .getFirst()
                 .getObservaciones()
                 .getObs()
-                .get(0)
+                .getFirst()
                 .getMsg();
         log.error(msjError);
         throw new BusinessServiceException(msjError);
       }
-      long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().get(0).getCAE());
+      long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().getFirst().getCAE());
       comprobanteAutorizableAFIP.setCae(cae);
-      String fechaVencimientoCaeResponse = response.getFeDetResp().getFECAEDetResponse().get(0).getCAEFchVto();
+      String fechaVencimientoCaeResponse = response.getFeDetResp().getFECAEDetResponse().getFirst().getCAEFchVto();
       comprobanteAutorizableAFIP.setVencimientoCAE(LocalDate.parse(fechaVencimientoCaeResponse, DateTimeFormatter.BASIC_ISO_DATE));
       comprobanteAutorizableAFIP.setNumSerieAfip(nroPuntoDeVentaAfip);
       comprobanteAutorizableAFIP.setNumFacturaAfip(siguienteNroComprobante);
@@ -134,8 +134,7 @@ public class AfipTaxationServiceImpl implements TaxationService {
         String p12pass = configSucursal.getPasswordCertificadoAfip();
         long ticketTimeInHours = 12L; // siempre devuelve por 12hs
         byte[] loginTicketRequestXmlCms =
-                afipWebServiceSOAPClient.crearCMS(
-                        p12file, p12pass, p12signer, WEBSERVICE_FACTURA_ELECTRONICA, ticketTimeInHours);
+                afipWebServiceSOAPClient.crearCMS(p12file, p12pass, p12signer, WEBSERVICE_FACTURA_ELECTRONICA, ticketTimeInHours);
         LoginCms loginCms = new LoginCms();
         loginCms.setIn0(Base64.getEncoder().encodeToString(loginTicketRequestXmlCms));
         try {
@@ -177,13 +176,12 @@ public class AfipTaxationServiceImpl implements TaxationService {
       case FACTURA_C -> solicitud.setCbteTipo(11);
       case NOTA_DEBITO_C -> solicitud.setCbteTipo(12);
       case NOTA_CREDITO_C -> solicitud.setCbteTipo(13);
-      default -> throw new BusinessServiceException(messageSource.getMessage(
-              MENSAJE_COMPROBANTE_AFIP_INVALIDO, null, Locale.getDefault()));
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage(MENSAJE_COMPROBANTE_AFIP_INVALIDO, null, Locale.getDefault()));
     }
     solicitud.setPtoVta(nroPuntoDeVentaAfip);
     try {
-      FERecuperaLastCbteResponse response =
-          afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
+      FERecuperaLastCbteResponse response = afipWebServiceSOAPClient.getUltimoComprobanteAutorizado(solicitud);
       return response.getCbteNro() + 1;
     } catch (WebServiceClientException | IOException ex) {
       throw new ServiceException(messageSource.getMessage(
@@ -243,8 +241,8 @@ public class AfipTaxationServiceImpl implements TaxationService {
         cabecera.setCbteTipo(13);
         this.procesarDetalle(detalle, comprobante);
       }
-      default -> throw new BusinessServiceException(messageSource.getMessage(
-              MENSAJE_COMPROBANTE_AFIP_INVALIDO, null, Locale.getDefault()));
+      default -> throw new BusinessServiceException(
+              messageSource.getMessage(MENSAJE_COMPROBANTE_AFIP_INVALIDO, null, Locale.getDefault()));
     }
     // Cantidad de registros del detalle del comprobante o lote de comprobantes de ingreso
     cabecera.setCantReg(1);
@@ -359,8 +357,7 @@ public class AfipTaxationServiceImpl implements TaxationService {
       detalle.setDocNro(0);
     } else {
       this.validarCliente(comprobante.getCliente());
-      detalle.setDocTipo(
-          (comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
+      detalle.setDocTipo((comprobante.getCliente().getCategoriaIVACliente() == CategoriaIVA.CONSUMIDOR_FINAL) ? 96 : 80);
       detalle.setDocNro(comprobante.getCliente().getIdFiscalCliente());
     }
   }
@@ -382,8 +379,7 @@ public class AfipTaxationServiceImpl implements TaxationService {
   private void validarCliente(ClienteEmbeddable cliente) {
     if (cliente.getIdFiscalCliente() == null) {
       throw new BusinessServiceException(
-          messageSource.getMessage(
-              "mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
+          messageSource.getMessage("mensaje_cliente_sin_idFiscal_error", null, Locale.getDefault()));
     }
   }
 }

@@ -13,7 +13,7 @@ public class BusquedaCuentaCorrienteProveedorCriteria {
 
   private String nroProveedor;
   private String razonSocial;
-  private Long idFiscal;
+  private String idFiscal;
   private Long idProvincia;
   private Long idLocalidad;
   private Integer pagina;
