@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -57,18 +56,17 @@ public class ClienteServiceImpl implements ClienteService {
     if (cliente.isPresent() && !cliente.get().isEliminado()) {
       return cliente.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_cliente_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+              messageSource.getMessage("mensaje_cliente_no_existente", null, Locale.getDefault()));
     }
   }
 
   @Override
   public Cliente getClientePredeterminado() {
-    Cliente cliente =
-        clienteRepository.findByAndPredeterminadoAndEliminado(true, false);
+    var cliente = clienteRepository.findByAndPredeterminadoAndEliminado(true, false);
     if (cliente == null) {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_cliente_sin_predeterminado", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+              messageSource.getMessage("mensaje_cliente_sin_predeterminado", null, Locale.getDefault()));
     }
     return cliente;
   }
@@ -111,23 +109,20 @@ public class ClienteServiceImpl implements ClienteService {
       }
       builder.or(nfPredicate);
     }
-    if (criteria.getIdFiscal() != null) builder.or(qCliente.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getIdFiscal() != null && criteria.getIdFiscal().matches("\\d+"))
+      builder.or(qCliente.idFiscal.eq(Long.valueOf(criteria.getIdFiscal())));
     if (criteria.getNroDeCliente() != null)
       builder.or(qCliente.nroCliente.containsIgnoreCase(criteria.getNroDeCliente()));
     if (criteria.getIdViajante() != null)
       builder.and(qCliente.viajante.idUsuario.eq(criteria.getIdViajante()));
     if (criteria.getIdLocalidad() != null)
-      builder.and(
-          qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
+      builder.and(qCliente.ubicacionFacturacion.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
-      builder.and(
-          qCliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(
-              criteria.getIdProvincia()));
+      builder.and(qCliente.ubicacionFacturacion.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     if (criteria.getIdLocalidad() != null)
       builder.and(qCliente.ubicacionEnvio.localidad.idLocalidad.eq(criteria.getIdLocalidad()));
     if (criteria.getIdProvincia() != null)
-      builder.and(
-          qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
+      builder.and(qCliente.ubicacionEnvio.localidad.provincia.idProvincia.eq(criteria.getIdProvincia()));
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(idUsuarioLoggedIn);
     if (!usuarioLogueado.getRoles().contains(Rol.ADMINISTRADOR)
         && !usuarioLogueado.getRoles().contains(Rol.VENDEDOR)
@@ -161,19 +156,15 @@ public class ClienteServiceImpl implements ClienteService {
     if (pagina == null) pagina = 0;
     String ordenDefault = "nombreFiscal";
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenDefault));
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -192,22 +183,19 @@ public class ClienteServiceImpl implements ClienteService {
     }
     // ID Fiscal
     if (cliente.getIdFiscal() != null) {
-      List<Cliente> clientes =
-          clienteRepository.findByIdFiscalAndEliminado(cliente.getIdFiscal(), false);
+      var clientes = clienteRepository.findByIdFiscalAndEliminado(cliente.getIdFiscal(), false);
       if (clientes.size() > 1
           || operacion == TipoDeOperacion.ACTUALIZACION
               && !clientes.isEmpty()
-              && clientes.get(0).getIdCliente() != cliente.getIdCliente()) {
+              && clientes.getFirst().getIdCliente() != cliente.getIdCliente()) {
         throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion == TipoDeOperacion.ALTA
           && !clientes.isEmpty()
           && cliente.getIdFiscal() != null) {
         throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_cliente_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Ubicacion
@@ -218,18 +206,18 @@ public class ClienteServiceImpl implements ClienteService {
         && (cliente.getUbicacionEnvio().getIdUbicacion() != 0L)
         && (cliente.getUbicacionFacturacion().getIdUbicacion()
             == cliente.getUbicacionEnvio().getIdUbicacion())) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_facturacion_envio_iguales", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_ubicacion_facturacion_envio_iguales", null, Locale.getDefault()));
     }
     if (cliente.getUbicacionFacturacion() != null
         && cliente.getUbicacionFacturacion().getLocalidad() == null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_facturacion_sin_localidad", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_ubicacion_facturacion_sin_localidad", null, Locale.getDefault()));
     }
     if (cliente.getUbicacionEnvio() != null
       && cliente.getUbicacionEnvio().getLocalidad() == null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_envio_sin_localidad", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_ubicacion_envio_sin_localidad", null, Locale.getDefault()));
     }
   }
 
@@ -247,8 +235,7 @@ public class ClienteServiceImpl implements ClienteService {
               ubicacionService.getLocalidadPorId(
                   cliente.getUbicacionFacturacion().getIdLocalidad()));
     }
-    if (cliente.getUbicacionEnvio() != null
-        && cliente.getUbicacionEnvio().getIdLocalidad() != null) {
+    if (cliente.getUbicacionEnvio() != null && cliente.getUbicacionEnvio().getIdLocalidad() != null) {
       cliente
           .getUbicacionEnvio()
           .setLocalidad(
@@ -263,8 +250,9 @@ public class ClienteServiceImpl implements ClienteService {
     if (cliente.getCredencial() != null) {
       Cliente clienteYaAsignado = this.getClientePorIdUsuario(cliente.getCredencial().getIdUsuario());
       if (clienteYaAsignado != null) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
+        throw new BusinessServiceException(
+                messageSource.getMessage("mensaje_cliente_credencial_no_valida",
+                        new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
       } else {
         if (!cliente.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           cliente.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -288,12 +276,12 @@ public class ClienteServiceImpl implements ClienteService {
     clientePorActualizar.setEliminado(clientePersistido.isEliminado());
     this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, clientePorActualizar);
     if (clientePorActualizar.getCredencial() != null) {
-      Cliente clienteYaAsignado =
-          this.getClientePorIdUsuario(clientePorActualizar.getCredencial().getIdUsuario());
+      Cliente clienteYaAsignado = this.getClientePorIdUsuario(clientePorActualizar.getCredencial().getIdUsuario());
       if (clienteYaAsignado != null
           && clienteYaAsignado.getIdCliente() != clientePorActualizar.getIdCliente()) {
-        throw new BusinessServiceException(messageSource.getMessage(
-          "mensaje_cliente_credencial_no_valida", new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
+        throw new BusinessServiceException(
+                messageSource.getMessage("mensaje_cliente_credencial_no_valida",
+                        new Object[] {clienteYaAsignado.getNombreFiscal()}, Locale.getDefault()));
       } else {
         if (!clientePorActualizar.getCredencial().getRoles().contains(Rol.COMPRADOR)) {
           clientePorActualizar.getCredencial().getRoles().add(Rol.COMPRADOR);
@@ -310,8 +298,8 @@ public class ClienteServiceImpl implements ClienteService {
   public void eliminar(long idCliente) {
     Cliente cliente = this.getClienteNoEliminadoPorId(idCliente);
     if (cliente == null) {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_cliente_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+              messageSource.getMessage("mensaje_cliente_no_existente", null, Locale.getDefault()));
     }
     cuentaCorrienteService.eliminarCuentaCorrienteCliente(idCliente);
     cliente.setCredencial(null);
@@ -374,24 +362,17 @@ public class ClienteServiceImpl implements ClienteService {
             .telefonoCliente(cliente.getTelefono())
             .build();
     if (cliente.getUbicacionFacturacion() != null) {
-      clienteEmbeddable.setDescripcionUbicacionCliente(
-          cliente.getUbicacionFacturacion().getDescripcion());
+      clienteEmbeddable.setDescripcionUbicacionCliente(cliente.getUbicacionFacturacion().getDescripcion());
       clienteEmbeddable.setLatitudUbicacionCliente(cliente.getUbicacionFacturacion().getLatitud());
-      clienteEmbeddable.setLongitudUbicacionCliente(
-          cliente.getUbicacionFacturacion().getLongitud());
+      clienteEmbeddable.setLongitudUbicacionCliente(cliente.getUbicacionFacturacion().getLongitud());
       clienteEmbeddable.setCalleUbicacionCliente(cliente.getUbicacionFacturacion().getCalle());
       clienteEmbeddable.setNumeroUbicacionCliente(cliente.getUbicacionFacturacion().getNumero());
       clienteEmbeddable.setPisoUbicacionCliente(cliente.getUbicacionFacturacion().getPiso());
-      clienteEmbeddable.setDepartamentoUbicacionCliente(
-          cliente.getUbicacionFacturacion().getDepartamento());
-      clienteEmbeddable.setNombreLocalidadCliente(
-          cliente.getUbicacionFacturacion().getLocalidad().getNombre());
-      clienteEmbeddable.setCodigoPostalLocalidadCliente(
-          cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal());
-      clienteEmbeddable.setCostoEnvioLocalidadCliente(
-          cliente.getUbicacionFacturacion().getLocalidad().getCostoEnvio());
-      clienteEmbeddable.setNombreProvinciaCliente(
-          cliente.getUbicacionFacturacion().getLocalidad().getProvincia().getNombre());
+      clienteEmbeddable.setDepartamentoUbicacionCliente(cliente.getUbicacionFacturacion().getDepartamento());
+      clienteEmbeddable.setNombreLocalidadCliente(cliente.getUbicacionFacturacion().getLocalidad().getNombre());
+      clienteEmbeddable.setCodigoPostalLocalidadCliente(cliente.getUbicacionFacturacion().getLocalidad().getCodigoPostal());
+      clienteEmbeddable.setCostoEnvioLocalidadCliente(cliente.getUbicacionFacturacion().getLocalidad().getCostoEnvio());
+      clienteEmbeddable.setNombreProvinciaCliente(cliente.getUbicacionFacturacion().getLocalidad().getProvincia().getNombre());
     }
     return clienteEmbeddable;
   }

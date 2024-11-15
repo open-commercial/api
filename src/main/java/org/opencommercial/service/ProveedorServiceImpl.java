@@ -53,13 +53,12 @@ public class ProveedorServiceImpl implements ProveedorService {
 
   @Override
   public Proveedor getProveedorNoEliminadoPorId(long idProveedor) {
-    Optional<Proveedor> proveedor = proveedorRepository
-      .findById(idProveedor);
+    Optional<Proveedor> proveedor = proveedorRepository.findById(idProveedor);
     if (proveedor.isPresent() && !proveedor.get().isEliminado()) {
       return proveedor.get();
     } else {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_proveedor_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+              messageSource.getMessage("mensaje_proveedor_no_existente", null, Locale.getDefault()));
     }
   }
 
@@ -80,7 +79,8 @@ public class ProveedorServiceImpl implements ProveedorService {
       }
       builder.or(rsPredicate);
     }
-    if (criteria.getIdFiscal() != null) builder.or(qProveedor.idFiscal.eq(criteria.getIdFiscal()));
+    if (criteria.getIdFiscal() != null && criteria.getIdFiscal().matches("\\d+"))
+      builder.or(qProveedor.idFiscal.eq(Long.valueOf(criteria.getIdFiscal())));
     if (criteria.getNroProveedor() != null)
       builder.or(qProveedor.nroProveedor.containsIgnoreCase(criteria.getNroProveedor()));
     if (criteria.getIdLocalidad() != null)
@@ -95,19 +95,15 @@ public class ProveedorServiceImpl implements ProveedorService {
     if (pagina == null) pagina = 0;
     String ordenDefault = "razonSocial";
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenDefault));
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenDefault));
     } else {
       switch (sentido) {
         case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
         default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+          return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
       }
     }
   }
@@ -122,40 +118,37 @@ public class ProveedorServiceImpl implements ProveedorService {
     // Duplicados
     // ID Fiscal
     if (proveedor.getIdFiscal() != null) {
-      List<Proveedor> proveedores =
-          proveedorRepository.findByIdFiscalAndEliminado(proveedor.getIdFiscal(), false);
+      var proveedores = proveedorRepository.findByIdFiscalAndEliminado(proveedor.getIdFiscal(), false);
       if (proveedores.size() > 1
           || operacion.equals(TipoDeOperacion.ACTUALIZACION)
               && !proveedores.isEmpty()
               && proveedores.get(0).getIdProveedor() != proveedor.getIdProveedor()) {
         throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
       if (operacion.equals(TipoDeOperacion.ALTA)
           && !proveedores.isEmpty()
           && proveedor.getIdFiscal() != null) {
         throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_proveedor_duplicado_idFiscal", null, Locale.getDefault()));
       }
     }
     // Razon social
     Proveedor proveedorDuplicado = this.getProveedorPorRazonSocial(proveedor.getRazonSocial());
     if (operacion == TipoDeOperacion.ALTA && proveedorDuplicado != null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
     }
     if (operacion == TipoDeOperacion.ACTUALIZACION
         && proveedorDuplicado != null
         && proveedorDuplicado.getIdProveedor() != proveedor.getIdProveedor()) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_proveedor_duplicado_razonSocial", null, Locale.getDefault()));
     }
     // Ubicacion
     if (proveedor.getUbicacion() != null && proveedor.getUbicacion().getLocalidad() == null) {
-      throw new BusinessServiceException(messageSource.getMessage(
-        "mensaje_ubicacion_sin_localidad", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_ubicacion_sin_localidad", null, Locale.getDefault()));
     }
   }
 
@@ -195,8 +188,8 @@ public class ProveedorServiceImpl implements ProveedorService {
   public void eliminar(long idProveedor) {
     Proveedor proveedor = this.getProveedorNoEliminadoPorId(idProveedor);
     if (proveedor == null) {
-      throw new EntityNotFoundException(messageSource.getMessage(
-        "mensaje_proveedor_no_existente", null, Locale.getDefault()));
+      throw new EntityNotFoundException(
+              messageSource.getMessage("mensaje_proveedor_no_existente", null, Locale.getDefault()));
     }
     cuentaCorrienteService.eliminarCuentaCorrienteProveedor(idProveedor);
     proveedor.setEliminado(true);
@@ -213,8 +206,7 @@ public class ProveedorServiceImpl implements ProveedorService {
     while (esRepetido) {
       randomLong = min + (long) (Math.random() * (max - min));
       String nroProveedor = Long.toString(randomLong);
-      Proveedor p =
-          proveedorRepository.findByNroProveedorAndEliminado(nroProveedor, false);
+      Proveedor p = proveedorRepository.findByNroProveedorAndEliminado(nroProveedor, false);
       if (p == null) esRepetido = false;
     }
     return Long.toString(randomLong);
