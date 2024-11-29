@@ -4,6 +4,12 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
+import org.opencommercial.exception.BusinessServiceException;
+import org.opencommercial.exception.UnauthorizedException;
+import org.opencommercial.model.ReCaptchaResponse;
+import org.opencommercial.model.Rol;
+import org.opencommercial.model.TokenAccesoExcluido;
+import org.opencommercial.repository.TokenAccesoExcluidoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -11,12 +17,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.opencommercial.exception.BusinessServiceException;
-import org.opencommercial.exception.UnauthorizedException;
-import org.opencommercial.model.ReCaptchaResponse;
-import org.opencommercial.model.Rol;
-import org.opencommercial.model.TokenAccesoExcluido;
-import org.opencommercial.repository.TokenAccesoExcluidoRepository;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.time.LocalDateTime;
@@ -87,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
       Jwts.parser().verifyWith(privateKey).build().parse(token);
       return true;
     } catch (JwtException ex) {
-      log.error(ex.getMessage());
+      log.warn(ex.getMessage());
       return false;
     }
   }
@@ -123,7 +123,7 @@ public class AuthServiceImpl implements AuthService {
                 .exchange(URL_RECAPTCHA + params, HttpMethod.POST, null, ReCaptchaResponse.class)
                 .getBody();
       } catch (RestClientException ex) {
-        log.error(ex.getMessage());
+        log.warn(ex.getMessage());
       }
       if (reCaptchaResponse == null || !reCaptchaResponse.isSuccess()) {
         throw new BusinessServiceException(messageSource.getMessage(

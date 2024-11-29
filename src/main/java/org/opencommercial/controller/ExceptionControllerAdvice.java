@@ -1,21 +1,22 @@
 package org.opencommercial.controller;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.*;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.opencommercial.exception.ForbiddenException;
+import org.opencommercial.exception.ServiceException;
+import org.opencommercial.exception.UnauthorizedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.opencommercial.exception.ForbiddenException;
-import org.opencommercial.exception.UnauthorizedException;
-import org.opencommercial.exception.ServiceException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Locale;
 
 @RestControllerAdvice
 @Slf4j
@@ -81,8 +82,6 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public String handleException(Exception ex) {
-    return log(
-        new Exception(
-            messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()), ex));
+    return log(new Exception(messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()), ex));
   }
 }

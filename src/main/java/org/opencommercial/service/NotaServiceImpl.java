@@ -1149,7 +1149,6 @@ public class NotaServiceImpl implements NotaService {
       try {
         params.put("logo", new ImageIcon(ImageIO.read(new URL(nota.getSucursal().getLogo()))).getImage());
       } catch (IOException ex) {
-        log.error(ex.getMessage());
         throw new ServiceException(
                 messageSource.getMessage("mensaje_sucursal_404_logo", null, Locale.getDefault()), ex);
       }

@@ -88,7 +88,6 @@ public class AfipTaxationServiceImpl implements TaxationService {
             response.getErrors().getErr().getFirst().getCode()
                 + "-"
                 + response.getErrors().getErr().getFirst().getMsg();
-        log.error(msjError);
         throw new BusinessServiceException(msjError);
       }
       // errores particulares de cada comprobante
@@ -102,7 +101,6 @@ public class AfipTaxationServiceImpl implements TaxationService {
                 .getObs()
                 .getFirst()
                 .getMsg();
-        log.error(msjError);
         throw new BusinessServiceException(msjError);
       }
       long cae = Long.parseLong(response.getFeDetResp().getFECAEDetResponse().getFirst().getCAE());

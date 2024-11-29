@@ -87,9 +87,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         | UnrecoverableKeyException
         | InvalidAlgorithmParameterException
         | NoSuchProviderException ex) {
-      log.error(ex.getMessage());
       throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_certificado_error", null, Locale.getDefault()));
+          messageSource.getMessage("mensaje_certificado_error", null, Locale.getDefault()), ex);
     }
     String loginTicketRequestXml = this.crearTicketRequerimientoAcceso(service, ticketTimeInHours);
     try {
@@ -105,8 +104,8 @@ public class AfipWebServiceSOAPClient extends WebServiceGatewaySupport {
         | NoSuchAlgorithmException
         | NoSuchProviderException
         | IOException ex) {
-      log.error(ex.getMessage());
-      throw new BusinessServiceException(messageSource.getMessage("mensaje_firmando_certificado_error", null, Locale.getDefault()));
+      throw new BusinessServiceException(
+              messageSource.getMessage("mensaje_firmando_certificado_error", null, Locale.getDefault()), ex);
     }
     return asn1Cms;
   }
