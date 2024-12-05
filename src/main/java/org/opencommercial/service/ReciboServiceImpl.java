@@ -179,7 +179,7 @@ public class ReciboServiceImpl implements ReciboService {
 
   @Override
   public void validarReglasDeNegocio(Recibo recibo) {
-    // Muteado momentaneamente por el problema del alta de recibo generado por sic-com cuando la caja esta cerrada
+    // Muteado momentaneamente por el problema del alta de recibo generado por COM cuando la caja esta cerrada
     // this.cajaService.validarMovimiento(recibo.getFecha(), recibo.getSucursal().getIdSucursal());
     if (recibo.getCliente() == null && recibo.getProveedor() == null) {
       throw new BusinessServiceException(messageSource.getMessage(
