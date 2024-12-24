@@ -740,7 +740,7 @@ public class ProductoServiceImpl implements ProductoService {
       }
     }
     productoRepository.saveAll(productos);
-    log.info("Los Productos {} se eliminaron.", productos);
+    log.info("Los productos se eliminaron correctamente. {}", productos);
   }
 
   @Override
@@ -844,7 +844,7 @@ public class ProductoServiceImpl implements ProductoService {
       this.validarReglasDeNegocio(TipoDeOperacion.ACTUALIZACION, p);
     }
     productoRepository.saveAll(productos);
-    log.info("Los Productos {} se modificaron correctamente.", productos);
+    log.info("Los productos se modificaron correctamente. {}", productos);
   }
 
   @Override

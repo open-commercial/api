@@ -216,7 +216,7 @@ public class PedidoServiceImpl implements PedidoService {
     productoService.actualizarStockPedido(pedido, TipoDeOperacion.ALTA);
     pedido = pedidoRepository.save(pedido);
     this.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
-    log.info("El Pedido {} se guardó correctamente.", pedido);
+    log.info("El pedido se guardó correctamente. {}", pedido);
     String emailCliente = pedido.getCliente().getEmail();
     if (emailCliente != null && !emailCliente.isEmpty()) {
       emailServiceFactory.getEmailService(emailDefaultProvider)
@@ -232,7 +232,7 @@ public class PedidoServiceImpl implements PedidoService {
                               Locale.getDefault()),
                       this.getReportePedido(pedido.getIdPedido()),
                       "Pedido.pdf");
-      log.info("El mail del pedido nro {} se envió.", pedido.getNroPedido());
+      log.info("Se envió el mail con el pedido. {}", pedido);
     }
     return pedido;
   }
@@ -492,8 +492,7 @@ public class PedidoServiceImpl implements PedidoService {
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ACTUALIZACION);
       pedido = pedidoRepository.save(pedido);
       this.actualizarCantidadReservadaDeProductosPorCambioDeEstado(pedido);
-      log.info(messageSource.getMessage(
-              "mensaje_pedido_cancelado", new Object[]{pedido}, Locale.getDefault()));
+      log.info(messageSource.getMessage("mensaje_pedido_cancelado", new Object[]{pedido}, Locale.getDefault()));
     } else {
       throw new BusinessServiceException(
           messageSource.getMessage(

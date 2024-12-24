@@ -262,7 +262,7 @@ public class ClienteServiceImpl implements ClienteService {
     cuentaCorrienteCliente.setFechaApertura(cuentaCorrienteCliente.getCliente().getFechaAlta());
     cliente = clienteRepository.save(cliente);
     cuentaCorrienteService.guardarCuentaCorrienteCliente(cuentaCorrienteCliente);
-    log.info("El Cliente {} se guardó correctamente.", cliente);
+    log.info("El cliente se guardó correctamente. {}", cliente);
     return cliente;
   }
 
@@ -289,7 +289,7 @@ public class ClienteServiceImpl implements ClienteService {
       }
     }
     Cliente clienteGuardado = clienteRepository.save(clientePorActualizar);
-    log.info("El Cliente {} se actualizó correctamente.", clienteGuardado);
+    log.info("El cliente se actualizó correctamente. {}", clienteGuardado);
     return clienteGuardado;
   }
 
@@ -307,7 +307,7 @@ public class ClienteServiceImpl implements ClienteService {
     cliente.setUbicacionFacturacion(null);
     cliente.setUbicacionEnvio(null);
     clienteRepository.save(cliente);
-    log.info("El Cliente {} se eliminó correctamente.", cliente);
+    log.info("El cliente se eliminó correctamente. {}", cliente);
   }
 
   @Override

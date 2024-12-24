@@ -87,7 +87,7 @@ public class MedidaServiceImpl implements MedidaService {
     customValidator.validar(medida);
     this.validarReglasDeNegocio(TipoDeOperacion.ALTA, medida);
     medida = medidaRepository.save(medida);
-    log.info("La Medida {} se guardó correctamente.", medida);
+    log.info("La medida se guardó correctamente. {}", medida);
     return medida;
   }
 
