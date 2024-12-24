@@ -326,7 +326,7 @@ public class FacturaVentaServiceImpl implements FacturaVentaService {
       var facturaGuardada = facturaVentaRepository.save((FacturaVenta) this.procesarFacturaVenta(f));
       this.cuentaCorrienteService.asentarEnCuentaCorriente(facturaGuardada, TipoDeOperacion.ALTA);
       facturasProcesadas.add(facturaGuardada);
-      log.info("La Factura {} se guardó correctamente.", facturaGuardada);
+      log.info("La factura se guardó correctamente. {}", facturaGuardada);
     });
     var facturasParaRelacionarAlPedido = new ArrayList<Factura>(facturasProcesadas);
     pedidoService.actualizarFacturasDelPedido(pedido, facturasParaRelacionarAlPedido);
@@ -521,10 +521,7 @@ public class FacturaVentaServiceImpl implements FacturaVentaService {
                       bodyEmail,
                       this.getReporteFacturaVenta(factura),
                       "Factura.pdf");
-      log.info(
-          "El mail de la factura serie {} nro {} se envió.",
-          factura.getNumSerie(),
-          factura.getNumFactura());
+      log.info("Se envió el mail con la factura. {}", factura);
     }
   }
 

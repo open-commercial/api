@@ -142,7 +142,7 @@ public class NotaServiceImpl implements NotaService {
     this.cuentaCorrienteService.asentarEnCuentaCorriente(nota, TipoDeOperacion.ELIMINACION);
     nota.setEliminada(true);
     notaRepository.save(nota);
-    log.info("La Nota {} se eliminó correctamente.", nota);
+    log.info("La nota se eliminó correctamente. {}", nota);
   }
 
   @Override
@@ -698,7 +698,7 @@ public class NotaServiceImpl implements NotaService {
       var tiposAutorizables = Arrays.asList(TipoDeComprobante.NOTA_CREDITO_A, TipoDeComprobante.NOTA_CREDITO_B, TipoDeComprobante.NOTA_CREDITO_C);
       if (tiposAutorizables.contains(notaCredito.getTipoComprobante())) this.autorizarNota(notaCredito);
     }
-    log.info("La Nota de Credito {} se guardó correctamente.", notaCredito);
+    log.info("La nota de crédito se guardó correctamente. {}", notaCredito);
     return notaCredito;
   }
 
@@ -1048,7 +1048,7 @@ public class NotaServiceImpl implements NotaService {
       var tiposAutorizables = Arrays.asList(TipoDeComprobante.NOTA_DEBITO_A, TipoDeComprobante.NOTA_DEBITO_B, TipoDeComprobante.NOTA_DEBITO_C);
       if (tiposAutorizables.contains(notaDebito.getTipoComprobante())) this.autorizarNota(notaDebito);
     }
-    log.info("La Nota de Debito {} se guardó correctamente.", notaDebito);
+    log.info("La nota de debito se guardó correctamente. {}", notaDebito);
     return notaDebito;
   }
 

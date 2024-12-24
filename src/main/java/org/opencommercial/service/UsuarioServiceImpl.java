@@ -254,7 +254,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     }
     usuario.setUsername(usuario.getUsername().toLowerCase());
     usuarioRepository.save(usuario);
-    log.info("El Usuario {} se actualizó correctamente.", usuario);
+    log.info("El usuario se actualizó correctamente. {}", usuario);
   }
 
   @Override
@@ -315,7 +315,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     usuario.setUsername(usuario.getUsername().toLowerCase());
     usuario.setPassword(encryptUtils.encryptWithMD5(usuario.getPassword()));
     usuario = usuarioRepository.save(usuario);
-    log.info("El Usuario {} se guardó correctamente.", usuario);
+    log.info("El usuario se guardó correctamente. {}", usuario);
     return usuario;
   }
 
@@ -332,7 +332,7 @@ public class UsuarioServiceImpl implements UsuarioService {
               Locale.getDefault()));
     usuario.setEliminado(true);
     usuarioRepository.save(usuario);
-    log.info("El Usuario {} se eliminó correctamente.", usuario);
+    log.info("El usuario se eliminó correctamente. {}", usuario);
   }
 
   @Override

@@ -1,13 +1,6 @@
 package org.opencommercial.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.MessageSource;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
 import org.opencommercial.exception.BusinessServiceException;
 import org.opencommercial.model.dto.EntidadMontoDTO;
 import org.opencommercial.model.dto.PeriodoMontoDTO;
@@ -15,6 +8,13 @@ import org.opencommercial.repository.FacturaCompraRepository;
 import org.opencommercial.repository.FacturaVentaRepository;
 import org.opencommercial.repository.projection.EntidadMontoProjection;
 import org.opencommercial.repository.projection.PeriodoMontoProjection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.MessageSource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Locale;
@@ -61,7 +61,7 @@ public class EstadisticaServiceImpl implements EstadisticaService {
                         MONTO_NETO_VENDIDO_POR_RUBRO_POR_ANIO,
                         MONTO_NETO_VENDIDO_POR_RUBRO_POR_MES);
     caches.forEach(i -> Objects.requireNonNull(cacheManager.getCache(i)).clear());
-    log.info("Todas las caches fueron limpiadas {}", caches);
+    log.info("Todas las caches fueron limpiadas. {}", caches);
   }
 
   @Override

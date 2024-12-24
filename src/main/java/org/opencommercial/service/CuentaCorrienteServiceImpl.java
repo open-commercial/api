@@ -83,7 +83,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
     customValidator.validar(cuentaCorrienteCliente);
     this.validarReglasDeNegocio(cuentaCorrienteCliente);
     cuentaCorrienteCliente = cuentaCorrienteClienteRepository.save(cuentaCorrienteCliente);
-    log.info("La Cuenta Corriente Cliente {} se guardó correctamente.", cuentaCorrienteCliente);
+    log.info("La cuenta corriente cliente se guardó correctamente. {}", cuentaCorrienteCliente);
     return cuentaCorrienteCliente;
   }
 
@@ -93,7 +93,7 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
     customValidator.validar(cuentaCorrienteProveedor);
     this.validarReglasDeNegocio(cuentaCorrienteProveedor);
     cuentaCorrienteProveedor = cuentaCorrienteProveedorRepository.save(cuentaCorrienteProveedor);
-    log.info("La Cuenta Corriente Proveedor {} se guardó correctamente.", cuentaCorrienteProveedor);
+    log.info("La cuenta corriente proveedor se guardó correctamente. {}", cuentaCorrienteProveedor);
     return cuentaCorrienteProveedor;
   }
 

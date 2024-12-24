@@ -246,13 +246,13 @@ public class CajaServiceImpl implements CajaService {
     cajaACerrar.setSaldoSistema(this.getSaldoSistema(cajaACerrar));
     cajaACerrar.setEstado(EstadoCaja.CERRADA);
     this.actualizar(cajaACerrar);
-    log.info("La Caja {} se cerró correctamente.", cajaACerrar);
+    log.info("La caja se cerró correctamente: {}", cajaACerrar);
     return cajaACerrar;
   }
 
   @Scheduled(cron = "30 0 0 * * *") // Todos los dias a las 00:00:30
   public void cerrarCajas() {
-    log.info("Cierre automático de Cajas a las {}", LocalDateTime.now());
+    log.info("Cierre automático de cajas a las {}", LocalDateTime.now());
     List<Sucursal> sucursales = this.sucursalService.getSucusales(false);
     sucursales.stream()
         .map(sucursal -> this.getUltimaCaja(sucursal.getIdSucursal()))

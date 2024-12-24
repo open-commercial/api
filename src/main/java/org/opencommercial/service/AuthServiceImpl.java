@@ -60,11 +60,11 @@ public class AuthServiceImpl implements AuthService {
   public String generarJWT(Long idUsuario, List<Rol> rolesDeUsuario) {
     LocalDateTime today = LocalDateTime.now();
     ZonedDateTime zdtNow = today.atZone(ZoneId.systemDefault());
-    ZonedDateTime zdtInOneMonth = today.plusMonths(1L).atZone(ZoneId.systemDefault());
+    ZonedDateTime zdtExpiration = today.plusWeeks(1L).atZone(ZoneId.systemDefault());
     var privateKey = new SecretKeySpec(Base64.getDecoder().decode(jwtSecretKey), ALGORITHM_SHA512);
     return Jwts.builder()
             .issuedAt(Date.from(zdtNow.toInstant()))
-            .expiration(Date.from(zdtInOneMonth.toInstant()))
+            .expiration(Date.from(zdtExpiration.toInstant()))
             .signWith(privateKey, Jwts.SIG.HS512)
             .claim("idUsuario", idUsuario)
             .claim("roles", rolesDeUsuario)

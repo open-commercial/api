@@ -73,7 +73,8 @@ public class UsuarioController {
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLoggedIn = usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class));
     boolean usuarioSeModificaASiMismo = usuarioLoggedIn.getIdUsuario() == usuarioDTO.getIdUsuario();
-    if (usuarioSeModificaASiMismo || usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
+    boolean usuarioLoggedInEsAdmin = usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR);
+    if (usuarioSeModificaASiMismo || usuarioLoggedInEsAdmin) {
       Usuario usuarioPorActualizar = modelMapper.map(usuarioDTO, Usuario.class);
       Usuario usuarioPersistido = usuarioService.getUsuarioNoEliminadoPorId(usuarioDTO.getIdUsuario());
       if (!usuarioLoggedIn.getRoles().contains(Rol.ADMINISTRADOR)) {
