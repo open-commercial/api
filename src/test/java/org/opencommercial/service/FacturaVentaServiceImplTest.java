@@ -304,8 +304,7 @@ class FacturaVentaServiceImplTest {
   @Test
   void shouldThrownBusinessServiceExceptionPorBusquedaVentaSinIdSucursal() {
     BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder().build();
-    assertThrows(
-        BusinessServiceException.class, () -> facturaVentaServiceImpl.getBuilderVenta(criteria));
+    assertThrows(BusinessServiceException.class, () -> facturaVentaServiceImpl.getBuilderVenta(criteria));
     verify(messageSource).getMessage(eq("mensaje_busqueda_sin_sucursal"), any(), any());
   }
 
@@ -333,12 +332,13 @@ class FacturaVentaServiceImplTest {
             .build();
     String resultadoBuilder =
         "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
-            + "&& facturaVenta.fecha between -999999999-01-01T00:00 and -999999999-01-01T23:59:59.999999999 "
+            + "&& facturaVenta.fecha >= -999999999-01-01T00:00 && facturaVenta.fecha <= -999999999-01-01T23:59:59.999999999 "
             + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
+            + "&& facturaVenta.pedido.nroPedido = 33 "
+            + "&& any(facturaVenta.renglones).idProductoItem = 3 "
             + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.remito.serie = 3 "
-            + "&& facturaVenta.remito.nroRemito = 4 && facturaVenta.pedido.nroPedido = 33 "
-            + "&& any(facturaVenta.renglones).idProductoItem = 3";
+            + "&& facturaVenta.remito.nroRemito = 4";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
         BusquedaFacturaVentaCriteria.builder()
@@ -355,11 +355,12 @@ class FacturaVentaServiceImplTest {
             .build();
     resultadoBuilder =
         "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
-            + "&& facturaVenta.fecha > -999999999-01-01T00:00 "
+            + "&& facturaVenta.fecha >= -999999999-01-01T00:00 "
             + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
-            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
-            + "&& any(facturaVenta.renglones).idProductoItem = 3";
+            + "&& facturaVenta.pedido.nroPedido = 33 "
+            + "&& any(facturaVenta.renglones).idProductoItem = 3 "
+            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     criteria =
         BusquedaFacturaVentaCriteria.builder()
@@ -376,11 +377,12 @@ class FacturaVentaServiceImplTest {
             .build();
     resultadoBuilder =
         "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
-            + "&& facturaVenta.fecha < -999999999-01-01T23:59:59.999999999 "
+            + "&& facturaVenta.fecha <= -999999999-01-01T23:59:59.999999999 "
             + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
-            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
-            + "&& any(facturaVenta.renglones).idProductoItem = 3";
+            + "&& facturaVenta.pedido.nroPedido = 33 "
+            + "&& any(facturaVenta.renglones).idProductoItem = 3 "
+            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     roles = Collections.singletonList(Rol.COMPRADOR);
     usuarioLogueado.setRoles(roles);
@@ -404,11 +406,12 @@ class FacturaVentaServiceImplTest {
             .build();
     resultadoBuilder =
         "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
-            + "&& facturaVenta.fecha < -999999999-01-01T23:59:59.999999999 "
+            + "&& facturaVenta.fecha <= -999999999-01-01T23:59:59.999999999 "
             + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
-            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
-            + "&& any(facturaVenta.renglones).idProductoItem = 3";
+            + "&& facturaVenta.pedido.nroPedido = 33 "
+            + "&& any(facturaVenta.renglones).idProductoItem = 3 "
+            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
     when(clienteService.getClientePorIdUsuario(1L)).thenReturn(null);
     criteria =
@@ -426,11 +429,12 @@ class FacturaVentaServiceImplTest {
             .build();
     resultadoBuilder =
         "facturaVenta.sucursal.idSucursal = 1 && facturaVenta.eliminada = false "
-            + "&& facturaVenta.fecha < -999999999-01-01T23:59:59.999999999 "
+            + "&& facturaVenta.fecha <= -999999999-01-01T23:59:59.999999999 "
             + "&& facturaVenta.cliente.idCliente = 1 && facturaVenta.tipoComprobante = FACTURA_A "
             + "&& facturaVenta.usuario.idUsuario = 7 && facturaVenta.cliente.viajante.idUsuario = 9 "
-            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5 && facturaVenta.pedido.nroPedido = 33 "
-            + "&& any(facturaVenta.renglones).idProductoItem = 3";
+            + "&& facturaVenta.pedido.nroPedido = 33 "
+            + "&& any(facturaVenta.renglones).idProductoItem = 3 "
+            + "&& facturaVenta.numSerie = 4 && facturaVenta.numFactura = 5";
     assertEquals(resultadoBuilder, facturaVentaServiceImpl.getBuilderVenta(criteria).toString());
   }
 
@@ -440,18 +444,17 @@ class FacturaVentaServiceImplTest {
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    var criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
-    QFacturaVenta qFacturVenta = QFacturaVenta.facturaVenta;
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     builder.and(
-        qFacturVenta
+        qFacturaVenta
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qFacturVenta.eliminada.eq(false)));
+            .and(qFacturaVenta.eliminada.eq(false)));
     when(facturaVentaRepository.calcularTotalFacturadoVenta(builder)).thenReturn(BigDecimal.TEN);
-    assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularTotalFacturadoVenta(criteria, 1L));
+    assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularTotalFacturadoVenta(criteria));
   }
 
   @Test
@@ -460,19 +463,17 @@ class FacturaVentaServiceImplTest {
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    var criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
-    QFacturaVenta qFacturVenta = QFacturaVenta.facturaVenta;
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     builder.and(
-        qFacturVenta
+        qFacturaVenta
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qFacturVenta.eliminada.eq(false)));
+            .and(qFacturaVenta.eliminada.eq(false)));
     when(facturaVentaRepository.calcularTotalFacturadoVenta(builder)).thenReturn(null);
-    assertEquals(
-        BigDecimal.ZERO, facturaVentaServiceImpl.calcularTotalFacturadoVenta(criteria, 1L));
+    assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularTotalFacturadoVenta(criteria));
   }
 
   @Test
@@ -481,19 +482,18 @@ class FacturaVentaServiceImplTest {
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    var criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
-    QFacturaVenta qFacturVenta = QFacturaVenta.facturaVenta;
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     builder.and(
-        qFacturVenta
+        qFacturaVenta
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qFacturVenta.eliminada.eq(false)));
+            .and(qFacturaVenta.eliminada.eq(false)));
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
     when(facturaVentaRepository.calcularIVAVenta(builder, tipoFactura)).thenReturn(BigDecimal.TEN);
-    assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularIvaVenta(criteria, 1L));
+    assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularIvaVenta(criteria));
   }
 
   @Test
@@ -502,19 +502,18 @@ class FacturaVentaServiceImplTest {
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    var criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
-    QFacturaVenta qFacturVenta = QFacturaVenta.facturaVenta;
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     builder.and(
-        qFacturVenta
+        qFacturaVenta
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qFacturVenta.eliminada.eq(false)));
+            .and(qFacturaVenta.eliminada.eq(false)));
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
     when(facturaVentaRepository.calcularIVAVenta(builder, tipoFactura)).thenReturn(null);
-    assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularIvaVenta(criteria, 1L));
+    assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularIvaVenta(criteria));
   }
 
   @Test
@@ -523,18 +522,17 @@ class FacturaVentaServiceImplTest {
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    var criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
-    QFacturaVenta qFacturVenta = QFacturaVenta.facturaVenta;
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     builder.and(
-        qFacturVenta
+        qFacturaVenta
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qFacturVenta.eliminada.eq(false)));
+            .and(qFacturaVenta.eliminada.eq(false)));
     when(facturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(BigDecimal.TEN);
-    assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularGananciaTotal(criteria, 1L));
+    assertEquals(BigDecimal.TEN, facturaVentaServiceImpl.calcularGananciaTotal(criteria));
   }
 
   @Test
@@ -543,18 +541,17 @@ class FacturaVentaServiceImplTest {
     List<Rol> roles = Arrays.asList(Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR);
     usuarioLogueado.setRoles(roles);
     when(usuarioService.getUsuarioNoEliminadoPorId(1L)).thenReturn(usuarioLogueado);
-    BusquedaFacturaVentaCriteria criteria =
-        BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
+    var criteria = BusquedaFacturaVentaCriteria.builder().idSucursal(1L).build();
     BooleanBuilder builder = new BooleanBuilder();
-    QFacturaVenta qFacturVenta = QFacturaVenta.facturaVenta;
+    QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
     builder.and(
-        qFacturVenta
+        qFacturaVenta
             .sucursal
             .idSucursal
             .eq(criteria.getIdSucursal())
-            .and(qFacturVenta.eliminada.eq(false)));
+            .and(qFacturaVenta.eliminada.eq(false)));
     when(facturaVentaRepository.calcularGananciaTotal(builder)).thenReturn(null);
-    assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularGananciaTotal(criteria, 1L));
+    assertEquals(BigDecimal.ZERO, facturaVentaServiceImpl.calcularGananciaTotal(criteria));
   }
 
   @Test

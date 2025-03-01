@@ -71,8 +71,7 @@ public interface NotaService {
 
   BigDecimal calcularTotalNota(List<RenglonNotaCredito> renglonesNota);
 
-  List<RenglonNotaCredito> calcularRenglonesCreditoProducto(
-          TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
+  List<RenglonNotaCredito> calcularRenglonesCreditoProducto(TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura);
 
   RenglonNotaCredito calcularRenglonCredito(TipoDeComprobante tipo, String detalle, BigDecimal monto);
 
@@ -86,22 +85,20 @@ public interface NotaService {
 
   BigDecimal calcularRecargoNetoCredito(BigDecimal subTotal, BigDecimal recargoPorcentaje);
 
-  BigDecimal calcularSubTotalBrutoCredito(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal subTotal,
-      BigDecimal recargoNeto,
-      BigDecimal descuentoNeto,
-      BigDecimal iva105Neto,
-      BigDecimal iva21Neto);
+  BigDecimal calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante,
+                                          BigDecimal subTotal,
+                                          BigDecimal recargoNeto,
+                                          BigDecimal descuentoNeto,
+                                          BigDecimal iva105Neto,
+                                          BigDecimal iva21Neto);
 
-  BigDecimal calcularIVANetoCredito(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal[] cantidades,
-      BigDecimal[] ivaPorcentajeRenglones,
-      BigDecimal[] ivaNetoRenglones,
-      BigDecimal ivaPorcentaje,
-      BigDecimal descuentoPorcentaje,
-      BigDecimal recargoPorcentaje);
+  BigDecimal calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante,
+                                    BigDecimal[] cantidades,
+                                    BigDecimal[] ivaPorcentajeRenglones,
+                                    BigDecimal[] ivaNetoRenglones,
+                                    BigDecimal ivaPorcentaje,
+                                    BigDecimal descuentoPorcentaje,
+                                    BigDecimal recargoPorcentaje);
 
   void validarReglasDeNegocio(Nota nota);
 

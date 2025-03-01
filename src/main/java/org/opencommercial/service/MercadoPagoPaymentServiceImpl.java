@@ -64,18 +64,17 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
   private final CustomValidator customValidator;
 
   @Autowired
-  public MercadoPagoPaymentServiceImpl(
-    ReciboService reciboService,
-    ClienteService clienteService,
-    NotaService notaService,
-    SucursalService sucursalService,
-    CarritoCompraService carritoCompraService,
-    UsuarioService usuarioService,
-    PedidoService pedidoService,
-    ProductoService productoService,
-    EncryptUtils encryptUtils,
-    MessageSource messageSource,
-    CustomValidator customValidator) {
+  public MercadoPagoPaymentServiceImpl(ReciboService reciboService,
+                                       ClienteService clienteService,
+                                       NotaService notaService,
+                                       SucursalService sucursalService,
+                                       CarritoCompraService carritoCompraService,
+                                       UsuarioService usuarioService,
+                                       PedidoService pedidoService,
+                                       ProductoService productoService,
+                                       EncryptUtils encryptUtils,
+                                       MessageSource messageSource,
+                                       CustomValidator customValidator) {
     this.reciboService = reciboService;
     this.clienteService = clienteService;
     this.notaService = notaService;
@@ -125,24 +124,12 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
           }
           casePedido = true;
           monto = carritoCompraService.calcularTotal(idUsuario);
-          title =
-                  "Pedido de ("
-                          + clienteDeUsuario.getNroCliente()
-                          + ") "
-                          + clienteDeUsuario.getNombreFiscal();
-          stringJson =
-                  "{ \""
-                          + STRING_ID_USUARIO
-                          + "\": "
-                          + idUsuario
-                          + " , \"idSucursal\": "
-                          + sucursal.getIdSucursal()
-                          + " , \"tipoDeEnvio\": "
-                          + nuevaOrdenDeCompra.getTipoDeEnvio()
-                          + " , \"movimiento\": "
-                          + Movimiento.PEDIDO
-                          + " , \"idPedido\": "
-                          + pedido.getIdPedido()
+          title = "Pedido de (" + clienteDeUsuario.getNroCliente() + ") " + clienteDeUsuario.getNombreFiscal();
+          stringJson = "{ \"" + STRING_ID_USUARIO + "\": " + idUsuario
+                          + " , \"idSucursal\": " + sucursal.getIdSucursal()
+                          + " , \"tipoDeEnvio\": " + nuevaOrdenDeCompra.getTipoDeEnvio()
+                          + " , \"movimiento\": " + Movimiento.PEDIDO
+                          + " , \"idPedido\": " + pedido.getIdPedido()
                           + "}";
           backUrls = PreferenceBackUrlsRequest.builder()
                   .success(origin + "/checkout/aprobado")
@@ -160,20 +147,10 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
                   messageSource.getMessage("mensaje_preference_deposito_sin_monto", null, Locale.getDefault()));
         }
         monto = nuevaOrdenDeCompra.getMonto();
-        title =
-                "Deposito de ("
-                        + clienteDeUsuario.getNroCliente()
-                        + ") "
-                        + clienteDeUsuario.getNombreFiscal();
-        stringJson =
-                "{ \""
-                        + STRING_ID_USUARIO
-                        + "\": "
-                        + idUsuario
-                        + " , \"idSucursal\": "
-                        + sucursal.getIdSucursal()
-                        + " , \"movimiento\": "
-                        + Movimiento.DEPOSITO
+        title = "Deposito de (" + clienteDeUsuario.getNroCliente() + ") " + clienteDeUsuario.getNombreFiscal();
+        stringJson = "{ \"" + STRING_ID_USUARIO + "\": " + idUsuario
+                        + " , \"idSucursal\": " + sucursal.getIdSucursal()
+                        + " , \"movimiento\": " + Movimiento.DEPOSITO
                         + "}";
         String urlDeposito = origin + "/perfil";
         backUrls = PreferenceBackUrlsRequest.builder()
@@ -189,8 +166,7 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
     try {
       stringJson = encryptUtils.encryptWithAES(jsonObject.toString());
     } catch (GeneralSecurityException e) {
-      throw new ServiceException(
-          messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
+      throw new ServiceException(messageSource.getMessage("mensaje_error_al_encriptar", null, Locale.getDefault()), e);
     }
     var preferenceItems = new ArrayList<PreferenceItemRequest>();
     preferenceItems.add(PreferenceItemRequest.builder().title(title).quantity(1).unitPrice(monto).build());
@@ -204,11 +180,10 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
               .forEach(medioDePago -> excludedPaymentMethods.add(PreferencePaymentMethodRequest.builder().id(medioDePago).build())
       );
     }
-    var paymentMethods =
-            PreferencePaymentMethodsRequest.builder()
-                    .excludedPaymentMethods(excludedPaymentMethods)
-                    .installments(12)
-                    .build();
+    var paymentMethods = PreferencePaymentMethodsRequest.builder()
+            .excludedPaymentMethods(excludedPaymentMethods)
+            .installments(12)
+            .build();
     try {
       PreferenceRequest request = casePedido ? PreferenceRequest.builder()
               .externalReference(stringJson)
@@ -253,35 +228,30 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
       payment = paymentClient.get(idPayment);
       if (payment.getId() != null && payment.getExternalReference() != null) {
         var reciboMP = reciboService.getReciboPorIdMercadoPago(idPayment);
-        var convertedObject =
-            new Gson()
-                .fromJson(
-                    encryptUtils.decryptWithAES(payment.getExternalReference()), JsonObject.class);
-        var idUsuario = convertedObject.get(STRING_ID_USUARIO);
+        var payload = new Gson().fromJson(encryptUtils.decryptWithAES(payment.getExternalReference()), JsonObject.class);
+        var idUsuario = payload.get(STRING_ID_USUARIO);
         if (idUsuario == null) {
           throw new BusinessServiceException(
               messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
         }
-        var idSucursal = convertedObject.get("idSucursal");
+        var idSucursal = payload.get("idSucursal");
         if (idSucursal == null) {
           throw new BusinessServiceException(
               messageSource.getMessage(MENSAJE_PREFERENCE_TIPO_MOVIMIENTO_NO_SOPORTADO, null, Locale.getDefault()));
         }
         var cliente = clienteService.getClientePorIdUsuario(Long.parseLong(idUsuario.getAsString()));
         var sucursal = sucursalService.getSucursalPorId(Long.parseLong(idSucursal.getAsString()));
-        var movimiento = Movimiento.valueOf(convertedObject.get("movimiento").getAsString());
-        long idPedido;
+        var movimiento = Movimiento.valueOf(payload.get("movimiento").getAsString());
         switch (payment.getStatus()) {
           case APPROVED -> {
             if (reciboMP.isPresent()) {
-              log.warn(messageSource.getMessage(
-                              "mensaje_recibo_de_pago_ya_existente",
-                              new Object[]{payment.getId()},
-                              Locale.getDefault()));
+              log.warn(messageSource.getMessage("mensaje_recibo_de_pago_ya_existente",
+                      new Object[]{payment.getId()},
+                      Locale.getDefault()));
             } else {
               switch (movimiento) {
                 case PEDIDO -> {
-                  idPedido = Long.parseLong(String.valueOf(convertedObject.get("idPedido")));
+                  long idPedido = Long.parseLong(String.valueOf(payload.get("idPedido")));
                   pedidoService.cambiarFechaDeVencimiento(idPedido);
                   this.crearReciboDePago(payment, cliente.getCredencial(), cliente, sucursal);
                 }
@@ -296,8 +266,7 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
               throw new EntityNotFoundException(
                       messageSource.getMessage("mensaje_recibo_no_existente", null, Locale.getDefault()));
             if (!notaService.existsNotaDebitoPorRecibo(reciboMP.get())) {
-              this.crearNotaDebito(
-                      reciboMP.get().getIdRecibo(),
+              this.crearNotaDebito(reciboMP.get().getIdRecibo(),
                       reciboMP.get().getIdCliente(),
                       reciboMP.get().getSucursal().getIdSucursal(),
                       cliente.getCredencial());
@@ -309,10 +278,9 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
           case REJECTED -> log.warn(
                   messageSource.getMessage("mensaje_pago_rechazado", new Object[]{payment}, Locale.getDefault()));
           default -> {
-            log.warn(messageSource.getMessage(
-                            "mensaje_pago_status_no_soportado",
-                            new Object[]{payment.getId()},
-                            Locale.getDefault()));
+            log.warn(messageSource.getMessage("mensaje_pago_status_no_soportado",
+                    new Object[]{payment.getId()},
+                    Locale.getDefault()));
             messageSource.getMessage(MENSAJE_PAGO_NO_SOPORTADO, null, Locale.getDefault());
           }
         }
@@ -379,12 +347,11 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
     if (facturaElectronicaHabilitada) notaService.autorizarNota(notaGuardada);
   }
 
-  private Pedido crearPedidoPorPreference(
-      Sucursal sucursal,
-      Usuario usuario,
-      Cliente cliente,
-      List<ItemCarritoCompra> items,
-      TipoDeEnvio tipoDeEnvio) {
+  private Pedido crearPedidoPorPreference(Sucursal sucursal,
+                                          Usuario usuario,
+                                          Cliente cliente,
+                                          List<ItemCarritoCompra> items,
+                                          TipoDeEnvio tipoDeEnvio) {
     var pedido = new Pedido();
     pedido.setRecargoPorcentaje(BigDecimal.ZERO);
     pedido.setDescuentoPorcentaje(BigDecimal.ZERO);
@@ -392,11 +359,8 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
     pedido.setUsuario(usuario);
     pedido.setCliente(cliente);
     List<RenglonPedido> renglonesPedido = new ArrayList<>();
-    items.forEach(
-        i ->
-            renglonesPedido.add(
-                pedidoService.calcularRenglonPedido(
-                    i.getProducto().getIdProducto(), i.getCantidad())));
+    items.forEach(i ->
+            renglonesPedido.add(pedidoService.calcularRenglonPedido(i.getProducto().getIdProducto(), i.getCantidad())));
     pedido.setRenglones(renglonesPedido);
     pedido.setTipoDeEnvio(tipoDeEnvio);
     pedido.setFecha(LocalDateTime.now());
@@ -412,12 +376,11 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
       cantidad[i] = item.getCantidad();
       i++;
     }
-    var productosParaVerificarStockDTO =
-        ProductosParaVerificarStockDTO.builder()
-                .idProducto(idProducto)
-                .cantidad(cantidad)
-                .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
-                .build();
+    var productosParaVerificarStockDTO = ProductosParaVerificarStockDTO.builder()
+            .idProducto(idProducto)
+            .cantidad(cantidad)
+            .idSucursal(sucursalService.getSucursalPredeterminada().getIdSucursal())
+            .build();
     return productoService.getProductosSinStockDisponible(productosParaVerificarStockDTO).isEmpty();
   }
 
@@ -425,23 +388,21 @@ public class MercadoPagoPaymentServiceImpl implements PaymentService {
     if (payment.getStatusDetail() != null) {
       switch (payment.getStatusDetail()) {
         case "cc_rejected_card_disabled", "cc_rejected_insufficient_amount", "cc_rejected_other_reason" ->
-                throw new BusinessServiceException(
-                        messageSource.getMessage(
-                                payment.getStatusDetail(),
-                                new Object[]{payment.getPaymentMethodId()},
-                                Locale.getDefault()));
-        case "cc_rejected_call_for_authorize" -> throw new BusinessServiceException(
-                messageSource.getMessage(
-                        payment.getStatusDetail(),
+                throw new BusinessServiceException(messageSource.getMessage(payment.getStatusDetail(),
+                        new Object[]{payment.getPaymentMethodId()},
+                        Locale.getDefault()));
+        case "cc_rejected_call_for_authorize" ->
+                throw new BusinessServiceException(messageSource.getMessage(payment.getStatusDetail(),
                         new Object[]{payment.getPaymentMethodId(), payment.getTransactionAmount()},
                         Locale.getDefault()));
-        case "cc_rejected_invalid_installments" -> throw new BusinessServiceException(
-                messageSource.getMessage(
-                        payment.getStatusDetail(),
+        case "cc_rejected_invalid_installments" ->
+                throw new BusinessServiceException(messageSource.getMessage(payment.getStatusDetail(),
                         new Object[]{payment.getPaymentMethodId(), payment.getInstallments()},
                         Locale.getDefault()));
-        default -> throw new BusinessServiceException(
-                messageSource.getMessage(payment.getStatusDetail(), null, Locale.getDefault()));
+        default ->
+                throw new BusinessServiceException(messageSource.getMessage(payment.getStatusDetail(),
+                        null,
+                        Locale.getDefault()));
       }
     } else {
       throw new BusinessServiceException(payment.getStatusDetail());

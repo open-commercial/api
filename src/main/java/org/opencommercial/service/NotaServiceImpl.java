@@ -66,24 +66,23 @@ public class NotaServiceImpl implements NotaService {
 
   @Autowired
   @Lazy
-  public NotaServiceImpl(
-          NotaRepository<Nota> notaRepository,
-          NotaCreditoRepository notaCreditoRepository,
-          NotaDebitoRepository notaDebitoRepository,
-          FacturaService facturaService,
-          NotaService notaService,
-          ReciboService reciboService,
-          ClienteService clienteService,
-          ProveedorService proveedorService,
-          UsuarioService usuarioService,
-          ProductoService productoService,
-          SucursalService sucursalService,
-          CuentaCorrienteService cuentaCorrienteService,
-          PaymentService paymentService,
-          TaxationService taxationService,
-          MessageSource messageSource,
-          CustomValidator customValidator,
-          JasperReportsHandler jasperReportsHandler) {
+  public NotaServiceImpl(NotaRepository<Nota> notaRepository,
+                         NotaCreditoRepository notaCreditoRepository,
+                         NotaDebitoRepository notaDebitoRepository,
+                         FacturaService facturaService,
+                         NotaService notaService,
+                         ReciboService reciboService,
+                         ClienteService clienteService,
+                         ProveedorService proveedorService,
+                         UsuarioService usuarioService,
+                         ProductoService productoService,
+                         SucursalService sucursalService,
+                         CuentaCorrienteService cuentaCorrienteService,
+                         PaymentService paymentService,
+                         TaxationService taxationService,
+                         MessageSource messageSource,
+                         CustomValidator customValidator,
+                         JasperReportsHandler jasperReportsHandler) {
     this.notaRepository = notaRepository;
     this.notaCreditoRepository = notaCreditoRepository;
     this.notaDebitoRepository = notaDebitoRepository;
@@ -151,8 +150,7 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public Page<NotaCredito> buscarNotasCredito(
-    BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
+  public Page<NotaCredito> buscarNotasCredito(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
     return notaCreditoRepository.findAll(
         this.getBuilderNotaCredito(busquedaNotaCriteria, idUsuarioLoggedIn),
         this.getPageable(
@@ -164,8 +162,7 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public Page<NotaDebito> buscarNotasDebito(
-      BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
+  public Page<NotaDebito> buscarNotasDebito(BusquedaNotaCriteria busquedaNotaCriteria, long idUsuarioLoggedIn) {
     return notaDebitoRepository.findAll(
         this.getBuilderNotaDebito(busquedaNotaCriteria, idUsuarioLoggedIn),
         this.getPageable(
@@ -193,8 +190,7 @@ public class NotaServiceImpl implements NotaService {
     }
   }
 
-  private BooleanBuilder getBuilderNotaCredito(
-      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+  private BooleanBuilder getBuilderNotaCredito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     QNotaCredito qNotaCredito = QNotaCredito.notaCredito;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
@@ -257,8 +253,7 @@ public class NotaServiceImpl implements NotaService {
     return builder;
   }
 
-  private BooleanBuilder getBuilderNotaDebito(
-      BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
+  private BooleanBuilder getBuilderNotaDebito(BusquedaNotaCriteria criteria, long idUsuarioLoggedIn) {
     QNotaDebito qNotaDebito = QNotaDebito.notaDebito;
     BooleanBuilder builder = new BooleanBuilder();
     builder.and(
@@ -468,8 +463,7 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public long getSiguienteNumeroNotaDebitoCliente(
-      Long idSucursal, TipoDeComprobante tipoDeComprobante) {
+  public long getSiguienteNumeroNotaDebitoCliente(Long idSucursal, TipoDeComprobante tipoDeComprobante) {
     Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
     Long numeroNota =
         notaDebitoRepository.buscarMayorNumNotaDebitoClienteSegunTipo(
@@ -480,8 +474,7 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public long getSiguienteNumeroNotaCreditoCliente(
-      Long idSucursal, TipoDeComprobante tipoDeComprobante) {
+  public long getSiguienteNumeroNotaCreditoCliente(Long idSucursal, TipoDeComprobante tipoDeComprobante) {
     Sucursal sucursal = sucursalService.getSucursalPorId(idSucursal);
     Long numeroNota =
         notaCreditoRepository.buscarMayorNumNotaCreditoClienteSegunTipo(
@@ -703,8 +696,8 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public NotaCredito calcularNotaCreditoConFactura(
-      NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO, Usuario usuario) {
+  public NotaCredito calcularNotaCreditoConFactura(NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
+                                                   Usuario usuario) {
     NotaCredito notaCreditoNueva = new NotaCredito();
     Factura factura =
         facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
@@ -798,8 +791,8 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public NotaCredito calcularNotaCreditoSinFactura(
-      NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO, Usuario usuario) {
+  public NotaCredito calcularNotaCreditoSinFactura(NuevaNotaCreditoSinFacturaDTO nuevaNotaCreditoSinFacturaDTO,
+                                                   Usuario usuario) {
     NotaCredito notaCreditoNueva = new NotaCredito();
     if (nuevaNotaCreditoSinFacturaDTO.getDetalle() == null
         || nuevaNotaCreditoSinFacturaDTO.getDetalle().isEmpty()) {
@@ -871,8 +864,8 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public NotaDebito calcularNotaDebitoConRecibo(
-      NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO, Usuario usuario) {
+  public NotaDebito calcularNotaDebitoConRecibo(NuevaNotaDebitoDeReciboDTO nuevaNotaDebitoDeReciboDTO,
+                                                Usuario usuario) {
     NotaDebito notaDebitoCalculada = new NotaDebito();
     notaDebitoCalculada.setFecha(LocalDateTime.now());
     Recibo reciboRelacionado =
@@ -948,8 +941,8 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public NotaDebito calcularNotaDebitoSinRecibo(
-      NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO, Usuario usuario) {
+  public NotaDebito calcularNotaDebitoSinRecibo(NuevaNotaDebitoSinReciboDTO nuevaNotaDebitoSinReciboDTO,
+                                                Usuario usuario) {
     NotaDebito notaDebitoCalculada = new NotaDebito();
     notaDebitoCalculada.setFecha(LocalDateTime.now());
     notaDebitoCalculada.setSucursal(sucursalService.getSucursalPorId(nuevaNotaDebitoSinReciboDTO.getIdSucursal()));
@@ -1101,11 +1094,10 @@ public class NotaServiceImpl implements NotaService {
     };
   }
 
-  private void actualizarStock(
-      List<RenglonNotaCredito> renglonesNotaCredito,
-      Long idSucursal,
-      TipoDeOperacion tipoOperacion,
-      Movimiento movimiento) {
+  private void actualizarStock(List<RenglonNotaCredito> renglonesNotaCredito,
+                               Long idSucursal,
+                               TipoDeOperacion tipoOperacion,
+                               Movimiento movimiento) {
     HashMap<Long, BigDecimal> idsYCantidades = new HashMap<>();
     renglonesNotaCredito.forEach(r -> idsYCantidades.put(r.getIdProductoItem(), r.getCantidad()));
     productoService.actualizarStockNotaCredito(idsYCantidades, idSucursal, tipoOperacion, movimiento);
@@ -1174,8 +1166,9 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public List<RenglonNotaCredito> calcularRenglonesCreditoProducto(
-      TipoDeComprobante tipo, BigDecimal[] cantidad, Long[] idRenglonFactura) {
+  public List<RenglonNotaCredito> calcularRenglonesCreditoProducto(TipoDeComprobante tipo,
+                                                                   BigDecimal[] cantidad,
+                                                                   Long[] idRenglonFactura) {
     List<RenglonNotaCredito> renglonesNota = new ArrayList<>();
     RenglonNotaCredito renglonNota;
     if (cantidad.length == idRenglonFactura.length) {
@@ -1390,14 +1383,13 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public BigDecimal calcularIVANetoCredito(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal[] cantidades,
-      BigDecimal[] ivaPorcentajeRenglones,
-      BigDecimal[] ivaNetoRenglones,
-      BigDecimal ivaPorcentaje,
-      BigDecimal descuentoPorcentaje,
-      BigDecimal recargoPorcentaje) {
+  public BigDecimal calcularIVANetoCredito(TipoDeComprobante tipoDeComprobante,
+                                           BigDecimal[] cantidades,
+                                           BigDecimal[] ivaPorcentajeRenglones,
+                                           BigDecimal[] ivaNetoRenglones,
+                                           BigDecimal ivaPorcentaje,
+                                           BigDecimal descuentoPorcentaje,
+                                           BigDecimal recargoPorcentaje) {
     BigDecimal resultado = BigDecimal.ZERO;
     int indice = cantidades.length;
     for (int i = 0; i < indice; i++) {
@@ -1425,13 +1417,12 @@ public class NotaServiceImpl implements NotaService {
   }
 
   @Override
-  public BigDecimal calcularSubTotalBrutoCredito(
-      TipoDeComprobante tipoDeComprobante,
-      BigDecimal subTotal,
-      BigDecimal recargoNeto,
-      BigDecimal descuentoNeto,
-      BigDecimal iva105Neto,
-      BigDecimal iva21Neto) {
+  public BigDecimal calcularSubTotalBrutoCredito(TipoDeComprobante tipoDeComprobante,
+                                                 BigDecimal subTotal,
+                                                 BigDecimal recargoNeto,
+                                                 BigDecimal descuentoNeto,
+                                                 BigDecimal iva105Neto,
+                                                 BigDecimal iva21Neto) {
     BigDecimal resultado = subTotal.add(recargoNeto).subtract(descuentoNeto);
     if (tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_B
         || tipoDeComprobante == TipoDeComprobante.NOTA_CREDITO_C

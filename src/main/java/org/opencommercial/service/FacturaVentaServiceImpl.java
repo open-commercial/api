@@ -1,6 +1,7 @@
 package org.opencommercial.service;
 
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.extern.slf4j.Slf4j;
 import org.opencommercial.exception.BusinessServiceException;
 import org.opencommercial.exception.ServiceException;
@@ -29,6 +30,7 @@ import java.math.RoundingMode;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -58,21 +60,20 @@ public class FacturaVentaServiceImpl implements FacturaVentaService {
 
   @Autowired
   @Lazy
-  public FacturaVentaServiceImpl(
-      FacturaVentaRepository facturaVentaRepository,
-      TaxationService taxationService,
-      ReciboService reciboService,
-      EmailServiceFactory emailServiceFactory,
-      PedidoService pedidoService,
-      UsuarioService usuarioService,
-      ClienteService clienteService,
-      CuentaCorrienteService cuentaCorrienteService,
-      FacturaService facturaService,
-      TransportistaService transportistaService,
-      SucursalService sucursalService,
-      MessageSource messageSource,
-      CustomValidator customValidator,
-      JasperReportsHandler jasperReportsHandler) {
+  public FacturaVentaServiceImpl(FacturaVentaRepository facturaVentaRepository,
+                                 TaxationService taxationService,
+                                 ReciboService reciboService,
+                                 EmailServiceFactory emailServiceFactory,
+                                 PedidoService pedidoService,
+                                 UsuarioService usuarioService,
+                                 ClienteService clienteService,
+                                 CuentaCorrienteService cuentaCorrienteService,
+                                 FacturaService facturaService,
+                                 TransportistaService transportistaService,
+                                 SucursalService sucursalService,
+                                 MessageSource messageSource,
+                                 CustomValidator customValidator,
+                                 JasperReportsHandler jasperReportsHandler) {
     this.facturaVentaRepository = facturaVentaRepository;
     this.reciboService = reciboService;
     this.taxationService = taxationService;
@@ -219,7 +220,7 @@ public class FacturaVentaServiceImpl implements FacturaVentaService {
   }
 
   @Override
-  public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria) {
     return facturaVentaRepository.findAll(
         this.getBuilderVenta(criteria),
         facturaService.getPageable(
@@ -228,66 +229,42 @@ public class FacturaVentaServiceImpl implements FacturaVentaService {
             criteria.getSentido()));
   }
 
+  private <T> void addCondition(BooleanBuilder builder, T value, Function<T, BooleanExpression> condition) {
+    Optional.ofNullable(value).ifPresent(v -> builder.and(condition.apply(v)));
+  }
+
   @Override
   public BooleanBuilder getBuilderVenta(BusquedaFacturaVentaCriteria criteria) {
     QFacturaVenta qFacturaVenta = QFacturaVenta.facturaVenta;
-    BooleanBuilder builder = new BooleanBuilder();
     if (criteria.getIdSucursal() == null) {
       throw new BusinessServiceException(
-          messageSource.getMessage("mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
+              messageSource.getMessage("mensaje_busqueda_sin_sucursal", null, Locale.getDefault()));
     }
-    builder.and(
-        qFacturaVenta
-            .sucursal
-            .idSucursal
-            .eq(criteria.getIdSucursal())
-            .and(qFacturaVenta.eliminada.eq(false)));
-    if (criteria.getFechaDesde() != null || criteria.getFechaHasta() != null) {
-      if (criteria.getFechaDesde() != null && criteria.getFechaHasta() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
-        criteria.setFechaHasta(
-            criteria
-                .getFechaHasta()
-                .withHour(23)
-                .withMinute(59)
-                .withSecond(59)
-                .withNano(999999999));
-        builder.and(
-            qFacturaVenta.fecha.between(criteria.getFechaDesde(), criteria.getFechaHasta()));
-      } else if (criteria.getFechaDesde() != null) {
-        criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
-        builder.and(qFacturaVenta.fecha.after(criteria.getFechaDesde()));
-      } else if (criteria.getFechaHasta() != null) {
-        criteria.setFechaHasta(
-            criteria
-                .getFechaHasta()
-                .withHour(23)
-                .withMinute(59)
-                .withSecond(59)
-                .withNano(999999999));
-        builder.and(qFacturaVenta.fecha.before(criteria.getFechaHasta()));
-      }
+    BooleanBuilder builder = new BooleanBuilder()
+            .and(qFacturaVenta.sucursal.idSucursal.eq(criteria.getIdSucursal()))
+            .and(qFacturaVenta.eliminada.eq(false));
+    Optional.ofNullable(criteria.getFechaDesde()).ifPresent(fechaDesde -> {
+      criteria.setFechaDesde(fechaDesde.withHour(0).withMinute(0).withSecond(0).withNano(0));
+      builder.and(qFacturaVenta.fecha.goe(criteria.getFechaDesde()));
+    });
+    Optional.ofNullable(criteria.getFechaHasta()).ifPresent(fechaHasta -> {
+      criteria.setFechaHasta(fechaHasta.withHour(23).withMinute(59).withSecond(59).withNano(999999999));
+      builder.and(qFacturaVenta.fecha.loe(criteria.getFechaHasta()));
+    });
+    this.addCondition(builder, criteria.getIdCliente(), qFacturaVenta.cliente.idCliente::eq);
+    this.addCondition(builder, criteria.getTipoComprobante(), qFacturaVenta.tipoComprobante::eq);
+    this.addCondition(builder, criteria.getIdUsuario(), qFacturaVenta.usuario.idUsuario::eq);
+    this.addCondition(builder, criteria.getIdViajante(), qFacturaVenta.cliente.viajante.idUsuario::eq);
+    this.addCondition(builder, criteria.getNroPedido(), qFacturaVenta.pedido.nroPedido::eq);
+    this.addCondition(builder, criteria.getIdProducto(), id -> qFacturaVenta.renglones.any().idProductoItem.eq(id));
+    if (criteria.getNumSerie() != null && criteria.getNumFactura() != null) {
+      builder.and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
+              .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
     }
-    if (criteria.getIdCliente() != null)
-      builder.and(qFacturaVenta.cliente.idCliente.eq(criteria.getIdCliente()));
-    if (criteria.getTipoComprobante() != null)
-      builder.and(qFacturaVenta.tipoComprobante.eq(criteria.getTipoComprobante()));
-    if (criteria.getIdUsuario() != null)
-      builder.and(qFacturaVenta.usuario.idUsuario.eq(criteria.getIdUsuario()));
-    if (criteria.getIdViajante() != null)
-      builder.and(qFacturaVenta.cliente.viajante.idUsuario.eq(criteria.getIdViajante()));
-    if (criteria.getNumSerie() != null && criteria.getNumFactura() != null)
-      builder
-          .and(qFacturaVenta.numSerie.eq(criteria.getNumSerie()))
-          .and(qFacturaVenta.numFactura.eq(criteria.getNumFactura()));
-    if (criteria.getSerieRemito() != null && criteria.getNroRemito() != null)
-      builder
-          .and(qFacturaVenta.remito.serie.eq(criteria.getSerieRemito()))
-          .and(qFacturaVenta.remito.nroRemito.eq(criteria.getNroRemito()));
-    if (criteria.getNroPedido() != null)
-      builder.and(qFacturaVenta.pedido.nroPedido.eq(criteria.getNroPedido()));
-    if (criteria.getIdProducto() != null)
-      builder.and(qFacturaVenta.renglones.any().idProductoItem.eq(criteria.getIdProducto()));
+    if (criteria.getSerieRemito() != null && criteria.getNroRemito() != null) {
+      builder.and(qFacturaVenta.remito.serie.eq(criteria.getSerieRemito()))
+              .and(qFacturaVenta.remito.nroRemito.eq(criteria.getNroRemito()));
+    }
     return builder;
   }
 
@@ -400,24 +377,21 @@ public class FacturaVentaServiceImpl implements FacturaVentaService {
   }
 
   @Override
-  public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-    BigDecimal totalFacturado =
-        facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilderVenta(criteria));
+  public BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria) {
+    var totalFacturado = facturaVentaRepository.calcularTotalFacturadoVenta(this.getBuilderVenta(criteria));
     return (totalFacturado != null ? totalFacturado : BigDecimal.ZERO);
   }
 
   @Override
-  public BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
+  public BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria) {
     TipoDeComprobante[] tipoFactura = {TipoDeComprobante.FACTURA_A, TipoDeComprobante.FACTURA_B};
-    BigDecimal ivaVenta =
-        facturaVentaRepository.calcularIVAVenta(this.getBuilderVenta(criteria), tipoFactura);
+    var ivaVenta = facturaVentaRepository.calcularIVAVenta(this.getBuilderVenta(criteria), tipoFactura);
     return (ivaVenta != null ? ivaVenta : BigDecimal.ZERO);
   }
 
   @Override
-  public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn) {
-    BigDecimal gananciaTotal =
-        facturaVentaRepository.calcularGananciaTotal(this.getBuilderVenta(criteria));
+  public BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria) {
+    var gananciaTotal = facturaVentaRepository.calcularGananciaTotal(this.getBuilderVenta(criteria));
     return (gananciaTotal != null ? gananciaTotal : BigDecimal.ZERO);
   }
 

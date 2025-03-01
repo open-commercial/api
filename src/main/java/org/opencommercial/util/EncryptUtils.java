@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Locale;
 
 @Component
@@ -22,10 +23,10 @@ public class EncryptUtils {
   @Value("${AES_PRIVATE_KEY}")
   private String privateKey;
 
-  @Value("${AES_INIT_VECTOR}")
-  private String initVector;
-
   private final MessageSource messageSource;
+  private static final String AES_CBC_PKCS5 = "AES/CBC/NoPadding";
+  private static final String AES_ALGORITHM = "AES";
+  private static final String MD5_ALGORITHM = "MD5";
 
   @Autowired
   public EncryptUtils(MessageSource messageSource) {
@@ -33,26 +34,36 @@ public class EncryptUtils {
   }
 
   public String encryptWithAES(String valueToEncrypt) throws GeneralSecurityException {
-    IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(StandardCharsets.UTF_8));
-    SecretKeySpec skeySpec = new SecretKeySpec(privateKey.getBytes(StandardCharsets.UTF_8), "AES");
-    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-    cipher.init(1, skeySpec, iv);
-    byte[] encrypted = cipher.doFinal(valueToEncrypt.getBytes());
-    return DatatypeConverter.printBase64Binary(encrypted);
+    byte[] iv = new byte[16];
+    new SecureRandom().nextBytes(iv);
+    IvParameterSpec ivSpec = new IvParameterSpec(iv);
+    SecretKeySpec skeySpec = new SecretKeySpec(privateKey.getBytes(StandardCharsets.UTF_8), AES_ALGORITHM);
+    Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5);
+    cipher.init(Cipher.ENCRYPT_MODE, skeySpec, ivSpec);
+    byte[] encrypted = cipher.doFinal(valueToEncrypt.getBytes(StandardCharsets.UTF_8));
+    byte[] combined = new byte[iv.length + encrypted.length];
+    System.arraycopy(iv, 0, combined, 0, iv.length);
+    System.arraycopy(encrypted, 0, combined, iv.length, encrypted.length);
+    return DatatypeConverter.printBase64Binary(combined);
   }
 
   public String decryptWithAES(String encryptedValue) throws GeneralSecurityException {
-    IvParameterSpec iv = new IvParameterSpec(initVector.getBytes(StandardCharsets.UTF_8));
-    SecretKeySpec skeySpec = new SecretKeySpec(privateKey.getBytes(StandardCharsets.UTF_8), "AES");
-    Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
-    cipher.init(2, skeySpec, iv);
-    byte[] original = cipher.doFinal(DatatypeConverter.parseBase64Binary(encryptedValue));
-    return new String(original);
+    byte[] combined = DatatypeConverter.parseBase64Binary(encryptedValue);
+    byte[] iv = new byte[16];
+    byte[] encryptedBytes = new byte[combined.length - 16];
+    System.arraycopy(combined, 0, iv, 0, 16);
+    System.arraycopy(combined, 16, encryptedBytes, 0, encryptedBytes.length);
+    IvParameterSpec ivSpec = new IvParameterSpec(iv);
+    SecretKeySpec skeySpec = new SecretKeySpec(privateKey.getBytes(StandardCharsets.UTF_8), AES_ALGORITHM);
+    Cipher cipher = Cipher.getInstance(AES_CBC_PKCS5);
+    cipher.init(Cipher.DECRYPT_MODE, skeySpec, ivSpec);
+    byte[] original = cipher.doFinal(encryptedBytes);
+    return new String(original, StandardCharsets.UTF_8);
   }
 
   public String encryptWithMD5(String valueToEncrypt) {
     try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
+      MessageDigest md = MessageDigest.getInstance(MD5_ALGORITHM);
       byte[] array = md.digest(valueToEncrypt.getBytes());
       StringBuilder sb = new StringBuilder();
       for (byte anArray : array) {
