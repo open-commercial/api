@@ -25,7 +25,7 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         .from(qFacturaVenta)
         .where(builder)
         .fetch()
-        .get(0);
+        .getFirst();
   }
 
   @Override
@@ -42,7 +42,7 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         .from(qFacturaVenta)
         .where(builder)
         .fetch()
-        .get(0);
+        .getFirst();
   }
 
   @Override
@@ -56,6 +56,6 @@ public class FacturaVentaRepositoryImpl implements FacturaVentaRepositoryCustom 
         .leftJoin(qFacturaVenta.renglones, qRenglonFactura)
         .where(builder)
         .fetch()
-        .get(0);
+        .getFirst();
   }
 }

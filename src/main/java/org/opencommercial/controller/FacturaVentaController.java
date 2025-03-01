@@ -112,10 +112,8 @@ public class FacturaVentaController {
 
   @PostMapping("/api/v1/facturas/ventas/busqueda/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
-  public Page<FacturaVenta> buscarFacturaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
-                                               @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.buscarFacturaVenta(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
+  public Page<FacturaVenta> buscarFacturaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria) {
+    return facturaVentaService.buscarFacturaVenta(criteria);
   }
 
   @GetMapping("/api/v1/facturas/ventas/tipos/sucursales/{idSucursal}/clientes/{idCliente}")
@@ -156,27 +154,20 @@ public class FacturaVentaController {
   }
 
   @PostMapping("/api/v1/facturas/ventas/total-facturado/criteria")
-  public BigDecimal calcularTotalFacturadoVenta(
-      @RequestBody BusquedaFacturaVentaCriteria criteria,
-      @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.calcularTotalFacturadoVenta(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
+  public BigDecimal calcularTotalFacturadoVenta(@RequestBody BusquedaFacturaVentaCriteria criteria) {
+    return facturaVentaService.calcularTotalFacturadoVenta(criteria);
   }
 
   @PostMapping("/api/v1/facturas/ventas/total-iva/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularIvaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria,
-                                     @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.calcularIvaVenta(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
+  public BigDecimal calcularIvaVenta(@RequestBody BusquedaFacturaVentaCriteria criteria) {
+    return facturaVentaService.calcularIvaVenta(criteria);
   }
 
   @PostMapping("/api/v1/facturas/ventas/ganancia-total/criteria")
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
-  public BigDecimal calcularGananciaTotal(@RequestBody BusquedaFacturaVentaCriteria criteria,
-                                          @RequestHeader("Authorization") String authorizationHeader) {
-    Claims claims = authService.getClaimsDelToken(authorizationHeader);
-    return facturaVentaService.calcularGananciaTotal(criteria, claims.get(CLAIM_ID_USUARIO, Long.class));
+  public BigDecimal calcularGananciaTotal(@RequestBody BusquedaFacturaVentaCriteria criteria) {
+    return facturaVentaService.calcularGananciaTotal(criteria);
   }
 
   @GetMapping("/api/v1/facturas/ventas/email/{idFactura}")

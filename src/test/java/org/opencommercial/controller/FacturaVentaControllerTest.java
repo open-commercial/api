@@ -98,8 +98,8 @@ class FacturaVentaControllerTest {
     facturas.add(facturaVenta);
     Page<FacturaVenta> pagina = new PageImpl<>(facturas);
     BusquedaFacturaVentaCriteria criteria = BusquedaFacturaVentaCriteria.builder().build();
-    when(facturaVentaService.buscarFacturaVenta(criteria, 1L)).thenReturn(pagina);
-    assertEquals(pagina, facturaVentaController.buscarFacturaVenta(criteria, "head"));
+    when(facturaVentaService.buscarFacturaVenta(criteria)).thenReturn(pagina);
+    assertEquals(pagina, facturaVentaController.buscarFacturaVenta(criteria));
   }
 
   @Test
@@ -149,52 +149,36 @@ class FacturaVentaControllerTest {
   void shouldCalcularRenglonesVenta() {
     List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO = new ArrayList<>();
     List<RenglonFactura> renglonesFacturas = new ArrayList<>();
-    when(facturaService.calcularRenglones(
-            TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevosRenglonesFacturaDTO))
+    when(facturaService.calcularRenglones(TipoDeComprobante.FACTURA_A, Movimiento.VENTA, nuevosRenglonesFacturaDTO))
         .thenReturn(renglonesFacturas);
-    assertNotNull(
-        facturaVentaController.calcularRenglonesVenta(
-            nuevosRenglonesFacturaDTO, TipoDeComprobante.FACTURA_A));
+    assertNotNull(facturaVentaController.calcularRenglonesVenta(nuevosRenglonesFacturaDTO, TipoDeComprobante.FACTURA_A));
   }
 
   @Test
   void shouldCalcularTotalFacturadoVenta() {
     var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-    BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
-        BusquedaFacturaVentaCriteria.builder().build();
-    when(facturaVentaService.calcularTotalFacturadoVenta(busquedaFacturaVentaCriteria, 1L))
-        .thenReturn(BigDecimal.TEN);
-    assertEquals(
-        BigDecimal.TEN,
-        facturaVentaController.calcularTotalFacturadoVenta(
-            busquedaFacturaVentaCriteria, "headers"));
+    var busquedaFacturaVentaCriteria = BusquedaFacturaVentaCriteria.builder().build();
+    when(facturaVentaService.calcularTotalFacturadoVenta(busquedaFacturaVentaCriteria)).thenReturn(BigDecimal.TEN);
+    assertEquals(BigDecimal.TEN, facturaVentaController.calcularTotalFacturadoVenta(busquedaFacturaVentaCriteria));
   }
 
   @Test
   void shouldCalcularIvaVenta() {
     var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-    BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
-        BusquedaFacturaVentaCriteria.builder().build();
-    when(facturaVentaService.calcularIvaVenta(busquedaFacturaVentaCriteria, 1L))
-        .thenReturn(BigDecimal.TEN);
-    assertEquals(
-        BigDecimal.TEN,
-        facturaVentaController.calcularIvaVenta(busquedaFacturaVentaCriteria, "headers"));
+    var busquedaFacturaVentaCriteria = BusquedaFacturaVentaCriteria.builder().build();
+    when(facturaVentaService.calcularIvaVenta(busquedaFacturaVentaCriteria)).thenReturn(BigDecimal.TEN);
+    assertEquals(BigDecimal.TEN, facturaVentaController.calcularIvaVenta(busquedaFacturaVentaCriteria));
   }
 
   @Test
   void shouldCalcularGananciaTotal() {
     var claims = new DefaultClaims(Map.of("idUsuario", 1L, "roles", List.of("ADMINISTRADOR")));
     when(authService.getClaimsDelToken("headers")).thenReturn(claims);
-    BusquedaFacturaVentaCriteria busquedaFacturaVentaCriteria =
-        BusquedaFacturaVentaCriteria.builder().build();
-    when(facturaVentaService.calcularGananciaTotal(busquedaFacturaVentaCriteria, 1L))
-        .thenReturn(BigDecimal.TEN);
-    assertEquals(
-        BigDecimal.TEN,
-        facturaVentaController.calcularGananciaTotal(busquedaFacturaVentaCriteria, "headers"));
+    var busquedaFacturaVentaCriteria = BusquedaFacturaVentaCriteria.builder().build();
+    when(facturaVentaService.calcularGananciaTotal(busquedaFacturaVentaCriteria)).thenReturn(BigDecimal.TEN);
+    assertEquals(BigDecimal.TEN, facturaVentaController.calcularGananciaTotal(busquedaFacturaVentaCriteria));
   }
 
   @Test

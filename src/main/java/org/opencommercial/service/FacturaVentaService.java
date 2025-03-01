@@ -17,7 +17,7 @@ public interface FacturaVentaService {
 
   List<RenglonFactura> getRenglonesPedidoParaFacturar(long idPedido, TipoDeComprobante tipoDeComprobante);
 
-  Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  Page<FacturaVenta> buscarFacturaVenta(BusquedaFacturaVentaCriteria criteria);
 
   List<FacturaVenta> guardar(List<FacturaVenta> facturas, long idPedido, List<Recibo> recibos);
 
@@ -27,11 +27,11 @@ public interface FacturaVentaService {
 
   List<FacturaVenta> getFacturaVentaDelRemito(Remito remito);
 
-  BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularTotalFacturadoVenta(BusquedaFacturaVentaCriteria criteria);
 
-  BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularIvaVenta(BusquedaFacturaVentaCriteria criteria);
 
-  BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria, long idUsuarioLoggedIn);
+  BigDecimal calcularGananciaTotal(BusquedaFacturaVentaCriteria criteria);
 
   long calcularNumeroFacturaVenta(TipoDeComprobante tipoDeComprobante, long serie, long idSucursal);
 
