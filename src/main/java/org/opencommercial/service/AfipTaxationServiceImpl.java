@@ -342,7 +342,7 @@ public class AfipTaxationServiceImpl implements TaxationService {
     // Código de moneda del comprobante. Consultar método FEParamGetTiposMonedas para valores posibles
     detalle.setMonId("PES");
     // Cotización de la moneda informada. Para PES, pesos argentinos la misma debe ser 1
-    detalle.setMonCotiz(1);
+    detalle.setMonCotiz(1.0);
     arrayDetalle.getFECAEDetRequest().add(detalle);
     fecaeRequest.setFeDetReq(arrayDetalle);
     return fecaeRequest;
