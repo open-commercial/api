@@ -2,19 +2,16 @@ package org.opencommercial.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.*;
+import org.opencommercial.config.Views;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
-import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import org.opencommercial.config.Views;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
 
 @Entity
 @Table(name = "usuario")
@@ -22,10 +19,13 @@ import jakarta.validation.constraints.NotEmpty;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"username", "email"})
-@ToString(exclude = {"roles", "password"})
+@ToString(exclude = {
+        "password",
+        "passwordRecoveryKey",
+        "passwordRecoveryKeyExpirationDate"
+})
 @JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({
-  "token",
   "passwordRecoveryKey",
   "passwordRecoveryKeyExpirationDate",
   "eliminado"
