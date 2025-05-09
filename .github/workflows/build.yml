@@ -34,6 +34,9 @@ jobs:
           if echo "$RELEASES" | jq -e ".[] | select(.tag_name == \"$VERSION\")" > /dev/null; then
             echo "❌ Release with tag '$VERSION' already exists!"
             exit 1
+          else
+            echo "✅ Version $VERSION has not been released yet."
+          fi
           
       - name: Set up JDK
         uses: actions/setup-java@v4
