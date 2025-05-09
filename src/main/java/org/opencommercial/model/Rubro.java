@@ -1,20 +1,15 @@
 package org.opencommercial.model;
 
-import java.io.Serializable;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.opencommercial.config.Views;
 
-import jakarta.validation.constraints.NotEmpty;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "rubro")
@@ -22,7 +17,7 @@ import jakarta.validation.constraints.NotEmpty;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "nombre")
-@ToString
+@ToString(exclude = {"imagenHtml"})
 @JsonView(Views.Comprador.class)
 @JsonIgnoreProperties({"eliminado"})
 public class Rubro implements Serializable {

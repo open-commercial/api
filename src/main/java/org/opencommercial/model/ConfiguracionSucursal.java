@@ -3,19 +3,15 @@ package org.opencommercial.model;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.io.Serializable;
-import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-
-import com.fasterxml.jackson.annotation.JsonView;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import org.opencommercial.config.Views;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "configuracionsucursal")
@@ -23,7 +19,14 @@ import org.opencommercial.config.Views;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = "idConfiguracionSucursal")
-@ToString(exclude = "certificadoAfip")
+@ToString(exclude = {
+        "certificadoAfip",
+        "passwordCertificadoAfip",
+        "tokenWSAA",
+        "signTokenWSAA",
+        "fechaGeneracionTokenWSAA",
+        "fechaVencimientoTokenWSAA"
+})
 @JsonIgnoreProperties({
   "tokenWSAA",
   "signTokenWSAA",

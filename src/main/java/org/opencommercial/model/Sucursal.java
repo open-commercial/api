@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"nombre"})
-@ToString
+@ToString(exclude = "logo")
 @JsonView(Views.Comprador.class)
 @JsonIgnoreProperties("eliminada")
 public class Sucursal implements Serializable {
