@@ -96,11 +96,11 @@ public class UsuarioServiceImpl implements UsuarioService {
             credencial.getUsername(),
             encryptUtils.encryptWithMD5(credencial.getPassword()));
     if (usuario == null) {
-      throw new BusinessServiceException(messageSource.getMessage(
+      throw new UnauthorizedException(messageSource.getMessage(
         "mensaje_usuario_logInInvalido", null, Locale.getDefault()));
     }
     if (!usuario.isHabilitado()) {
-      throw new BusinessServiceException(messageSource.getMessage(
+      throw new UnauthorizedException(messageSource.getMessage(
         "mensaje_usuario_no_habilitado", null, Locale.getDefault()));
     }
     return usuario;

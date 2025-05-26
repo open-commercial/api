@@ -29,13 +29,23 @@ public class ExceptionControllerAdvice {
     this.messageSource = messageSource;
   }
 
-  private String log(Exception ex) {
+  private String logError(Exception ex) {
     String mensaje =
         ex.getMessage()
             + "\n(Transaction ID: "
             + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
             + ")";
     log.error(mensaje, ex);
+    return ex.getMessage();
+  }
+
+  private String logWarn(Exception ex) {
+    String mensaje =
+            ex.getMessage()
+                    + "\n(Transaction ID: "
+                    + LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    + ")";
+    log.warn(mensaje, ex);
     return ex.getMessage();
   }
 
@@ -58,30 +68,31 @@ public class ExceptionControllerAdvice {
   @ExceptionHandler(ServiceException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public String handleServiceException(ServiceException ex) {
-    return this.log(ex);
+    return this.logError(ex);
   }
 
   @ExceptionHandler(UnauthorizedException.class)
   @ResponseStatus(HttpStatus.UNAUTHORIZED)
   public String handleUnauthorizedException(UnauthorizedException ex) {
-    return this.log(ex);
+    return this.logWarn(ex);
   }
 
   @ExceptionHandler(ForbiddenException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public String handleForbiddenException(ForbiddenException ex) {
-    return this.log(ex);
+    return this.logWarn(ex);
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public String handleEntityNotFoundException(EntityNotFoundException ex) {
-    return this.log(ex);
+    return this.logError(ex);
   }
 
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public String handleException(Exception ex) {
-    return log(new Exception(messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()), ex));
+    return this.logError(
+            new Exception(messageSource.getMessage("mensaje_error_request", null, Locale.getDefault()), ex));
   }
 }
