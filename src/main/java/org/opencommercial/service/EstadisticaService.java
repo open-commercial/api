@@ -2,6 +2,7 @@ package org.opencommercial.service;
 
 import org.opencommercial.model.dto.EntidadMontoDTO;
 import org.opencommercial.model.dto.PeriodoMontoDTO;
+
 import java.util.List;
 
 public interface EstadisticaService {
@@ -18,8 +19,8 @@ public interface EstadisticaService {
 
   List<PeriodoMontoDTO> getMontoNetoVendidoPorMes(long idSucursal, int anio);
 
-  List<EntidadMontoDTO> getMontoNetoVendidoPorRubroPorAnio(long idSucursal, int anio);
+  List<EntidadMontoDTO> getMontoNetoVendidoPorClientePorAnio(long idSucursal, int anio);
 
-  List<EntidadMontoDTO> getMontoNetoVendidoPorRubroPorMes(long idSucursal, int anio, int mes);
+  List<EntidadMontoDTO> getMontoNetoVendidoPorClientePorMes(long idSucursal, int anio, int mes);
 
 }

@@ -1,14 +1,15 @@
 package org.opencommercial.repository;
 
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import org.opencommercial.model.FacturaVenta;
 import org.opencommercial.model.Remito;
 import org.opencommercial.model.TipoDeComprobante;
 import org.opencommercial.repository.projection.EntidadMontoProjection;
 import org.opencommercial.repository.projection.PeriodoMontoProjection;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+
 import java.util.List;
 
 public interface FacturaVentaRepository extends
@@ -38,7 +39,7 @@ public interface FacturaVentaRepository extends
           "FROM FacturaVenta fv " +
           "WHERE fv.eliminada = false AND fv.sucursal.idSucursal = :idSucursal " +
           "GROUP BY periodo " +
-          "ORDER BY periodo desc")
+          "ORDER BY periodo DESC")
   List<PeriodoMontoProjection> getMontoNetoVendidoPorAnio(long idSucursal, Pageable pageable);
 
   @Query("SELECT month(fv.fecha) as periodo, round(sum(fv.total)) as monto " +
@@ -54,7 +55,7 @@ public interface FacturaVentaRepository extends
           "AND year(fv.fecha) = :anio AND fv.sucursal.idSucursal = :idSucursal " +
           "GROUP BY c.idCliente " +
           "ORDER BY monto desc")
-  List<EntidadMontoProjection> getMontoNetoVendidoPorRubroPorAnio(long idSucursal, int anio);
+  List<EntidadMontoProjection> getMontoNetoVendidoPorClientePorAnio(long idSucursal, int anio);
 
   @Query("SELECT c.nombreFiscal as entidad, round(sum(fv.total)) as monto " +
           "FROM FacturaVenta fv INNER JOIN fv.cliente c " +
@@ -62,5 +63,5 @@ public interface FacturaVentaRepository extends
           "AND year(fv.fecha) = :anio AND month(fv.fecha) = :mes AND fv.sucursal.idSucursal = :idSucursal " +
           "GROUP BY c.idCliente " +
           "ORDER BY monto desc")
-  List<EntidadMontoProjection> getMontoNetoVendidoPorRubroPorMes(long idSucursal, int anio, int mes);
+  List<EntidadMontoProjection> getMontoNetoVendidoPorClientePorMes(long idSucursal, int anio, int mes);
 }

@@ -1,11 +1,11 @@
 package org.opencommercial.repository;
 
+import org.opencommercial.model.FacturaCompra;
 import org.opencommercial.repository.projection.EntidadMontoProjection;
 import org.opencommercial.repository.projection.PeriodoMontoProjection;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
-import org.opencommercial.model.FacturaCompra;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public interface FacturaCompraRepository extends
           "FROM FacturaCompra fc " +
           "WHERE fc.eliminada = false AND fc.sucursal.idSucursal = :idSucursal " +
           "GROUP BY periodo " +
-          "ORDER BY periodo desc")
+          "ORDER BY periodo DESC")
   List<PeriodoMontoProjection> getMontoNetoCompradoPorAnio(long idSucursal, Pageable pageable);
 
   @Query("SELECT month(fc.fecha) as periodo, round(sum(fc.total)) as monto " +
