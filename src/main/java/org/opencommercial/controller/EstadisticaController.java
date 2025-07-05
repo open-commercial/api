@@ -24,28 +24,28 @@ public class EstadisticaController {
   }
 
   @GetMapping("/api/v1/estadisticas/compras/monto-neto-mensual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<PeriodoMontoDTO> getMontoNetoCompradoPorMes(@PathVariable long idSucursal,
                                                           @RequestParam int anio) {
     return estadisticaService.getMontoNetoCompradoPorMes(idSucursal, anio);
   }
 
   @GetMapping("/api/v1/estadisticas/compras/monto-neto-anual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<PeriodoMontoDTO> getMontoNetoCompradoPorAnio(@PathVariable long idSucursal,
                                                            @RequestParam(required = false, defaultValue = "5") int limite) {
     return estadisticaService.getMontoNetoCompradoPorAnio(idSucursal, limite);
   }
 
   @GetMapping("/api/v1/estadisticas/compras/proveedores/monto-neto-anual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorAnio(@PathVariable long idSucursal,
                                                                        @RequestParam int anio) {
     return estadisticaService.getMontoNetoCompradoPorProveedorPorAnio(idSucursal, anio);
   }
 
   @GetMapping("/api/v1/estadisticas/compras/proveedores/monto-neto-mensual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<EntidadMontoDTO> getMontoNetoCompradoPorProveedorPorMes(@PathVariable long idSucursal,
                                                                       @RequestParam int anio,
                                                                       @RequestParam int mes) {
@@ -53,28 +53,28 @@ public class EstadisticaController {
   }
 
   @GetMapping("/api/v1/estadisticas/ventas/monto-neto-anual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<PeriodoMontoDTO> getMontoNetoVendidoPorAnio(@PathVariable long idSucursal,
                                                           @RequestParam(required = false, defaultValue = "5") int limite) {
     return estadisticaService.getMontoNetoVendidoPorAnio(idSucursal, limite);
   }
 
   @GetMapping("/api/v1/estadisticas/ventas/monto-neto-mensual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<PeriodoMontoDTO> getMontoNetoVendidoPorMes(@PathVariable long idSucursal,
                                                          @RequestParam int anio) {
     return estadisticaService.getMontoNetoVendidoPorMes(idSucursal, anio);
   }
 
   @GetMapping("/api/v1/estadisticas/ventas/clientes/monto-neto-anual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<EntidadMontoDTO> getMontoNetoVendidoPorClientePorAnio(@PathVariable long idSucursal,
                                                                     @RequestParam int anio) {
     return estadisticaService.getMontoNetoVendidoPorClientePorAnio(idSucursal, anio);
   }
 
   @GetMapping("/api/v1/estadisticas/ventas/clientes/monto-neto-mensual/sucursales/{idSucursal}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR})
   public List<EntidadMontoDTO> getMontoNetoVendidoPorClientePorMes(@PathVariable long idSucursal,
                                                                    @RequestParam int anio,
                                                                    @RequestParam int mes) {
