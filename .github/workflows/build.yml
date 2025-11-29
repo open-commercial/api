@@ -1,10 +1,12 @@
 name: Open Commercial CI
+
 on:
   push:
     branches:
       - master
   pull_request:
     types: [ opened, synchronize, reopened ]
+    
 jobs:
   build-analyze-deploy:
     name: Build, analyze, dockerize, and publish
@@ -15,49 +17,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Extract version from pom.xml
-        id: extract_version
-        run: |
-          VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>(.*)<\/version>.*/\1/')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Check if version already exists as a GitHub release
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VERSION: ${{ steps.extract_version.outputs.version }}
-        run: |
-          echo "Checking if version $VERSION exists as a GitHub release..."
-
-          RELEASES=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            "https://api.github.com/repos/${{ github.repository }}/releases")
-
-          if echo "$RELEASES" | jq -e ".[] | select(.tag_name == \"$VERSION\")" > /dev/null; then
-            echo "❌ Release with tag '$VERSION' already exists!"
-            exit 1
-          else
-            echo "✅ Version $VERSION has not been released yet."
-          fi
-          
       - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: 21
           distribution: corretto
-          
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-          
-      - name: Cache Maven packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-          
+
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -72,28 +37,46 @@ jobs:
           MERCADOPAGO_ACCESS_TOKEN: ""
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=open-commercial -Dsonar.projectKey=api:api
         
-      - name: Generate changelog
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: Bullrich/generate-release-changelog@master
-        id: changelog
-        env:
-          REPO: ${{ github.repository }}
-          
       - name: Get release version
+        id: extract_version
+        run: |
+          RELEASE_VERSION=$(grep -m 1 '<version>' pom.xml | sed -E 's/.*<version>(.*)<\/version>.*/\1/')
+          echo "version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create tag
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          echo "RELEASE_VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)" >> $GITHUB_ENV
-          
-      - name: Create Release
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"          
+          echo "Tagging version: ${RELEASE_VERSION}"
+          git tag "${RELEASE_VERSION}"
+          git push origin "${RELEASE_VERSION}"
+
+      - name: Generate changelog
         if: ${{ github.ref == 'refs/heads/master' }}
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |          
+          PREV_TAG=$(git tag --sort=-creatordate | sed -n '2p')
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          echo "Previous tag: $PREV_TAG"
+          echo "Current tag: ${RELEASE_VERSION}"          
+          echo "" >> CHANGELOG.md
+          git log ${PREV_TAG}..HEAD \
+            --pretty=format:"- [%h](https://github.com/${{ github.repository }}/commit/%h) %s" \
+            >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          cat CHANGELOG.md
+          
+      - name: Create release
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_VERSION }}
-          release_name: ${{ env.RELEASE_VERSION }}
-          body: |
-            ${{ steps.changelog.outputs.changelog }}
+          name: ${{ env.RELEASE_VERSION }}
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             
       - name: Set up QEMU
         if: ${{ github.ref == 'refs/heads/master' }}
