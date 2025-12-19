@@ -20,4 +20,6 @@ public interface AuthService {
   void validarRecaptcha(String recaptcha);
 
   void excluirTokenAcceso(String authorizationHeader);
+
+  boolean usuarioTieneRoles(Claims claims);
 }

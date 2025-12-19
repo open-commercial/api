@@ -1120,8 +1120,9 @@ public class ProductoServiceImpl implements ProductoService {
     Set<CantidadEnSucursal> cantidadesEnSucursales = new HashSet<>();
     producto.getCantidadProducto().getCantidadEnSucursales()
             .stream()
-            .filter(cantidadEnSucursal -> (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
-                    || cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursalSeleccionada))
+            .filter(cantidadEnSucursal ->
+                    (cantidadEnSucursal.getSucursal().getConfiguracionSucursal().isComparteStock()
+                            || cantidadEnSucursal.getSucursal().getIdSucursal() == idSucursalSeleccionada))
             .forEach(cantidadesEnSucursales::add);
     producto.getCantidadProducto().setCantidadEnSucursalesDisponible(cantidadesEnSucursales);
     producto.getCantidadProducto()

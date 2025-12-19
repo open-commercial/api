@@ -36,6 +36,8 @@ public class AuthServiceImpl implements AuthService {
   private static final String URL_RECAPTCHA = "https://www.google.com/recaptcha/api/siteverify";
   private static final String BEARER_TOKEN_PREFIX = "Bearer";
   private static final String ALGORITHM_SHA512 = "HmacSHA512";
+  private static final String CLAIM_ROLES = "roles";
+  private static final String CLAIM_ID_USUARIO = "idUsuario";
   private final MessageSource messageSource;
 
   @Value("${RECAPTCHA_SECRET_KEY}")
@@ -66,8 +68,8 @@ public class AuthServiceImpl implements AuthService {
             .issuedAt(Date.from(zdtNow.toInstant()))
             .expiration(Date.from(zdtExpiration.toInstant()))
             .signWith(privateKey, Jwts.SIG.HS512)
-            .claim("idUsuario", idUsuario)
-            .claim("roles", rolesDeUsuario)
+            .claim(CLAIM_ID_USUARIO, idUsuario)
+            .claim(CLAIM_ROLES, rolesDeUsuario)
             .compact();
   }
 
@@ -138,5 +140,11 @@ public class AuthServiceImpl implements AuthService {
     if (tokenAccesoExcluidoRepository.findByToken(token) == null) {
       tokenAccesoExcluidoRepository.save(TokenAccesoExcluido.builder().token(token).build());
     }
+  }
+
+  @Override
+  public boolean usuarioTieneRoles(Claims claims) {
+    var rolesDelUsuario = claims.get(CLAIM_ROLES, List.class);
+    return rolesDelUsuario != null && !rolesDelUsuario.isEmpty();
   }
 }

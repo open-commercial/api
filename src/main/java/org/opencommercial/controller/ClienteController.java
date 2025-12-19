@@ -2,10 +2,6 @@ package org.opencommercial.controller;
 
 import io.jsonwebtoken.Claims;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.*;
 import org.opencommercial.aspect.AccesoRolesPermitidos;
 import org.opencommercial.exception.ForbiddenException;
 import org.opencommercial.model.Cliente;
@@ -18,6 +14,10 @@ import org.opencommercial.service.AuthService;
 import org.opencommercial.service.ClienteService;
 import org.opencommercial.service.UbicacionService;
 import org.opencommercial.service.UsuarioService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -182,12 +182,6 @@ public class ClienteController {
   @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO})
   public void setClientePredeterminado(@PathVariable long idCliente) {
     clienteService.setClientePredeterminado(clienteService.getClienteNoEliminadoPorId(idCliente));
-  }
-
-  @GetMapping("/api/v1/clientes/pedidos/{idPedido}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR, Rol.VIAJANTE})
-  public Cliente getClientePorIdPedido(@PathVariable long idPedido) {
-    return clienteService.getClientePorIdPedido(idPedido);
   }
 
   @GetMapping("/api/v1/clientes/usuarios/{idUsuario}")

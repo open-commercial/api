@@ -104,20 +104,13 @@ public class FacturaServiceImpl implements FacturaService {
     if (pagina == null) pagina = 0;
     String ordenDefault = "fecha";
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(
-          pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+      return PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
     } else {
-      switch (sentido) {
-        case "ASC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
-        case "DESC":
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default:
-          return PageRequest.of(
-              pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
-      }
+      return switch (sentido) {
+        case "ASC" -> PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.ASC, ordenarPor));
+        case "DESC" -> PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenarPor));
+        default -> PageRequest.of(pagina, TAMANIO_PAGINA_DEFAULT, Sort.by(Sort.Direction.DESC, ordenDefault));
+      };
     }
   }
 
@@ -130,9 +123,7 @@ public class FacturaServiceImpl implements FacturaService {
 
   private void calcularCantidadDeArticulos(Factura factura) {
     factura.setCantidadArticulos(BigDecimal.ZERO);
-    factura
-        .getRenglones()
-        .forEach(
+    factura.getRenglones().forEach(
             r -> factura.setCantidadArticulos(factura.getCantidadArticulos().add(r.getCantidad())));
   }
 
@@ -194,8 +185,7 @@ public class FacturaServiceImpl implements FacturaService {
           messageSource.getMessage(
               "mensaje_factura_compra_fecha_incorrecta", null, Locale.getDefault()));
     }
-    if (factura instanceof FacturaVenta) {
-      FacturaVenta facturaVenta = (FacturaVenta) factura;
+    if (factura instanceof FacturaVenta facturaVenta) {
       if (facturaVenta.getCae() != 0L) {
         throw new BusinessServiceException(
             messageSource.getMessage("mensaje_factura_venta_cae", null, Locale.getDefault()));
@@ -276,8 +266,7 @@ public class FacturaServiceImpl implements FacturaService {
   }
 
   @Override
-  public BigDecimal calcularPrecioUnitario(
-      Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto) {
+  public BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto) {
     BigDecimal ivaResultado;
     BigDecimal resultado = BigDecimal.ZERO;
     if (movimiento == Movimiento.COMPRA) {
@@ -307,22 +296,19 @@ public class FacturaServiceImpl implements FacturaService {
   }
 
   @Override
-  public List<RenglonFactura> calcularRenglones(
-      TipoDeComprobante tipoDeComprobante,
-      Movimiento movimiento,
-      List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO) {
+  public List<RenglonFactura> calcularRenglones(TipoDeComprobante tipoDeComprobante, Movimiento movimiento,
+                                                List<NuevoRenglonFacturaDTO> nuevosRenglonesFacturaDTO) {
     nuevosRenglonesFacturaDTO.forEach(customValidator::validar);
     List<RenglonFactura> renglones = new ArrayList<>();
     nuevosRenglonesFacturaDTO.forEach(
-        nuevoRenglonFacturaDTO -> {
-          if (movimiento.equals(Movimiento.VENTA)) {
-            nuevoRenglonFacturaDTO.setRenglonMarcado(
-                this.marcarRenglonParaAplicarBonificacion(
-                    nuevoRenglonFacturaDTO.getIdProducto(), nuevoRenglonFacturaDTO.getCantidad()));
-          }
-          renglones.add(
-              this.calcularRenglon(tipoDeComprobante, movimiento, nuevoRenglonFacturaDTO));
-        });
+            nuevoRenglonFacturaDTO -> {
+              if (movimiento.equals(Movimiento.VENTA)) {
+                nuevoRenglonFacturaDTO.setRenglonMarcado(
+                        this.marcarRenglonParaAplicarBonificacion(
+                                nuevoRenglonFacturaDTO.getIdProducto(), nuevoRenglonFacturaDTO.getCantidad()));
+              }
+              renglones.add(this.calcularRenglon(tipoDeComprobante, movimiento, nuevoRenglonFacturaDTO));
+            });
     return renglones;
   }
 
@@ -370,19 +356,15 @@ public class FacturaServiceImpl implements FacturaService {
   }
 
   @Override
-  public Resultados calcularResultadosFactura(
-      NuevosResultadosComprobanteDTO nuevosResultadosComprobante) {
+  public Resultados calcularResultadosFactura(NuevosResultadosComprobanteDTO nuevosResultadosComprobante) {
     Resultados resultados = new Resultados();
     // subTotal
-    resultados.setSubTotal(
-        CalculosComprobante.calcularSubTotal(nuevosResultadosComprobante.getImporte()));
+    resultados.setSubTotal(CalculosComprobante.calcularSubTotal(nuevosResultadosComprobante.getImporte()));
     // Descuentos y Recargos
-    resultados.setDescuentoNeto(
-        CalculosComprobante.calcularProporcion(
-            resultados.getSubTotal(), nuevosResultadosComprobante.getDescuentoPorcentaje()));
-    resultados.setRecargoNeto(
-        CalculosComprobante.calcularProporcion(
-            resultados.getSubTotal(), nuevosResultadosComprobante.getRecargoPorcentaje()));
+    resultados.setDescuentoNeto(CalculosComprobante.calcularProporcion(resultados.getSubTotal(),
+            nuevosResultadosComprobante.getDescuentoPorcentaje()));
+    resultados.setRecargoNeto(CalculosComprobante.calcularProporcion(resultados.getSubTotal(),
+            nuevosResultadosComprobante.getRecargoPorcentaje()));
     // IVA
     if (nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_A
         || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
@@ -392,8 +374,7 @@ public class FacturaServiceImpl implements FacturaService {
       if (nuevosResultadosComprobante.getIvaNetos().length != longitudDeArraysValido
           || nuevosResultadosComprobante.getIvaPorcentajes().length != longitudDeArraysValido) {
         throw new BusinessServiceException(
-            messageSource.getMessage(
-                "mensaje_factura_renglones_parametros_no_validos", null, Locale.getDefault()));
+            messageSource.getMessage("mensaje_factura_renglones_parametros_no_validos", null, Locale.getDefault()));
       }
       resultados.setIva21Neto(
           this.calcularIvaNetoFactura(
@@ -423,8 +404,7 @@ public class FacturaServiceImpl implements FacturaService {
     resultados.setSubTotalBruto(
         CalculosComprobante.calcularSubTotalBruto(
             (nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.FACTURA_B
-                || nuevosResultadosComprobante.getTipoDeComprobante()
-                    == TipoDeComprobante.PRESUPUESTO),
+                || nuevosResultadosComprobante.getTipoDeComprobante() == TipoDeComprobante.PRESUPUESTO),
             resultados.getSubTotal(),
             resultados.getRecargoNeto(),
             resultados.getDescuentoNeto(),

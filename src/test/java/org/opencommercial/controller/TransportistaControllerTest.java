@@ -2,11 +2,14 @@ package org.opencommercial.controller;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.modelmapper.ModelMapper;
 import org.opencommercial.model.Transportista;
 import org.opencommercial.service.TransportistaServiceImpl;
+import org.opencommercial.service.UbicacionServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {TransportistaController.class})
 class TransportistaControllerTest {
 
-  @Mock TransportistaServiceImpl transportistaService;
+  @MockBean TransportistaServiceImpl transportistaService;
+  @MockBean UbicacionServiceImpl ubicacionService;
+  @MockBean ModelMapper modelMapper;
 
-  @InjectMocks TransportistaController transportistaController;
+  @Autowired TransportistaController transportistaController;
 
   @Test
   void shouldGetTransportistaPorId() {

@@ -2,14 +2,15 @@ package org.opencommercial.controller;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.opencommercial.model.Pedido;
 import org.opencommercial.model.RenglonPedido;
 import org.opencommercial.model.Resultados;
 import org.opencommercial.model.dto.NuevoRenglonPedidoDTO;
 import org.opencommercial.model.dto.NuevosResultadosComprobanteDTO;
-import org.opencommercial.service.PedidoServiceImpl;
+import org.opencommercial.service.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -20,11 +21,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = {PedidoController.class})
 class PedidoControllerTest {
 
-  @Mock PedidoServiceImpl pedidoService;
+  @MockBean PedidoServiceImpl pedidoService;
+  @MockBean UsuarioServiceImpl usuarioService;
+  @MockBean SucursalServiceImpl sucursalService;
+  @MockBean ClienteServiceImpl clienteService;
+  @MockBean ReciboServiceImpl reciboService;
+  @MockBean AuthServiceImpl authService;
 
-  @InjectMocks PedidoController pedidoController;
+  @Autowired PedidoController pedidoController;
 
   @Test
   void shouldGetPedidoPorId() {
