@@ -9,9 +9,9 @@ import org.opencommercial.model.Ubicacion;
 import org.opencommercial.repository.TransportistaRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,9 +22,9 @@ import static org.mockito.Mockito.*;
     classes = {TransportistaServiceImpl.class, CustomValidator.class, MessageSource.class})
 class TransportistaServiceImplTest {
 
-  @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean TransportistaRepository transportistaRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean UbicacionServiceImpl ubicacionService;
+  @MockitoBean TransportistaRepository transportistaRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired TransportistaServiceImpl transportistaService;
 

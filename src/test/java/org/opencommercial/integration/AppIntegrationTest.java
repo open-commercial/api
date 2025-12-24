@@ -1,7 +1,7 @@
 package org.opencommercial.integration;
 
-import jakarta.validation.constraints.NotNull;
 import org.apache.commons.io.IOUtils;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.opencommercial.integration.model.*;
@@ -9,8 +9,9 @@ import org.opencommercial.model.*;
 import org.opencommercial.model.criteria.*;
 import org.opencommercial.model.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.MessageSource;
 import org.springframework.core.ParameterizedTypeReference;
@@ -24,12 +25,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestClientResponseException;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -39,6 +41,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureTestRestTemplate
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @TestPropertySource(locations = "/application.properties")
 class AppIntegrationTest {
@@ -51,7 +54,7 @@ class AppIntegrationTest {
 
   @Container
   @ServiceConnection
-  static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.3.0");
+  static MySQLContainer mySQLContainer = new MySQLContainer("mysql:8.3.0");
 
   void iniciarSesionComoAdministrador() {
     this.token = restTemplate.postForEntity("/api/v1/login",
@@ -74,13 +77,14 @@ class AppIntegrationTest {
     restTemplate.getRestTemplate()
                 .setErrorHandler(
                     new ResponseErrorHandler() {
+
                       @Override
-                      public boolean hasError(@NotNull ClientHttpResponse response) throws IOException {
+                      public boolean hasError(@NonNull ClientHttpResponse response) throws IOException {
                         return (response.getStatusCode().is4xxClientError() || response.getStatusCode().is5xxServerError());
                       }
 
                       @Override
-                      public void handleError(@NotNull ClientHttpResponse response) throws IOException {
+                      public void handleError(@NonNull URI url, @NonNull HttpMethod method, @NonNull ClientHttpResponse response) throws IOException {
                         String mensaje = IOUtils.toString(response.getBody(), Charset.defaultCharset());
                         throw new RestClientResponseException(
                                 mensaje,
@@ -133,8 +137,9 @@ class AppIntegrationTest {
     assertEquals(nuevaSucursal.getTelefono(), sucursalRecuperada.getTelefono());
     assertEquals(nuevaSucursal.getUbicacion().getIdLocalidad(), sucursalRecuperada.getUbicacion().getIdLocalidad());
     ConfiguracionSucursal configuracionSucursal =
-        restTemplate.getForObject("/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
-            ConfiguracionSucursal.class);
+            restTemplate.getForObject(
+                    "/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+                    ConfiguracionSucursal.class);
     configuracionSucursal.setPuntoDeRetiro(true);
     configuracionSucursal.setPredeterminada(true);
     restTemplate.put("/api/v1/configuraciones-sucursal", configuracionSucursal);
@@ -147,8 +152,9 @@ class AppIntegrationTest {
     configuracionSucursal.setNroPuntoDeVentaAfip(2);
     restTemplate.put("/api/v1/configuraciones-sucursal", configuracionSucursal);
     ConfiguracionSucursal configuracionSucursalActualizada =
-        restTemplate.getForObject("/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
-            ConfiguracionSucursal.class);
+            restTemplate.getForObject(
+                    "/api/v1/configuraciones-sucursal/" + sucursalRecuperada.getIdSucursal(),
+                    ConfiguracionSucursal.class);
     assertEquals(configuracionSucursal, configuracionSucursalActualizada);
   }
 
@@ -1712,6 +1718,7 @@ class AppIntegrationTest {
             "/api/v1/facturas/ventas/renglones/pedidos/" + pedidosRecuperados.getFirst().getIdPedido()
                     + "?tipoDeComprobante=FACTURA_X",
             RenglonFactura[].class));
+    assertNotNull(renglones);
     assertEquals("Corta Papas - Vegetales", renglones.getFirst().getDescripcionItem());
     assertEquals(new BigDecimal("50.000000000000000"), renglones.getFirst().getCantidad());
     assertEquals(new BigDecimal("1000.000000000000000"), renglones.getFirst().getPrecioUnitario());

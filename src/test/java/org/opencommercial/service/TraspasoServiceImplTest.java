@@ -16,11 +16,11 @@ import org.opencommercial.repository.TraspasoRepository;
 import org.opencommercial.util.CustomValidator;
 import org.opencommercial.util.JasperReportsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -36,13 +36,13 @@ import static org.mockito.Mockito.*;
         classes = {CustomValidator.class, TraspasoServiceImpl.class, MessageSource.class, JasperReportsHandler.class})
 class TraspasoServiceImplTest {
 
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean SucursalServiceImpl sucursalService;
-  @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean PedidoServiceImpl pedidoService;
-  @MockBean TraspasoRepository traspasoRepository;
-  @MockBean RenglonTraspasoRepository renglonTraspasoRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean SucursalServiceImpl sucursalService;
+  @MockitoBean UsuarioServiceImpl usuarioService;
+  @MockitoBean PedidoServiceImpl pedidoService;
+  @MockitoBean TraspasoRepository traspasoRepository;
+  @MockitoBean RenglonTraspasoRepository renglonTraspasoRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired TraspasoServiceImpl traspasoService;
 

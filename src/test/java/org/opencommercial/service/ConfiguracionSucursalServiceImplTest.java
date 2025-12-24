@@ -7,9 +7,9 @@ import org.opencommercial.model.ConfiguracionSucursal;
 import org.opencommercial.repository.ConfiguracionSucursalRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -26,8 +26,8 @@ import static org.mockito.Mockito.when;
     classes = {ConfiguracionSucursalServiceImpl.class, CustomValidator.class, MessageSource.class})
 class ConfiguracionSucursalServiceImplTest {
 
-  @MockBean ConfiguracionSucursalRepository configuracionSucursalRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean ConfiguracionSucursalRepository configuracionSucursalRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired ConfiguracionSucursalServiceImpl configuracionSucursalService;
 

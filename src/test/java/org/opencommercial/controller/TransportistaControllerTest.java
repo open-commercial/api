@@ -7,8 +7,8 @@ import org.opencommercial.model.Transportista;
 import org.opencommercial.service.TransportistaServiceImpl;
 import org.opencommercial.service.UbicacionServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -21,9 +21,9 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {TransportistaController.class})
 class TransportistaControllerTest {
 
-  @MockBean TransportistaServiceImpl transportistaService;
-  @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean ModelMapper modelMapper;
+  @MockitoBean TransportistaServiceImpl transportistaService;
+  @MockitoBean UbicacionServiceImpl ubicacionService;
+  @MockitoBean ModelMapper modelMapper;
 
   @Autowired TransportistaController transportistaController;
 

@@ -10,9 +10,9 @@ import org.opencommercial.model.Usuario;
 import org.opencommercial.repository.ClienteRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -31,11 +31,11 @@ import static org.mockito.Mockito.when;
         classes = {ClienteServiceImpl.class, CustomValidator.class, MessageSource.class})
 class ClienteServiceImplTest {
 
-  @MockBean MessageSource messageSource;
-  @MockBean ClienteRepository clienteRepository;
-  @MockBean CuentaCorrienteService cuentaCorrienteService;
-  @MockBean UsuarioService usuarioService;
-  @MockBean UbicacionService ubicacionService;
+  @MockitoBean MessageSource messageSource;
+  @MockitoBean ClienteRepository clienteRepository;
+  @MockitoBean CuentaCorrienteService cuentaCorrienteService;
+  @MockitoBean UsuarioService usuarioService;
+  @MockitoBean UbicacionService ubicacionService;
 
   @Autowired ClienteServiceImpl clienteService;
 

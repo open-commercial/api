@@ -7,9 +7,9 @@ import org.opencommercial.model.*;
 import org.opencommercial.model.criteria.BusquedaReciboCriteria;
 import org.opencommercial.repository.ReciboRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -28,11 +28,11 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {ReciboServiceImpl.class, MessageSource.class})
 class ReciboServiceImplTest {
 
-  @MockBean ConfiguracionSucursalService configuracionSucursalServiceInterface;
-  @MockBean FormaDePagoService formaDePagoService;
-  @MockBean SucursalService sucursalService;
-  @MockBean ReciboRepository reciboRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean ConfiguracionSucursalService configuracionSucursalServiceInterface;
+  @MockitoBean FormaDePagoService formaDePagoService;
+  @MockitoBean SucursalService sucursalService;
+  @MockitoBean ReciboRepository reciboRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired ReciboServiceImpl reciboServiceImpl;
 

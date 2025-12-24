@@ -9,8 +9,8 @@ import org.opencommercial.model.dto.NuevoRenglonPedidoDTO;
 import org.opencommercial.model.dto.NuevosResultadosComprobanteDTO;
 import org.opencommercial.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -24,12 +24,12 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {PedidoController.class})
 class PedidoControllerTest {
 
-  @MockBean PedidoServiceImpl pedidoService;
-  @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean SucursalServiceImpl sucursalService;
-  @MockBean ClienteServiceImpl clienteService;
-  @MockBean ReciboServiceImpl reciboService;
-  @MockBean AuthServiceImpl authService;
+  @MockitoBean PedidoServiceImpl pedidoService;
+  @MockitoBean UsuarioServiceImpl usuarioService;
+  @MockitoBean SucursalServiceImpl sucursalService;
+  @MockitoBean ClienteServiceImpl clienteService;
+  @MockitoBean ReciboServiceImpl reciboService;
+  @MockitoBean AuthServiceImpl authService;
 
   @Autowired PedidoController pedidoController;
 

@@ -10,9 +10,9 @@ import org.opencommercial.model.dto.NuevaNotaCreditoSinFacturaDTO;
 import org.opencommercial.model.dto.NuevaNotaDebitoSinReciboDTO;
 import org.opencommercial.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -25,12 +25,12 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {NotaController.class, MessageSource.class})
 class NotaControllerTest {
 
-  @MockBean NotaService notaService;
-  @MockBean ReciboService reciboService;
-  @MockBean SucursalService sucursalService;
-  @MockBean UsuarioService usuarioService;
-  @MockBean AuthService authService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean NotaService notaService;
+  @MockitoBean ReciboService reciboService;
+  @MockitoBean SucursalService sucursalService;
+  @MockitoBean UsuarioService usuarioService;
+  @MockitoBean AuthService authService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired NotaController notaController;
 

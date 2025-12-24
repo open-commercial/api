@@ -5,9 +5,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.opencommercial.model.criteria.BusquedaGastoCriteria;
 import org.opencommercial.repository.GastoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDateTime;
@@ -18,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {GastoServiceImpl.class, MessageSource.class})
 class GastoServiceImplTest {
 
-    @MockBean GastoRepository gastoRepository;
-    @MockBean SucursalService sucursalService;
-    @MockBean CajaService cajaService;
-    @MockBean MessageSource messageSource;
+    @MockitoBean GastoRepository gastoRepository;
+    @MockitoBean SucursalService sucursalService;
+    @MockitoBean CajaService cajaService;
+    @MockitoBean MessageSource messageSource;
 
     @Autowired GastoServiceImpl gastoService;
 

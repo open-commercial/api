@@ -16,9 +16,9 @@ import org.opencommercial.repository.FacturaVentaRepository;
 import org.opencommercial.util.CustomValidator;
 import org.opencommercial.util.JasperReportsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -41,18 +41,18 @@ import static org.mockito.Mockito.*;
         })
 class FacturaVentaServiceImplTest {
 
-  @MockBean FacturaRepository<Factura> facturaRepository;
-  @MockBean FacturaVentaRepository facturaVentaRepository;
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean ClienteServiceImpl clienteService;
-  @MockBean PedidoServiceImpl pedidoService;
-  @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
-  @MockBean EmailServiceFactory emailServiceFactory;
-  @MockBean ResendEmailServiceImpl resendEmailService;
-  @MockBean SucursalServiceImpl sucursalService;
-  @MockBean TransportistaServiceImpl transportistaService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean FacturaRepository<Factura> facturaRepository;
+  @MockitoBean FacturaVentaRepository facturaVentaRepository;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean UsuarioServiceImpl usuarioService;
+  @MockitoBean ClienteServiceImpl clienteService;
+  @MockitoBean PedidoServiceImpl pedidoService;
+  @MockitoBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
+  @MockitoBean EmailServiceFactory emailServiceFactory;
+  @MockitoBean ResendEmailServiceImpl resendEmailService;
+  @MockitoBean SucursalServiceImpl sucursalService;
+  @MockitoBean TransportistaServiceImpl transportistaService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired FacturaServiceImpl facturaServiceImpl;
   @Autowired FacturaVentaServiceImpl facturaVentaServiceImpl;

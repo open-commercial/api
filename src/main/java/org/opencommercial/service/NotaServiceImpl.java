@@ -699,8 +699,7 @@ public class NotaServiceImpl implements NotaService {
   public NotaCredito calcularNotaCreditoConFactura(NuevaNotaCreditoDeFacturaDTO nuevaNotaCreditoDeFacturaDTO,
                                                    Usuario usuario) {
     NotaCredito notaCreditoNueva = new NotaCredito();
-    Factura factura =
-        facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
+    Factura factura = facturaService.getFacturaNoEliminadaPorId(nuevaNotaCreditoDeFacturaDTO.getIdFactura());
     if (Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getCantidades()).contains(null)
         || Arrays.asList(nuevaNotaCreditoDeFacturaDTO.getIdsRenglonesFactura()).contains(null)) {
       throw new BusinessServiceException(
@@ -734,9 +733,8 @@ public class NotaServiceImpl implements NotaService {
     notaCreditoNueva.setRecargoPorcentaje(factura.getRecargoPorcentaje());
     notaCreditoNueva.setRecargoNeto(
         notaService.calcularRecargoNetoCredito(
-            notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoPorcentaje()));
-    notaCreditoNueva.setTipoComprobante(
-        notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()));
+                notaCreditoNueva.getSubTotal(), notaCreditoNueva.getRecargoPorcentaje()));
+    notaCreditoNueva.setTipoComprobante(notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()));
     notaCreditoNueva.setIva105Neto(
         notaService.calcularIVANetoCredito(
             notaService.getTipoDeNotaCreditoSegunFactura(factura.getTipoComprobante()),

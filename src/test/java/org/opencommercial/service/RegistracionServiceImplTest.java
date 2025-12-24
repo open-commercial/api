@@ -7,8 +7,8 @@ import org.opencommercial.model.CategoriaIVA;
 import org.opencommercial.model.dto.RegistracionClienteAndUsuarioDTO;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,9 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ContextConfiguration(classes = {RegistracionServiceImpl.class, CustomValidator.class})
 class RegistracionServiceImplTest {
 
-  @MockBean UsuarioService usuarioService;
-  @MockBean ClienteService clienteService;
-  @MockBean EmailServiceFactory emailServiceFactory;
+  @MockitoBean UsuarioService usuarioService;
+  @MockitoBean ClienteService clienteService;
+  @MockitoBean EmailServiceFactory emailServiceFactory;
 
   @Autowired RegistracionServiceImpl registracionService;
 
