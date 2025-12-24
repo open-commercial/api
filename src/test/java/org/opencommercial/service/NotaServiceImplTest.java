@@ -8,9 +8,9 @@ import org.opencommercial.model.dto.NuevaNotaCreditoSinFacturaDTO;
 import org.opencommercial.repository.NotaDebitoRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -29,11 +29,11 @@ import static org.mockito.Mockito.when;
         classes = {NotaServiceImpl.class, CustomValidator.class, MessageSource.class})
 class NotaServiceImplTest {
 
-  @MockBean SucursalServiceImpl sucursalServiceImpl;
-  @MockBean ClienteServiceImpl clienteService;
-  @MockBean ProveedorServiceImpl proveedorService;
-  @MockBean NotaDebitoRepository notaDebitoRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean SucursalServiceImpl sucursalServiceImpl;
+  @MockitoBean ClienteServiceImpl clienteService;
+  @MockitoBean ProveedorServiceImpl proveedorService;
+  @MockitoBean NotaDebitoRepository notaDebitoRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired NotaServiceImpl notaServiceImpl;
 

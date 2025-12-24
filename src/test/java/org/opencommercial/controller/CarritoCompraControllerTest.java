@@ -3,15 +3,15 @@ package org.opencommercial.controller;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.MessageSource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.opencommercial.model.dto.ProductoFaltanteDTO;
 import org.opencommercial.service.AuthServiceImpl;
 import org.opencommercial.service.CarritoCompraServiceImpl;
 import org.opencommercial.service.ProductoServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,10 +24,10 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {CarritoCompraController.class, MessageSource.class})
 class CarritoCompraControllerTest {
 
-  @MockBean CarritoCompraServiceImpl carritoCompraService;
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean AuthServiceImpl authService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean CarritoCompraServiceImpl carritoCompraService;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean AuthServiceImpl authService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired CarritoCompraController carritoCompraController;
 

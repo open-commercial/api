@@ -13,12 +13,12 @@ import org.opencommercial.model.embeddable.PrecioProductoEmbeddable;
 import org.opencommercial.repository.CarritoCompraRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -33,12 +33,12 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = {CustomValidator.class, CarritoCompraServiceImpl.class})
 class CarritoCompraServiceImplTest {
 
-  @MockBean CarritoCompraRepository carritoCompraRepository;
-  @MockBean UsuarioService usuarioService;
-  @MockBean ProductoService productoService;
-  @MockBean SucursalService sucursalService;
-  @MockBean ClienteService clienteService;
-  @MockBean PedidoService pedidoService;
+  @MockitoBean CarritoCompraRepository carritoCompraRepository;
+  @MockitoBean UsuarioService usuarioService;
+  @MockitoBean ProductoService productoService;
+  @MockitoBean SucursalService sucursalService;
+  @MockitoBean ClienteService clienteService;
+  @MockitoBean PedidoService pedidoService;
 
   @Autowired CarritoCompraServiceImpl carritoCompraServiceImpl;
 

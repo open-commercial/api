@@ -6,7 +6,12 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"certificadoAfip", "existeCertificado", "passwordCertificadoAfip"})
+@EqualsAndHashCode(
+        exclude = {
+                "certificadoAfip",
+                "existeCertificado",
+                "passwordCertificadoAfip"
+        })
 public class ConfiguracionSucursalTest {
 
   private long idConfiguracionSucursal;

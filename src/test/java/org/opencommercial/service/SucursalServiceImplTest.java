@@ -9,9 +9,9 @@ import org.opencommercial.model.dto.NuevaSucursalDTO;
 import org.opencommercial.repository.SucursalRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -30,12 +30,12 @@ import static org.mockito.Mockito.*;
     classes = {SucursalServiceImpl.class, CustomValidator.class, MessageSource.class})
 class SucursalServiceImplTest {
 
-  @MockBean SucursalRepository sucursalRepository;
-  @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
-  @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean ImageUploaderService imageUploaderService;
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean SucursalRepository sucursalRepository;
+  @MockitoBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
+  @MockitoBean UbicacionServiceImpl ubicacionService;
+  @MockitoBean ImageUploaderService imageUploaderService;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired SucursalServiceImpl sucursalService;
 

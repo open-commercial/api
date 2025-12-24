@@ -10,9 +10,9 @@ import org.opencommercial.service.CuentaCorrienteService;
 import org.opencommercial.service.ProveedorService;
 import org.opencommercial.util.FormatoReporte;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
@@ -25,11 +25,11 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {CuentaCorrienteController.class})
 class CuentaCorrienteControllerTest {
 
-    @MockBean CuentaCorrienteService cuentaCorrienteService;
-    @MockBean ProveedorService proveedorService;
-    @MockBean ClienteService clienteService;
-    @MockBean AuthService authService;
-    @MockBean MessageSource messageSource;
+    @MockitoBean CuentaCorrienteService cuentaCorrienteService;
+    @MockitoBean ProveedorService proveedorService;
+    @MockitoBean ClienteService clienteService;
+    @MockitoBean AuthService authService;
+    @MockitoBean MessageSource messageSource;
 
     @Autowired CuentaCorrienteController cuentaCorrienteController;
 

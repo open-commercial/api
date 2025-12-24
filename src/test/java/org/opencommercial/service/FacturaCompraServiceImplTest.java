@@ -10,9 +10,9 @@ import org.opencommercial.model.criteria.BusquedaFacturaCompraCriteria;
 import org.opencommercial.model.embeddable.PrecioProductoEmbeddable;
 import org.opencommercial.repository.FacturaCompraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -29,8 +29,8 @@ import static org.mockito.Mockito.when;
     classes = {FacturaServiceImpl.class, FacturaCompraServiceImpl.class, MessageSource.class})
 class FacturaCompraServiceImplTest {
 
-  @MockBean FacturaCompraRepository facturaCompraRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean FacturaCompraRepository facturaCompraRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired FacturaServiceImpl facturaServiceImpl;
   @Autowired FacturaCompraServiceImpl facturaCompraServiceImpl;

@@ -10,9 +10,9 @@ import org.opencommercial.repository.FacturaRepository;
 import org.opencommercial.util.CalculosComprobante;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -27,13 +27,13 @@ import static org.mockito.Mockito.when;
     classes = {CustomValidator.class, FacturaServiceImpl.class, MessageSource.class})
 class FacturaServiceImplTest {
 
-  @MockBean SucursalServiceImpl sucursalService;
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean PedidoServiceImpl pedidoService;
-  @MockBean FacturaRepository<Factura> facturaRepository;
-  @MockBean NotaServiceImpl notaService;
-  @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean SucursalServiceImpl sucursalService;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean PedidoServiceImpl pedidoService;
+  @MockitoBean FacturaRepository<Factura> facturaRepository;
+  @MockitoBean NotaServiceImpl notaService;
+  @MockitoBean CuentaCorrienteServiceImpl cuentaCorrienteService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired FacturaServiceImpl facturaServiceImpl;
 

@@ -9,7 +9,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"idSucursal", "ubicacion", "detalleUbicacion", "configuracionSucursal"})
+@EqualsAndHashCode(
+        exclude = {
+                "idSucursal",
+                "ubicacion",
+                "detalleUbicacion",
+                "configuracionSucursal"
+        })
 public class SucursalTest {
 
   private long idSucursal;

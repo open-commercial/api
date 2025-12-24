@@ -13,10 +13,10 @@ import org.opencommercial.repository.RenglonRemitoRepository;
 import org.opencommercial.util.CustomValidator;
 import org.opencommercial.util.JasperReportsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -37,17 +37,17 @@ import static org.mockito.Mockito.when;
     classes = {CustomValidator.class, RemitoServiceImpl.class, MessageSource.class, JasperReportsHandler.class})
 class RemitoServiceImplTest {
 
-  @MockBean FacturaService facturaService;
-  @MockBean FacturaVentaService facturaVentaService;
-  @MockBean RemitoRepository remitoRepository;
-  @MockBean RenglonRemitoRepository renglonRemitoRepository;
-  @MockBean ClienteService clienteService;
-  @MockBean UsuarioService usuarioService;
-  @MockBean TransportistaService transportistaService;
-  @MockBean ConfiguracionSucursalService configuracionSucursalService;
-  @MockBean CuentaCorrienteService cuentaCorrienteService;
-  @MockBean SucursalService sucursalService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean FacturaService facturaService;
+  @MockitoBean FacturaVentaService facturaVentaService;
+  @MockitoBean RemitoRepository remitoRepository;
+  @MockitoBean RenglonRemitoRepository renglonRemitoRepository;
+  @MockitoBean ClienteService clienteService;
+  @MockitoBean UsuarioService usuarioService;
+  @MockitoBean TransportistaService transportistaService;
+  @MockitoBean ConfiguracionSucursalService configuracionSucursalService;
+  @MockitoBean CuentaCorrienteService cuentaCorrienteService;
+  @MockitoBean SucursalService sucursalService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired RemitoServiceImpl remitoService;
 

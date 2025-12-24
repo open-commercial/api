@@ -12,10 +12,10 @@ import org.opencommercial.util.CustomValidator;
 import org.opencommercial.util.FormatoReporte;
 import org.opencommercial.util.JasperReportsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
@@ -32,13 +32,13 @@ import static org.mockito.Mockito.*;
         classes = {CuentaCorrienteServiceImpl.class, CustomValidator.class, MessageSource.class, JasperReportsHandler.class})
 class CuentaCorrienteServiceImplTest {
 
-  @MockBean CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
-  @MockBean CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
-  @MockBean RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
-  @MockBean UsuarioService usuarioService;
-  @MockBean ClienteService clienteService;
-  @MockBean SucursalService sucursalService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean CuentaCorrienteRepository<CuentaCorriente> cuentaCorrienteRepository;
+  @MockitoBean CuentaCorrienteClienteRepository cuentaCorrienteClienteRepository;
+  @MockitoBean RenglonCuentaCorrienteRepository renglonCuentaCorrienteRepository;
+  @MockitoBean UsuarioService usuarioService;
+  @MockitoBean ClienteService clienteService;
+  @MockitoBean SucursalService sucursalService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired CuentaCorrienteServiceImpl cuentaCorrienteService;
 

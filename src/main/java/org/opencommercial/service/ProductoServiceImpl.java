@@ -873,7 +873,6 @@ public class ProductoServiceImpl implements ProductoService {
   }
 
   @Override
-  @Transactional
   public String subirImagenProducto(long idProducto, byte[] imagen) {
     if (imagen.length > TAMANIO_MAXIMO_IMAGEN)
       throw new BusinessServiceException(

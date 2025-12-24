@@ -13,11 +13,11 @@ import org.opencommercial.model.dto.NuevoRenglonFacturaDTO;
 import org.opencommercial.model.dto.NuevosResultadosComprobanteDTO;
 import org.opencommercial.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -34,18 +34,18 @@ import static org.mockito.Mockito.*;
 @ContextConfiguration(classes = {FacturaController.class, MessageSource.class})
 class FacturaControllerTest {
 
-    @MockBean SucursalServiceImpl sucursalService;
-    @MockBean FacturaServiceImpl facturaService;
-    @MockBean FacturaCompraServiceImpl facturaCompraService;
-    @MockBean ProveedorServiceImpl proveedorService;
-    @MockBean UsuarioServiceImpl usuarioService;
-    @MockBean TransportistaServiceImpl transportistaService;
-    @MockBean FacturaVentaServiceImpl facturaVentaService;
-    @MockBean ReciboServiceImpl reciboService;
-    @MockBean AuthServiceImpl authService;
-    @MockBean ClienteServiceImpl clienteService;
-    @MockBean PedidoServiceImpl pedidoService;
-    @MockBean MessageSource messageSource;
+    @MockitoBean SucursalServiceImpl sucursalService;
+    @MockitoBean FacturaServiceImpl facturaService;
+    @MockitoBean FacturaCompraServiceImpl facturaCompraService;
+    @MockitoBean ProveedorServiceImpl proveedorService;
+    @MockitoBean UsuarioServiceImpl usuarioService;
+    @MockitoBean TransportistaServiceImpl transportistaService;
+    @MockitoBean FacturaVentaServiceImpl facturaVentaService;
+    @MockitoBean ReciboServiceImpl reciboService;
+    @MockitoBean AuthServiceImpl authService;
+    @MockitoBean ClienteServiceImpl clienteService;
+    @MockitoBean PedidoServiceImpl pedidoService;
+    @MockitoBean MessageSource messageSource;
 
     @Autowired FacturaController facturaController;
 

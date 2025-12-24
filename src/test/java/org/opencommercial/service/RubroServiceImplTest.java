@@ -7,9 +7,9 @@ import org.opencommercial.model.Rubro;
 import org.opencommercial.repository.RubroRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,8 +20,8 @@ import static org.mockito.Mockito.verify;
     classes = {CustomValidator.class, RubroServiceImpl.class, MessageSource.class})
 class RubroServiceImplTest {
 
-  @MockBean MessageSource messageSource;
-  @MockBean RubroRepository rubroRepository;
+  @MockitoBean MessageSource messageSource;
+  @MockitoBean RubroRepository rubroRepository;
 
   @Autowired RubroServiceImpl rubroService;
 

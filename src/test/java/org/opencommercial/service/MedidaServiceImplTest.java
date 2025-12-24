@@ -8,9 +8,9 @@ import org.opencommercial.model.TipoDeOperacion;
 import org.opencommercial.repository.MedidaRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -24,8 +24,8 @@ import static org.mockito.Mockito.when;
     classes = {MedidaServiceImpl.class, CustomValidator.class, MessageSource.class})
 class MedidaServiceImplTest {
 
-  @MockBean MessageSource messageSource;
-  @MockBean MedidaRepository medidaRepository;
+  @MockitoBean MessageSource messageSource;
+  @MockitoBean MedidaRepository medidaRepository;
 
   @Autowired MedidaServiceImpl medidaService;
 

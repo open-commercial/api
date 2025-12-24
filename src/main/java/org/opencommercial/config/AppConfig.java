@@ -1,12 +1,12 @@
 package org.opencommercial.config;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.Module;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
+import org.opencommercial.model.Cliente;
+import org.opencommercial.model.Ubicacion;
+import org.opencommercial.model.dto.ClienteDTO;
+import org.opencommercial.model.dto.UbicacionDTO;
+import org.opencommercial.service.AfipWebServiceSOAPClient;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,41 +17,39 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.opencommercial.model.Cliente;
-import org.opencommercial.model.Ubicacion;
-import org.opencommercial.model.dto.ClienteDTO;
-import org.opencommercial.model.dto.UbicacionDTO;
-import org.opencommercial.service.AfipWebServiceSOAPClient;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.module.SimpleModule;
 
-import java.io.IOException;
 import java.time.Clock;
 
 @Configuration
 public class AppConfig {
 
   @Bean
-  public Module springDataPageModule() {
+  public SimpleModule springDataPageModule() {
     return new SimpleModule()
-        .addSerializer(
-            Page.class,
-            new JsonSerializer<Page>() {
-              @Override
-              public void serialize(Page value, JsonGenerator gen, SerializerProvider serializers)
-                  throws IOException {
-                gen.writeStartObject();
-                gen.writeNumberField("totalElements", value.getTotalElements());
-                gen.writeNumberField("totalPages", value.getTotalPages());
-                gen.writeNumberField("number", value.getNumber());
-                gen.writeNumberField("numberOfElements", value.getNumberOfElements());
-                gen.writeNumberField("size", value.getSize());
-                gen.writeBooleanField("first", value.isFirst());
-                gen.writeBooleanField("last", value.isLast());
-                gen.writeFieldName("content");
-                serializers.defaultSerializeValue(value.getContent(), gen);
-                gen.writeObjectField("sort", value.getSort());
-                gen.writeEndObject();
-              }
-            });
+            .addSerializer(
+                    Page.class,
+                    new ValueSerializer<Page>() {
+
+                      @Override
+                      public void serialize(Page value, JsonGenerator gen, SerializationContext sc) throws JacksonException {
+                        gen.writeStartObject();
+                        gen.writeNumberProperty("totalElements", value.getTotalElements());
+                        gen.writeNumberProperty("totalPages", value.getTotalPages());
+                        gen.writeNumberProperty("number", value.getNumber());
+                        gen.writeNumberProperty("numberOfElements", value.getNumberOfElements());
+                        gen.writeNumberProperty("size", value.getSize());
+                        gen.writeBooleanProperty("first", value.isFirst());
+                        gen.writeBooleanProperty("last", value.isLast());
+                        sc.defaultSerializeProperty("content", value.getContent(), gen);
+                        gen.writePOJOProperty("sort", value.getSort());
+                        gen.writeEndObject();
+                      }
+                    });
   }
 
   @Bean
