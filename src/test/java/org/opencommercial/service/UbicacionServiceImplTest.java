@@ -13,9 +13,9 @@ import org.opencommercial.repository.ProvinciaRepository;
 import org.opencommercial.repository.UbicacionRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -28,10 +28,10 @@ import static org.mockito.Mockito.*;
     classes = {UbicacionServiceImpl.class, CustomValidator.class, MessageSource.class})
 class UbicacionServiceImplTest {
 
-  @MockBean MessageSource messageSource;
-  @MockBean UbicacionRepository UbicacionRepository;
-  @MockBean LocalidadRepository localidadRepository;
-  @MockBean ProvinciaRepository provinciaRepository;
+  @MockitoBean MessageSource messageSource;
+  @MockitoBean UbicacionRepository UbicacionRepository;
+  @MockitoBean LocalidadRepository localidadRepository;
+  @MockitoBean ProvinciaRepository provinciaRepository;
 
   @Autowired UbicacionServiceImpl ubicacionService;
 

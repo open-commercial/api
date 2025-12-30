@@ -7,9 +7,9 @@ import org.opencommercial.model.Proveedor;
 import org.opencommercial.repository.ProveedorRepository;
 import org.opencommercial.util.CustomValidator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.mockito.Mockito.verify;
@@ -19,10 +19,10 @@ import static org.mockito.Mockito.verify;
     classes = {CustomValidator.class, ProveedorServiceImpl.class, MessageSource.class})
 public class ProveedorServiceImplTest {
 
-  @MockBean ProveedorRepository proveedorRepository;
-  @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
-  @MockBean UbicacionServiceImpl ubicacionService;
-  @MockBean MessageSource messageSource;
+  @MockitoBean ProveedorRepository proveedorRepository;
+  @MockitoBean CuentaCorrienteServiceImpl cuentaCorrienteService;
+  @MockitoBean UbicacionServiceImpl ubicacionService;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired ProveedorServiceImpl proveedorService;
 

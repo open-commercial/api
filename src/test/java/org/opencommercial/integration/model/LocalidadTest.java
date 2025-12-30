@@ -10,7 +10,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@EqualsAndHashCode(exclude = {"idLocalidad", "idProvincia", "nombreProvincia"})
+@EqualsAndHashCode(
+        exclude = {
+                "idLocalidad",
+                "idProvincia",
+                "nombreProvincia"
+        })
 public class LocalidadTest {
 
   private long idLocalidad;

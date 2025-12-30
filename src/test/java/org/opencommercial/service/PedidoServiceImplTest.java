@@ -16,9 +16,9 @@ import org.opencommercial.repository.RenglonPedidoRepository;
 import org.opencommercial.util.CustomValidator;
 import org.opencommercial.util.JasperReportsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -39,19 +39,19 @@ import static org.mockito.Mockito.*;
         })
 class PedidoServiceImplTest {
 
-  @MockBean PedidoRepository pedidoRepository;
-  @MockBean RenglonPedidoRepository renglonPedidoRepository;
-  @MockBean FacturaVentaServiceImpl facturaVentaService;
-  @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean ClienteServiceImpl clienteService;
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean EmailServiceFactory emailServiceFactory;
-  @MockBean ResendEmailServiceImpl resendEmailService;
-  @MockBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
-  @MockBean CuentaCorrienteServiceImpl cuentaCorrienteService;
-  @MockBean ReciboServiceImpl reciboService;
-  @MockBean MessageSource messageSource;
-  @MockBean ModelMapper modelMapper;
+  @MockitoBean PedidoRepository pedidoRepository;
+  @MockitoBean RenglonPedidoRepository renglonPedidoRepository;
+  @MockitoBean FacturaVentaServiceImpl facturaVentaService;
+  @MockitoBean UsuarioServiceImpl usuarioService;
+  @MockitoBean ClienteServiceImpl clienteService;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean EmailServiceFactory emailServiceFactory;
+  @MockitoBean ResendEmailServiceImpl resendEmailService;
+  @MockitoBean ConfiguracionSucursalServiceImpl configuracionSucursalService;
+  @MockitoBean CuentaCorrienteServiceImpl cuentaCorrienteService;
+  @MockitoBean ReciboServiceImpl reciboService;
+  @MockitoBean MessageSource messageSource;
+  @MockitoBean ModelMapper modelMapper;
 
   @Autowired PedidoServiceImpl pedidoService;
 

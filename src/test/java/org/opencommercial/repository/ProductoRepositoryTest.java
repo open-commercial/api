@@ -12,16 +12,16 @@ import org.opencommercial.model.embeddable.CantidadProductoEmbeddable;
 import org.opencommercial.model.embeddable.PrecioProductoEmbeddable;
 import org.opencommercial.repository.custom.ProductoRepositoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.mysql.MySQLContainer;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ContextConfiguration(classes = {ProductoRepositoryImpl.class, LocalidadRepository.class, App.class})
 class ProductoRepositoryTest {
 
-  @MockBean JwtInterceptor jwtInterceptor;
+  @MockitoBean JwtInterceptor jwtInterceptor;
 
   @Autowired TestEntityManager testEntityManager;
   @Autowired ProductoRepositoryImpl productoRepositoryImpl;
@@ -45,7 +45,7 @@ class ProductoRepositoryTest {
 
   @Container
   @ServiceConnection
-  static MySQLContainer<?> mySQLContainer = new MySQLContainer<>("mysql:8.3.0");
+  static MySQLContainer mySQLContainer = new MySQLContainer("mysql:8.3.0");
 
   @Test
   void shouldThrowOptimisticLockExceptionWhenIntentaActualizarProductoDetached() {

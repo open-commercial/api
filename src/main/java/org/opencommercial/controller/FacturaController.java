@@ -109,17 +109,14 @@ public class FacturaController {
     FacturaCompra fc = new FacturaCompra();
     fc.setFecha(nuevaCompraCompraDTO.getFecha());
     fc.setTipoComprobante(nuevaCompraCompraDTO.getTipoDeComprobante());
-    fc.setNumSerie(
-            nuevaCompraCompraDTO.getNumSerie() != null ? nuevaCompraCompraDTO.getNumSerie() : 0L);
-    fc.setNumFactura(
-            nuevaCompraCompraDTO.getNumFactura() != null ? nuevaCompraCompraDTO.getNumFactura() : 0L);
+    fc.setNumSerie(nuevaCompraCompraDTO.getNumSerie() != null ? nuevaCompraCompraDTO.getNumSerie() : 0L);
+    fc.setNumFactura(nuevaCompraCompraDTO.getNumFactura() != null ? nuevaCompraCompraDTO.getNumFactura() : 0L);
     fc.setFechaVencimiento(nuevaCompraCompraDTO.getFechaVencimiento());
     fc.setFechaAlta(LocalDateTime.now());
-    fc.setRenglones(
-            facturaService.calcularRenglones(
-                    nuevaCompraCompraDTO.getTipoDeComprobante(),
-                    Movimiento.COMPRA,
-                    nuevaCompraCompraDTO.getRenglones()));
+    fc.setRenglones(facturaService.calcularRenglones(
+            nuevaCompraCompraDTO.getTipoDeComprobante(),
+            Movimiento.COMPRA,
+            nuevaCompraCompraDTO.getRenglones()));
     fc.setRecargoPorcentaje(
             nuevaCompraCompraDTO.getRecargoPorcentaje() != null
                     ? nuevaCompraCompraDTO.getRecargoPorcentaje()
@@ -133,12 +130,9 @@ public class FacturaController {
                     ? nuevaCompraCompraDTO.getObservaciones()
                     : "");
     fc.setSucursal(sucursalService.getSucursalPorId(nuevaCompraCompraDTO.getIdSucursal()));
-    fc.setProveedor(
-            proveedorService.getProveedorNoEliminadoPorId(nuevaCompraCompraDTO.getIdProveedor()));
+    fc.setProveedor(proveedorService.getProveedorNoEliminadoPorId(nuevaCompraCompraDTO.getIdProveedor()));
     if (nuevaCompraCompraDTO.getIdTransportista() != null) {
-      fc.setTransportista(
-              transportistaService.getTransportistaNoEliminadoPorId(
-                      nuevaCompraCompraDTO.getIdTransportista()));
+      fc.setTransportista(transportistaService.getTransportistaNoEliminadoPorId(nuevaCompraCompraDTO.getIdTransportista()));
     }
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     fc.setUsuario(usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class)));
@@ -154,7 +148,7 @@ public class FacturaController {
   }
 
   @GetMapping("/api/v1/facturas/compras/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR}) //remove VENDEDOR
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idSucursal,
                                                   @PathVariable long idProveedor) {
     return facturaCompraService.getTiposDeComprobanteCompra(

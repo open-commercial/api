@@ -11,8 +11,8 @@ import org.opencommercial.model.embeddable.CantidadProductoEmbeddable;
 import org.opencommercial.model.embeddable.PrecioProductoEmbeddable;
 import org.opencommercial.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -26,14 +26,14 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {ProductoController.class})
 class ProductoControllerTest {
 
-  @MockBean ProductoServiceImpl productoService;
-  @MockBean MedidaServiceImpl medidaService;
-  @MockBean RubroServiceImpl rubroService;
-  @MockBean ProveedorServiceImpl proveedorService;
-  @MockBean SucursalServiceImpl sucursalService;
-  @MockBean AuthServiceImpl authService;
-  @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean ModelMapper modelMapper;
+  @MockitoBean ProductoServiceImpl productoService;
+  @MockitoBean MedidaServiceImpl medidaService;
+  @MockitoBean RubroServiceImpl rubroService;
+  @MockitoBean ProveedorServiceImpl proveedorService;
+  @MockitoBean SucursalServiceImpl sucursalService;
+  @MockitoBean AuthServiceImpl authService;
+  @MockitoBean UsuarioServiceImpl usuarioService;
+  @MockitoBean ModelMapper modelMapper;
 
   @Autowired ProductoController productoController;
 

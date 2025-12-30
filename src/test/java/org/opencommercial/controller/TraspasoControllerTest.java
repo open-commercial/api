@@ -3,15 +3,15 @@ package org.opencommercial.controller;
 import io.jsonwebtoken.impl.DefaultClaims;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.opencommercial.model.Traspaso;
 import org.opencommercial.model.criteria.BusquedaTraspasoCriteria;
 import org.opencommercial.model.dto.NuevoTraspasoDTO;
 import org.opencommercial.service.AuthServiceImpl;
 import org.opencommercial.service.TraspasoServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 import java.util.Map;
@@ -23,8 +23,8 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {TraspasoController.class})
 class TraspasoControllerTest {
 
-  @MockBean TraspasoServiceImpl traspasoService;
-  @MockBean AuthServiceImpl authService;
+  @MockitoBean TraspasoServiceImpl traspasoService;
+  @MockitoBean AuthServiceImpl authService;
 
   @Autowired TraspasoController traspasoController;
 

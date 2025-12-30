@@ -22,10 +22,10 @@ import org.opencommercial.util.CustomValidator;
 import org.opencommercial.util.FormatoReporte;
 import org.opencommercial.util.JasperReportsHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -47,19 +47,19 @@ import static org.mockito.Mockito.*;
         })
 class ProductoServiceImplTest {
 
-  @MockBean MedidaServiceImpl medidaService;
-  @MockBean RubroServiceImpl rubroService;
-  @MockBean ProveedorServiceImpl proveedorService;
-  @MockBean SucursalServiceImpl sucursalService;
-  @MockBean TraspasoServiceImpl traspasoService;
-  @MockBean PedidoServiceImpl pedidoService;
-  @MockBean ClienteServiceImpl clienteService;
-  @MockBean UsuarioServiceImpl usuarioService;
-  @MockBean EmailServiceFactory emailServiceFactory;
-  @MockBean ResendEmailServiceImpl resendEmailService;
-  @MockBean ProductoRepository productoRepository;
-  @MockBean ProductoFavoritoRepository productoFavoritoRepository;
-  @MockBean MessageSource messageSource;
+  @MockitoBean MedidaServiceImpl medidaService;
+  @MockitoBean RubroServiceImpl rubroService;
+  @MockitoBean ProveedorServiceImpl proveedorService;
+  @MockitoBean SucursalServiceImpl sucursalService;
+  @MockitoBean TraspasoServiceImpl traspasoService;
+  @MockitoBean PedidoServiceImpl pedidoService;
+  @MockitoBean ClienteServiceImpl clienteService;
+  @MockitoBean UsuarioServiceImpl usuarioService;
+  @MockitoBean EmailServiceFactory emailServiceFactory;
+  @MockitoBean ResendEmailServiceImpl resendEmailService;
+  @MockitoBean ProductoRepository productoRepository;
+  @MockitoBean ProductoFavoritoRepository productoFavoritoRepository;
+  @MockitoBean MessageSource messageSource;
 
   @Autowired ProductoServiceImpl productoService;
 

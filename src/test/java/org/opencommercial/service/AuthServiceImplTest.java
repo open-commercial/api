@@ -2,16 +2,16 @@ package org.opencommercial.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.MessageSource;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.client.RestTemplate;
 import org.opencommercial.model.Rol;
 import org.opencommercial.model.TokenAccesoExcluido;
 import org.opencommercial.repository.TokenAccesoExcluidoRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -25,9 +25,9 @@ import static org.mockito.Mockito.when;
 @TestPropertySource(locations = "classpath:application.properties")
 class AuthServiceImplTest {
 
-  @MockBean TokenAccesoExcluidoRepository tokenAccesoExcluidoRepository;
-  @MockBean MessageSource messageSource;
-  @MockBean RestTemplate restTemplate;
+  @MockitoBean TokenAccesoExcluidoRepository tokenAccesoExcluidoRepository;
+  @MockitoBean MessageSource messageSource;
+  @MockitoBean RestTemplate restTemplate;
 
   @Autowired AuthServiceImpl authService;
   static final String BEARER_TOKEN_PREFIX = "Bearer";
