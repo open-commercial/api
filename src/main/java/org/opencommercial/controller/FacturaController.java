@@ -148,7 +148,7 @@ public class FacturaController {
   }
 
   @GetMapping("/api/v1/facturas/compras/tipos/sucursales/{idSucursal}/proveedores/{idProveedor}")
-  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR}) //remove VENDEDOR
+  @AccesoRolesPermitidos({Rol.ADMINISTRADOR, Rol.ENCARGADO, Rol.VENDEDOR})
   public TipoDeComprobante[] getTipoFacturaCompra(@PathVariable long idSucursal,
                                                   @PathVariable long idProveedor) {
     return facturaCompraService.getTiposDeComprobanteCompra(
