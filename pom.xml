@@ -21,7 +21,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <modelmapper.version>3.2.1</modelmapper.version>
         <dom4j.version>1.6.1</dom4j.version>
-        <jasperreports.version>6.17.0</jasperreports.version>
+        <jasperreports.version>7.0.4</jasperreports.version>
         <apache-poi.version>3.17</apache-poi.version>
         <jjwt.version>0.13.0</jjwt.version>
         <bouncycastle-bcmail.version>1.46</bouncycastle-bcmail.version>
