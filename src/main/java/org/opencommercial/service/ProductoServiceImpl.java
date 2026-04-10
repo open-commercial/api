@@ -218,10 +218,7 @@ public class ProductoServiceImpl implements ProductoService {
                 criteria.getOrdenarPor(),
                 criteria.getSentido(),
                 TAMANIO_PAGINA_DEFAULT));
-    productos.stream()
-        .forEach(
-            producto ->
-              this.calcularCantidadEnSucursalesDisponible(producto, idSucursal));
+    productos.forEach(producto -> this.calcularCantidadEnSucursalesDisponible(producto, idSucursal));
     return productos;
   }
 
@@ -321,14 +318,13 @@ public class ProductoServiceImpl implements ProductoService {
 
   @Override
   public BooleanBuilder getBuilder(BusquedaProductoCriteria criteria) {
-    QProducto qProducto = QProducto.producto;
-    BooleanBuilder builder = new BooleanBuilder();
+    var qProducto = QProducto.producto;
+    var builder = new BooleanBuilder();
     builder.and(qProducto.eliminado.eq(false));
     if (criteria.getCodigo() != null && criteria.getDescripcion() != null)
       builder.and(
           qProducto
-              .codigo
-              .containsIgnoreCase(criteria.getCodigo())
+              .codigo.containsIgnoreCase(criteria.getCodigo())
               .or(this.buildPredicadoDescripcion(criteria.getDescripcion(), qProducto)));
     else {
       if (criteria.getCodigo() != null)
@@ -349,9 +345,9 @@ public class ProductoServiceImpl implements ProductoService {
           .and(qProducto.cantidadProducto.cantidadEnSucursales.any().cantidad.gt(BigDecimal.ZERO))
           .and(qProducto.cantidadProducto.ilimitado.eq(false));
     if (criteria.getListarSoloParaCatalogo() != null)
-      builder.and(Boolean.TRUE.equals(criteria.getListarSoloParaCatalogo()) ? qProducto.paraCatalogo.isTrue() : qProducto.paraCatalogo.isFalse());
+      builder.and(criteria.getListarSoloParaCatalogo() ? qProducto.paraCatalogo.isTrue() : qProducto.paraCatalogo.isFalse());
     if (criteria.getPublico() != null) {
-      if (Boolean.TRUE.equals(criteria.getPublico())) {
+      if (criteria.getPublico()) {
         builder.and(qProducto.publico.isTrue());
       } else {
         builder.and(qProducto.publico.isFalse());

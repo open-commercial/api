@@ -70,8 +70,8 @@ public class AppConfig {
 
   @Bean
   public FilterRegistrationBean<CorsFilter> corsFilter() {
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
+    var source = new UrlBasedCorsConfigurationSource();
+    var config = new CorsConfiguration().applyPermitDefaultValues();
     config.addAllowedMethod(HttpMethod.PUT);
     config.addAllowedMethod(HttpMethod.DELETE);
     source.registerCorsConfiguration("/**", config);

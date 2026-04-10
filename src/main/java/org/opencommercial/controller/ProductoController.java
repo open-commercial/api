@@ -92,13 +92,13 @@ public class ProductoController {
       @RequestParam(required = false) Movimiento movimiento,
       @RequestHeader(required = false, name = "Authorization") String authorizationHeader) {
     Page<Producto> productos;
-    boolean esAutogestion = authorizationHeader != null &&
-            movimiento != null &&
-            movimiento.equals(Movimiento.COMPRA)
+    boolean esAutogestion = authorizationHeader != null
+            && movimiento != null
+            && movimiento.equals(Movimiento.COMPRA)
             && idCliente == null;
-    boolean esGestionAdministrativa = authorizationHeader != null &&
-            movimiento != null &&
-            movimiento.equals(Movimiento.VENTA)
+    boolean esGestionAdministrativa = authorizationHeader != null
+            && movimiento != null
+            && movimiento.equals(Movimiento.VENTA)
             && idCliente != null;
     if (esAutogestion) {
       Claims claims = authService.getClaimsDelToken(authorizationHeader);
@@ -152,15 +152,12 @@ public class ProductoController {
     Producto productoPorActualizar = modelMapper.map(productoDTO, Producto.class);
     productoPorActualizar.setCantidadProducto(productoService.construirCantidadProductoEmbeddable(productoDTO));
     productoPorActualizar.setPrecioProducto(productoService.construirPrecioProductoEmbeddable(productoDTO));
-    Producto productoPersistido =
-        productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
+    var productoPersistido = productoService.getProductoNoEliminadoPorId(productoPorActualizar.getIdProducto());
       if (idMedida != null) productoPorActualizar.setMedida(medidaService.getMedidaNoEliminadaPorId(idMedida));
       else productoPorActualizar.setMedida(productoPersistido.getMedida());
       if (idRubro != null) productoPorActualizar.setRubro(rubroService.getRubroNoEliminadoPorId(idRubro));
       else productoPorActualizar.setRubro(productoPersistido.getRubro());
-    if (idProveedor != null)
-      productoPorActualizar.setProveedor(
-          proveedorService.getProveedorNoEliminadoPorId(idProveedor));
+    if (idProveedor != null) productoPorActualizar.setProveedor(proveedorService.getProveedorNoEliminadoPorId(idProveedor));
     else productoPorActualizar.setProveedor(productoPersistido.getProveedor());
     Claims claims = authService.getClaimsDelToken(authorizationHeader);
     Usuario usuarioLogueado = usuarioService.getUsuarioNoEliminadoPorId(claims.get(CLAIM_ID_USUARIO, Long.class));
