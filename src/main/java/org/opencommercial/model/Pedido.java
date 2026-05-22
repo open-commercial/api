@@ -25,9 +25,9 @@ import java.util.List;
 @ToString(exclude = {"facturas", "renglones"})
 @JsonView(Views.Comprador.class)
 @JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "idPedido",
-    scope = Pedido.class)
+  generator = ObjectIdGenerators.PropertyGenerator.class,
+  property = "idPedido",
+  scope = Pedido.class)
 @JsonIgnoreProperties({"usuario", "sucursal"})
 public class Pedido implements Serializable {
 

@@ -23,9 +23,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "serie", "nroNota", "sucursal"})
 @JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "idNota",
-    scope = Nota.class)
+  generator = ObjectIdGenerators.PropertyGenerator.class,
+  property = "idNota",
+  scope = Nota.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
   @JsonSubTypes.Type(value = NotaCredito.class),

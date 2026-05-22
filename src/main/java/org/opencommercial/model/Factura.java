@@ -25,9 +25,9 @@ import java.util.List;
 @EqualsAndHashCode(of = {"fecha", "tipoComprobante", "numSerie", "numFactura", "sucursal"})
 @ToString(exclude = {"renglones"})
 @JsonIdentityInfo(
-    generator = ObjectIdGenerators.PropertyGenerator.class,
-    property = "idFactura",
-    scope = Factura.class)
+  generator = ObjectIdGenerators.PropertyGenerator.class,
+  property = "idFactura",
+  scope = Factura.class)
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({@Type(value = FacturaCompra.class), @Type(value = FacturaVenta.class)})
 public abstract class Factura implements Serializable {

@@ -11,8 +11,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.opencommercial.config.Views;
-
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +21,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 @JsonView(Views.Comprador.class)
-public class CuentaCorrienteCliente extends CuentaCorriente implements Serializable {
+public class CuentaCorrienteCliente extends CuentaCorriente {
 
   @ManyToOne
   @JoinColumn(name = "id_Cliente")
