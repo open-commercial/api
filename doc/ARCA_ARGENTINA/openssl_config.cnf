@@ -1,7 +1,7 @@
 [ req ]
 prompt = no
 default_bits = 2048
-default_keyfile = empresa_private.key
+default_keyfile = private.key
 encrypt_key = no
 distinguished_name = req_distinguished_name
  

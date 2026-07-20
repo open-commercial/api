@@ -1,0 +1,20 @@
+# create the CSR from config file
+openssl req -new -config <filename of config file> -out <filename of csr>
+
+# read CSR
+openssl req -text -noout -in <filename for csr>
+
+# read CRT
+openssl x509 -text -noout -in <filename for crt>
+
+# encrypt the TRA.xml to generate the CMS file
+# -in es tu mensaje el TRA.xml
+# -signer es el crt de afip
+# -inkey la llave privada
+# -out el archivo de destino
+# Ej: openssl smime -sign -in TRA.xml -signer sucursal.crt -inkey private.key -out TRA.xml.cms -nodetach
+
+openssl smime -sign -in ${pathOutput} -signer ${pathSignedCrt} -inkey ${pathPrivateKey} -out ${cmsPath} -nodetach
+
+# Generate the .p12 file to be used in Java code
+openssl pkcs12 -export -in sucursal-testing.crt -inkey private.key -name "sucursal" -out sucursal.p12
