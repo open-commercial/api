@@ -1059,4 +1059,60 @@ class ProductoServiceImplTest {
     verify(productoRepository).actualizarCantidadReservada(1L, BigDecimal.TEN.negate());
   }
 
+  @Test
+  void shouldRecalcularCantidadTotalAlEliminarCantidadesDeSucursal() {
+    Sucursal sucursalAEliminar = new Sucursal();
+    sucursalAEliminar.setNombre("Sucursal a eliminar");
+    Sucursal sucursalRestante = new Sucursal();
+    sucursalRestante.setNombre("Sucursal restante");
+    CantidadEnSucursal cantidadAEliminar = new CantidadEnSucursal();
+    cantidadAEliminar.setSucursal(sucursalAEliminar);
+    cantidadAEliminar.setCantidad(new BigDecimal("2"));
+    CantidadEnSucursal cantidadRestante = new CantidadEnSucursal();
+    cantidadRestante.setSucursal(sucursalRestante);
+    cantidadRestante.setCantidad(new BigDecimal("3"));
+    Producto producto = new Producto();
+    producto.setCantidadProducto(new CantidadProductoEmbeddable());
+    producto.getCantidadProducto()
+        .setCantidadEnSucursales(new HashSet<>(Set.of(cantidadAEliminar, cantidadRestante)));
+    producto.getCantidadProducto().setCantidadTotalEnSucursales(new BigDecimal("5"));
+    when(productoRepository.findAllByEliminado(false)).thenReturn(List.of(producto));
+    productoService.eliminarCantidadesDeSucursal(sucursalAEliminar);
+    assertEquals(1, producto.getCantidadProducto().getCantidadEnSucursales().size());
+    assertEquals(
+        0,
+        new BigDecimal("3")
+            .compareTo(producto.getCantidadProducto().getCantidadTotalEnSucursales()));
+    verify(productoRepository).saveAll(any());
+  }
+
+  @Test
+  void shouldGuardarCantidadEnSucursalPropiaPorProductoParaSucursalNueva() {
+    Sucursal sucursalNueva = new Sucursal();
+    sucursalNueva.setNombre("Sucursal nueva");
+    Producto primerProducto = this.construirProducto();
+    Producto segundoProducto = this.construirProducto();
+    when(productoRepository.findAllByEliminado(false))
+        .thenReturn(List.of(primerProducto, segundoProducto));
+    productoService.guardarCantidadesDeSucursalNueva(sucursalNueva);
+    CantidadEnSucursal cantidadDelPrimerProducto =
+        this.buscarCantidadDeSucursal(primerProducto, sucursalNueva);
+    CantidadEnSucursal cantidadDelSegundoProducto =
+        this.buscarCantidadDeSucursal(segundoProducto, sucursalNueva);
+    assertNotSame(cantidadDelPrimerProducto, cantidadDelSegundoProducto);
+    assertEquals(0, BigDecimal.ZERO.compareTo(cantidadDelPrimerProducto.getCantidad()));
+    assertEquals(
+        0,
+        BigDecimal.TEN.compareTo(
+            primerProducto.getCantidadProducto().getCantidadTotalEnSucursales()));
+    verify(productoRepository).saveAll(any());
+  }
+
+  private CantidadEnSucursal buscarCantidadDeSucursal(Producto producto, Sucursal sucursal) {
+    return producto.getCantidadProducto().getCantidadEnSucursales().stream()
+        .filter(cantidadEnSucursal -> cantidadEnSucursal.getSucursal() == sucursal)
+        .findFirst()
+        .orElseThrow();
+  }
+
 }

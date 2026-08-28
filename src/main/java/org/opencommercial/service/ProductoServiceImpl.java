@@ -402,10 +402,7 @@ public class ProductoServiceImpl implements ProductoService {
                           cantidadEnSucursal.setCantidad(
                               nuevoProductoDTO.getCantidadEnSucursal().get(idSucursal))
                         ));
-    producto.getCantidadProducto().setCantidadTotalEnSucursales(
-        producto.getCantidadProducto().getCantidadEnSucursales().stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    this.recalcularCantidadTotalEnSucursales(producto);
     producto.getCantidadProducto().setCantMinima(nuevoProductoDTO.getCantMinima());
     producto.setPrecioProducto(new PrecioProductoEmbeddable());
     producto.getPrecioProducto().setPrecioCosto(nuevoProductoDTO.getPrecioCosto());
@@ -681,6 +678,15 @@ public class ProductoServiceImpl implements ProductoService {
     }
   }
 
+  private void recalcularCantidadTotalEnSucursales(Producto producto) {
+    producto
+        .getCantidadProducto()
+        .setCantidadTotalEnSucursales(
+            producto.getCantidadProducto().getCantidadEnSucursales().stream()
+                .map(CantidadEnSucursal::getCantidad)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+  }
+
   private Producto agregarStock(Producto producto, long idSucursal, BigDecimal cantidad) {
     producto
         .getCantidadProducto().getCantidadEnSucursales()
@@ -690,10 +696,7 @@ public class ProductoServiceImpl implements ProductoService {
                 cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().add(cantidad));
               }
             });
-    producto.getCantidadProducto().setCantidadTotalEnSucursales(
-        producto.getCantidadProducto().getCantidadEnSucursales().stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    this.recalcularCantidadTotalEnSucursales(producto);
     producto = productoRepository.save(producto);
     log.info(messageSource.getMessage(
             "mensaje_producto_agrega_stock",
@@ -711,10 +714,7 @@ public class ProductoServiceImpl implements ProductoService {
                 cantidadEnSucursal.setCantidad(cantidadEnSucursal.getCantidad().subtract(cantidad));
               }
             });
-    producto.getCantidadProducto().setCantidadTotalEnSucursales(
-        producto.getCantidadProducto().getCantidadEnSucursales().stream()
-            .map(CantidadEnSucursal::getCantidad)
-            .reduce(BigDecimal.ZERO, BigDecimal::add));
+    this.recalcularCantidadTotalEnSucursales(producto);
     producto = productoRepository.save(producto);
     log.info(messageSource.getMessage(
             "mensaje_producto_quita_stock",
@@ -846,25 +846,29 @@ public class ProductoServiceImpl implements ProductoService {
   @Override
   @Transactional
   public void guardarCantidadesDeSucursalNueva(Sucursal sucursal) {
-    CantidadEnSucursal cantidadNueva = new CantidadEnSucursal();
-    cantidadNueva.setSucursal(sucursal);
-    cantidadNueva.setCantidad(BigDecimal.ZERO);
-    List<Producto> productos =
-      productoRepository.findAllByEliminado(false);
-    productos.forEach(producto -> producto.getCantidadProducto().getCantidadEnSucursales().add(cantidadNueva));
+    List<Producto> productos = productoRepository.findAllByEliminado(false);
+    productos.forEach(
+        producto -> {
+          CantidadEnSucursal cantidadNueva = new CantidadEnSucursal();
+          cantidadNueva.setSucursal(sucursal);
+          cantidadNueva.setCantidad(BigDecimal.ZERO);
+          producto.getCantidadProducto().getCantidadEnSucursales().add(cantidadNueva);
+          this.recalcularCantidadTotalEnSucursales(producto);
+        });
     this.productoRepository.saveAll(productos);
   }
 
   @Override
   @Transactional
   public void eliminarCantidadesDeSucursal(Sucursal sucursal) {
-    List<Producto> productos =
-            productoRepository.findAllByEliminado(false);
-
+    List<Producto> productos = productoRepository.findAllByEliminado(false);
     CantidadEnSucursal cantidadAuxiliar = new CantidadEnSucursal();
     cantidadAuxiliar.setSucursal(sucursal);
-
-    productos.forEach(producto -> producto.getCantidadProducto().getCantidadEnSucursales().remove(cantidadAuxiliar));
+    productos.forEach(
+        producto -> {
+          producto.getCantidadProducto().getCantidadEnSucursales().remove(cantidadAuxiliar);
+          this.recalcularCantidadTotalEnSucursales(producto);
+        });
     this.productoRepository.saveAll(productos);
   }
 

@@ -75,8 +75,15 @@ class PedidoServiceImplTest {
   void shouldEliminarPedidoAbierto() {
     Pedido pedido = new Pedido();
     pedido.setEstado(EstadoPedido.ABIERTO);
+    List<RenglonPedido> renglonesPedido = new ArrayList<>();
+    RenglonPedido renglonPedido = new RenglonPedido();
+    renglonPedido.setIdProductoItem(1L);
+    renglonPedido.setCantidad(BigDecimal.TEN);
+    renglonesPedido.add(renglonPedido);
+    pedido.setRenglones(renglonesPedido);
     when(pedidoRepository.findById(1L)).thenReturn(Optional.of(pedido));
     pedidoService.eliminar(1L);
+    verify(productoService).quitarCantidadReservada(1L, BigDecimal.TEN);
     verify(pedidoRepository, times(1)).delete(pedido);
   }
 
@@ -228,7 +235,7 @@ class PedidoServiceImplTest {
     assertThrows(
         BusinessServiceException.class,
         () -> pedidoService.validarReglasDeNegocio(TipoDeOperacion.ALTA, pedido));
-    verify(messageSource).getMessage(eq("mensaja_estado_no_valido"), any(), any());
+    verify(messageSource).getMessage(eq("mensaje_estado_no_valido"), any(), any());
     pedido.setEstado(EstadoPedido.ABIERTO);
     when(pedidoRepository.existsByNroPedidoAndSucursal(123L, sucursal))
         .thenReturn(true);

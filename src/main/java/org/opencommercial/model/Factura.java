@@ -63,7 +63,7 @@ public abstract class Factura implements Serializable {
   // @FutureOrPresent(message = "{mensaje_fecha_vencimiento_invalida}")
   private LocalDate fechaVencimiento;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_Pedido")
   private Pedido pedido;
 

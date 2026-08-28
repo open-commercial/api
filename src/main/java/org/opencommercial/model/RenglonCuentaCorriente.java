@@ -49,27 +49,27 @@ public class RenglonCuentaCorriente implements Serializable {
     @Column(precision = 25, scale = 15)
     private BigDecimal monto;
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cuenta_corriente")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private CuentaCorriente cuentaCorriente;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_Factura")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Factura factura;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idNota")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Nota nota;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idRecibo")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Recibo recibo;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "idRemito")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Remito remito;

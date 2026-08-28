@@ -70,7 +70,7 @@ public abstract class Nota implements Serializable {
   @JoinColumn(name = "id_Cliente")
   private Cliente cliente;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_FacturaVenta")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private FacturaVenta facturaVenta;
@@ -79,7 +79,7 @@ public abstract class Nota implements Serializable {
   @JoinColumn(name = "id_Proveedor")
   private Proveedor proveedor;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "id_FacturaCompra")
   @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
   private FacturaCompra facturaCompra;

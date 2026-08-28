@@ -6,13 +6,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.opencommercial</groupId>
     <artifactId>api</artifactId>
-    <version>1.4.3</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.6</version>
+        <version>4.1.1</version>
         <relativePath/>
     </parent>
 

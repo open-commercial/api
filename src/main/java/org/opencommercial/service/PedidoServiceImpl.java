@@ -95,14 +95,10 @@ public class PedidoServiceImpl implements PedidoService {
     if (pedido.getEstado() != EstadoPedido.ABIERTO
             && (operacion == TipoDeOperacion.ALTA || operacion == TipoDeOperacion.ACTUALIZACION)) {
       throw new BusinessServiceException(messageSource.getMessage(
-        "mensaja_estado_no_valido", null, Locale.getDefault()));
+        "mensaje_estado_no_valido", null, Locale.getDefault()));
     }
     // Duplicados
-    if (operacion == TipoDeOperacion.ALTA && pedido.getEstado() != EstadoPedido.ABIERTO) {
-      throw new BusinessServiceException(
-          messageSource.getMessage("mensaja_estado_no_valido", null, Locale.getDefault()));
-    }
-    if (operacion == TipoDeOperacion.ALTA
+      if (operacion == TipoDeOperacion.ALTA
         && pedidoRepository.existsByNroPedidoAndSucursal(pedido.getNroPedido(), pedido.getSucursal())) {
       throw new BusinessServiceException(messageSource.getMessage(
         "mensaje_pedido_duplicado", null, Locale.getDefault()));
@@ -200,7 +196,7 @@ public class PedidoServiceImpl implements PedidoService {
     this.asignarDetalleEnvio(pedido);
     this.calcularCantidadDeArticulos(pedido);
     pedido.setNroPedido(this.generarNumeroPedido(pedido.getSucursal()));
-    if (pedido.getObservaciones() == null || pedido.getObservaciones().equals("")) {
+    if (pedido.getObservaciones() == null || pedido.getObservaciones().isEmpty()) {
       pedido.setObservaciones("Los precios se encuentran sujetos a modificaciones.");
     }
     pedido
@@ -337,7 +333,7 @@ public class PedidoServiceImpl implements PedidoService {
       } else if (criteria.getFechaDesde() != null) {
         criteria.setFechaDesde(criteria.getFechaDesde().withHour(0).withMinute(0).withSecond(0).withNano(0));
         builder.and(qPedido.fecha.after(criteria.getFechaDesde()));
-      } else if (criteria.getFechaHasta() != null) {
+      } else {
         criteria.setFechaHasta(criteria.getFechaHasta().withHour(23).withMinute(59).withSecond(59).withNano(999999999));
         builder.and(qPedido.fecha.before(criteria.getFechaHasta()));
       }
@@ -508,6 +504,7 @@ public class PedidoServiceImpl implements PedidoService {
     Pedido pedido = this.getPedidoNoEliminadoPorId(idPedido);
     if (pedido.getEstado() == EstadoPedido.ABIERTO) {
       productoService.actualizarStockPedido(pedido, TipoDeOperacion.ELIMINACION);
+      this.liberarCantidadReservadaDeProductos(pedido);
       pedidoRepository.delete(pedido);
     } else {
       throw new BusinessServiceException(
@@ -683,11 +680,16 @@ public class PedidoServiceImpl implements PedidoService {
     switch (pedido.getEstado()) {
       case ABIERTO -> pedido.getRenglones().forEach(renglonPedido ->
               productoService.agregarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
-      case CANCELADO, CERRADO -> pedido.getRenglones().forEach(renglonPedido ->
-              productoService.quitarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
+      case CANCELADO, CERRADO -> this.liberarCantidadReservadaDeProductos(pedido);
       default -> throw new ServiceException(
-              messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada", null, Locale.getDefault()));
+              messageSource.getMessage("mensaje_producto_error_actualizar_cantidad_reservada",
+                      null, Locale.getDefault()));
     }
+  }
+
+  private void liberarCantidadReservadaDeProductos(Pedido pedido) {
+    pedido.getRenglones().forEach(renglonPedido ->
+            productoService.quitarCantidadReservada(renglonPedido.getIdProductoItem(), renglonPedido.getCantidad()));
   }
 
   @Override

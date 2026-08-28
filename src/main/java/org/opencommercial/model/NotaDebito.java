@@ -31,7 +31,7 @@ public class NotaDebito extends Nota implements Serializable {
   @Column(precision = 25, scale = 15)
   private BigDecimal montoNoGravado;
 
-  @ManyToOne
+  @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "idRecibo")
   private Recibo recibo;
 
