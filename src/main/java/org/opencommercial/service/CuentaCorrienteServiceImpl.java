@@ -211,12 +211,12 @@ public class CuentaCorrienteServiceImpl implements CuentaCorrienteService {
     if (pagina == null)
       pagina = 0;
     if (ordenarPor == null || sentido == null) {
-      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
+      return PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
     } else {
       return switch (sentido) {
         case "ASC" -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenarPor));
         case "DESC" -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenarPor));
-        default -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.DESC, ordenDefault));
+        default -> PageRequest.of(pagina, tamanioPagina, Sort.by(Sort.Direction.ASC, ordenDefault));
       };
     }
   }
