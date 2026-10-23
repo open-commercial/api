@@ -37,8 +37,7 @@ public interface FacturaService {
       Producto producto,
       BigDecimal descuentoPorcentaje);
 
-  BigDecimal calcularPrecioUnitario(
-      Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
+  BigDecimal calcularPrecioUnitario(Movimiento movimiento, TipoDeComprobante tipoDeComprobante, Producto producto);
 
   RenglonFactura calcularRenglon(
       TipoDeComprobante tipoDeComprobante,
@@ -62,8 +61,7 @@ public interface FacturaService {
 
   void validarReglasDeNegocio(Factura factura);
 
-  void aplicarBonificacion(
-          RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion);
+  void aplicarBonificacion(RenglonFactura nuevoRenglon, Producto producto, boolean aplicaBonificacion);
 
   boolean marcarRenglonParaAplicarBonificacion(long idProducto, BigDecimal cantidad);
 }
